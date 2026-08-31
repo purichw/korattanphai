@@ -6,7 +6,6 @@ import {
   Gauge,
   Leaf,
   LocateFixed,
-  Map as MapIcon,
   Maximize2,
   Minimize2,
   MapPin,
@@ -64,7 +63,7 @@ import {
   summarizeNakhonRatchasimaDistrict,
   summarizeNakhonRatchasimaProvince,
 } from "../domain";
-import { formatMonth, labelConfidence, labelCrop, labelHazard, severityLabel } from "../i18n";
+import { formatMonth, labelConfidence, severityLabel } from "../i18n";
 import { useAppDispatch, useAppState } from "../store";
 import type {
   DataClass,
@@ -204,6 +203,9 @@ const localMaxZoom = 5.2;
 const localZoomStep = sharedMapButtonZoomStep;
 const localDistrictFocusZoom = 2.2;
 const localSubdistrictFocusZoom = 2.72;
+const primaryCropLabelTh = "ข้าว";
+const primaryHazardLabelTh = "ภัยแล้ง";
+const primaryRiskScopeLabelTh = "ความเสี่ยงภัยแล้ง";
 const hiddenLocalHydrologyLayerIds = new Set<string>([
   NAKHON_RATCHASIMA_LAYER_IDS.floodExtent,
   NAKHON_RATCHASIMA_LAYER_IDS.dwrEws,
@@ -352,7 +354,7 @@ function mapModeHelper(mode: LocalMapMode) {
 }
 
 const localMapViewOptions: AppSelectOption[] = [
-  { value: "risk", label: "ความเสี่ยง", group: "มุมมองสี" },
+  { value: "risk", label: "ความเสี่ยงภัยแล้ง", group: "มุมมองสี" },
   { value: "study", label: "ข้อมูลในระบบ", group: "มุมมองสี" },
 ];
 
@@ -363,10 +365,10 @@ const localStudyCriterionOptions: AppSelectOption[] = [
 ];
 
 const localRiskCriterionOptions: AppSelectOption[] = [
-  { value: "all", label: "ทุกระดับเสี่ยง", group: "ความเสี่ยง" },
-  { value: "green", label: "เขียว", group: "ความเสี่ยง" },
-  { value: "yellow", label: "เหลือง", group: "ความเสี่ยง" },
-  { value: "red", label: "แดง", group: "ความเสี่ยง" },
+  { value: "all", label: "ทุกระดับภัยแล้ง", group: "ความเสี่ยงภัยแล้ง" },
+  { value: "green", label: "ปกติ", group: "ความเสี่ยงภัยแล้ง" },
+  { value: "yellow", label: "เฝ้าระวัง", group: "ความเสี่ยงภัยแล้ง" },
+  { value: "red", label: "เสี่ยงสูง", group: "ความเสี่ยงภัยแล้ง" },
 ];
 
 function layerUsesResearchCriteriaMap(layerId: string, activeTab?: ProvinceDashboardTab | null) {
@@ -768,24 +770,6 @@ function translateAccess(value: string) {
     "internal calculation": "คำนวณภายในระบบ",
     "local bundle index referencing REAL sources": "ดัชนีข้อมูลในชุดข้อมูลที่อ้างอิงแหล่งข้อมูลจริง",
     runtime: "สถานะภายในระบบ",
-  };
-  return labels[value] ?? value;
-}
-
-function translateNakhonRatchasimaLayerGroup(value: string) {
-  const labels: Record<string, string> = {
-    Agriculture: "เกษตร",
-    Base: "ขอบเขต",
-    Hydrology: "น้ำ",
-    Operations: "ปฏิบัติการ",
-    "Operations / Evidence": "ปฏิบัติการ/หลักฐาน",
-    Planning: "วางแผน",
-    Prototype: "ต้นแบบ",
-    Risk: "ความเสี่ยง",
-    "Risk/Agriculture": "ความเสี่ยง/เกษตร",
-    "Risk/Hydrology": "ความเสี่ยง/น้ำ",
-    Weather: "อากาศ",
-    "Weather/Hydrology": "ฝน/น้ำ",
   };
   return labels[value] ?? value;
 }
@@ -2502,11 +2486,11 @@ function ProvinceSituationCards({ provinceRecord }: { provinceRecord: ProvinceMo
       <div className="nr-dashboard-situation-cards">
         <OfficialMetricCard
           icon={<ShieldAlert size={18} />}
-          label="ความเสี่ยงเกษตรเดือนนี้"
+          label="ความเสี่ยงภัยแล้งเดือนนี้"
           value={provinceRecord ? severityLabel(provinceRecord.severity, "th") : "รอข้อมูล"}
           detail={
             provinceRecord
-              ? `${labelHazard(provinceRecord.primaryHazard, "th")} · ${labelCrop(provinceRecord.mainCropExposure, "th")} · ${formatMonth(provinceRecord.month, "th")}`
+              ? `${primaryHazardLabelTh} · ${primaryCropLabelTh} · ${formatMonth(provinceRecord.month, "th")}`
               : "ยังไม่มี record ของเดือนที่เลือก"
           }
           tone={provinceRecord ? (provinceRecord.severity === "Normal" ? "good" : "default") : "muted"}
@@ -2515,8 +2499,8 @@ function ProvinceSituationCards({ provinceRecord }: { provinceRecord: ProvinceMo
         <OfficialMetricCard
           icon={<Leaf size={18} />}
           label="พืชที่เกี่ยวข้อง"
-          value={provinceRecord ? labelCrop(provinceRecord.mainCropExposure, "th") : "รอข้อมูล"}
-          detail={provinceRecord ? `ภัยหลัก: ${labelHazard(provinceRecord.primaryHazard, "th")}` : "ยังไม่มี record ของเดือนที่เลือก"}
+          value={provinceRecord ? primaryCropLabelTh : "รอข้อมูล"}
+          detail={provinceRecord ? `ภัยหลัก: ${primaryHazardLabelTh}` : "ยังไม่มี record ของเดือนที่เลือก"}
           tone="default"
           provenance={provinceRecord ? dataProvenanceChipKindFromText(provinceRecord.provenance) : "PENDING_SOURCE"}
         />
@@ -2566,11 +2550,11 @@ function ProvinceDashboardMapCard({
 }) {
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
-  const title = activeTab === "drought" ? "แผนที่ภัยแล้งจากชุดข้อมูล" : "แผนที่สถานการณ์ความเสี่ยง";
+  const title = activeTab === "drought" ? "แผนที่ภัยแล้งจากชุดข้อมูล" : "แผนที่ความเสี่ยงภัยแล้ง";
   const helper =
     activeTab === "drought"
       ? `ชุดข้อมูลภัยแล้ง · ${formatMonth(activeResearchPeriod.period, "th")} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
-      : `${layer.labelTh} · ${mapModeHelper(mapMode)}`;
+      : `${primaryRiskScopeLabelTh} · ${mapModeHelper(mapMode)}`;
 
   return (
     <section className="nr-dashboard-map-card" aria-label={title}>
@@ -2609,7 +2593,7 @@ function AgricultureImpactPanel({ provinceRecord }: { provinceRecord: ProvinceMo
           <dl className="nr-compact-list">
             <div>
               <dt>พืชหลัก</dt>
-              <dd>{labelCrop(provinceRecord.mainCropExposure, "th")}</dd>
+              <dd>{primaryCropLabelTh}</dd>
             </div>
             <div>
               <dt>พื้นที่เปิดรับ</dt>
@@ -2701,7 +2685,7 @@ function AgriculturalRiskContextPanel({ provinceRecord }: { provinceRecord: Prov
   return (
     <section className="nr-panel nr-agri-context">
       <div className="nr-module-title-row">
-        <PanelTitle icon={<Leaf size={18} />} title="บริบทความเสี่ยงเกษตร" />
+        <PanelTitle icon={<Leaf size={18} />} title="บริบทความเสี่ยงภัยแล้ง" />
         <DataProvenanceChip kind={provinceRecord ? dataProvenanceChipKindFromText(provinceRecord.provenance) : "PENDING_SOURCE"} />
       </div>
       {provinceRecord ? (
@@ -2712,12 +2696,12 @@ function AgriculturalRiskContextPanel({ provinceRecord }: { provinceRecord: Prov
               <dd>{formatMonth(provinceRecord.month, "th")}</dd>
             </div>
             <div>
-              <dt>ภัยหลักในต้นแบบ</dt>
-              <dd>{labelHazard(provinceRecord.primaryHazard, "th")}</dd>
+              <dt>ภัยหลัก</dt>
+              <dd>{primaryHazardLabelTh}</dd>
             </div>
             <div>
               <dt>พืชที่เกี่ยวข้อง</dt>
-              <dd>{labelCrop(provinceRecord.mainCropExposure, "th")}</dd>
+              <dd>{primaryCropLabelTh}</dd>
             </div>
             <div>
               <dt>ความเชื่อมั่น</dt>
@@ -4410,19 +4394,6 @@ export function NakhonRatchasimaWorkspace({
           </div>
         )}
         <NakhonRatchasimaBreadcrumbs target={route} onNavigate={onNavigate} />
-        <div className="nr-layer-control">
-          <MapIcon size={17} />
-          <AppSelect
-            ariaLabel="ชั้นข้อมูลจังหวัดนครราชสีมา"
-            value={selectedLayer.id}
-            onChange={setSelectedLayerId}
-            options={visibleLayers.map((layer) => ({
-              value: layer.id,
-              label: layer.labelTh,
-              group: translateNakhonRatchasimaLayerGroup(layer.group),
-            }))}
-          />
-        </div>
       </section>
 
       <OperationalFilters

@@ -1,8 +1,8 @@
 import type { AppSelectOption } from "./AppSelect";
 import { AppSelect } from "./AppSelect";
-import { crops, hazards, months, provinces } from "../data/catalog";
+import { months, provinces } from "../data/catalog";
 import { getProvinceRecord } from "../domain";
-import { formatMonth, labelCrop, labelHazard, t } from "../i18n";
+import { formatMonth, t } from "../i18n";
 import { useAppDispatch, useAppState } from "../store";
 
 type ContextChip = {
@@ -23,6 +23,9 @@ type OperationalFiltersProps = {
   ariaLabel?: string;
   className?: string;
 };
+
+const scopedHazardOptions: AppSelectOption[] = [{ value: "All", label: "ภัยแล้ง" }];
+const scopedCropOptions: AppSelectOption[] = [{ value: "All", label: "ข้าว" }];
 
 function filterCount(hasArea: boolean, contextChipCount: number) {
   return Math.min(6, 3 + (hasArea ? 1 : 0) + contextChipCount);
@@ -93,19 +96,13 @@ export function OperationalFilters({
         label={t("hazard", language)}
         value={state.selectedHazard}
         onChange={(hazard) => dispatch({ type: "setHazard", hazard })}
-        options={[
-          { value: "All", label: t("all", language) },
-          ...hazards.map((hazard) => ({ value: hazard, label: labelHazard(hazard, language) })),
-        ]}
+        options={scopedHazardOptions}
       />
       <AppSelect
         label={t("crop", language)}
         value={state.selectedCrop}
         onChange={(crop) => dispatch({ type: "setCrop", crop })}
-        options={[
-          { value: "All", label: t("all", language) },
-          ...crops.map((crop) => ({ value: crop, label: labelCrop(crop, language) })),
-        ]}
+        options={scopedCropOptions}
       />
       {areaSelectConfig && (
         <AppSelect

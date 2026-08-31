@@ -110,9 +110,9 @@ export function appReducer(state: AppState, action: Action): AppState {
     case "setMonth":
       return { ...state, selectedMonth: action.month };
     case "setHazard":
-      return { ...state, selectedHazard: action.hazard };
+      return { ...state, selectedHazard: "All" };
     case "setCrop":
-      return { ...state, selectedCrop: action.crop };
+      return { ...state, selectedCrop: "All" };
     case "selectProvince":
       return {
         ...state,
@@ -263,6 +263,8 @@ function loadInitialState(): AppState {
       ...createInitialState(),
       ...parsed,
       language: "th",
+      selectedHazard: "All",
+      selectedCrop: "All",
       mapLayer: normalizeMapLayerId(parsed.mapLayer),
       runtime: { ...createInitialRuntimeState(), ...parsed.runtime },
     };

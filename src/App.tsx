@@ -59,6 +59,7 @@ import {
   getLayerSources,
   getMapLayer,
   getOutcomeForEvent,
+  getNakhonRatchasimaProvinceTabPath,
   getProvinceRecord,
   getProvinceTrend,
   getProvinceWorkspacePath,
@@ -197,6 +198,9 @@ function AppShell({
   const appRoute = resolveAppRoute(path);
   const nakhonRoute = appRoute.kind === "nakhon-ratchasima" ? appRoute.target : null;
   const provinceRoute = appRoute.kind === "province-workspace" ? appRoute.target : null;
+  const isDroughtSubNavActive = Boolean(
+    nakhonRoute?.valid && nakhonRoute.level === "province" && nakhonRoute.tab === "drought",
+  );
 
   const sectionLabel = (section: AppSection) => t(section, language);
 
@@ -232,20 +236,38 @@ function AppShell({
         <nav id="primary-navigation" className="primary-nav">
           {visibleSections.map((section) => {
             const Icon = sectionIcons[section];
+            const isOverviewSection = section === "overview";
+            const isMainItemActive = state.section === section && !(isOverviewSection && isDroughtSubNavActive);
             return (
-              <button
-                key={section}
-                type="button"
-                className={state.section === section ? "nav-item active" : "nav-item"}
-                onClick={() => {
-                  onNavigate("/");
-                  dispatch({ type: "setSection", section });
-                  setIsMobileMenuOpen(false);
-                }}
-              >
-                <Icon size={17} />
-                <span>{sectionLabel(section)}</span>
-              </button>
+              <div key={section} className="nav-group">
+                <button
+                  type="button"
+                  className={isMainItemActive ? "nav-item active" : "nav-item"}
+                  onClick={() => {
+                    onNavigate("/");
+                    dispatch({ type: "setSection", section });
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Icon size={17} />
+                  <span>{sectionLabel(section)}</span>
+                </button>
+                {isOverviewSection && (
+                  <div className="nav-subnav" aria-label="เมนูย่อยภาพรวม">
+                    <button
+                      type="button"
+                      className={isDroughtSubNavActive ? "nav-subitem active" : "nav-subitem"}
+                      onClick={() => {
+                        onNavigate(getNakhonRatchasimaProvinceTabPath("drought"));
+                        dispatch({ type: "setSection", section });
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <span>ภัยแล้ง</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>

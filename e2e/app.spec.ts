@@ -26,37 +26,6 @@ async function loginAs(page: Page, username: string) {
   await expect(page.getByRole("button", { name: "ออกจากระบบ" })).toBeVisible();
 }
 
-async function chooseAppSelect(page: Page, root: Page | Locator, name: RegExp | string, value: string) {
-  const combo = root.getByRole("combobox", { name });
-  await expect(combo).toBeVisible();
-  await combo.click();
-  const listboxId = await combo.getAttribute("aria-controls");
-  expect(listboxId).toBeTruthy();
-  await page.locator(`#${listboxId} [data-select-value="${value}"]`).click();
-  await expect(combo).toHaveAttribute("aria-expanded", "false");
-}
-
-async function expectAppSelectOptionsAbsent(page: Page, root: Page | Locator, name: RegExp | string, texts: string[]) {
-  const combo = root.getByRole("combobox", { name });
-  await expect(combo).toBeVisible();
-  await combo.click();
-  const listboxId = await combo.getAttribute("aria-controls");
-  expect(listboxId).toBeTruthy();
-  const menu = page.locator(`#${listboxId}`);
-  await expect(menu).toBeVisible();
-  for (const text of texts) await expect(menu).not.toContainText(text);
-  await page.keyboard.press("Escape");
-  await expect(combo).toHaveAttribute("aria-expanded", "false");
-}
-
-const hiddenHydrologyLayerLabels = [
-  "พื้นที่น้ำท่วม / น้ำท่วมคาดการณ์",
-  "สถานีเตือนภัยน้ำหลาก-ดินถล่ม",
-  "อ่างเก็บน้ำ / สถานการณ์น้ำ",
-  "พยากรณ์และบริบทฝน",
-  "ปริมาณฝนและสถานี",
-];
-
 async function readMapTransform(svg: Locator, transformSelector = ".map-transform-layer") {
   return svg.locator(transformSelector).evaluate((element) => {
     const values = (element.getAttribute("transform") ?? "")
@@ -166,15 +135,23 @@ test("login route accepts only the two allowed usernames without listing them", 
   await expect(page.getByRole("button", { name: "ออกจากระบบ" })).toBeVisible();
 });
 
-test("Nakhon Ratchasima-only shell opens the provincial overview with one sidebar item", async ({ page }) => {
+test("Nakhon Ratchasima-only shell opens the provincial overview with nested drought nav", async ({ page }) => {
   await loginAs(page, smokeUsername);
 
   await expect(page).toHaveURL(/\/$/);
   await expect(page).toHaveTitle(/Korat Tan Phai/);
   await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
   const nav = await openPrimaryNav(page);
-  await expect(nav.getByRole("button")).toHaveCount(1);
+  await expect(nav.getByRole("button")).toHaveCount(2);
   await expect(nav.getByRole("button", { name: "ภาพรวม", exact: true })).toBeVisible();
+  await expect(nav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toBeVisible();
+  await nav.getByRole("button", { name: "ภัยแล้ง", exact: true }).click();
+  await expect(page).toHaveURL(/\/drought$/);
+  await expect(page.getByRole("heading", { name: "พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน" })).toBeVisible();
+  const droughtNav = await openPrimaryNav(page);
+  await expect(droughtNav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toHaveClass(/active/);
+  await droughtNav.getByRole("button", { name: "ภาพรวม", exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
   await expect(page.locator(".brand-lockup").getByText("โคราชทันภัย")).toBeVisible();
   await expect(page.locator(".brand-lockup").getByText("Korat Tan Phai")).toBeVisible();
   await expect(page.getByRole("button", { name: "EN", exact: true })).toHaveCount(0);
@@ -224,13 +201,27 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
   await expect(menu).toBeVisible();
   await expect(menu.getByRole("option").first()).toBeVisible();
   await expect(menu).toHaveCSS("font-family", /Google Sans/);
+  await expect(menu).toContainText("ภัยแล้ง");
+  await expect(menu).not.toContainText("น้ำหลาก");
+  await expect(menu).not.toContainText("ฝนหนัก");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect(hazard).not.toContainText("ทั้งหมด");
+  await expect(hazard).toContainText("ภัยแล้ง");
   await expect(hazard).toHaveAttribute("aria-expanded", "false");
 
-  const layerControl = page.locator(".nr-layer-control");
-  await expectAppSelectOptionsAbsent(page, layerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", hiddenHydrologyLayerLabels);
+  const crop = filters.getByRole("combobox", { name: /^พืช/ });
+  await crop.click();
+  const cropListboxId = await crop.getAttribute("aria-controls");
+  expect(cropListboxId).toBeTruthy();
+  const cropMenu = page.locator(`#${cropListboxId}`);
+  await expect(cropMenu).toContainText("ข้าว");
+  await expect(cropMenu).not.toContainText("ข้าวโพด");
+  await expect(cropMenu).not.toContainText("มันสำปะหลัง");
+  await expect(cropMenu).not.toContainText("อ้อย");
+  await page.keyboard.press("Escape");
+  await expect(crop).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator(".nr-layer-control")).toHaveCount(0);
 });
 
 test.skip("national map preview, zoom, and pan keep Thailand inside the viewport", async ({ page }, testInfo) => {
@@ -439,8 +430,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
-  const nakhonRatchasimaLayerControl = page.locator(".nr-layer-control");
-  await expectAppSelectOptionsAbsent(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", hiddenHydrologyLayerLabels);
+  await expect(page.locator(".nr-layer-control")).toHaveCount(0);
   await expect(localMap.locator(".nr-map-legend")).not.toContainText("มีสถานีฝนในพื้นที่");
   await expect(localMap.locator(".nr-map-legend")).not.toContainText("ใช้สถานีใกล้สุด");
   await expect(page.getByText("ปริมาณฝนและสถานี")).toHaveCount(0);
@@ -467,7 +457,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
 
-  await chooseAppSelect(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", "nr-local-evidence-subset");
+  await expect(page.locator(".nr-layer-control")).toHaveCount(0);
   await page.goto("/mueang-nakhon-ratchasima");
   await expect(page.getByRole("heading", { name: "เมืองนครราชสีมา", exact: true })).toBeVisible();
   await expect(localMap.getByText("ขอบเขตตำบล")).toHaveCount(0);
@@ -501,8 +491,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
   await expect(localMap.getByText("ขอบเขตตำบล")).toHaveCount(0);
 
-  const nakhonRatchasimaLayerControl = page.locator(".nr-layer-control");
-  await expectAppSelectOptionsAbsent(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", hiddenHydrologyLayerLabels);
+  await expect(page.locator(".nr-layer-control")).toHaveCount(0);
   await expect(localMap.locator(".nr-map-legend")).not.toContainText("มีสถานีฝนในพื้นที่");
   await expect(localMap.locator(".nr-map-legend")).not.toContainText("ใช้สถานีใกล้สุด");
 
@@ -585,7 +574,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   await expect(page.getByRole("heading", { name: "อุดมทรัพย์", exact: true })).toBeVisible();
 
   if (!isMobile) {
-    await chooseAppSelect(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", "nr-local-evidence-subset");
+    await expect(page.locator(".nr-layer-control")).toHaveCount(0);
     await page.goto("/mueang-nakhon-ratchasima");
     await centerInViewport(localMap);
     await clickSvgPathFillPoint(
