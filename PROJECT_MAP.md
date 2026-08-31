@@ -79,9 +79,8 @@ Production smoke checks after an authorized deploy:
 - Confirm the visible product UI is Thai-only and the brand is Korat Tan Phai /
   โคราชทันภัย.
 - Confirm the primary sidebar shows only `ภาพรวม`.
-- Confirm `/`, `/wang-nam-khiao`, and `/wang-nam-khiao/t-302504` load, and that
-  `/login` still accepts demo usernames. Legacy `/nakhon-ratchasima/...` links
-  must still resolve.
+- Confirm `/`, `/wang-nam-khiao`, and `/wang-nam-khiao/t-302504` load after
+  login, while legacy `/nakhon-ratchasima/...` links still resolve.
 - Confirm the Nakhon Ratchasima map loads and no network errors appear for
   `/geodata/nakhon-ratchasima-subdistricts.geojson` or
   `/geodata/thailand-neighbor-context.geojson`.
