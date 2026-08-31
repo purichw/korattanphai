@@ -207,20 +207,18 @@ function AppShell({
   return (
     <div className="app-shell" lang={language}>
       <aside className={isMobileMenuOpen ? "sidebar mobile-menu-open" : "sidebar"} aria-label="เมนูหลัก">
-        <div className="brand-lockup">
-          <div className="brand-mark">
-            <img
-              src="/brand/kaset-tan-phai-emblem.webp"
-              width="256"
-              height="252"
-              alt=""
-              aria-hidden="true"
-              decoding="async"
-            />
-          </div>
-          <div>
-            <strong>{t("brand", language)}</strong>
-            <span>Korat Tan Phai</span>
+        <div className="brand-lockup is-logo-only">
+          <div className="brand-mark is-sidebar-logo">
+            <picture>
+              <source media="(max-width: 720px)" srcSet="/brand/korat-tan-phai-emblem.webp" />
+              <img
+                src="/brand/korat-tan-phai-sidebar-logo.webp"
+                width="644"
+                height="720"
+                alt={t("brand", language)}
+                decoding="async"
+              />
+            </picture>
           </div>
         </div>
         <button
@@ -1203,9 +1201,9 @@ function LoginPage({ onLogin }: { onLogin: (user: LoginUser) => void }) {
       <section className="login-card" aria-labelledby="login-title">
         <div className="login-brand">
           <img
-            src="/brand/kaset-tan-phai-emblem.webp"
-            width="256"
-            height="252"
+            src="/brand/korat-tan-phai-emblem.webp"
+            width="768"
+            height="768"
             alt=""
             aria-hidden="true"
             decoding="async"

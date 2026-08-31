@@ -40,6 +40,24 @@ async function centerInViewport(locator: Locator) {
   await locator.evaluate((element) => element.scrollIntoView({ block: "center", inline: "nearest" }));
 }
 
+async function expectPreviewInsideMap(preview: Locator, map: Locator) {
+  const [previewBox, mapBox] = await Promise.all([preview.boundingBox(), map.boundingBox()]);
+  expect(previewBox).not.toBeNull();
+  expect(mapBox).not.toBeNull();
+  if (!previewBox || !mapBox) return;
+  expect(previewBox.x).toBeGreaterThanOrEqual(mapBox.x - 1);
+  expect(previewBox.y).toBeGreaterThanOrEqual(mapBox.y - 1);
+  expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(mapBox.x + mapBox.width + 1);
+  expect(previewBox.y + previewBox.height).toBeLessThanOrEqual(mapBox.y + mapBox.height + 1);
+}
+
+async function boundingBoxOrThrow(locator: Locator) {
+  const box = await locator.boundingBox();
+  expect(box).not.toBeNull();
+  if (!box) throw new Error("Expected locator to have a visible bounding box");
+  return box;
+}
+
 async function clickSvgPathFillPoint(page: Page, locator: Locator, useTouch: boolean) {
   await centerInViewport(locator);
   const point = await locator.evaluate((element) => {
@@ -148,12 +166,41 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await nav.getByRole("button", { name: "ภัยแล้ง", exact: true }).click();
   await expect(page).toHaveURL(/\/drought$/);
   await expect(page.getByRole("heading", { name: "พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน" })).toBeVisible();
+  await closePrimaryNav(page);
+  await expect(page.locator(".nr-drought-dashboard")).toBeVisible();
+  await expect(page.locator(".nr-drought-forecast-row .nr-drought-forecast-section")).toBeVisible();
+  await expect(page.locator(".nr-drought-forecast-section .nr-forecast-summary-panel")).toBeVisible();
+  await expect(page.locator(".nr-drought-forecast-section").getByText("ระดับเสี่ยงสูงสุด")).toBeVisible();
+  await expect(page.locator(".nr-drought-forecast-section .nr-forecast-summary-stack")).toHaveCount(0);
+  await expect(page.locator(".nr-drought-forecast-section .metric-card")).toHaveCount(0);
+  await expect(page.locator(".nr-drought-forecast-section .nr-forecast-timeline li")).toHaveCount(6);
+  await expect(page.locator(".nr-drought-forecast-section .nr-forecast-timeline").getByText("167 ตำบล")).toHaveCount(3);
+  await expect(page.locator(".nr-drought-forecast-section").getByText("เดือนที่เสี่ยงสูงสุด")).toHaveCount(0);
+  await expect(page.locator(".nr-drought-forecast-row .nr-research-attention")).toBeVisible();
+  await expect(page.locator(".nr-dashboard-module-grid .nr-follow-up-section")).toHaveCount(0);
+  const viewport = page.viewportSize();
+  const forecastBox = await boundingBoxOrThrow(page.locator(".nr-drought-forecast-section"));
+  const attentionBox = await boundingBoxOrThrow(page.locator(".nr-research-attention"));
+  const situationBox = await boundingBoxOrThrow(page.locator(".nr-drought-situation-section"));
+  const mapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card"));
+  const followUpBox = await boundingBoxOrThrow(page.locator(".nr-follow-up-section"));
+  const dashboardBox = await boundingBoxOrThrow(page.locator(".nr-drought-dashboard"));
+  if ((viewport?.width ?? 0) >= 1180) {
+    expect(Math.abs(forecastBox.y - attentionBox.y)).toBeLessThan(8);
+    expect(attentionBox.x).toBeGreaterThan(forecastBox.x + forecastBox.width - 2);
+  } else {
+    expect(attentionBox.y).toBeGreaterThan(forecastBox.y);
+  }
+  expect(situationBox.y).toBeGreaterThan(forecastBox.y);
+  expect(mapBox.y).toBeGreaterThan(situationBox.y);
+  expect(followUpBox.y).toBeGreaterThan(mapBox.y);
+  expect(mapBox.width).toBeGreaterThan(dashboardBox.width * 0.94);
   const droughtNav = await openPrimaryNav(page);
   await expect(droughtNav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toHaveClass(/active/);
   await droughtNav.getByRole("button", { name: "ภาพรวม", exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.locator(".brand-lockup").getByText("โคราชทันภัย")).toBeVisible();
-  await expect(page.locator(".brand-lockup").getByText("Korat Tan Phai")).toBeVisible();
+  await expect(page.locator(".brand-lockup strong")).toHaveCount(0);
+  await expect(page.locator(".brand-lockup span")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "EN", exact: true })).toHaveCount(0);
   await closePrimaryNav(page);
   await expect(page.locator(".topbar-logo")).toHaveCount(0);
@@ -163,14 +210,11 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /ภาพรวม/ })).toBeVisible();
   await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /ภัยแล้ง/ })).toBeVisible();
   await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /^น้ำ/ })).toHaveCount(0);
-  await expect(page.locator(".brand-mark img")).toHaveAttribute(
-    "src",
-    "/brand/kaset-tan-phai-emblem.webp",
-  );
-  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("sizes", "32x32");
+  await expect(page.locator(".brand-mark img")).toHaveAttribute("src", "/brand/korat-tan-phai-sidebar-logo.webp");
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("sizes", "512x512");
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
     "href",
-    "/brand/kaset-tan-phai-favicon.png?v=2",
+    "/brand/korat-tan-phai-favicon.png?v=3",
   );
   await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
 });
@@ -541,6 +585,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   await expect(nakhonRatchasimaPreview).toContainText("ไทยสามัคคี");
   await expect(nakhonRatchasimaPreview.getByRole("button", { name: "เปิดอำเภอนี้" })).toBeVisible();
   await expect(nakhonRatchasimaPreview.getByRole("button", { name: "เปิดตำบลนี้" })).toHaveCount(0);
+  if (!isMobile) await expectPreviewInsideMap(nakhonRatchasimaPreview, localMap);
   const overlayOrder = await nakhonRatchasimaPreview.evaluate((card) => {
     const legend = document.querySelector(".nr-map-legend");
     return {
@@ -585,6 +630,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
     await expect(nakhonRatchasimaPreview).toContainText("ในเมือง");
     await expect(nakhonRatchasimaPreview.getByRole("button", { name: "เปิดอำเภอนี้" })).toHaveCount(0);
     await expect(nakhonRatchasimaPreview.getByRole("button", { name: "เปิดตำบลนี้" })).toBeVisible();
+    await expectPreviewInsideMap(nakhonRatchasimaPreview, localMap);
     await nakhonRatchasimaPreview.getByRole("button", { name: "เปิดตำบลนี้" }).click();
     await expect(page).toHaveURL(/\/mueang-nakhon-ratchasima\/t-300101$/);
     await expect(page.getByRole("heading", { name: "ในเมือง", exact: true })).toBeVisible();

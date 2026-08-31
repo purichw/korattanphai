@@ -222,6 +222,12 @@ summary:focus-visible {
   min-width: 0;
 }
 
+.brand-lockup.is-logo-only {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 8px;
+}
+
 .brand-lockup strong,
 .brand-lockup span {
   display: block;
@@ -243,10 +249,19 @@ summary:focus-visible {
   line-height: 0;
 }
 
+.brand-lockup.is-logo-only .brand-mark {
+  width: min(184px, 100%);
+  margin: 0 auto;
+}
+
 .brand-mark img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.brand-lockup.is-logo-only .brand-mark img {
+  filter: drop-shadow(0 10px 18px rgba(3, 13, 8, 0.34));
 }
 
 .primary-nav {
@@ -1756,9 +1771,17 @@ textarea {
   bottom: max(12px, env(safe-area-inset-bottom));
   left: max(12px, env(safe-area-inset-left));
   z-index: 50;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   width: auto;
   max-width: 420px;
+  max-height: min(520px, calc(100dvh - 24px));
   margin: 0 auto;
+}
+
+.map-preview-card.is-touch dl {
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .nr-map-preview-card {
@@ -1766,11 +1789,21 @@ textarea {
 }
 
 .nr-map-preview-card:not(.is-touch) {
-  max-height: min(360px, calc(100vh - 168px));
+  width: min(var(--nr-map-preview-width, 344px), calc(100% - 24px));
+  max-height: min(var(--nr-map-preview-max-height, 380px), calc(100vh - 168px));
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
 }
 
 .nr-map-preview-card:not(.is-touch) dl {
-  max-height: min(226px, calc(100vh - 292px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  max-height: min(calc(var(--nr-map-preview-max-height, 380px) - 112px), calc(100vh - 292px));
+  overflow-y: auto;
+}
+
+.nr-map-preview-card:not(.is-touch) dl > div:last-child {
+  grid-column: 1 / -1;
 }
 
 .area-panel {
@@ -3050,7 +3083,7 @@ textarea {
 
 .nr-dashboard-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 6px;
   max-width: 100%;
   min-width: 0;
@@ -3205,21 +3238,49 @@ textarea {
 }
 
 .nr-forecast-priority-section {
-  border-color: rgba(53, 126, 211, 0.34);
-  background:
-    linear-gradient(180deg, rgba(247, 252, 255, 0.98), rgba(255, 255, 255, 0.98));
+  gap: 14px;
+  border-color: rgba(178, 195, 184, 0.86);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(250, 252, 250, 0.98));
 }
 
 .nr-forecast-priority-section > .nr-dashboard-section-heading h2 {
-  font-size: 1.24rem;
+  font-size: 1.34rem;
 }
 
 .nr-forecast-priority-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(258px, 0.42fr);
-  gap: 12px;
+  grid-template-columns: minmax(0, 2.1fr) minmax(280px, 0.9fr);
+  gap: 20px;
   align-items: stretch;
   min-width: 0;
+}
+
+.nr-forecast-chart-surface {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.nr-forecast-chart-heading {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.nr-forecast-chart-heading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 950;
+  line-height: 1.28;
+}
+
+.nr-forecast-chart-heading span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+  line-height: 1.35;
 }
 
 .nr-forecast-line-graph {
@@ -3228,10 +3289,9 @@ textarea {
   min-width: 0;
   margin: 0;
   padding: 10px 10px 8px;
-  border: 1px solid rgba(58, 128, 208, 0.24);
+  border: 1px solid rgba(178, 195, 184, 0.72);
   border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(248, 252, 255, 0.98), rgba(255, 255, 255, 0.96));
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.96));
 }
 
 .nr-forecast-line-svg {
@@ -3364,15 +3424,13 @@ textarea {
 }
 
 .nr-drought-forecast-section {
-  border-color: rgba(207, 128, 43, 0.3);
-  background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(255, 255, 255, 0.98));
+  border-color: rgba(178, 195, 184, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(253, 252, 249, 0.98));
 }
 
 .nr-drought-forecast-graph {
-  border-color: rgba(207, 128, 43, 0.25);
-  background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(255, 255, 255, 0.96));
+  border-color: rgba(178, 195, 184, 0.72);
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.96));
 }
 
 .nr-drought-forecast-graph-area {
@@ -3452,25 +3510,6 @@ textarea {
   background: #c84d4a;
 }
 
-.nr-drought-forecast-lead-card {
-  background: #fff8ec;
-  border-color: rgba(217, 147, 34, 0.34);
-}
-
-.nr-drought-forecast-lead-card.is-normal {
-  background: #edf8f1;
-  border-color: rgba(65, 167, 109, 0.32);
-}
-
-.nr-drought-forecast-lead-card.is-severe {
-  background: #fff5f4;
-  border-color: rgba(200, 77, 74, 0.34);
-}
-
-.nr-drought-forecast-month-strip {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
 .nr-area-forecast-section {
   border-color: rgba(66, 137, 198, 0.28);
 }
@@ -3523,159 +3562,251 @@ textarea {
   min-height: 286px;
 }
 
-.nr-forecast-primary-strip span.is-normal {
-  border-color: rgba(65, 167, 109, 0.3);
-  background: #f5fbf7;
-}
-
-.nr-forecast-primary-strip span.is-normal::before {
-  background: #41a76d;
-}
-
-.nr-forecast-primary-strip span.is-watch {
-  border-color: rgba(217, 147, 34, 0.34);
-  background: #fff9ef;
-}
-
-.nr-forecast-primary-strip span.is-watch::before {
-  background: #d99322;
-}
-
-.nr-forecast-primary-strip span.is-severe {
-  border-color: rgba(200, 77, 74, 0.34);
-  background: #fff7f6;
-}
-
-.nr-forecast-primary-strip span.is-severe::before {
-  background: #c84d4a;
-}
-
-.nr-forecast-summary-stack {
+.nr-forecast-summary-panel {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-rows: minmax(0, 1fr) auto;
   min-width: 0;
-}
-
-.nr-forecast-lead-card {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  min-width: 0;
-  min-height: 164px;
-  padding: 16px;
-  border: 1px solid rgba(58, 128, 208, 0.28);
+  overflow: hidden;
+  border: 1px solid rgba(65, 167, 109, 0.3);
   border-radius: 8px;
-  background: #edf7ff;
-  color: var(--muted);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(65, 167, 109, 0.1), transparent 58%),
+    linear-gradient(180deg, #f5fbf7, #ffffff);
+  color: #206842;
   text-align: center;
 }
 
-.nr-forecast-summary-stack .nr-forecast-lead-card,
-.nr-forecast-summary-stack .metric-card:last-child {
-  grid-column: 1 / -1;
+.nr-forecast-summary-panel.is-watch {
+  border-color: rgba(217, 147, 34, 0.34);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(217, 147, 34, 0.1), transparent 58%),
+    linear-gradient(180deg, #fff9ef, #ffffff);
+  color: #9d5f0e;
 }
 
-.nr-forecast-lead-card span,
-.nr-forecast-lead-card small {
-  color: #526a77;
-  font-size: 0.78rem;
-  font-weight: 850;
-  line-height: 1.28;
+.nr-forecast-summary-panel.is-severe {
+  border-color: rgba(200, 77, 74, 0.34);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(200, 77, 74, 0.1), transparent 58%),
+    linear-gradient(180deg, #fff7f6, #ffffff);
+  color: #a83937;
 }
 
-.nr-forecast-lead-card strong {
-  margin-top: 8px;
+.nr-forecast-summary-primary {
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  align-content: center;
+  min-height: 244px;
+  padding: 22px 18px 18px;
+}
+
+.nr-forecast-summary-label,
+.nr-forecast-summary-metrics dt {
+  display: inline-grid;
+  gap: 8px;
+  justify-items: center;
   color: var(--ink);
-  font-size: clamp(1.3rem, 2vw, 1.78rem);
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.nr-forecast-summary-icon {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(65, 167, 109, 0.12);
+  color: #1f8750;
+}
+
+.nr-forecast-summary-panel.is-watch .nr-forecast-summary-icon {
+  background: rgba(217, 147, 34, 0.13);
+  color: #b86f11;
+}
+
+.nr-forecast-summary-panel.is-severe .nr-forecast-summary-icon {
+  background: rgba(200, 77, 74, 0.12);
+  color: #a83937;
+}
+
+.nr-forecast-summary-primary strong {
+  color: currentColor;
+  font-size: 1.72rem;
   font-weight: 950;
   line-height: 1.18;
 }
 
-.nr-forecast-lead-card b {
-  margin: 4px 0;
-  color: #2470bc;
-  font-size: clamp(1.8rem, 3vw, 2.48rem);
+.nr-forecast-summary-primary b {
+  color: currentColor;
+  font-size: 3rem;
   font-weight: 950;
   line-height: 1.05;
 }
 
-.nr-forecast-summary-stack .metric-card {
-  min-height: 88px;
+.nr-forecast-summary-primary small {
+  color: var(--ink);
+  font-size: 0.94rem;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
+.nr-forecast-summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  margin: 0;
+  border-top: 1px solid rgba(178, 195, 184, 0.78);
+}
+
+.nr-forecast-summary-metrics > div {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 15px 12px 16px;
+}
+
+.nr-forecast-summary-metrics > div + div {
+  border-left: 1px solid rgba(178, 195, 184, 0.78);
+}
+
+.nr-forecast-summary-metrics dd {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.nr-forecast-summary-metrics dd strong {
+  color: #a83937;
+  font-size: 1.04rem;
+  font-weight: 950;
+  line-height: 1.25;
+}
+
+.nr-forecast-summary-metrics dd span,
+.nr-forecast-summary-metrics dd small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 780;
+  line-height: 1.35;
 }
 
 .nr-forecast-primary-strip {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 7px;
   max-width: 100%;
   min-width: 0;
 }
 
-.nr-forecast-primary-strip span {
+.nr-forecast-timeline {
+  position: relative;
   display: grid;
-  gap: 4px;
-  place-items: center;
-  align-content: center;
-  min-width: 0;
-  min-height: 82px;
-  padding: 9px 8px;
-  border: 1px solid rgba(178, 195, 184, 0.82);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 13px 18px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(178, 195, 184, 0.78);
   border-radius: 8px;
-  background: #fbfcfb;
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.98));
+  list-style: none;
+}
+
+.nr-forecast-timeline::before {
+  position: absolute;
+  top: 22px;
+  right: 30px;
+  left: 30px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(178, 176, 168, 0.58);
+  content: "";
+}
+
+.nr-forecast-timeline li {
+  --timeline-color: #41a76d;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  min-width: 0;
+  min-height: 112px;
+  padding: 0 10px;
+  color: var(--ink);
   text-align: center;
 }
 
-.nr-forecast-primary-strip span::before {
-  content: "";
-  width: 9px;
-  height: 9px;
+.nr-forecast-timeline li:not(:last-child) {
+  border-right: 1px dashed rgba(178, 176, 168, 0.54);
+}
+
+.nr-forecast-timeline li.is-normal {
+  --timeline-color: #2f9c5f;
+}
+
+.nr-forecast-timeline li.is-watch {
+  --timeline-color: #d99322;
+}
+
+.nr-forecast-timeline li.is-severe {
+  --timeline-color: #c84d4a;
+}
+
+.nr-forecast-timeline-marker {
+  width: 19px;
+  height: 19px;
+  margin-bottom: 8px;
+  border: 4px solid var(--timeline-color);
   border-radius: 999px;
-  background: #2f78c7;
-}
-
-.nr-forecast-primary-strip span.is-light {
-  border-color: rgba(47, 120, 199, 0.28);
-  background: #f6fbff;
-}
-
-.nr-forecast-primary-strip span.is-moderate {
-  border-color: rgba(217, 147, 34, 0.34);
-  background: #fff9ef;
-}
-
-.nr-forecast-primary-strip span.is-moderate::before {
-  background: #d99322;
-}
-
-.nr-forecast-primary-strip span.is-heavy {
-  border-color: rgba(200, 77, 74, 0.34);
-  background: #fff7f6;
-}
-
-.nr-forecast-primary-strip span.is-heavy::before {
-  background: #c84d4a;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
 }
 
 .nr-forecast-primary-strip small {
   color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 820;
+  font-size: 0.78rem;
+  font-weight: 900;
   line-height: 1.25;
 }
 
 .nr-forecast-primary-strip strong {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
   color: var(--ink);
   font-size: 0.76rem;
   font-weight: 950;
   line-height: 1.25;
 }
 
+.nr-forecast-primary-strip strong i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--timeline-color);
+}
+
 .nr-forecast-primary-strip b {
-  color: #2470bc;
-  font-size: 0.78rem;
+  color: var(--timeline-color);
+  font-size: 0.86rem;
   font-weight: 950;
   line-height: 1.2;
+}
+
+.nr-forecast-footnote {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.nr-forecast-footnote svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #2f7a8b;
 }
 
 .nr-research-trend {
@@ -4025,6 +4156,49 @@ textarea {
   gap: 14px;
   align-items: start;
   min-width: 0;
+}
+
+.nr-drought-dashboard {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.nr-drought-forecast-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.68fr) minmax(310px, 0.32fr);
+  gap: 14px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.nr-drought-forecast-row > .nr-dashboard-section,
+.nr-drought-forecast-row > .nr-research-attention {
+  min-height: 100%;
+}
+
+.nr-drought-forecast-row .nr-research-attention {
+  align-content: start;
+}
+
+.nr-drought-dashboard .nr-drought-situation-section {
+  align-content: start;
+}
+
+.nr-drought-dashboard .nr-drought-situation-section .nr-research-stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nr-drought-dashboard .nr-dashboard-map-card .nr-map-panel {
+  min-height: clamp(480px, 56svh, 660px);
+}
+
+.nr-drought-dashboard .nr-dashboard-map-card .nr-map-svg {
+  height: clamp(480px, 56svh, 660px);
+}
+
+.nr-drought-dashboard .nr-follow-up-section .nr-research-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .nr-area-heading {
@@ -6206,6 +6380,7 @@ textarea {
   .nr-main-grid,
   .nr-dashboard-heading,
   .nr-dashboard-layout,
+  .nr-drought-forecast-row,
   .nr-area-heading,
   .nr-area-dashboard,
   .nr-dashboard-map-header,
@@ -6236,11 +6411,15 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .nr-forecast-summary-stack .metric-card {
-    min-height: 90px;
+  .nr-forecast-summary-panel {
+    order: -1;
   }
 
   .nr-research-source-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nr-drought-dashboard .nr-follow-up-section .nr-research-list {
     grid-template-columns: 1fr;
   }
 
@@ -6315,6 +6494,12 @@ textarea {
     gap: 10px;
   }
 
+  .brand-lockup.is-logo-only {
+    display: flex;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
   .brand-lockup strong {
     font-size: 1rem;
   }
@@ -6325,6 +6510,11 @@ textarea {
 
   .brand-mark {
     width: 42px;
+  }
+
+  .brand-lockup.is-logo-only .brand-mark {
+    width: 50px;
+    margin: 0;
   }
 
   .mobile-menu-toggle {
@@ -6600,11 +6790,6 @@ textarea {
     font-size: 1.12rem;
   }
 
-  .nr-forecast-lead-card {
-    min-height: 134px;
-    padding: 13px;
-  }
-
   .nr-forecast-line-graph {
     padding: 8px;
   }
@@ -6621,13 +6806,26 @@ textarea {
     min-height: 238px;
   }
 
-  .nr-forecast-summary-stack {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .nr-forecast-summary-primary {
+    min-height: 184px;
+    padding: 17px 14px;
   }
 
-  .nr-forecast-summary-stack .metric-card {
-    min-height: 86px;
-    padding: 10px 28px 10px 10px;
+  .nr-forecast-summary-primary strong {
+    font-size: 1.42rem;
+  }
+
+  .nr-forecast-summary-primary b {
+    font-size: 2.32rem;
+  }
+
+  .nr-forecast-summary-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .nr-forecast-summary-metrics > div + div {
+    border-top: 1px solid rgba(178, 195, 184, 0.78);
+    border-left: 0;
   }
 
   .nr-forecast-primary-strip {
@@ -6644,8 +6842,17 @@ textarea {
     -webkit-overflow-scrolling: touch;
   }
 
-  .nr-forecast-primary-strip span {
-    flex: 0 0 min(42vw, 146px);
+  .nr-forecast-timeline {
+    padding: 10px;
+  }
+
+  .nr-forecast-timeline::before {
+    display: none;
+  }
+
+  .nr-forecast-primary-strip li {
+    flex: 0 0 min(58vw, 180px);
+    min-height: 104px;
     scroll-snap-align: start;
   }
 
@@ -6755,9 +6962,22 @@ textarea {
   }
 
   .nr-dashboard-layout,
+  .nr-drought-forecast-row,
   .nr-dashboard-map-header,
   .nr-dashboard-module-grid {
     grid-template-columns: 1fr;
+  }
+
+  .nr-drought-dashboard {
+    gap: 10px;
+  }
+
+  .nr-drought-dashboard .nr-dashboard-map-card .nr-map-panel {
+    min-height: 430px;
+  }
+
+  .nr-drought-dashboard .nr-dashboard-map-card .nr-map-svg {
+    height: 430px;
   }
 
   .nr-dashboard-map-header {
