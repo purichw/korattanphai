@@ -96,19 +96,16 @@ After deploy:
 7. Confirm `/geodata/nakhon-ratchasima-subdistricts.geojson` loads.
 8. Confirm `/api/risk-fusion?eventId=ARE-2026-0825-NE` returns JSON.
 9. Check desktop and mobile widths for no horizontal overflow.
-10. Confirm `/`, `/water`, `/drought`, `/wang-nam-khiao`, and
+10. Confirm `/`, `/drought`, `/wang-nam-khiao`, and
     `/wang-nam-khiao/t-302504` load after login.
 11. Confirm legacy `/nakhon-ratchasima/...` URLs still load for old links.
-12. Select the Nakhon Ratchasima layer `ปริมาณฝนและสถานี`; confirm the legend
-    separates `สถานีในพื้นที่` and `สถานีใกล้สุด`.
-13. Confirm `/wang-nam-khiao/t-302504` shows direct station
-    IDs such as `STN0778`, `STN0981`, or `STN0982`, and treats ThaiWater
-    24-hour rainfall values as province/station context rather than a direct
-    subdistrict reading.
+12. Confirm the Nakhon Ratchasima layer selector hides water, flood, reservoir,
+    weather, and rainfall layers from the current product UI.
+13. Confirm `/wang-nam-khiao/t-302504` does not show station, rainfall,
+    water-level, reservoir, or irrigation detail panels.
 14. Confirm an unseeded local route such as
     `/mueang-nakhon-ratchasima/t-300101` says local evidence
-    is not yet available, labels nearest station as representative context, and
-    does not render as normal/low-risk.
+    is not yet available and does not render as normal/low-risk.
 15. Confirm map layer selector displays provenance and separates no-data,
    source-unavailable, unsupported, low-risk, and available states.
 16. Confirm the root province overview does not show a `กลับแผนที่ประเทศ`

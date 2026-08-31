@@ -29,22 +29,18 @@ identity, acknowledgement receipt, or server audit exists.
 2. Login gate returns the operator to the requested route after username entry.
 3. Province view shows 32 districts, 289 navigable subdistricts, local layer
    selector, source freshness, and provenance guardrails.
-   The layer `ปริมาณฝนและสถานี` summarizes direct DWR EWS station coverage and
-   nearest-station representative context. The province page may also show the
-   ThaiWater 24-hour station snapshot as province/station context; it must not
-   appear as a direct reading for every subdistrict.
+   The visible layer selector hides water, flood, reservoir, weather, and
+   rainfall layers while those catalog/data entries remain parked in source for
+   future ingest and prediction work.
 4. Operator opens a district, for example
    `/nakhon-ratchasima/wang-nam-khiao`.
 5. District view shows child subdistricts and inherited province/regional
    context.
 6. Operator opens a subdistrict, for example
    `/nakhon-ratchasima/wang-nam-khiao/t-302504`.
-7. Subdistrict view shows direct REAL evidence where available, inherited
-   context separately, and an explicit no-data state where local evidence is not
+7. Subdistrict view shows drought status, data-readiness context, inherited
+   evidence counts, and an explicit no-data state where local evidence is not
    seeded.
-   Rainfall cards must show either `สถานีในพื้นที่` or `สถานีใกล้สุด` with
-   distance/freshness/confidence; nearest-station context is still not a local
-   measurement.
 
 ### Province Placeholder Journey
 
@@ -53,7 +49,7 @@ identity, acknowledgement receipt, or server audit exists.
 2. The preview/detail action opens `/{province-slug}` from canonical province
    routing data.
 3. The workspace shows province-level filters and containers for situation,
-   water, rainfall, agriculture, and data readiness.
+   agriculture, and data readiness.
 4. Placeholder copy must make the missing local evidence explicit. It must not
    translate missing district/subdistrict data into normal, low-risk, or zero
    rainfall states.

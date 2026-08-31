@@ -68,16 +68,15 @@ export const NAKHON_RATCHASIMA_ID = "TH-P29";
 export const NAKHON_RATCHASIMA_PROVINCE_CODE = "30";
 export const NAKHON_RATCHASIMA_ROUTE_BASE = "/";
 export const NAKHON_RATCHASIMA_LEGACY_ROUTE_BASE = "/nakhon-ratchasima";
-export type NakhonRatchasimaProvinceTab = "overview" | "water" | "drought";
+export type NakhonRatchasimaProvinceTab = "overview" | "drought";
 export const NAKHON_RATCHASIMA_PROVINCE_TABS: ReadonlyArray<{
   id: NakhonRatchasimaProvinceTab;
   path: string;
 }> = [
   { id: "overview", path: NAKHON_RATCHASIMA_ROUTE_BASE },
-  { id: "water", path: "/water" },
   { id: "drought", path: "/drought" },
 ] as const;
-const NAKHON_RATCHASIMA_RESERVED_PROVINCE_TABS = ["water", "drought"] as const;
+const NAKHON_RATCHASIMA_RESERVED_PROVINCE_TABS = ["drought"] as const;
 type NakhonRatchasimaReservedProvinceTab = (typeof NAKHON_RATCHASIMA_RESERVED_PROVINCE_TABS)[number];
 
 function isNakhonRatchasimaReservedProvinceTab(value: string): value is NakhonRatchasimaReservedProvinceTab {
@@ -114,16 +113,10 @@ export const appSitemap = [
     source: "canonical Nakhon Ratchasima hierarchy",
   },
   {
-    id: "nakhon-ratchasima-water",
-    pattern: "/water",
-    scope: "province",
-    source: "normalized Excel rainfall/drought panel",
-  },
-  {
     id: "nakhon-ratchasima-drought",
     pattern: "/drought",
     scope: "province",
-    source: "normalized Excel rainfall/drought panel",
+    source: "normalized Excel drought panel",
   },
   {
     id: "nakhon-ratchasima-district",

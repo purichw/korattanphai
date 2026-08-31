@@ -36,6 +36,27 @@ async function chooseAppSelect(page: Page, root: Page | Locator, name: RegExp | 
   await expect(combo).toHaveAttribute("aria-expanded", "false");
 }
 
+async function expectAppSelectOptionsAbsent(page: Page, root: Page | Locator, name: RegExp | string, texts: string[]) {
+  const combo = root.getByRole("combobox", { name });
+  await expect(combo).toBeVisible();
+  await combo.click();
+  const listboxId = await combo.getAttribute("aria-controls");
+  expect(listboxId).toBeTruthy();
+  const menu = page.locator(`#${listboxId}`);
+  await expect(menu).toBeVisible();
+  for (const text of texts) await expect(menu).not.toContainText(text);
+  await page.keyboard.press("Escape");
+  await expect(combo).toHaveAttribute("aria-expanded", "false");
+}
+
+const hiddenHydrologyLayerLabels = [
+  "พื้นที่น้ำท่วม / น้ำท่วมคาดการณ์",
+  "สถานีเตือนภัยน้ำหลาก-ดินถล่ม",
+  "อ่างเก็บน้ำ / สถานการณ์น้ำ",
+  "พยากรณ์และบริบทฝน",
+  "ปริมาณฝนและสถานี",
+];
+
 async function readMapTransform(svg: Locator, transformSelector = ".map-transform-layer") {
   return svg.locator(transformSelector).evaluate((element) => {
     const values = (element.getAttribute("transform") ?? "")
@@ -161,6 +182,10 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with one sideba
   await expect(page.locator(".topbar-logo")).toHaveCount(0);
   await expect(page.getByText("ข่าวกรองความเสี่ยงเกษตรและการเตือนภัยล่วงหน้าระดับประเทศ")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
+  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab")).toHaveCount(2);
+  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /ภาพรวม/ })).toBeVisible();
+  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /ภัยแล้ง/ })).toBeVisible();
+  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /^น้ำ/ })).toHaveCount(0);
   await expect(page.locator(".brand-mark img")).toHaveAttribute(
     "src",
     "/brand/kaset-tan-phai-emblem.webp",
@@ -171,6 +196,17 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with one sideba
     "/brand/kaset-tan-phai-favicon.png?v=2",
   );
   await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+});
+
+test("removed water route no longer renders the province water page", async ({ page }) => {
+  await loginAs(page, smokeUsername);
+  await page.goto("/water");
+
+  await expect(page.getByRole("heading", { name: "ไม่พบพื้นที่" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "กลับภาพรวม" })).toBeVisible();
+  await expect(page.getByText("แผนที่ฝนย้อนหลังในชุดข้อมูล")).toHaveCount(0);
+  await expect(page.getByText("พยากรณ์ฝน: ThaiWater")).toHaveCount(0);
+  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /^น้ำ/ })).toHaveCount(0);
 });
 
 test("custom dropdowns are app-rendered and keyboard operable", async ({ page }) => {
@@ -194,8 +230,7 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
   await expect(hazard).toHaveAttribute("aria-expanded", "false");
 
   const layerControl = page.locator(".nr-layer-control");
-  await chooseAppSelect(page, layerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", "nr-rainfall-stations");
-  await expect(layerControl).toContainText("ปริมาณฝนและสถานี");
+  await expectAppSelectOptionsAbsent(page, layerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", hiddenHydrologyLayerLabels);
 });
 
 test.skip("national map preview, zoom, and pan keep Thailand inside the viewport", async ({ page }, testInfo) => {
@@ -383,8 +418,8 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   const districtSubdistrictListboxId = await districtSubdistrictSelect.getAttribute("aria-controls");
   expect(districtSubdistrictListboxId).toBeTruthy();
   const districtSubdistrictMenu = page.locator(`#${districtSubdistrictListboxId}`);
-  await expect(districtSubdistrictMenu).toContainText("สถานีในพื้นที่");
-  await expect(districtSubdistrictMenu).toContainText("ใช้สถานีใกล้สุด");
+  await expect(districtSubdistrictMenu).not.toContainText("สถานีในพื้นที่");
+  await expect(districtSubdistrictMenu).not.toContainText("ใช้สถานีใกล้สุด");
   await districtSubdistrictMenu.locator('[data-select-value="302504"]').click();
   await expect(page).toHaveURL(/\/wang-nam-khiao\/t-302504$/);
   await expect(page.getByRole("heading", { name: "อุดมทรัพย์", exact: true })).toBeVisible();
@@ -405,18 +440,18 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
   const nakhonRatchasimaLayerControl = page.locator(".nr-layer-control");
-  await chooseAppSelect(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", "nr-rainfall-stations");
-  await expect(nakhonRatchasimaLayerControl).toContainText("ปริมาณฝนและสถานี");
-  await expect(localMap.locator(".nr-map-legend")).toContainText("มีสถานีฝนในพื้นที่");
-  await expect(localMap.locator(".nr-map-legend")).toContainText("ใช้สถานีใกล้สุด");
-  await expect(page.getByText("ปริมาณฝนและสถานี").first()).toBeVisible();
-  await expect(page.locator(".nr-rainfall-panel").getByText("ใช้สถานีใกล้สุด").first()).toBeVisible();
+  await expectAppSelectOptionsAbsent(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", hiddenHydrologyLayerLabels);
+  await expect(localMap.locator(".nr-map-legend")).not.toContainText("มีสถานีฝนในพื้นที่");
+  await expect(localMap.locator(".nr-map-legend")).not.toContainText("ใช้สถานีใกล้สุด");
+  await expect(page.getByText("ปริมาณฝนและสถานี")).toHaveCount(0);
+  await expect(page.getByText("ฝน 24 ชม.")).toHaveCount(0);
+  await expect(page.getByText("ระดับน้ำ")).toHaveCount(0);
+  await expect(page.getByText("ความพร้อมข้อมูลน้ำ")).toHaveCount(0);
 
   await page.goto("/nakhon-ratchasima/wang-nam-khiao/t-302504");
   await expect(page).toHaveURL(/\/nakhon-ratchasima\/wang-nam-khiao\/t-302504$/);
   await expect(page.getByRole("heading", { name: "อุดมทรัพย์", exact: true })).toBeVisible();
-  await expect(page.getByText("หลักฐานสถานี").first()).toBeVisible();
-  await expect(page.getByText("มีหลักฐาน").first()).toBeVisible();
+  await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.getByText("ข้อมูลที่ยังไม่มี").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "แผนที่ตำบลที่เลือก" })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
@@ -442,7 +477,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในชุดข้อมูลนี้").first()).toBeVisible();
   await expect(page.getByText("ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ").first()).toBeVisible();
   await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูล ThaiWater")).toBeVisible();
-  await expect(page.getByText("หลักฐานสถานี").first()).toBeVisible();
+  await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.getByText("ไม่มีข้อมูล").first()).toBeVisible();
 
   await page.goto("/");
@@ -467,9 +502,9 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   await expect(localMap.getByText("ขอบเขตตำบล")).toHaveCount(0);
 
   const nakhonRatchasimaLayerControl = page.locator(".nr-layer-control");
-  await chooseAppSelect(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", "nr-rainfall-stations");
-  await expect(localMap.locator(".nr-map-legend")).toContainText("มีสถานีฝนในพื้นที่");
-  await expect(localMap.locator(".nr-map-legend")).toContainText("ใช้สถานีใกล้สุด");
+  await expectAppSelectOptionsAbsent(page, nakhonRatchasimaLayerControl, "ชั้นข้อมูลจังหวัดนครราชสีมา", hiddenHydrologyLayerLabels);
+  await expect(localMap.locator(".nr-map-legend")).not.toContainText("มีสถานีฝนในพื้นที่");
+  await expect(localMap.locator(".nr-map-legend")).not.toContainText("ใช้สถานีใกล้สุด");
 
   await centerInViewport(localMap);
   const initialTransform = await readMapTransform(localSvg, ".nr-map-transform-layer");

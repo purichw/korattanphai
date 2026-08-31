@@ -35,7 +35,7 @@
     {
       "id": "nr-drought",
       "group": "Risk",
-      "labelTh": "ความเสี่ยงภัยแล้ง / การใช้น้ำพืช",
+      "labelTh": "ความเสี่ยงภัยแล้ง",
       "classification": "REAL",
       "sourceId": "SRC-GISTDA-CROPSDROUGHT",
       "access": "TOKEN_REQUIRED",

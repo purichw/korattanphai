@@ -46,7 +46,7 @@ Current Nakhon Ratchasima research/data patch:
 - Naming correction: province-level UI/docs must say Nakhon Ratchasima
   province. Do not use local nicknames or district/local names as synonyms for
   the province.
-- Added root-level Nakhon Ratchasima client routes: `/`, `/water`, `/drought`,
+- Added root-level Nakhon Ratchasima client routes: `/`, `/drought`,
   `/{district-slug}`, and `/{district-slug}/{subdistrict-slug}`. Legacy
   `/nakhon-ratchasima/...` aliases remain accepted for old links.
 - Added `NakhonRatchasimaWorkspace` for province, district, and subdistrict
@@ -68,8 +68,9 @@ Current Nakhon Ratchasima rainfall patch:
 - Added 49 REAL DWR EWS station points and a 289-subdistrict coverage matrix:
   29 direct-station subdistricts, 260 nearest-station representative records,
   and 0 no-source records in the current matrix.
-- Added `ปริมาณฝนและสถานี` to the Nakhon Ratchasima layer catalogue and local
-  workspace panels.
+- Kept `ปริมาณฝนและสถานี` in the raw Nakhon Ratchasima layer catalogue, but the
+  Korat Tan Phai product UI now hides water, flood, reservoir, weather, and
+  rainfall layers until they are needed for a confirmed prediction workflow.
 - Kept `rainfall_observations_24h.json` empty by design. The ThaiWater snapshot
   can show province/station rainfall context, but it must not be copied into
   every subdistrict or silently converted into agricultural risk.
@@ -85,9 +86,9 @@ Current province workspace/navigation patch:
   `NakhonRatchasimaWorkspace`.
 - Other canonical provinces open `/{province-slug}` placeholder dashboards via
   `ProvinceWorkspacePlaceholder`.
-- Placeholder dashboards include situation, water, rainfall, agriculture, and
-  data-readiness containers, but they must not display missing local evidence as
-  normal risk, zero rainfall, or a completed data-readiness feature.
+- Placeholder dashboards include situation, agriculture, and data-readiness
+  containers, but they must not display missing local evidence as normal risk or
+  a completed data-readiness feature.
 
 ## Open Risks
 

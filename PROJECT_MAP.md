@@ -84,10 +84,9 @@ Production smoke checks after an authorized deploy:
 - Confirm the Nakhon Ratchasima map loads and no network errors appear for
   `/geodata/nakhon-ratchasima-subdistricts.geojson` or
   `/geodata/thailand-neighbor-context.geojson`.
-- Confirm the Nakhon Ratchasima layer selector exposes `ปริมาณฝนและสถานี`,
-  the legend distinguishes `สถานีในพื้นที่` from `สถานีใกล้สุด`, and ThaiWater
-  rainfall values are shown only as province/station context, not copied into
-  subdistrict risk.
+- Confirm the Nakhon Ratchasima layer selector does not expose water, flood,
+  reservoir, weather, or rainfall layers; those raw catalog entries remain
+  parked for future ingest/prediction work only.
 - Confirm unseeded local areas say detailed local evidence is not yet available
   and do not render as normal/low-risk.
 - Confirm there is no visible EN version or TH/EN toggle; visible UI copy should
@@ -184,7 +183,6 @@ Routes:
 
 - `/login`: frontend-only username gate for the prototype.
 - `/`: province-level Nakhon Ratchasima overview.
-- `/water`: province-level official water situation tab.
 - `/drought`: province-level drought context tab.
 - `/{district-slug}`: district workspace.
 - `/{district-slug}/{subdistrict-slug}`: subdistrict workspace.
@@ -200,9 +198,8 @@ sidebar:
 - `risks`: risk-event list and detail panel.
 - `map`: interactive province map and area profile.
 - `ProvinceWorkspacePlaceholder`: route-backed province-level container for
-  non-seeded provinces. It keeps situation, water, rainfall, agriculture, and
-  data-readiness spaces visible without turning missing local data into normal
-  risk.
+  non-seeded provinces. It keeps situation, agriculture, and data-readiness
+  spaces visible without turning missing local data into normal risk.
 - `forecast`: monthly backbone and seasonal horizon cards.
 - `crops`: crop profiles and crop-condition summary.
 - `workflows`: field verification form and advisory approval workspace.

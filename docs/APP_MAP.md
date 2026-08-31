@@ -11,7 +11,6 @@ Routes:
 
 - `/login`: frontend-only username gate.
 - `/`: province-level Nakhon Ratchasima overview.
-- `/water`: province-level water situation tab.
 - `/drought`: province-level drought context tab.
 - `/{district-slug}`: district-level drill-down.
 - `/{district-slug}/{subdistrict-slug}`: subdistrict-level drill-down.
@@ -26,8 +25,10 @@ Primary user-facing surface:
 
 - `NakhonRatchasimaWorkspace`: province -> district -> subdistrict operational
   drill-down for canonical province `TH-P29`, with 32 districts and 289
-  subdistricts. It includes the `ปริมาณฝนและสถานี` layer for DWR EWS station
-  coverage and nearest-station representative context.
+  subdistricts. Its visible map selector is scoped to agriculture risk, drought,
+  planning, operations, and data-readiness layers; water, flood, reservoir,
+  weather, and rainfall catalog entries are retained in source but hidden from
+  the current product UI.
 
 Inherited nationwide/workflow components remain in source for later extraction
 or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.

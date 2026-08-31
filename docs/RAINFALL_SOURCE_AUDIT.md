@@ -19,12 +19,13 @@ Current fixture files:
 Current UI surface:
 
 - `/`
-- `/water`
 - `/drought`
 - `/{district-slug}`
 - `/{district-slug}/{subdistrict-slug}`
 - Legacy `/nakhon-ratchasima/...` aliases for old links.
-- Layer selector option: `ปริมาณฝนและสถานี`
+- The rainfall/station layer remains in the raw catalogue, but the current
+  Korat Tan Phai product UI hides it together with other water, flood,
+  reservoir, and weather layers.
 
 ## Source Audit
 
@@ -166,14 +167,13 @@ Standard API base/auth/export for `/Rainfall` with `latest=false`,
 
 ## UI Requirements
 
-- The Nakhon Ratchasima layer selector must include `ปริมาณฝนและสถานี`.
-- Province view should summarize direct-station coverage, nearest-station
-  coverage, station count, and live-observation status.
-- District view should summarize coverage for its child subdistricts.
-- Subdistrict view should show direct station or nearest station, distance,
-  confidence, station timestamp, and the no-direct-reading warning.
-- Mobile must avoid horizontal overflow, clipped station IDs, and ambiguous
-  color-only meaning.
+- Do not expose rainfall/station coverage in the current Korat Tan Phai UI until
+  the team intentionally reopens it for a confirmed prediction workflow.
+- Province, district, and subdistrict pages should not show rainfall, water
+  level, reservoir, station, irrigation, or weather-context panels.
+- If rainfall is later reintroduced, it must remain source-labelled and must not
+  be copied into every subdistrict or converted into agricultural risk without
+  a tested station/admin-code crosswalk and risk-fusion rule.
 
 ## Verification
 

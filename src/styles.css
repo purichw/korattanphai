@@ -3826,7 +3826,7 @@ textarea {
 
 .nr-dashboard-situation-cards {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   min-width: 0;
 }
@@ -4497,25 +4497,6 @@ textarea {
   font-size: 0.78rem;
   font-weight: 760;
   line-height: 1.45;
-}
-
-.nr-water-hero {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  padding: 16px 18px;
-}
-
-.nr-water-hero .hero-copy {
-  max-width: 980px;
-}
-
-.nr-water-hero .hero-copy h2 {
-  max-width: none;
-  font-size: clamp(1.45rem, 2vw, 2.12rem);
-}
-
-.nr-water-hero .hero-copy p {
-  max-width: 940px;
 }
 
 .nr-water-readiness-summary {
@@ -6507,24 +6488,6 @@ textarea {
 
   .nr-workspace {
     gap: 12px;
-  }
-
-  .nr-water-hero {
-    padding: 11px 12px;
-  }
-
-  .nr-water-hero .hero-copy h2 {
-    font-size: 1.28rem;
-    line-height: 1.24;
-  }
-
-  .nr-water-hero .hero-copy p:not(.eyebrow) {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    font-size: 0.9rem;
-    line-height: 1.45;
   }
 
   .nr-water-readiness-summary {

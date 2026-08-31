@@ -22,7 +22,6 @@ sidebar starts with only the overview entry, and `/` opens the Nakhon Ratchasima
 workspace directly.
 
 - Province overview: `/`
-- Water tab: `/water`
 - Drought tab: `/drought`
 - District: `/{district-slug}`
 - Subdistrict: `/{district-slug}/{subdistrict-slug}`

@@ -312,7 +312,6 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(getAppSitemap().map((route) => route.pattern)).toEqual([
       "/login",
       "/",
-      "/water",
       "/drought",
       "/{district-slug}",
       "/{district-slug}/{subdistrict-slug}",
@@ -336,15 +335,15 @@ describe("Nakhon Ratchasima incremental research patch", () => {
       isWorkspace: true,
       target: { level: "province", tab: "overview" },
     });
-    expect(resolveAppRoute(getNakhonRatchasimaProvinceTabPath("water"))).toMatchObject({
-      kind: "nakhon-ratchasima",
-      isWorkspace: true,
-      target: { level: "province", tab: "water" },
-    });
     expect(resolveAppRoute(getNakhonRatchasimaProvinceTabPath("drought"))).toMatchObject({
       kind: "nakhon-ratchasima",
       isWorkspace: true,
       target: { level: "province", tab: "drought" },
+    });
+    expect(resolveAppRoute("/water")).toMatchObject({
+      kind: "nakhon-ratchasima",
+      isWorkspace: true,
+      target: { valid: false, level: "not-found" },
     });
     expect(resolveAppRoute("/mueang-nakhon-ratchasima")).toMatchObject({
       kind: "nakhon-ratchasima",
