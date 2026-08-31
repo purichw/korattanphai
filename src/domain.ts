@@ -116,7 +116,7 @@ export const appSitemap = [
     id: "nakhon-ratchasima-drought",
     pattern: "/drought",
     scope: "province",
-    source: "normalized Excel drought panel",
+    source: "normalized drought panel",
   },
   {
     id: "nakhon-ratchasima-district",

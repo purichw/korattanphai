@@ -1,5 +1,29 @@
 # Rollback Parking Lot
 
+## 2026-08-31 22:43 +07:00 — Hide Technical Source Names From User-Facing Copy
+
+- Request: remove end-user-facing references to ThaiWater and Excel-style source
+  filenames while keeping the demo data and internal provenance records intact.
+- Checkpoint:
+  `/tmp/codex-rollback-checkpoints/korattanphai-remove-thaiwater-copy-20260831-224354/`
+- Release status: parked for the Nakhon Ratchasima-only demo UX; restore only
+  if source/file provenance needs to be exposed in the public UI again.
+- Will remove from live UI:
+  - source/file names in province drought forecast copy;
+  - source/file names in district and subdistrict forecast remarks;
+  - source/file names in data-limit accordions, fallback notices, and no-data
+    explanations;
+  - placeholder copy that exposed upstream water-data source acronyms.
+- Will keep in the app:
+  - canonical JSON, source registry, ingest lineage, internal TypeScript names,
+    and documentation needed to preserve provenance;
+  - forecast and historical data behavior, with only the visible copy changed.
+- Restore checklist:
+  - restore the visible source/file copy in the province, district, and
+    subdistrict panels;
+  - restore e2e expectations for the source-specific text;
+  - rerun targeted route snapshots before release.
+
 ## 2026-08-31 21:42 +07:00 — Remove Visible Water UI From Korat Tan Phai
 
 - Request: remove water/rain graphs and water-related evidence panels from the

@@ -205,7 +205,7 @@ test("removed water route no longer renders the province water page", async ({ p
   await expect(page.getByRole("heading", { name: "ไม่พบพื้นที่" })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับภาพรวม" })).toBeVisible();
   await expect(page.getByText("แผนที่ฝนย้อนหลังในชุดข้อมูล")).toHaveCount(0);
-  await expect(page.getByText("พยากรณ์ฝน: ThaiWater")).toHaveCount(0);
+  await expect(page.getByText("พยากรณ์ฝน")).toHaveCount(0);
   await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /^น้ำ/ })).toHaveCount(0);
 });
 
@@ -476,7 +476,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("heading", { name: "ในเมือง", exact: true })).toBeVisible();
   await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในชุดข้อมูลนี้").first()).toBeVisible();
   await expect(page.getByText("ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ").first()).toBeVisible();
-  await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูล ThaiWater")).toBeVisible();
+  await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูลพยากรณ์")).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.getByText("ไม่มีข้อมูล").first()).toBeVisible();
 

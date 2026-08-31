@@ -1225,10 +1225,6 @@ function researchLatestPeriod(summary: NakhonRatchasimaResearchPanelSummary) {
   return formatMonth(summary.meta.periodEnd, "th");
 }
 
-function sourceFileName(value: string) {
-  return value.split("/").filter(Boolean).pop() ?? value;
-}
-
 function researchJoinPolicyNote() {
   return "เชื่อมพื้นที่ด้วยรหัสจังหวัด รหัสอำเภอ และรหัสตำบลเท่านั้น รหัสจากงานวิจัยเดิมใช้เพื่ออ้างอิงแถวต้นทาง ไม่ใช่รหัสราชการ";
 }
@@ -1443,7 +1439,7 @@ function ProvinceDashboardHeading({ research }: { research: NakhonRatchasimaRese
           <span>แหล่งข้อมูลหลัก</span>
           <DataProvenanceChip kind="REAL" />
         </div>
-        <strong>แหล่งข้อมูลหลัก: ชุดข้อมูล Excel ที่จัดมาตรฐานสำหรับสถานการณ์เกษตรและภัยแล้ง</strong>
+        <strong>แหล่งข้อมูลหลัก: ข้อมูลสถานการณ์เกษตรและภัยแล้งที่จัดมาตรฐานแล้ว</strong>
         <small>
           {researchDisplayPeriod(research)} · เดือนล่าสุดในชุดข้อมูล {researchLatestPeriod(research)}
         </small>
@@ -1570,8 +1566,8 @@ function SourceTruthNote({
   droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
 }) {
   const selectedLabel = "ภัยแล้ง";
-  const forecastSourceLabel = `${droughtForecast.meta.sourceNameTh} · รอบ ${formatMonth(droughtForecast.meta.issueMonth, "th")}`;
-  const forecastHeading = "พยากรณ์ภัยแล้ง: ThaiWater · ข้อมูลย้อนหลังและความเสี่ยง: ชุดข้อมูล Excel ที่จัดมาตรฐานแล้ว";
+  const forecastSourceLabel = `ข้อมูลพยากรณ์ 6 เดือน · รอบ ${formatMonth(droughtForecast.meta.issueMonth, "th")}`;
+  const forecastHeading = "พยากรณ์ภัยแล้ง · ข้อมูลย้อนหลังและความเสี่ยงจากชุดข้อมูลที่จัดมาตรฐานแล้ว";
   const periodValue = formatMonth(droughtForecast.meta.issueMonth, "th");
   const periodDescription = `พยากรณ์ภัยแล้ง ${formatThaiNumber(droughtForecast.monthly.length)} เดือนล่าสุด`;
 
@@ -1691,9 +1687,9 @@ function DroughtForecastTrendGraph({
         className="nr-forecast-line-svg"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="กราฟพยากรณ์จำนวนตำบลเสี่ยงภัยแล้ง 6 เดือนจาก ThaiWater"
+        aria-label="กราฟพยากรณ์จำนวนตำบลเสี่ยงภัยแล้ง 6 เดือน"
       >
-        <title>กราฟพยากรณ์จำนวนตำบลเสี่ยงภัยแล้ง 6 เดือนจาก ThaiWater</title>
+        <title>กราฟพยากรณ์จำนวนตำบลเสี่ยงภัยแล้ง 6 เดือน</title>
         {guideValues.map((value) => {
           const y = yForValue(value);
           return (
@@ -1837,9 +1833,9 @@ function ResearchAreaForecastPanel({
         <p className={`nr-compact-note${droughtArea.hasData && !hasDroughtRiskSignal ? " nr-forecast-remark" : ""}`}>
           {droughtArea.hasData
             ? hasDroughtRiskSignal
-              ? `กรองจาก ThaiWater ตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} ${droughtCoverageRemark} มีพื้นที่ขาดข้อมูล ${formatThaiNumber(droughtArea.missingSubdistricts)} ตำบล`
-              : `กราฟเป็น 0 ทุกเดือน เพราะ ThaiWater ระบุสถานะไม่เสี่ยงในช่วงพยากรณ์นี้ หลังกรองตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} (${droughtCoverageRemark})`
-            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูล ThaiWater"}
+              ? `กรองข้อมูลพยากรณ์ตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} ${droughtCoverageRemark} มีพื้นที่ขาดข้อมูล ${formatThaiNumber(droughtArea.missingSubdistricts)} ตำบล`
+              : `กราฟเป็น 0 ทุกเดือน เพราะข้อมูลพยากรณ์ระบุว่าไม่เสี่ยงในช่วงพยากรณ์นี้ หลังกรองตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} (${droughtCoverageRemark})`
+            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูลพยากรณ์"}
         </p>
       </div>
     </DashboardSection>
@@ -1853,9 +1849,9 @@ function DroughtForecastPriorityPanel({ forecast }: { forecast: NakhonRatchasima
   if (months.length === 0 || !lead) {
     return (
       <DashboardSection
-        eyebrow="พยากรณ์จาก ThaiWater"
+        eyebrow="ข้อมูลพยากรณ์"
         title="พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน"
-        description="ยังไม่มีรายการพยากรณ์ภัยแล้งที่อ่านได้จาก ThaiWater จึงไม่สร้างค่าจำลองแทน"
+        description="ยังไม่มีรายการพยากรณ์ภัยแล้งที่อ่านได้ จึงไม่สร้างค่าจำลองแทน"
         provenance="PENDING_SOURCE"
         className="nr-forecast-priority-section nr-drought-forecast-section is-empty"
       >
@@ -1872,7 +1868,7 @@ function DroughtForecastPriorityPanel({ forecast }: { forecast: NakhonRatchasima
 
   return (
     <DashboardSection
-      eyebrow="พยากรณ์จาก ThaiWater"
+      eyebrow="ข้อมูลพยากรณ์"
       title="พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน"
       description="ใช้เป็นสัญญาณล่วงหน้าของหน้าภัยแล้ง ก่อนเทียบกับข้อมูลย้อนหลังและรายการพื้นที่ที่ควรตรวจสอบ"
       provenance="REAL"
@@ -1912,7 +1908,7 @@ function DroughtForecastPriorityPanel({ forecast }: { forecast: NakhonRatchasima
         ))}
       </div>
       <p className="nr-compact-note">
-        ข้อมูลนี้เป็นพยากรณ์พื้นที่เสี่ยงภัยแล้งจาก ThaiWater แยกจากข้อมูลภัยแล้งย้อนหลังใน Excel
+        ข้อมูลนี้เป็นพยากรณ์พื้นที่เสี่ยงภัยแล้ง แยกจากข้อมูลภัยแล้งย้อนหลังที่จัดมาตรฐานแล้ว
       </p>
     </DashboardSection>
   );
@@ -2003,17 +1999,7 @@ function ResearchSubdistrictAttentionPanel({
   );
 }
 
-function ResearchSourceLimitsPanel({
-  research,
-  droughtForecast,
-}: {
-  research: NakhonRatchasimaResearchPanelSummary;
-  droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
-}) {
-  const forecastSourceText = `${droughtForecast.meta.sourceNameTh} · รอบ ${formatMonth(droughtForecast.meta.issueMonth, "th")} · ${sourceFileName(
-    droughtForecast.meta.upstreamFile,
-  )}`;
-
+function ResearchSourceLimitsPanel({ research }: { research: NakhonRatchasimaResearchPanelSummary }) {
   return (
     <DashboardAccordionSection
       eyebrow="ตรวจสอบข้อมูล"
@@ -2026,22 +2012,22 @@ function ResearchSourceLimitsPanel({
       <dl className="nr-research-source-grid">
         <div>
           <dt>ข้อตกลงชุดข้อมูล</dt>
-          <dd>ชุดข้อมูล Excel ที่จัดมาตรฐานแล้ว</dd>
+          <dd>ข้อมูลสถานการณ์และภัยแล้งที่จัดมาตรฐานแล้ว</dd>
         </div>
         <div>
-          <dt>แหล่งข้อมูลพยากรณ์</dt>
-          <dd>{forecastSourceText}</dd>
+          <dt>ข้อมูลพยากรณ์</dt>
+          <dd>พยากรณ์ภัยแล้ง 6 เดือนล่าสุด</dd>
         </div>
         <div>
-          <dt>ชุดข้อมูล Excel ที่ใช้อยู่</dt>
-          <dd>Drought.xlsx / ตารางข้อมูลรายเดือน</dd>
+          <dt>ข้อมูลรายเดือน</dt>
+          <dd>ตารางสถานการณ์ภัยแล้งรายพื้นที่</dd>
         </div>
         <div>
           <dt>ขอบเขตการใช้</dt>
           <dd>ใช้เฉพาะสถานะภัยแล้ง ความพร้อมข้อมูลพื้นที่ และกฎเชื่อมรหัสพื้นที่</dd>
         </div>
       </dl>
-      <p className="nr-compact-note">{researchJoinPolicyNote()} · ข้อมูลพยากรณ์ภัยแล้งแยกจากรายการย้อนหลังใน Excel</p>
+      <p className="nr-compact-note">{researchJoinPolicyNote()} · ข้อมูลพยากรณ์ภัยแล้งแยกจากรายการย้อนหลังที่จัดมาตรฐานแล้ว</p>
       <div className="nr-research-source-guardrails">
         <div className="nr-module-title-row">
           <PanelTitle icon={<AlertTriangle size={18} />} title="ข้อกำกับข้อมูลสำคัญ" />
@@ -2075,7 +2061,7 @@ function ResearchAreaHeading({
       <div>
         <p className="eyebrow">{areaLabel} · {subdistrict?.subdistrictCode ?? district.districtCode}</p>
         <h2>{title}</h2>
-        <p>{locationLine} ใช้ข้อมูลรายเดือนจากชุดข้อมูล Excel ที่จัดมาตรฐานแล้วเป็นแกนหลัก</p>
+        <p>{locationLine} ใช้ข้อมูลรายเดือนจากชุดข้อมูลที่จัดมาตรฐานแล้วเป็นแกนหลัก</p>
       </div>
       <div className="summary-strip nr-area-heading-metrics">
         <MetricCard
@@ -2128,7 +2114,7 @@ function ResearchAreaSituationPanel({
 
   return (
     <DashboardSection
-      eyebrow="ข้อมูลจากชุดข้อมูล Excel"
+      eyebrow="ข้อมูลรายเดือน"
       title={isSubdistrict ? "สถานการณ์ตำบลจากชุดข้อมูล" : "สถานการณ์อำเภอจากชุดข้อมูล"}
       description={
         isSubdistrict
@@ -2159,7 +2145,7 @@ function ResearchAreaSituationPanel({
         <MetricCard
           label="ข้อมูลที่ต้องตรวจซ้ำ"
           value={isSubdistrict ? (stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ") : `${formatThaiNumber(stats.droughtConflictKeys)} ชุด`}
-          detail="รายการที่ต้องตรวจทานจาก Drought.xlsx"
+          detail="รายการที่ต้องตรวจทานจากข้อมูลรายเดือน"
           provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"}
           tone={stats.droughtConflictKeys > 0 ? "watch" : "good"}
         />
@@ -2226,7 +2212,7 @@ function ResearchAreaDroughtHistoryPanel({
     <DashboardSection
       eyebrow="ภัยแล้งย้อนหลัง"
       title={title}
-      description="สถานะภัยแล้งอ่านจาก Drought.xlsx ที่จัดมาตรฐานแล้ว และแยกรายการที่ต้องตรวจทานออกจากค่าหลัก"
+      description="สถานะภัยแล้งอ่านจากข้อมูลรายเดือนที่จัดมาตรฐานแล้ว และแยกรายการที่ต้องตรวจทานออกจากค่าหลัก"
       provenance={hasData ? "DERIVED" : "PENDING_SOURCE"}
       className="nr-area-chart-section"
     >
@@ -2274,7 +2260,7 @@ function ResearchAreaSubdistrictsPanel({
     <DashboardSection
       eyebrow="ลำดับชั้นพื้นที่"
       title="ตำบลในอำเภอนี้"
-      description="ทุกตำบลในอำเภอใช้โครงเดียวกันและดึงรายการรายเดือนจากชุดข้อมูล Excel ที่จัดมาตรฐานแล้ว"
+      description="ทุกตำบลในอำเภอใช้โครงเดียวกันและดึงรายการรายเดือนจากชุดข้อมูลที่จัดมาตรฐานแล้ว"
       provenance="REAL"
       className="nr-area-subdistrict-section"
     >
@@ -2410,11 +2396,11 @@ function ResearchAreaSourceLimitsPanel({
         </div>
         <div>
           <dt>ข้อตกลงชุดข้อมูล</dt>
-          <dd>ชุดข้อมูล Excel ที่จัดมาตรฐานแล้ว</dd>
+          <dd>ข้อมูลสถานการณ์และภัยแล้งที่จัดมาตรฐานแล้ว</dd>
         </div>
         <div>
-          <dt>ชุดข้อมูล Excel ที่ใช้อยู่</dt>
-          <dd>Drought.xlsx / ตารางข้อมูลรายเดือน</dd>
+          <dt>ข้อมูลรายเดือนที่ใช้อยู่</dt>
+          <dd>ตารางสถานการณ์ภัยแล้งรายพื้นที่</dd>
         </div>
         <div>
           <dt>ความครอบคลุมในเดือนที่เลือก</dt>
@@ -2494,10 +2480,7 @@ function ResearchProvinceDataView({
         <div className="nr-dashboard-module-grid">
           <ResearchDroughtDistrictPanel research={research} onNavigate={onNavigate} />
         </div>
-        <ResearchSourceLimitsPanel
-          research={research}
-          droughtForecast={droughtForecast}
-        />
+        <ResearchSourceLimitsPanel research={research} />
       </div>
       <aside className="nr-dashboard-aside">
         <ResearchSubdistrictAttentionPanel title={attentionTitle} records={attentionRecords} onNavigate={onNavigate} />
@@ -3802,7 +3785,7 @@ function NakhonRatchasimaLocalMap({
         {useResearchCriteriaMap && (
           <>
             {criteriaActive && <strong>{localMapCriteriaSummaryLabel(criteria)}</strong>}
-            {activeResearchPeriod.isFallback && <span>เดือนที่เลือกไม่มีในชุดข้อมูล Excel จึงใช้เดือนล่าสุดของชุดข้อมูลแทน</span>}
+            {activeResearchPeriod.isFallback && <span>เดือนที่เลือกไม่มีในชุดข้อมูล จึงใช้เดือนล่าสุดของชุดข้อมูลแทน</span>}
           </>
         )}
       </div>
@@ -4083,7 +4066,7 @@ function DistrictView({
           <DashboardSection
             eyebrow="ข้อมูลที่ยังไม่มี"
             title="ช่องว่างของพื้นที่"
-            description="ถ้า Excel ไม่มีรายการข้อมูลหรือยังไม่ระบุสถานะ ระบบจะแสดงเป็นไม่มีข้อมูล ไม่เติมค่าจำลอง"
+            description="ถ้าชุดข้อมูลไม่มีรายการหรือยังไม่ระบุสถานะ ระบบจะแสดงเป็นไม่มีข้อมูล ไม่เติมค่าจำลอง"
             provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"}
             className="nr-area-side-section"
           >
@@ -4171,7 +4154,7 @@ function SubdistrictView({
           <DashboardSection
             eyebrow="ข้อมูลที่ยังไม่มี"
             title="ช่องว่างของตำบล"
-            description="ค่าที่ไม่มีจาก Excel จะแสดงเป็นไม่มีข้อมูล ไม่ใช้สถานีหรือหลักฐานเก่าแทนตัวเลขหลัก"
+            description="ค่าที่ไม่มีในชุดข้อมูลจะแสดงเป็นไม่มีข้อมูล ไม่ใช้สถานีหรือหลักฐานเก่าแทนตัวเลขหลัก"
             provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
             className="nr-area-side-section"
           >
@@ -4339,7 +4322,7 @@ export function NakhonRatchasimaWorkspace({
     return [
       {
         value: workspaceMonth,
-        label: `${formatMonth(workspaceMonth, "th")} · นอกชุดข้อมูล Excel`,
+        label: `${formatMonth(workspaceMonth, "th")} · นอกชุดข้อมูล`,
         group: "เดือนที่เลือกอยู่",
         badge: "ใช้เดือนล่าสุดแทน",
         badgeTone: "watch" as const,

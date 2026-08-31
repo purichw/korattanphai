@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, CloudRain, Database, Leaf, Map, ShieldAlert, Waves } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Database, Leaf, Map, ShieldAlert, Waves } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { DataProvenanceChip, dataProvenanceChipKindFromText } from "./DataProvenanceChip";
 import { OperationalFilters } from "./OperationalFilters";
@@ -190,8 +190,8 @@ export function ProvinceWorkspacePlaceholder({
       </section>
 
       <section className="province-container-grid">
-        <PlaceholderPanel icon={<CloudRain size={18} />} eyebrow="น้ำและฝน" title="รอข้อมูลน้ำจังหวัด">
-          <p>ยังไม่มีภาพบันทึกข้อมูล ThaiWater/DWR/TMD เฉพาะจังหวัดนี้ในโปรเจกต์ จึงไม่แสดงค่าฝน ระดับน้ำ หรือสถานีเป็นตัวเลขจริง</p>
+        <PlaceholderPanel icon={<Database size={18} />} eyebrow="ข้อมูลจังหวัด" title="รอชุดข้อมูลจังหวัด">
+          <p>ยังไม่มีข้อมูลเฉพาะจังหวัดนี้ในโปรเจกต์ จึงไม่แสดงตัวเลขสถานการณ์เป็นค่าจริง</p>
         </PlaceholderPanel>
 
         <PlaceholderPanel icon={<Leaf size={18} />} eyebrow="เกษตร" title="บริบทพื้นที่เกษตร">
