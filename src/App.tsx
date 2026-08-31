@@ -1,13 +1,15 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
   Bell,
   CheckCircle2,
+  ChevronDown,
   ClipboardCheck,
   CloudRain,
   Database,
   Leaf,
+  LogOut,
   Map,
   Menu,
   RotateCcw,
@@ -15,6 +17,7 @@ import {
   ShieldCheck,
   Sprout,
   UserRound,
+  UsersRound,
   Waves,
   X,
 } from "lucide-react";
@@ -25,7 +28,6 @@ import {
   writeStoredLogin,
   type LoginUser,
 } from "./auth";
-import { AppSelect } from "./components/AppSelect";
 import { DataProvenanceChip, DataProvenanceLegend, dataProvenanceChipKindFromText } from "./components/DataProvenanceChip";
 import { NakhonRatchasimaWorkspaceSummary } from "./components/NakhonRatchasimaWorkspaceSummary";
 import { NakhonRatchasimaWorkspace } from "./components/NakhonRatchasimaWorkspace";
@@ -121,7 +123,6 @@ import {
   labelOrganization,
   labelOutcomeProvenance,
   labelPeriod,
-  labelPersonaOption,
   labelPersonaRole,
   labelPriority,
   labelPrototypeUse,
@@ -139,7 +140,7 @@ import {
 } from "./i18n";
 import { loadRiskFusionBreakdown } from "./riskFusionClient";
 import { AppStateProvider, useAppDispatch, useAppState } from "./store";
-import type { AppSection, RiskFusionBreakdown, VerificationSubmission } from "./types";
+import type { AppSection, Language, RiskFusionBreakdown, UserPersona, VerificationSubmission } from "./types";
 
 const sectionIcons: Record<AppSection, typeof Map> = {
   overview: BarChart3,
@@ -175,6 +176,160 @@ const publicationChannels = [
   "PDF bulletin",
   "Voice / IVR",
 ];
+
+function AccountControl({
+  loginUser,
+  persona,
+  language,
+  compact = false,
+  onPersonaChange,
+  onResetDemo,
+  onLogout,
+}: {
+  loginUser: LoginUser;
+  persona: UserPersona;
+  language: Language;
+  compact?: boolean;
+  onPersonaChange: (personaId: string) => void;
+  onResetDemo: () => void;
+  onLogout: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuId = useId().replaceAll(":", "");
+  const roleLabel = labelPersonaRole(persona.role, language);
+  const accountLabel = `บัญชีผู้ใช้ ${loginUser.name} ${roleLabel}`;
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setIsOpen(false);
+      window.requestAnimationFrame(() => triggerRef.current?.focus());
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const closeMenu = () => {
+    setIsOpen(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
+  };
+
+  const choosePersona = (personaId: string) => {
+    onPersonaChange(personaId);
+    closeMenu();
+  };
+
+  return (
+    <div ref={rootRef} className={compact ? "account-menu is-compact" : "account-menu"}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className="account-trigger"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? menuId : undefined}
+        aria-label={accountLabel}
+        title={compact ? accountLabel : undefined}
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        <UserRound size={18} aria-hidden="true" />
+        <span className="account-trigger-copy">
+          <strong>{loginUser.name}</strong>
+          <small>{roleLabel}</small>
+        </span>
+        <ChevronDown className="account-trigger-chevron" size={17} aria-hidden="true" />
+      </button>
+      {isOpen && (
+        <>
+          <div
+            className="account-menu-backdrop"
+            aria-hidden="true"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              closeMenu();
+            }}
+          />
+          <div id={menuId} className="account-menu-popover" role="menu" aria-label="บัญชีผู้ใช้">
+            <div className="account-menu-heading" role="presentation">
+              <span>บัญชีผู้ใช้</span>
+            </div>
+            <div className="account-menu-profile" role="presentation">
+              <UserRound size={18} aria-hidden="true" />
+              <span>
+                <strong>{loginUser.name}</strong>
+                <small>{roleLabel}</small>
+              </span>
+            </div>
+            <div className="account-menu-divider" role="presentation" />
+            <div className="account-menu-section" role="presentation">
+              <span className="account-menu-section-label">เปลี่ยนบทบาท</span>
+              <div className="account-role-options" role="group" aria-label="เปลี่ยนบทบาท">
+                {users.map((user) => {
+                  const optionRole = labelPersonaRole(user.role, language);
+                  const isSelected = user.id === persona.id;
+                  return (
+                    <button
+                      key={user.id}
+                      type="button"
+                      className={isSelected ? "account-role-option active" : "account-role-option"}
+                      role="menuitemradio"
+                      aria-checked={isSelected}
+                      onClick={() => choosePersona(user.id)}
+                    >
+                      <UsersRound size={16} aria-hidden="true" />
+                      <span>
+                        <strong>{optionRole}</strong>
+                        <small>{user.username}</small>
+                      </span>
+                      {isSelected && <CheckCircle2 size={16} aria-hidden="true" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="account-menu-divider" role="presentation" />
+            <button
+              type="button"
+              className="account-menu-action is-warning"
+              role="menuitem"
+              onClick={() => {
+                onResetDemo();
+                closeMenu();
+              }}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              <span>{t("resetDemo", language)}</span>
+            </button>
+            <button
+              type="button"
+              className="account-menu-action is-danger"
+              role="menuitem"
+              onClick={() => {
+                setIsOpen(false);
+                onLogout();
+              }}
+            >
+              <LogOut size={16} aria-hidden="true" />
+              <span>ออกจากระบบ</span>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function AppShell({
   loginUser,
@@ -231,6 +386,17 @@ function AppShell({
         >
           {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
+        <div className="mobile-account-slot">
+          <AccountControl
+            compact
+            loginUser={loginUser}
+            persona={persona}
+            language={language}
+            onPersonaChange={(personaId) => dispatch({ type: "setPersona", personaId })}
+            onResetDemo={() => dispatch({ type: "resetDemo" })}
+            onLogout={onLogout}
+          />
+        </div>
         <nav id="primary-navigation" className="primary-nav">
           {visibleSections.map((section) => {
             const Icon = sectionIcons[section];
@@ -275,31 +441,16 @@ function AppShell({
         <header className="topbar">
           <div className="topbar-brand">
             <h1 className="sr-only">{t("brand", language)}</h1>
-            <p className="eyebrow">{labelPersonaRole(persona.role, language)}</p>
           </div>
           <div className="topbar-actions">
-            <div className="login-session-chip" aria-label="ผู้ใช้ที่เข้าสู่ระบบ">
-              <UserRound size={15} />
-              <span>{loginUser.name}</span>
-            </div>
-            <AppSelect
-              className="select-label persona-select"
-              icon={<UserRound size={15} />}
-              ariaLabel={t("persona", language)}
-              value={state.personaId}
-              onChange={(personaId) => dispatch({ type: "setPersona", personaId })}
-              options={users.map((user) => ({
-                value: user.id,
-                label: labelPersonaOption(user.username, user.role, language),
-              }))}
+            <AccountControl
+              loginUser={loginUser}
+              persona={persona}
+              language={language}
+              onPersonaChange={(personaId) => dispatch({ type: "setPersona", personaId })}
+              onResetDemo={() => dispatch({ type: "resetDemo" })}
+              onLogout={onLogout}
             />
-            <button type="button" className="secondary-button" onClick={() => dispatch({ type: "resetDemo" })}>
-              <RotateCcw size={16} />
-              {t("resetDemo", language)}
-            </button>
-            <button type="button" className="secondary-button" onClick={onLogout}>
-              ออกจากระบบ
-            </button>
           </div>
         </header>
 

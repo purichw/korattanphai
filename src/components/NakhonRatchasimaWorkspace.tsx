@@ -247,7 +247,7 @@ function dashboardDefaultsForTab(tab: ProvinceDashboardTab): { layerId: string; 
     };
   }
   return {
-    layerId: NAKHON_RATCHASIMA_LAYER_IDS.derivedAgriculturalRisk,
+    layerId: NAKHON_RATCHASIMA_LAYER_IDS.drought,
     mapMode: "prediction-readiness",
   };
 }
@@ -359,21 +359,21 @@ function mapModeHelper(mode: LocalMapMode) {
 }
 
 const localMapViewOptions: AppSelectOption[] = [
-  { value: "risk", label: "ความเสี่ยงภัยแล้ง", group: "มุมมองสี" },
-  { value: "study", label: "ข้อมูลในระบบ", group: "มุมมองสี" },
+  { value: "risk", label: "ความเสี่ยงภัยแล้ง", group: "มุมมองแผนที่" },
+  { value: "study", label: "สถานะข้อมูล", group: "มุมมองแผนที่" },
 ];
 
 const localStudyCriterionOptions: AppSelectOption[] = [
-  { value: "all", label: "ทุกตำบล", group: "ข้อมูลในระบบ" },
-  { value: "studied", label: "มีข้อมูลในระบบ", group: "ข้อมูลในระบบ" },
-  { value: "unstudied", label: "ไม่มีข้อมูลในระบบ", group: "ข้อมูลในระบบ" },
+  { value: "all", label: "ทุกตำบล", group: "สถานะข้อมูล" },
+  { value: "studied", label: "มีข้อมูลในระบบ", group: "สถานะข้อมูล" },
+  { value: "unstudied", label: "ไม่มีข้อมูลในระบบ", group: "สถานะข้อมูล" },
 ];
 
 const localRiskCriterionOptions: AppSelectOption[] = [
-  { value: "all", label: "ทุกระดับภัยแล้ง", group: "ความเสี่ยงภัยแล้ง" },
-  { value: "green", label: "ปกติ", group: "ความเสี่ยงภัยแล้ง" },
-  { value: "yellow", label: "เฝ้าระวัง", group: "ความเสี่ยงภัยแล้ง" },
-  { value: "red", label: "เสี่ยงสูง", group: "ความเสี่ยงภัยแล้ง" },
+  { value: "all", label: "ทุกระดับภัยแล้ง", group: "ระดับภัยแล้ง" },
+  { value: "green", label: "ปกติ", group: "ระดับภัยแล้ง" },
+  { value: "yellow", label: "เฝ้าระวัง", group: "ระดับภัยแล้ง" },
+  { value: "red", label: "เสี่ยงสูง", group: "ระดับภัยแล้ง" },
 ];
 
 function layerUsesResearchCriteriaMap(layerId: string, activeTab?: ProvinceDashboardTab | null) {
@@ -1185,6 +1185,11 @@ function formatThaiNumber(value: number, maximumFractionDigits = 0) {
   }).format(value);
 }
 
+function buddhistYearGroupForPeriod(period: string) {
+  const year = Number(period.slice(0, 4));
+  return Number.isFinite(year) ? `พ.ศ. ${formatThaiNumber(year + 543)}` : undefined;
+}
+
 function formatPercent(value: number, maximumFractionDigits = 0) {
   return `${formatThaiNumber(value, maximumFractionDigits)}%`;
 }
@@ -1425,6 +1430,7 @@ function ProvinceDashboardHeading({ research }: { research: NakhonRatchasimaRese
 }
 
 function DashboardSection({
+  id,
   eyebrow,
   title,
   description,
@@ -1432,6 +1438,7 @@ function DashboardSection({
   className = "",
   children,
 }: {
+  id?: string;
   eyebrow: string;
   title: string;
   description?: ReactNode;
@@ -1440,7 +1447,7 @@ function DashboardSection({
   children: ReactNode;
 }) {
   return (
-    <section className={["nr-dashboard-section", className].filter(Boolean).join(" ")}>
+    <section id={id} className={["nr-dashboard-section", className].filter(Boolean).join(" ")}>
       <div className="nr-dashboard-section-heading">
         <div>
           <p className="eyebrow">{eyebrow}</p>
@@ -1526,6 +1533,48 @@ function DataGovernanceGuardrailAccordion() {
         </summary>
         <DataGovernanceGuardrailList />
       </details>
+    </section>
+  );
+}
+
+function DroughtPageHeader({
+  droughtForecast,
+  research,
+  onBack,
+}: {
+  droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
+  research: NakhonRatchasimaResearchPanelSummary;
+  onBack: () => void;
+}) {
+  const contextItems = [
+    { icon: <TrendingUp size={17} />, label: "ใช้เป็นสัญญาณล่วงหน้า" },
+    { icon: <Database size={17} />, label: "เทียบกับข้อมูลย้อนหลัง" },
+    { icon: <LocateFixed size={17} />, label: "ตรวจสอบพื้นที่ภาคสนาม" },
+    { icon: <ShieldAlert size={17} />, label: "จัดลำดับพื้นที่เฝ้าระวัง" },
+  ];
+
+  return (
+    <section className="nr-drought-page-header" aria-labelledby="nr-drought-page-title">
+      <button type="button" className="nr-page-back-link" onClick={onBack}>
+        <ArrowLeft size={16} aria-hidden="true" />
+        <span>ภาพรวมจังหวัด</span>
+      </button>
+      <div className="nr-drought-page-identity">
+        <h1 id="nr-drought-page-title">ภัยแล้ง</h1>
+        <p>ติดตามสถานการณ์เกษตรและพื้นที่เสี่ยงภัยแล้งของจังหวัดนครราชสีมา</p>
+        <small>
+          อัปเดตล่าสุด {formatMonth(droughtForecast.meta.issueMonth, "th")} <span aria-hidden="true">•</span>{" "}
+          ข้อมูลย้อนหลังถึง {researchLatestPeriod(research)}
+        </small>
+      </div>
+      <ul className="nr-drought-context-strip" aria-label="บริบทการใช้งานหน้าภัยแล้ง">
+        {contextItems.map((item) => (
+          <li key={item.label}>
+            <span aria-hidden="true">{item.icon}</span>
+            {item.label}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -2071,24 +2120,25 @@ function ResearchAreaHeading({
   stats: ResearchAreaStats;
 }) {
   const isSubdistrict = subdistrict !== undefined;
-  const areaLabel = isSubdistrict ? "ระดับตำบล" : "ระดับอำเภอ";
+  const areaLabel = isSubdistrict ? `รหัสตำบล: ${subdistrict.subdistrictCode}` : `รหัสอำเภอ: ${district.districtCode}`;
   const title = subdistrict?.nameTh ?? district.nameTh;
   const locationLine = subdistrict
     ? `จังหวัดนครราชสีมา → อำเภอ${district.nameTh} → ตำบล${subdistrict.nameTh}`
     : `จังหวัดนครราชสีมา → อำเภอ${district.nameTh} → ${formatThaiNumber(stats.totalSubdistricts)} ตำบล`;
+  const coveragePercent = stats.totalSubdistricts > 0 ? (stats.recordCount / stats.totalSubdistricts) * 100 : 0;
 
   return (
-    <section className="nr-dashboard-heading nr-area-heading" aria-label={`หัวข้อแดชบอร์ด${areaLabel}`}>
+    <section className="nr-dashboard-heading nr-area-heading" aria-label={`หัวข้อแดชบอร์ด${isSubdistrict ? "ระดับตำบล" : "ระดับอำเภอ"}`}>
       <div>
-        <p className="eyebrow">{areaLabel} · {subdistrict?.subdistrictCode ?? district.districtCode}</p>
+        <p className="eyebrow">{areaLabel}</p>
         <h2>{title}</h2>
-        <p>{locationLine} ใช้ข้อมูลรายเดือนจากชุดข้อมูลที่จัดมาตรฐานแล้วเป็นแกนหลัก</p>
+        <p>{locationLine} ใช้ข้อมูลภัยแล้งรายเดือนที่จัดมาตรฐานแล้วเป็นแกนหลักสำหรับติดตามพื้นที่เกษตร</p>
       </div>
       <div className="summary-strip nr-area-heading-metrics">
         <MetricCard
           label="ข้อมูลในระบบ"
           value={isSubdistrict ? (stats.recordCount > 0 ? "มีข้อมูล" : "ไม่มีข้อมูล") : `${stats.recordCount}/${stats.totalSubdistricts} ตำบล`}
-          detail={`${formatMonth(activePeriod.period, "th")}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}`}
+          detail={isSubdistrict ? `${formatMonth(activePeriod.period, "th")}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}` : `${formatPercent(coveragePercent, 0)} ครอบคลุมทุกพื้นที่`}
           provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
         />
         <MetricCard
@@ -2101,11 +2151,12 @@ function ResearchAreaHeading({
         <MetricCard
           label="ข้อมูลที่ต้องตรวจซ้ำ"
           value={isSubdistrict ? (stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ") : `${formatThaiNumber(stats.droughtConflictKeys)} ชุด`}
+          detail="รอเจ้าหน้าที่ตรวจทาน"
           provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"}
           tone={stats.droughtConflictKeys > 0 ? "watch" : "good"}
         />
         <MetricCard
-          label="ช่องว่างข้อมูล"
+          label={isSubdistrict ? "ช่องว่างข้อมูล" : "ตำบลไม่มีข้อมูล"}
           value={isSubdistrict ? (stats.missingCount > 0 ? "ขาดข้อมูล" : "ครบ") : `${formatThaiNumber(stats.missingCount)} ตำบล`}
           detail={isSubdistrict ? "รายการรายเดือนของพื้นที่นี้" : `จากทั้งหมด ${formatThaiNumber(stats.totalSubdistricts)} ตำบล`}
           provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"}
@@ -2279,6 +2330,7 @@ function ResearchAreaSubdistrictsPanel({
 }) {
   return (
     <DashboardSection
+      id="district-subdistricts"
       eyebrow="ลำดับชั้นพื้นที่"
       title="ตำบลในอำเภอนี้"
       description="ทุกตำบลในอำเภอใช้โครงเดียวกันและดึงรายการรายเดือนจากชุดข้อมูลที่จัดมาตรฐานแล้ว"
@@ -2330,10 +2382,10 @@ function ResearchAreaAttentionPanel({
   return (
     <DashboardSection
       eyebrow="พื้นที่ติดตาม"
-      title="ตำบลที่ควรเปิดดูต่อ"
+      title="พื้นที่เฝ้าระวัง / ควรตรวจติดตาม"
       description="เรียงจากระดับภัยแล้งในเดือนที่เลือก"
       provenance="DERIVED"
-      className="nr-area-side-section"
+      className="nr-area-side-section nr-area-watchlist-section"
     >
       <div className="nr-research-list">
         {rows.map(({ subdistrict, record }) => (
@@ -2343,6 +2395,9 @@ function ResearchAreaAttentionPanel({
           </button>
         ))}
       </div>
+      <a className="secondary-button nr-area-attention-all" href="#district-subdistricts">
+        ดูทั้งหมด {formatThaiNumber(district.subdistricts.length)} ตำบล
+      </a>
     </DashboardSection>
   );
 }
@@ -2547,7 +2602,7 @@ function ProvinceSituationCards({ provinceRecord }: { provinceRecord: ProvinceMo
         />
         <OfficialMetricCard
           icon={<Database size={18} />}
-          label="ความเชื่อมั่น"
+          label="ความเชื่อมั่นของข้อมูล"
           value={provinceRecord ? labelConfidence(provinceRecord.confidence, "th") : "รอข้อมูล"}
           detail={provinceRecord ? formatMonth(provinceRecord.month, "th") : "เลือกเดือนอื่นเพื่อดูข้อมูล"}
           tone="default"
@@ -2583,14 +2638,17 @@ function ProvinceDashboardMapCard({
 }) {
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
-  const title = activeTab === "drought" ? "แผนที่ภัยแล้งจากชุดข้อมูล" : "แผนที่ความเสี่ยงภัยแล้ง";
+  const mapMonthLabel = formatMonth(activeResearchPeriod.period, "th");
+  const title = activeTab === "drought" ? "แผนที่ภัยแล้งจากชุดข้อมูล" : "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     activeTab === "drought"
-      ? `ชุดข้อมูลภัยแล้ง · ${formatMonth(activeResearchPeriod.period, "th")} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
-      : `${primaryRiskScopeLabelTh} · ${mapModeHelper(mapMode)}`;
+      ? `ชุดข้อมูลภัยแล้ง · ${mapMonthLabel} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
+      : `${mapMonthLabel} · สีแสดงสถานะจากชุดข้อมูลที่จัดมาตรฐานแล้ว ไม่ใช่ประกาศภัยทางการ${
+          activeResearchPeriod.isFallback ? " · เดือนที่เลือกไม่มีในชุดข้อมูล จึงใช้เดือนล่าสุดแทน" : ""
+        }`;
 
   return (
-    <section className="nr-dashboard-map-card" aria-label={title}>
+    <section className={`nr-dashboard-map-card is-${activeTab}-map`} aria-label={title}>
       <div className="nr-dashboard-map-header">
         <div>
           <p className="eyebrow">แผนที่</p>
@@ -2637,7 +2695,7 @@ function AgricultureImpactPanel({ provinceRecord }: { provinceRecord: ProvinceMo
               <dd>{formatRai(provinceRecord.highRiskAreaRai)} ไร่</dd>
             </div>
             <div>
-              <dt>ความเชื่อมั่น</dt>
+              <dt>ความเชื่อมั่นของข้อมูล</dt>
               <dd>{labelConfidence(provinceRecord.confidence, "th")}</dd>
             </div>
           </dl>
@@ -2710,42 +2768,6 @@ function PredictionReadinessPanel({
           ดูชั้นความพร้อมบนแผนที่
         </button>
       </div>
-    </section>
-  );
-}
-
-function AgriculturalRiskContextPanel({ provinceRecord }: { provinceRecord: ProvinceMonthRisk | undefined }) {
-  return (
-    <section className="nr-panel nr-agri-context">
-      <div className="nr-module-title-row">
-        <PanelTitle icon={<Leaf size={18} />} title="บริบทความเสี่ยงภัยแล้ง" />
-        <DataProvenanceChip kind={provinceRecord ? dataProvenanceChipKindFromText(provinceRecord.provenance) : "PENDING_SOURCE"} />
-      </div>
-      {provinceRecord ? (
-        <>
-          <dl className="nr-compact-list">
-            <div>
-              <dt>เดือน</dt>
-              <dd>{formatMonth(provinceRecord.month, "th")}</dd>
-            </div>
-            <div>
-              <dt>ภัยหลัก</dt>
-              <dd>{primaryHazardLabelTh}</dd>
-            </div>
-            <div>
-              <dt>พืชที่เกี่ยวข้อง</dt>
-              <dd>{primaryCropLabelTh}</dd>
-            </div>
-            <div>
-              <dt>ความเชื่อมั่น</dt>
-              <dd>{labelConfidence(provinceRecord.confidence, "th")}</dd>
-            </div>
-          </dl>
-          <p className="nr-compact-note">ส่วนนี้เป็นบริบทจาก record ต้นแบบ ไม่ใช่ประกาศผลกระทบทางการ</p>
-        </>
-      ) : (
-        <EmptyLocalEvidence />
-      )}
     </section>
   );
 }
@@ -3295,6 +3317,13 @@ function NakhonRatchasimaLocalMap({
   );
   const criteriaMatchedCount = focusedFeatureModels.filter((model) => model.matchesCriteria).length;
   const focusAreaCount = focusedFeatureModels.length;
+  const criteriaNarrowed = criteria.study !== criteriaDefaults.study || criteria.risk !== criteriaDefaults.risk;
+  const criteriaStatusText =
+    useResearchCriteriaMap && criteriaNarrowed
+      ? criteriaMatchedCount > 0
+        ? `แสดง ${formatThaiNumber(criteriaMatchedCount)} จาก ${formatThaiNumber(focusAreaCount)} ตำบล`
+        : "ไม่พบตำบลที่ตรงกับตัวกรอง"
+      : null;
   const localLabels = (() => {
     const candidates: MapLabelCandidate[] = [];
 
@@ -3450,21 +3479,21 @@ function NakhonRatchasimaLocalMap({
           />
           <AppSelect
             className="nr-local-map-select"
-            ariaLabel="มุมมองสีแผนที่"
+            ariaLabel="มุมมองแผนที่"
             value={criteria.viewMode}
             onChange={(viewMode) => setCriteria((current) => ({ ...current, viewMode: viewMode as LocalMapViewMode }))}
             options={localMapViewOptions}
           />
           <AppSelect
             className="nr-local-map-select"
-            ariaLabel="ตัวกรองข้อมูลในระบบ"
+            ariaLabel="สถานะข้อมูล"
             value={criteria.study}
             onChange={(study) => setCriteria((current) => ({ ...current, study: study as LocalStudyCriterion }))}
             options={localStudyCriterionOptions}
           />
           <AppSelect
             className="nr-local-map-select"
-            ariaLabel="ตัวกรองระดับความเสี่ยง"
+            ariaLabel="ระดับภัยแล้ง"
             value={criteria.risk}
             onChange={(risk) => setCriteria((current) => ({ ...current, risk: risk as LocalRiskCriterion }))}
             options={localRiskCriterionOptions}
@@ -3479,9 +3508,11 @@ function NakhonRatchasimaLocalMap({
             <RotateCcw size={14} />
             <span>รีเซ็ต</span>
           </button>
-          <span className="nr-local-map-count">
-            {formatThaiNumber(criteriaMatchedCount)}/{formatThaiNumber(focusAreaCount)} ตำบล
-          </span>
+          {criteriaStatusText && (
+            <span className="nr-local-map-filter-status" role="status" aria-live="polite">
+              {criteriaStatusText}
+            </span>
+          )}
         </div>
       )}
       <svg
@@ -3821,7 +3852,7 @@ function NakhonRatchasimaLocalMap({
         ))}
         {useResearchCriteriaMap && (
           <>
-            {criteriaActive && <strong>{localMapCriteriaSummaryLabel(criteria)}</strong>}
+            {criteriaNarrowed && <strong>{localMapCriteriaSummaryLabel(criteria)}</strong>}
             {activeResearchPeriod.isFallback && <span>เดือนที่เลือกไม่มีในชุดข้อมูล จึงใช้เดือนล่าสุดของชุดข้อมูลแทน</span>}
           </>
         )}
@@ -3887,7 +3918,7 @@ function routeBackTargetForRoute(route: NakhonRatchasimaRouteTarget) {
     return { label: "กลับภาพรวม", path: NAKHON_RATCHASIMA_ROUTE_BASE };
   }
   if (route.level === "province" && route.tab !== "overview") {
-    return { label: "กลับภาพรวมจังหวัด", path: NAKHON_RATCHASIMA_ROUTE_BASE };
+    return { label: "ภาพรวมจังหวัด", path: NAKHON_RATCHASIMA_ROUTE_BASE };
   }
   if (route.level === "province") {
     return null;
@@ -3977,39 +4008,29 @@ function ProvinceView({
 
   return (
     <>
-      <ProvinceDashboardHeading research={researchSummary} />
-      <ProvinceDashboardTabBar activeTab={activeTab} onChange={selectDashboardTab} />
       {activeTab === "overview" ? (
-        <ProvinceSituationCards provinceRecord={provinceRecord} />
-      ) : (
-        <SourceTruthNote
-          research={researchSummary}
-          droughtForecast={droughtForecast}
-        />
-      )}
+        <>
+          <ProvinceDashboardHeading research={researchSummary} />
+          <ProvinceDashboardTabBar activeTab={activeTab} onChange={selectDashboardTab} />
+          <ProvinceSituationCards provinceRecord={provinceRecord} />
+        </>
+      ) : null}
 
       {activeTab === "overview" ? (
         <>
-          <section className={`nr-dashboard-layout is-${activeTab}`}>
-            <div className="nr-dashboard-main">
-              <ProvinceDashboardMapCard
-                activeTab={activeTab}
-                layer={layer}
-                mapMode={mapMode}
-                onMapModeChange={onMapModeChange}
-                onNavigate={onNavigate}
-                selectedMonth={selectedMonth}
-                monthOptions={monthOptions}
-                onMonthChange={onMonthChange}
-                selectedSubdistrictCode={selectedMapSubdistrictCode}
-                onSelectedSubdistrictChange={setSelectedMapSubdistrictCode}
-              />
-              <AgricultureImpactPanel provinceRecord={provinceRecord} />
-            </div>
-            <aside className="nr-dashboard-aside">
-              <AgriculturalRiskContextPanel provinceRecord={provinceRecord} />
-            </aside>
-          </section>
+          <ProvinceDashboardMapCard
+            activeTab={activeTab}
+            layer={layer}
+            mapMode={mapMode}
+            onMapModeChange={onMapModeChange}
+            onNavigate={onNavigate}
+            selectedMonth={selectedMonth}
+            monthOptions={monthOptions}
+            onMonthChange={onMonthChange}
+            selectedSubdistrictCode={selectedMapSubdistrictCode}
+            onSelectedSubdistrictChange={setSelectedMapSubdistrictCode}
+          />
+          <AgricultureImpactPanel provinceRecord={provinceRecord} />
 
           <ContentSection
             className="nr-data-readiness-section"
@@ -4073,45 +4094,29 @@ function DistrictView({
   const droughtForecast = getNakhonRatchasimaThaiWaterDroughtForecast();
 
   return (
-    <>
+    <div className="nr-area-template is-district">
       <ResearchAreaHeading district={district} activePeriod={activeResearchPeriod} stats={stats} />
-
-      <section className="nr-dashboard-layout nr-area-dashboard is-district">
-        <div className="nr-dashboard-main">
-          <ResearchAreaForecastPanel
-            district={district}
-            droughtForecast={droughtForecast}
-          />
-          <ResearchAreaSituationPanel district={district} stats={stats} activePeriod={activeResearchPeriod} />
-          <ResearchAreaMapSection
-            target={{ valid: true, level: "district", district }}
-            layer={layer}
-            mapMode={mapMode}
-            onMapModeChange={onMapModeChange}
-            onNavigate={onNavigate}
-            selectedMonth={selectedMonth}
-            monthOptions={monthOptions}
-            onMonthChange={onMonthChange}
-          />
-          <div className="nr-dashboard-module-grid">
-            <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของอำเภอ" series={monthlySeries} />
-          </div>
-          <ResearchAreaSubdistrictsPanel district={district} period={activeResearchPeriod.period} onNavigate={onNavigate} />
-        </div>
-        <aside className="nr-dashboard-aside">
-          <ResearchAreaAttentionPanel district={district} period={activeResearchPeriod.period} onNavigate={onNavigate} />
-          <DashboardSection
-            eyebrow="ข้อมูลที่ยังไม่มี"
-            title="ช่องว่างของพื้นที่"
-            description="ถ้าชุดข้อมูลไม่มีรายการหรือยังไม่ระบุสถานะ ระบบจะแสดงเป็นไม่มีข้อมูล ไม่เติมค่าจำลอง"
-            provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"}
-            className="nr-area-side-section"
-          >
-            <ResearchStatGrid>
-              <MetricCard label="ตำบลไม่มีรายการข้อมูล" value={`${formatThaiNumber(stats.missingCount)} ตำบล`} provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"} />
-            </ResearchStatGrid>
-          </DashboardSection>
-        </aside>
+      <section className="nr-area-decision-row" aria-label="พยากรณ์และพื้นที่ที่ควรติดตาม">
+        <ResearchAreaForecastPanel
+          district={district}
+          droughtForecast={droughtForecast}
+        />
+        <ResearchAreaAttentionPanel district={district} period={activeResearchPeriod.period} onNavigate={onNavigate} />
+      </section>
+      <ResearchAreaSituationPanel district={district} stats={stats} activePeriod={activeResearchPeriod} />
+      <ResearchAreaMapSection
+        target={{ valid: true, level: "district", district }}
+        layer={layer}
+        mapMode={mapMode}
+        onMapModeChange={onMapModeChange}
+        onNavigate={onNavigate}
+        selectedMonth={selectedMonth}
+        monthOptions={monthOptions}
+        onMonthChange={onMonthChange}
+      />
+      <section className="nr-area-lower-row" aria-label="ประวัติภัยแล้งและตำบลในอำเภอ">
+        <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของอำเภอ" series={monthlySeries} />
+        <ResearchAreaSubdistrictsPanel district={district} period={activeResearchPeriod.period} onNavigate={onNavigate} />
       </section>
       <ResearchAreaSourceLimitsPanel
         district={district}
@@ -4119,7 +4124,7 @@ function DistrictView({
         directRecords={evidence.direct}
         inheritedRecords={evidence.inherited}
       />
-    </>
+    </div>
   );
 }
 
@@ -4353,7 +4358,7 @@ export function NakhonRatchasimaWorkspace({
     const options = periods.map((period) => ({
       value: period,
       label: formatMonth(period, "th"),
-      group: period.slice(0, 4),
+      group: buddhistYearGroupForPeriod(period),
     }));
     if (periods.includes(workspaceMonth)) return options;
     return [
@@ -4420,6 +4425,9 @@ export function NakhonRatchasimaWorkspace({
   const handleRouteBack = () => {
     if (routeBackTarget) onNavigate(routeBackTarget.path);
   };
+  const isProvinceDroughtRoute = route.level === "province" && route.tab === "drought";
+  const droughtPageForecast = isProvinceDroughtRoute ? getNakhonRatchasimaThaiWaterDroughtForecast() : null;
+  const droughtPageResearch = isProvinceDroughtRoute ? getNakhonRatchasimaResearchPanelSummary() : null;
 
   if (!route.valid) {
     return (
@@ -4437,17 +4445,21 @@ export function NakhonRatchasimaWorkspace({
 
   return (
     <div className="page-stack nr-workspace">
-      <section className="nr-route-bar">
-        {routeBackTarget && (
-          <div className="nr-route-actions">
-            <button type="button" className="secondary-button" onClick={handleRouteBack}>
-              <ArrowLeft size={16} />
-              {routeBackTarget.label}
-            </button>
-          </div>
-        )}
-        <NakhonRatchasimaBreadcrumbs target={route} onNavigate={onNavigate} />
-      </section>
+      {isProvinceDroughtRoute && droughtPageForecast && droughtPageResearch ? (
+        <DroughtPageHeader droughtForecast={droughtPageForecast} research={droughtPageResearch} onBack={handleRouteBack} />
+      ) : (
+        <section className="nr-route-bar">
+          {routeBackTarget && (
+            <div className="nr-route-actions">
+              <button type="button" className="secondary-button" onClick={handleRouteBack}>
+                <ArrowLeft size={16} />
+                {routeBackTarget.label}
+              </button>
+            </div>
+          )}
+          <NakhonRatchasimaBreadcrumbs target={route} onNavigate={onNavigate} />
+        </section>
+      )}
 
       <OperationalFilters
         monthOptions={route.valid ? researchMonthOptions : undefined}

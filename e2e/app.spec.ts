@@ -23,7 +23,7 @@ async function loginAs(page: Page, username: string) {
   await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
   await page.getByLabel("ชื่อผู้ใช้").fill(username);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: "ออกจากระบบ" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
 }
 
 async function readMapTransform(svg: Locator, transformSelector = ".map-transform-layer") {
@@ -144,13 +144,14 @@ test("login route accepts only the two allowed usernames without listing them", 
 
   await page.getByLabel("ชื่อผู้ใช้").fill("pointy");
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: "ออกจากระบบ" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ Pointy/ })).toBeVisible();
 
-  await page.getByRole("button", { name: "ออกจากระบบ" }).click();
+  await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
+  await page.getByRole("menuitem", { name: /ออกจากระบบ/ }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel("ชื่อผู้ใช้").fill("SOMSAK");
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: "ออกจากระบบ" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ Somsak/ })).toBeVisible();
 });
 
 test("Nakhon Ratchasima-only shell opens the provincial overview with nested drought nav", async ({ page }) => {
@@ -159,12 +160,39 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page).toHaveURL(/\/$/);
   await expect(page).toHaveTitle(/Korat Tan Phai/);
   await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+  const accountTrigger = page.getByRole("button", { name: /บัญชีผู้ใช้/ });
+  await expect(accountTrigger).toBeVisible();
+  await expect(page.locator(".topbar .login-session-chip")).toHaveCount(0);
+  await expect(page.locator(".topbar .persona-select")).toHaveCount(0);
+  await expect(page.locator(".topbar .secondary-button")).toHaveCount(0);
+  await accountTrigger.click();
+  const accountMenu = page.getByRole("menu", { name: "บัญชีผู้ใช้" });
+  await expect(accountMenu).toContainText("Pointy");
+  await expect(accountMenu).toContainText("เจ้าหน้าที่เกษตรจังหวัด");
+  await expect(accountMenu.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
+  await expect(accountMenu.getByRole("menuitem", { name: /รีเซ็ตข้อมูลเดโม/ })).toBeVisible();
+  await expect(accountMenu.getByRole("menuitem", { name: /ออกจากระบบ/ })).toBeVisible();
+  await accountMenu.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรอำเภอ/ }).click();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ Pointy เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
+  await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
+  await page.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรจังหวัด/ }).click();
+  await expect(page.getByRole("heading", { name: "แผนที่สถานการณ์ภัยแล้ง" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "บริบทความเสี่ยงภัยแล้ง" })).toHaveCount(0);
+  await expect(page.getByText("ความเชื่อมั่นของข้อมูล").first()).toBeVisible();
+  const overviewMapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card.is-overview-map"));
+  const overviewWorkspaceBox = await boundingBoxOrThrow(page.locator(".nr-workspace"));
+  expect(overviewMapBox.width).toBeGreaterThan(overviewWorkspaceBox.width * 0.88);
   const nav = await openPrimaryNav(page);
   await expect(nav.getByRole("button")).toHaveCount(2);
   await expect(nav.getByRole("button", { name: "ภาพรวม", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toBeVisible();
   await nav.getByRole("button", { name: "ภัยแล้ง", exact: true }).click();
   await expect(page).toHaveURL(/\/drought$/);
+  await expect(page.getByRole("heading", { level: 1, name: "ภัยแล้ง" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "ภาพรวมจังหวัด" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "กลับภาพรวมจังหวัด" })).toHaveCount(0);
+  await expect(page.locator(".nr-drought-page-header")).toBeVisible();
+  await expect(page.locator(".nr-route-bar")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน" })).toBeVisible();
   await closePrimaryNav(page);
   await expect(page.locator(".nr-drought-dashboard")).toBeVisible();
@@ -183,21 +211,39 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const attentionBox = await boundingBoxOrThrow(page.locator(".nr-research-attention"));
   const situationBox = await boundingBoxOrThrow(page.locator(".nr-drought-situation-section"));
   const mapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card"));
-  const followUpBox = await boundingBoxOrThrow(page.locator(".nr-follow-up-section"));
+  const mapToolbar = page.locator(".nr-dashboard-map-card .nr-local-map-criteria");
+  const mapControls = page.locator(".nr-dashboard-map-card .nr-map-controls");
+  await expect(page.getByRole("heading", { name: "แผนที่ภัยแล้งจากชุดข้อมูล" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox")).toHaveCount(4);
+  await expect(mapToolbar.getByRole("combobox", { name: "เดือนข้อมูลบนแผนที่จังหวัดนครราชสีมา" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox", { name: "มุมมองแผนที่" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox", { name: "สถานะข้อมูล" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox", { name: "ระดับภัยแล้ง" })).toBeVisible();
+  await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
+  await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
+  await mapToolbar.getByRole("combobox", { name: "ระดับภัยแล้ง" }).click();
+  await page.getByRole("option", { name: "เสี่ยงสูง" }).click();
+  await expect(mapToolbar.locator(".nr-local-map-filter-status")).toContainText(/แสดง .* จาก .* ตำบล|ไม่พบตำบลที่ตรงกับตัวกรอง/);
+  await mapToolbar.getByRole("button", { name: "รีเซ็ต" }).click();
+  await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
   const dashboardBox = await boundingBoxOrThrow(page.locator(".nr-drought-dashboard"));
   if ((viewport?.width ?? 0) >= 1180) {
     expect(Math.abs(forecastBox.y - attentionBox.y)).toBeLessThan(8);
     expect(attentionBox.x).toBeGreaterThan(forecastBox.x + forecastBox.width - 2);
+    const toolbarBox = await boundingBoxOrThrow(mapToolbar);
+    const controlsBox = await boundingBoxOrThrow(mapControls);
+    expect(toolbarBox.x + toolbarBox.width).toBeLessThanOrEqual(controlsBox.x - 4);
+    expect(controlsBox.height).toBeGreaterThan(controlsBox.width * 2);
   } else {
     expect(attentionBox.y).toBeGreaterThan(forecastBox.y);
   }
   expect(situationBox.y).toBeGreaterThan(forecastBox.y);
   expect(mapBox.y).toBeGreaterThan(situationBox.y);
-  expect(followUpBox.y).toBeGreaterThan(mapBox.y);
   expect(mapBox.width).toBeGreaterThan(dashboardBox.width * 0.94);
   const droughtNav = await openPrimaryNav(page);
   await expect(droughtNav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toHaveClass(/active/);
-  await droughtNav.getByRole("button", { name: "ภาพรวม", exact: true }).click();
+  await closePrimaryNav(page);
+  await page.getByRole("button", { name: "ภาพรวมจังหวัด" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator(".brand-lockup strong")).toHaveCount(0);
   await expect(page.locator(".brand-lockup span")).toHaveCount(0);
