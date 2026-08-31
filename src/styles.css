@@ -4201,6 +4201,12 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+@media (max-width: 1360px) {
+  .nr-drought-forecast-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .nr-area-heading {
   grid-template-columns: minmax(0, 0.9fr) minmax(440px, 1fr);
 }
