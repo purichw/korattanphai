@@ -74,8 +74,8 @@ needs audit:
 - Sidebar/nav starts with only `ภาพรวม` for this subset.
 - Visible UI is Thai-only; there is no language switch in the product surface.
 - Reset Demo Data restores seed state through `resetDemo`.
-- Login redirects unauthenticated direct links to `/login`, then returns to the
-  requested path after accepted username entry.
+- `/login` is a separate demo username gate. Current province and drill-down
+  routes can also load directly as public prototype pages.
 - Opening `/` hides the inherited nationwide filter band; the local workspace
   owns its layer selector and breadcrumbs.
 - Nakhon Ratchasima local controls mirror the nationwide select component:
