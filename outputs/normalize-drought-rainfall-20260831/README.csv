@@ -1,0 +1,17 @@
+key,value
+generatedAt,2026-08-31 Asia/Bangkok
+sourceDroughtWorkbook,/Users/point/Downloads/Drought.xlsx
+sourceRainfallWorkbook,/Users/point/Downloads/Rainfall.xlsx
+canonicalProvinceId,TH-P29
+canonicalProvinceCode,30
+canonicalProvinceNameTh,นครราชสีมา
+canonicalDistricts,32
+canonicalSubdistricts,289
+normalizedPanelRows,36703
+attentionFlagRows,2941
+duplicateAuditRows,43218
+periodMin,2015-06
+periodMax,2025-12
+provenancePolicy,Rainfall and drought values are DERIVED research workbook values until source/station lineage is confirmed.
+droughtConflictPolicy,Use conservative maximum as droughtRiskLevel and keep droughtRiskConflict=true plus raw values/source rows.
+thaiWaterPrecedencePolicy,"When official ThaiWater operational data conflicts with this workbook, ThaiWater prevails for live operations."

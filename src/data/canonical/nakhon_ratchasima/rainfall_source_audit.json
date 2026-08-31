@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "generatedAt": "2026-08-30T17:03:00+07:00",
+    "provinceCode": "30",
+    "provinceId": "TH-P29",
+    "scope": "Nakhon Ratchasima rainfall research/data patch",
+    "userDecision": "Use nearest station proxy when no direct subdistrict station exists; proxy must be labelled with distance, freshness and confidence.",
+    "noFabricationRule": "Do not create rainfall_mm, affected rai, farmer count, or risk scores where source access does not support the value."
+  },
+  "sources": [
+    {
+      "sourceId": "SRC-HII-THAIWATER",
+      "sourceNameTh": "มาตรฐานข้อมูล ThaiWater / HII",
+      "sourceUrl": "https://standard.thaiwater.net/docs/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B8%B3%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%99%E0%B9%89%E0%B8%B3-%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B0/%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1/%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A7%E0%B8%B1%E0%B8%94/%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%9D%E0%B8%99-rainfall/",
+      "accessMethod": "เอกสารมาตรฐานข้อมูลและ API resource",
+      "observedResources": [
+        "/Rainfall",
+        "/StationInfo"
+      ],
+      "fields": [
+        "stationCode",
+        "stationReference",
+        "resultTime",
+        "value",
+        "uom",
+        "qualityFlag",
+        "qualityControlLevel"
+      ],
+      "unit": "mm",
+      "timestampRule": "ใช้ resultTime จาก source และแสดงเวลา Asia/Bangkok ใน UI",
+      "geography": "station-based observation; ต้อง join ผ่าน metadata สถานี ไม่ใช่ชื่อพื้นที่",
+      "licenseOrUsageNote": "needs audit: เอกสารมาตรฐานเปิดอ่านได้ แต่สิทธิ์/endpoint production สำหรับ ingest ยังต้องยืนยันกับผู้ให้บริการ",
+      "freshness": "ตาม resultTime/source API เมื่อเชื่อมต่อจริง",
+      "limitationTh": "รอบนี้ดึง snapshot จาก public provincial dashboard endpoints ได้ แต่ยังไม่ได้สิทธิ์หรือ route ของ ThaiWater Standard /Rainfall สำหรับ historical bulk import ตั้งแต่ Jan 2025"
+    },
+    {
+      "sourceId": "SRC-DWR-EWS",
+      "sourceNameTh": "ระบบเตือนภัยล่วงหน้า กรมทรัพยากรน้ำ",
+      "sourceUrl": "http://ews1.dwr.go.th/ews/province-stn-point?FilterProvince=%E0%B8%99%E0%B8%84%E0%B8%A3%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%AA%E0%B8%B5%E0%B8%A1%E0%B8%B2",
+      "accessMethod": "หน้ารายการพิกัดสถานีจังหวัดและหน้าข้อมูลฝนของระบบ EWS",
+      "observedResources": [
+        "/ews/province-stn-point",
+        "/ews/select-data",
+        "/ews/rain-daily",
+        "/ews/rain-weekly",
+        "/ews/rain-month"
+      ],
+      "fields": [
+        "STN ID",
+        "ชื่อ",
+        "ตำบล",
+        "อำเภอ",
+        "จังหวัด",
+        "โครงการปี",
+        "ละติจูด",
+        "ลองจิจูด",
+        "rain",
+        "rain12",
+        "rain24",
+        "stn_date"
+      ],
+      "unit": "mm for rainfall fields where station-specific endpoint is confirmed",
+      "timestampRule": "DWR page uses station timestamps; station-specific query parameter needs audit before production ingest",
+      "geography": "station/village coverage, then joined to subdistrict code through canonical hierarchy",
+      "licenseOrUsageNote": "public web report; usage/license needs audit before automated production harvesting",
+      "freshness": "2026-08-29T00:55:00+07:00",
+      "limitationTh": "พิกัดสถานีและ coverage ใช้ได้ใน patch นี้ แต่ค่าฝนสดยังไม่ถูกนำเข้าเพราะ query รายสถานียังไม่ยืนยัน"
+    },
+    {
+      "sourceId": "SRC-TMD",
+      "sourceNameTh": "กรมอุตุนิยมวิทยา",
+      "sourceUrl": "https://www.tmd.go.th/en/weather/province/kanchanaburi",
+      "accessMethod": "หน้าสภาพอากาศจังหวัดและรายงาน/พยากรณ์ที่มี field ฝนตามช่วงเวลา",
+      "observedResources": [
+        "province weather page",
+        "daily/monthly forecast/report pages"
+      ],
+      "fields": [
+        "Amount of Rainfall (15 minutes)",
+        "Amount of Rainfall 1 hour",
+        "Amount of Rainfall (from 07:00)",
+        "Rain 3 hr",
+        "Amount of Rainfall"
+      ],
+      "unit": "mm",
+      "timestampRule": "ใช้ announcement/update time จาก TMD เมื่อเชื่อมต่อจริง",
+      "geography": "weather station/province/regional context",
+      "licenseOrUsageNote": "public page; API/open-data terms need audit before production ingest",
+      "freshness": "page-specific announcement/update time",
+      "limitationTh": "ใช้เป็นบริบท/ยืนยันความหมาย field ไม่ใช่ค่าฝนรายตำบลของจังหวัดนครราชสีมาใน patch นี้"
+    }
+  ],
+  "outcome": {
+    "stationCountFromDwrProvincePage": 49,
+    "officialWaterSnapshotStatus": "THAIWATER_PUBLIC_PROVINCIAL_ENDPOINTS_CAPTURED",
+    "thaiWaterConflictPolicy": "When ThaiWater public provincial values conflict with existing static fixture values for water situation, ThaiWater prevails.",
+    "directSubdistrictCoverage": 29,
+    "nearestProxyCoverage": 260,
+    "noSourceAvailable": 0,
+    "current24hIngestStatus": "PROVINCE_STATION_SNAPSHOT_CAPTURED_NO_CONFIRMED_SUBDISTRICT_CROSSWALK",
+    "thaiWaterRain24StationCount": 104,
+    "thaiWaterRain24OverlapWithDwrCoverageStations": 0,
+    "rain24SubdistrictJoinPolicy": "Do not join ThaiWater rain24 station readings to subdistrict coverage by Thai names. Use station/admin code crosswalk only.",
+    "monthlyHistoryStatus": "REGIONAL_CONTEXT_ONLY_NO_SUBDISTRICT_MONTHLY_TOTALS",
+    "historicalFromJan2025Attempt": {
+      "requestedStart": "2025-01-01",
+      "attemptedAt": "2026-08-30T17:03:00+07:00",
+      "publicProvincialEndpointOutcome": "NO_CONFIRMED_JAN_2025_PLUS_HISTORY_FROM_PUBLIC_DASHBOARD_API",
+      "standardApiOutcome": "DOCUMENTED_BUT_NOT_EXPOSED_AT_PUBLIC_THAIWATER30_API_BASE",
+      "testedEndpoints": [
+        {
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/iframe/rain24_graph?id=1123748&start_date=2025-01-01&end_date=2025-01-31",
+          "status": 200,
+          "observedBehavior": "returned the same latest seven-day station series as the default graph request"
+        },
+        {
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain1d?province_code=30&start_date=2025-01-01&end_date=2025-01-31",
+          "status": 200,
+          "observedBehavior": "ignored date range and returned latest provincial maximum"
+        },
+        {
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rainfall_month?province_code=30&start_date=2025-01-01&end_date=2025-01-31",
+          "status": 200,
+          "observedBehavior": "ignored date range and returned latest monthly maximum"
+        },
+        {
+          "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/Rainfall?interval=P-Daily&latest=false&startDatetime=2025-01-01T00:00:00&endDatetime=2025-01-31T23:59:59&provinceCode=30",
+          "status": 404,
+          "observedBehavior": "public provincial API base returned unknown service"
+        }
+      ],
+      "requiredNextStepTh": "ขอ endpoint/base URL หรือสิทธิ์ ThaiWater Standard /Rainfall จากหน่วยงาน แล้วดึงด้วย latest=false, startDatetime, endDatetime, interval=P-Daily หรือ P-Monthly และ join ผ่านรหัสสถานี/admin code"
+    }
+  }
+}

@@ -1,0 +1,666 @@
+{
+  "meta": {
+    "generatedAt": "2026-08-27",
+    "recordCount": 24,
+    "allowedProvenance": [
+      "REAL",
+      "CANONICAL_SYNTHETIC",
+      "DERIVED",
+      "RUNTIME_STATE"
+    ]
+  },
+  "records": [
+    {
+      "id": "EVID-GEO-001",
+      "provenance": "REAL",
+      "source_id": "SRC-NAKHON-RATCHASIMA-PAO-ADMIN",
+      "evidence_type": "ADMIN_COUNT",
+      "hazard": null,
+      "observation_period": "2026 publication",
+      "as_of_date": "2026-05",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": null,
+        "subdistrict_code": null,
+        "scope": "province"
+      },
+      "facts": {
+        "district_count": 32,
+        "subdistrict_count": 289,
+        "village_count": 3756
+      },
+      "limitation": "Count/list corroboration only; codes come from DOPA/TIS-derived companion sources."
+    },
+    {
+      "id": "EVID-GEO-002",
+      "provenance": "REAL",
+      "source_id": "SRC-DOPA-DISTRICT-CODES",
+      "evidence_type": "ADMIN_CODES",
+      "hazard": null,
+      "observation_period": "reference",
+      "as_of_date": null,
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "scope": "district master"
+      },
+      "facts": {
+        "district_code_range": "3001–3032",
+        "district_count": 32
+      },
+      "limitation": "DOPA/BORA code-name evidence; source is an operational document."
+    },
+    {
+      "id": "EVID-GEO-003",
+      "provenance": "REAL",
+      "source_id": "SRC-SILTH-DOPA-SUBDISTRICT",
+      "evidence_type": "ADMIN_CODES",
+      "hazard": null,
+      "observation_period": "reference",
+      "as_of_date": "terminology release",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "scope": "subdistrict master"
+      },
+      "facts": {
+        "first_code": "300101",
+        "last_code": "303205",
+        "record_count": 289
+      },
+      "limitation": "DOPA/TIS-derived terminology publication; not a verified live DOPA subdistrict registry endpoint."
+    },
+    {
+      "id": "EVID-GEO-004",
+      "provenance": "REAL",
+      "source_id": "SRC-GISTDA-ADMIN-BOUNDARY",
+      "evidence_type": "GEOMETRY_CAPABILITY",
+      "hazard": null,
+      "observation_period": "reference layer",
+      "as_of_date": null,
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "scope": "subdistrict geometry"
+      },
+      "facts": {
+        "geometry_type": "esriGeometryPolygon",
+        "source_crs": "EPSG:32647",
+        "query_formats": [
+          "JSON",
+          "geoJSON",
+          "PBF"
+        ],
+        "join_fields": [
+          "P_code",
+          "A_code",
+          "T_code"
+        ],
+        "metadata_fields": [
+          "Admin_code",
+          "Source_Nam",
+          "Source_dat",
+          "Shape_Area",
+          "Shape_Leng"
+        ]
+      },
+      "limitation": "Geometry payload is referenced, not embedded; validate actual key values at ingestion."
+    },
+    {
+      "id": "EVID-TMD-202606",
+      "provenance": "REAL",
+      "source_id": "SRC-TMD-OBS-JUN",
+      "evidence_type": "WEATHER_OBSERVED_CONTEXT",
+      "hazard": "Drought / Heat Stress",
+      "observation_period": "2026-06",
+      "as_of_date": "2026-06-30",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "scope": "Thailand national context; meteorological context for Nakhon Ratchasima province, not a local measurement"
+      },
+      "facts": {
+        "national_mean_rainfall_anomaly_pct": -8,
+        "national_mean_temperature_anomaly_c": 0.4
+      },
+      "limitation": "National values cannot be assigned to a Nakhon Ratchasima district/subdistrict."
+    },
+    {
+      "id": "EVID-NAKHON-RATCHASIMA-WATER-20260623",
+      "provenance": "REAL",
+      "source_id": "SRC-NAKHON-RATCHASIMA-WATER-20260623",
+      "evidence_type": "WATER_STATUS",
+      "hazard": "Drought / Agricultural Water Stress",
+      "observation_period": "2026-06",
+      "as_of_date": "2026-06-23",
+      "forecast_issued_at": null,
+      "forecast_valid_from": "2026-06",
+      "forecast_valid_to": "2026-07",
+      "geography": {
+        "province_code": "30",
+        "scope": "province/basin"
+      },
+      "facts": {
+        "reservoir_count_reported": 29,
+        "combined_storage_approx_pct_capacity": 35,
+        "planning_context": "June–July dry-spell/water-allocation concern"
+      },
+      "limitation": "Province/basin context only; no uniform tambon severity."
+    },
+    {
+      "id": "EVID-TMD-202607",
+      "provenance": "REAL",
+      "source_id": "SRC-TMD-OBS-JUL",
+      "evidence_type": "WEATHER_OBSERVED_CONTEXT",
+      "hazard": "Heavy Rain / Flood",
+      "observation_period": "2026-07",
+      "as_of_date": "2026-07-31",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "scope": "Thailand national/regional context"
+      },
+      "facts": {
+        "national_mean_rainfall_anomaly_pct": 8,
+        "national_mean_temperature_anomaly_c": 0.2,
+        "narrative": "Heavy rain occurred in parts of the Northeast at times; rainfall also decreased during part of mid-month."
+      },
+      "limitation": "Not evidence that every Nakhon Ratchasima area flooded."
+    },
+    {
+      "id": "EVID-TMD-202608",
+      "provenance": "REAL",
+      "source_id": "SRC-TMD-FCST-AUG",
+      "evidence_type": "WEATHER_FORECAST_CONTEXT",
+      "hazard": "Heavy Rain / Flash Flood",
+      "observation_period": null,
+      "as_of_date": "2026-08-25",
+      "forecast_issued_at": "2026-08",
+      "forecast_valid_from": "2026-08-01",
+      "forecast_valid_to": "2026-08-31",
+      "geography": {
+        "scope": "Northeast regional context; Nakhon Ratchasima province is in Northeast"
+      },
+      "facts": {
+        "northeast_forecast_rainfall_mm_min": 230,
+        "northeast_forecast_rainfall_mm_max": 280,
+        "rainy_days_min": 18,
+        "rainy_days_max": 20,
+        "narrative": "Heavy to very heavy rain possible in some locations."
+      },
+      "limitation": "Regional forecast; no official Nakhon Ratchasima subdistrict probability."
+    },
+    {
+      "id": "EVID-DDPM-20260806",
+      "provenance": "REAL",
+      "source_id": "SRC-DDPM-WATCH-20260806",
+      "evidence_type": "OFFICIAL_WARNING",
+      "hazard": "Flash Flood / Heavy Rain / Waterlogging",
+      "observation_period": null,
+      "as_of_date": "2026-08-05",
+      "forecast_issued_at": "2026-08-05",
+      "forecast_valid_from": "2026-08-06",
+      "forecast_valid_to": "2026-08-09",
+      "geography": {
+        "province_code": "30",
+        "scope": "province watch"
+      },
+      "facts": {
+        "status": "WATCH",
+        "nakhon_ratchasima_included": true,
+        "hazards": [
+          "flash flood",
+          "forest runoff",
+          "waterlogging"
+        ]
+      },
+      "limitation": "Forecast/watch evidence, not observed flood impact."
+    },
+    {
+      "id": "EVID-DOAE-20260820-SOENGSANG",
+      "provenance": "REAL",
+      "source_id": "SRC-DOAE-SOENGSANG-20260820",
+      "evidence_type": "PEST_DISEASE_SURVEILLANCE",
+      "hazard": "Pest / Disease",
+      "observation_period": "2026-08-20 to 2026-08-25",
+      "as_of_date": "2026-08-25",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3003",
+        "subdistrict_code": null,
+        "scope": "Soeng Sang district banana production area"
+      },
+      "facts": {
+        "crop": "banana",
+        "status": "surveillance/investigation",
+        "confirmed_diagnosis": false,
+        "sample_analysis": "reported as under detailed analysis"
+      },
+      "limitation": "Do not invent disease name, severity, affected rai, farmer count, or tambon."
+    },
+    {
+      "id": "EVID-RID8-RESERVOIR-REFERENCE",
+      "provenance": "REAL",
+      "source_id": "SRC-RID8-RESERVOIRS",
+      "evidence_type": "RESERVOIR_REFERENCE",
+      "hazard": "Drought / Flood water-management context",
+      "observation_period": "reference",
+      "as_of_date": null,
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "scope": "large reservoir assets"
+      },
+      "facts": {
+        "reservoirs": [
+          {
+            "name_th": "ลำตะคอง",
+            "capacity_mcm": 214.49
+          },
+          {
+            "name_th": "ลำพระเพลิง",
+            "capacity_mcm": 155.0
+          },
+          {
+            "name_th": "มูลบน",
+            "capacity_mcm": 141.0
+          },
+          {
+            "name_th": "ลำแชะ",
+            "capacity_mcm": 275.0
+          }
+        ]
+      },
+      "limitation": "Reference capacities, not current storage."
+    },
+    {
+      "id": "EVID-TMD-202609",
+      "provenance": "REAL",
+      "source_id": "SRC-TMD-FCST-SEP",
+      "evidence_type": "WEATHER_FORECAST_CONTEXT",
+      "hazard": "Heavy Rain / Flash Flood",
+      "observation_period": null,
+      "as_of_date": "2026-08-07",
+      "forecast_issued_at": "2026-08-07",
+      "forecast_valid_from": "2026-09-01",
+      "forecast_valid_to": "2026-09-30",
+      "geography": {
+        "scope": "Northeast regional context"
+      },
+      "facts": {
+        "northeast_forecast_rainfall_mm_min": 200,
+        "northeast_forecast_rainfall_mm_max": 250,
+        "rainy_days_min": 17,
+        "rainy_days_max": 19,
+        "narrative": "Rainy conditions continue; heavy/very heavy rain possible in some locations."
+      },
+      "limitation": "Agricultural consequence requires exposure/vulnerability derivation."
+    },
+    {
+      "id": "EVID-TMD-202610",
+      "provenance": "REAL",
+      "source_id": "SRC-TMD-FCST-AUG-OCT",
+      "evidence_type": "FORECAST_HORIZON_SUPPORT",
+      "hazard": "Seasonal Transition / Rainfall Variability",
+      "observation_period": null,
+      "as_of_date": "2026-08",
+      "forecast_issued_at": "2026-08",
+      "forecast_valid_from": "2026-10-01",
+      "forecast_valid_to": "2026-10-31",
+      "geography": {
+        "scope": "Upper Thailand/regional context"
+      },
+      "facts": {
+        "october_supported_selectable_horizon": true,
+        "narrative": "Upper Thailand transitions out of rainy season around mid-October."
+      },
+      "limitation": "No exact Nakhon Ratchasima province/district probability from this evidence."
+    },
+    {
+      "id": "EVID-DWR-20250510-01",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3025",
+        "subdistrict_code": "302504",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN0981",
+        "station_name": "บ้านอุดมทรัพย์พัฒนา",
+        "trigger": "Rainfall",
+        "reported_value": 84.5,
+        "subdistrict_th": "อุดมทรัพย์",
+        "district_th": "วังน้ำเขียว"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-02",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3002",
+        "subdistrict_code": "300202",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN2019",
+        "station_name": "บ้านเฉลียงโคก",
+        "trigger": "Water level warning",
+        "reported_value": 41.5,
+        "subdistrict_th": "เฉลียง",
+        "district_th": "ครบุรี"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-03",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3014",
+        "subdistrict_code": "301420",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN2023",
+        "station_name": "บ้านพระบึงนอก",
+        "trigger": "Rainfall",
+        "reported_value": 83.0,
+        "subdistrict_th": "บ่อปลาทอง",
+        "district_th": "ปักธงชัย"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-04",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3025",
+        "subdistrict_code": "302504",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN0982",
+        "station_name": "บ้านห้วยน้ำเค็ม",
+        "trigger": "Rainfall",
+        "reported_value": 93.0,
+        "subdistrict_th": "อุดมทรัพย์",
+        "district_th": "วังน้ำเขียว"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-05",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3006",
+        "subdistrict_code": "300601",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN2020",
+        "station_name": "บ้านจักราช",
+        "trigger": "Rainfall",
+        "reported_value": 83.0,
+        "subdistrict_th": "จักราช",
+        "district_th": "จักราช"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-06",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3025",
+        "subdistrict_code": "302504",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN0778",
+        "station_name": "บ้านซับเต่า",
+        "trigger": "Rainfall",
+        "reported_value": 98.5,
+        "subdistrict_th": "อุดมทรัพย์",
+        "district_th": "วังน้ำเขียว"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-07",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3020",
+        "subdistrict_code": "302005",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN0988",
+        "station_name": "บ้านหนองไผ่",
+        "trigger": "Rainfall",
+        "reported_value": 84.5,
+        "subdistrict_th": "หนองหญ้าขาว",
+        "district_th": "สีคิ้ว"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-20250510-08",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-HIST-20250510",
+      "evidence_type": "DWR_EWS_WARNING",
+      "hazard": "Flash Flood / Heavy Rain",
+      "observation_period": "2025-05-10",
+      "as_of_date": "2025-05-10",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": "3013",
+        "subdistrict_code": "301306",
+        "scope": "station/subdistrict"
+      },
+      "facts": {
+        "station_id": "STN2022",
+        "station_name": "บ้านธรรมจักรพัฒนา",
+        "trigger": "Rainfall",
+        "reported_value": 116.5,
+        "subdistrict_th": "ตลาดไทร",
+        "district_th": "ประทาย"
+      },
+      "limitation": "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value."
+    },
+    {
+      "id": "EVID-DWR-NAKHON-RATCHASIMA-STATION-COVERAGE-20260827",
+      "provenance": "REAL",
+      "source_id": "SRC-DWR-EWS",
+      "evidence_type": "HYDROLOGY_STATION_COVERAGE",
+      "hazard": null,
+      "observation_period": "reference coverage aligned to 2025-01..2026-10",
+      "as_of_date": "2026-08-27",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": null,
+        "subdistrict_code": null,
+        "scope": "30 matched DWR EWS station/covered-village subdistricts in Nakhon Ratchasima"
+      },
+      "facts": {
+        "station_options": 49,
+        "station_or_covered_village_rows": 130,
+        "matched_district_count": 13,
+        "matched_subdistrict_count": 30,
+        "canonical_period_start": "2025-01",
+        "canonical_period_end": "2026-10",
+        "direct_station_subdistrict_count": 29
+      },
+      "limitation": "Station/source coverage only; not a monthly warning, observed flood, crop impact, or affected-rai measurement."
+    },
+    {
+      "id": "EVID-DOAE-FARMER-REG-CAPABILITY-20260827",
+      "provenance": "REAL",
+      "source_id": "SRC-DOAE-FARMER-REGISTRATION",
+      "evidence_type": "CROP_REGISTRATION_REPORT_CAPABILITY",
+      "hazard": null,
+      "observation_period": "report path supports production-year queries; canonical app period remains 2025-01..2026-10",
+      "as_of_date": "2026-08-27",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": null,
+        "subdistrict_code": null,
+        "scope": "province/district/subdistrict report filters"
+      },
+      "facts": {
+        "supports_production_year_filter": true,
+        "supports_province_filter": true,
+        "supports_district_filter": true,
+        "supports_subdistrict_filter": true,
+        "supports_crop_group_and_type_filters": true,
+        "report_note_daily_cutoff": true,
+        "report_note_subdistrict_level_can_show_name_list": true
+      },
+      "limitation": "No DOAE crop-area values were extracted in this patch; do not use this as affected crop area until queried and normalized."
+    },
+    {
+      "id": "EVID-OPSMOAC-NAKHON-RATCHASIMA-SITUATION-INDEX-20260828",
+      "provenance": "REAL",
+      "source_id": "SRC-OPSMOAC-NAKHON-RATCHASIMA-SITUATION",
+      "evidence_type": "PROVINCIAL_AG_DISASTER_REPORT_INDEX",
+      "hazard": null,
+      "observation_period": "canonical report-index matrix aligned to 2025-01..2026-10",
+      "as_of_date": "2026-08-28",
+      "forecast_issued_at": null,
+      "forecast_valid_from": null,
+      "forecast_valid_to": null,
+      "geography": {
+        "province_code": "30",
+        "district_code": null,
+        "subdistrict_code": null,
+        "scope": "Nakhon Ratchasima provincial report index"
+      },
+      "facts": {
+        "canonical_month_count": 22,
+        "indexed_monthly_report_count": 18,
+        "linked_attachment_month_count": 12,
+        "categories_visible": [
+          "สถานการณ์ภัยพิบัติด้านการเกษตร",
+          "แจ้งเตือนภัย",
+          "การระบาดศัตรูพืช"
+        ],
+        "visible_monthly_reports": [
+          "2025-01",
+          "2025-02",
+          "2025-03",
+          "2025-05",
+          "2025-06",
+          "2025-07",
+          "2025-08",
+          "2025-09",
+          "2025-10",
+          "2025-11",
+          "2025-12",
+          "2026-01",
+          "2026-02",
+          "2026-03",
+          "2026-04",
+          "2026-05",
+          "2026-06",
+          "2026-07"
+        ],
+        "related_warning_only_months": [
+          "2025-04"
+        ],
+        "current_and_forecast_months": [
+          "2026-08",
+          "2026-09",
+          "2026-10"
+        ],
+        "matrix_file": "opsmoac_monthly_reports canonical fixture"
+      },
+      "limitation": "Index confirms report availability and attachment paths only. It can support prediction validation/readiness after detail parsing, but cannot assign district/subdistrict impacts, crops, or rai by itself."
+    }
+  ]
+}

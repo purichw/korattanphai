@@ -1,0 +1,369 @@
+{
+  "meta": {
+    "fetchedAt": "2026-08-30T17:01:47+07:00",
+    "forecastFetchedAt": "2026-08-31T13:01:22+07:00",
+    "timezone": "Asia/Bangkok",
+    "provinceCode": "30",
+    "provinceId": "TH-P29",
+    "provinceNameTh": "นครราชสีมา",
+    "sourceNameTh": "ศูนย์ข้อมูลน้ำระดับจังหวัดนครราชสีมา / ThaiWater",
+    "sourceUrl": "https://nakhonratchasima.thaiwater.net/",
+    "apiBaseUrl": "https://api-v3.thaiwater.net/api/v1/thaiwater30/",
+    "provenance": "REAL",
+    "scopeNoteTh": "ข้อมูลนี้เป็นภาพบันทึกจากจุดเชื่อมข้อมูลจังหวัดนครราชสีมา ไม่ใช่ live polling ใน runtime ของเว็บ",
+    "usageNoteTh": "เมื่อข้อมูลชนกัน ให้ ThaiWater เป็นหลักสำหรับสถานการณ์น้ำ และต้องแยกจากคะแนนความเสี่ยงเกษตรที่ระบบคำนวณ"
+  },
+  "endpoints": [
+    {
+      "id": "thaiwater-rain24",
+      "labelTh": "ฝนสะสม 24 ชม. รายสถานี",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain24?include_zero=1&province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 10:01:44 GMT",
+      "statusNoteTh": "อ่านได้และคืนข้อมูล 104 สถานี (ล่าสุด 2026-08-30 16:00)"
+    },
+    {
+      "id": "thaiwater-rain1d",
+      "labelTh": "ฝนสูงสุดวันนี้",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain1d?province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 00:40:00 GMT",
+      "statusNoteTh": "อ่านได้และคืนสถานีสูงสุด 1 รายการ"
+    },
+    {
+      "id": "thaiwater-rain3d",
+      "labelTh": "ฝนสะสม 3 วัน",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain3d?province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 10:01:44 GMT",
+      "statusNoteTh": "อ่านได้และคืนข้อมูล 70 สถานี"
+    },
+    {
+      "id": "thaiwater-rain7d",
+      "labelTh": "ฝนสะสม 7 วัน",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rain7d?province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 10:01:45 GMT",
+      "statusNoteTh": "อ่านได้และคืนข้อมูล 70 สถานี"
+    },
+    {
+      "id": "thaiwater-rainfall-month",
+      "labelTh": "ฝนรายเดือนสูงสุด",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/rainfall_month?province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 00:40:00 GMT",
+      "statusNoteTh": "อ่านได้และคืนสถานีฝนรายเดือนสูงสุด 1 รายการ"
+    },
+    {
+      "id": "thaiwater-temperature-week",
+      "labelTh": "อุณหภูมิสูงสุด/ต่ำสุดในรอบสัปดาห์",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/temperature_maxmin_thisweek?province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 10:01:45 GMT",
+      "statusNoteTh": "อ่านได้จากจุดเชื่อมอุณหภูมิรอบสัปดาห์"
+    },
+    {
+      "id": "thaiwater-waterlevel",
+      "labelTh": "สถานีวัดระดับน้ำ",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/waterlevel?province_code=30",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 10:01:46 GMT",
+      "statusNoteTh": "อ่านได้และคืนข้อมูล 49 สถานี (ล่าสุด 2026-08-30 16:50)"
+    },
+    {
+      "id": "thaiwater-dam",
+      "labelTh": "อ่างเก็บน้ำในจังหวัด",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/dam?province_id=30",
+      "status": 200,
+      "lastModified": null,
+      "statusNoteTh": "อ่านได้และใช้ค้นหา id อ่างเก็บน้ำเพื่อคำนวณน้ำใช้การ"
+    },
+    {
+      "id": "thaiwater-dam-uses-water",
+      "labelTh": "น้ำใช้การรวมของอ่างเก็บน้ำ",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/dam_uses_water?dam_id=9,7,40,41&mediumdam_id=59695,58841,391,6,10,58768,749,59681,227,232,748,7,58766,8,175,606,253,178,58839,228,4,12,176,3,392,9,58913,59086,58914,58975,59161,59043,58971,58973,59125",
+      "status": 200,
+      "lastModified": "Sun, 30 Aug 2026 07:48:02 GMT",
+      "statusNoteTh": "อ่านได้จาก id อ่างเก็บน้ำที่ค้นพบในจังหวัด และใช้เป็นค่าหลักเมื่อชนกับ fixture เก่า"
+    },
+    {
+      "id": "thaiwater-rainfall-forecast",
+      "labelTh": "พยากรณ์ฝนรายจังหวัด",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/provinces/wrfrom_rainforcase7d?province_code=30",
+      "status": 200,
+      "lastModified": null,
+      "statusNoteTh": "อ่านได้และคืนพยากรณ์ 7 วัน ตรวจล่าสุด 2026-08-31 13:01"
+    },
+    {
+      "id": "thaiwater-warning-province",
+      "labelTh": "ข้อความเตือนภัยรายจังหวัด",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/warning_province",
+      "status": 200,
+      "lastModified": null,
+      "statusNoteTh": "อ่านได้และคืนคำเตือนระดับประเทศ 3 รายการ แต่ไม่มีรายการของจังหวัดนครราชสีมา"
+    },
+    {
+      "id": "thaiwater-storm-data",
+      "labelTh": "ข้อมูลพายุ",
+      "url": "https://api-v3.thaiwater.net/api/v1/thaiwater30/public/storm_data",
+      "status": 200,
+      "lastModified": null,
+      "statusNoteTh": "อ่านได้ และไม่มีรายการข้อมูลในรอบภาพบันทึกนี้"
+    }
+  ],
+  "situation": {
+    "stormStatusTh": "ไม่มีพายุเข้าใกล้ประเทศไทย",
+    "publicWarningCount": 0,
+    "disasterAreas": {
+      "floodDistricts": 0,
+      "droughtDistricts": 0,
+      "noteTh": "ค่าจากหน้าแดชบอร์ดจังหวัด ThaiWater ณ รอบภาพบันทึกนี้ แสดงอุทกภัย 0 อำเภอ และภัยแล้ง 0 อำเภอ",
+      "provenance": "REAL"
+    },
+    "rain1dMax": {
+      "stationId": "1109544",
+      "stationNameTh": "โรงเรียนบ้านหนองปรือโป่ง",
+      "districtTh": "บ้านเหลื่อม",
+      "subdistrictTh": "โคกกระเบื้อง",
+      "value": 25.4,
+      "unit": "mm",
+      "observedAt": "2026-08-29",
+      "periodStart": "2026-08-30",
+      "periodEnd": "2026-08-30",
+      "agencyTh": "สถาบันสารสนเทศทรัพยากรน้ำ (องค์การมหาชน)"
+    },
+    "rain3dMax": {
+      "stationId": "1123748",
+      "stationNameTh": "บ้านน้ำโตน",
+      "districtTh": "เทพารักษ์",
+      "subdistrictTh": "บึงปรือ",
+      "value": 98,
+      "unit": "mm",
+      "observedAt": "2026-08-30",
+      "periodStart": "2026-08-27",
+      "periodEnd": "2026-08-29",
+      "agencyTh": "กรมทรัพยากรน้ำ"
+    },
+    "rain7dMax": {
+      "stationId": "1123748",
+      "stationNameTh": "บ้านน้ำโตน",
+      "districtTh": "เทพารักษ์",
+      "subdistrictTh": "บึงปรือ",
+      "value": 104,
+      "unit": "mm",
+      "observedAt": "2026-08-30",
+      "periodStart": "2026-08-24",
+      "periodEnd": "2026-08-29",
+      "agencyTh": "กรมทรัพยากรน้ำ"
+    },
+    "monthlyRainMax": {
+      "stationId": "1085",
+      "stationNameTh": "บ้านซับเต่า",
+      "districtTh": "วังน้ำเขียว",
+      "subdistrictTh": "อุดมทรัพย์",
+      "value": 289,
+      "unit": "mm",
+      "observedAt": null,
+      "periodStart": "2026-07-01 07:00:00",
+      "periodEnd": "2026-08-01 07:00:00",
+      "agencyTh": "กรมทรัพยากรน้ำ"
+    },
+    "temperatureWeek": {
+      "maxC": 43,
+      "minC": 24.4,
+      "stationId": "1394808",
+      "stationNameTh": "สะพานน้ำลำตะคอง",
+      "districtTh": "ปากช่อง",
+      "subdistrictTh": "หมูสี",
+      "observedAt": null,
+      "periodStart": "2026-08-24",
+      "agencyTh": "มูลนิธิอาสาเพื่อนพึ่ง (ภาฯ) ยามยาก สภากาชาดไทย"
+    },
+    "damUsableWater": {
+      "observedDate": "2026-08-30",
+      "usableWaterMcm": 351,
+      "usableWaterPercent": 29,
+      "storageMcm": 415,
+      "storagePercent": 34,
+      "releasedMcm": 3,
+      "largeReservoirCount": 4,
+      "mediumReservoirCount": 35,
+      "sourceNoteTh": "คำนวณจากจุดเชื่อมข้อมูล dam_uses_water หลังค้นหา id อ่างเก็บน้ำของจังหวัด ThaiWater เป็นหลักเมื่อชนกับ fixture เก่า"
+    }
+  },
+  "rainfall24h": {
+    "stationCount": 104,
+    "observedAtLatest": "2026-08-30 16:00",
+    "counts": {
+      "veryHeavy": 0,
+      "heavy": 0,
+      "moderate": 22,
+      "light": 62,
+      "noRain": 20
+    },
+    "topStations": [
+      {
+        "stationId": "1123748",
+        "stationNameTh": "บ้านน้ำโตน",
+        "districtTh": "เทพารักษ์",
+        "subdistrictTh": "บึงปรือ",
+        "rainfallMm": 33.5,
+        "observedAt": "2026-08-30 15:00"
+      },
+      {
+        "stationId": "1067",
+        "stationNameTh": "บ้านเขายายเที่ยง",
+        "districtTh": "สีคิ้ว",
+        "subdistrictTh": "คลองไผ่",
+        "rainfallMm": 32,
+        "observedAt": "2026-08-30 15:00"
+      },
+      {
+        "stationId": "500144",
+        "stationNameTh": "บ้านหนองกะโตวา",
+        "districtTh": "ปากช่อง",
+        "subdistrictTh": "ปากช่อง",
+        "rainfallMm": 31.5,
+        "observedAt": "2026-08-30 15:00"
+      },
+      {
+        "stationId": "1459066",
+        "stationNameTh": "ชุมชนหนองสาหร่าย (สะพานขาว)",
+        "districtTh": "ปากช่อง",
+        "subdistrictTh": "ปากช่อง",
+        "rainfallMm": 28.5,
+        "observedAt": "2026-08-30 15:00"
+      },
+      {
+        "stationId": "1459065",
+        "stationNameTh": "บ้านหนองอ้อ",
+        "districtTh": "โนนสูง",
+        "subdistrictTh": "เมืองปราสาท",
+        "rainfallMm": 26,
+        "observedAt": "2026-08-30 15:00"
+      }
+    ]
+  },
+  "waterlevel": {
+    "stationCount": 49,
+    "observedAtLatest": "2026-08-30 16:50",
+    "counts": {
+      "overflow": 0,
+      "high": 0,
+      "normal": 13,
+      "low": 5,
+      "criticalLow": 2,
+      "noData": 29
+    },
+    "keyStations": [
+      {
+        "stationId": "2726",
+        "stationNameTh": "ตำบลในเมือง",
+        "districtTh": "เมืองนครราชสีมา",
+        "subdistrictTh": "บ้านเกาะ",
+        "riverName": "ลำตะคองเก่า",
+        "storagePercent": 67.52,
+        "diffBankM": 1.02,
+        "observedAt": "2026-08-30 16:00"
+      },
+      {
+        "stationId": "2750",
+        "stationNameTh": "บ้านซึม",
+        "districtTh": "พิมาย",
+        "subdistrictTh": "สัมฤทธิ์",
+        "riverName": "แม่น้ำมูล",
+        "storagePercent": 59.3,
+        "diffBankM": 2.32,
+        "observedAt": "2026-08-30 16:00"
+      },
+      {
+        "stationId": "1035516",
+        "stationNameTh": "บ้านบัว",
+        "districtTh": "โนนสูง",
+        "subdistrictTh": "โนนสูง",
+        "riverName": "ลำเชิงไกร",
+        "storagePercent": 50.54,
+        "diffBankM": 1.84,
+        "observedAt": "2026-08-30 16:00"
+      },
+      {
+        "stationId": "2694",
+        "stationNameTh": "บ้านท่าเยี่ยม",
+        "districtTh": "ปักธงชัย",
+        "subdistrictTh": "บ่อปลาทอง",
+        "riverName": "ลำพระเพลิง",
+        "storagePercent": 46.28,
+        "diffBankM": 2.89,
+        "observedAt": "2026-08-30 16:00"
+      },
+      {
+        "stationId": "1117894",
+        "stationNameTh": "บ้านขนงพระเหนือ",
+        "districtTh": "ปากช่อง",
+        "subdistrictTh": "ขนงพระ",
+        "riverName": "ลำโดมน้อย",
+        "storagePercent": 44.66,
+        "diffBankM": 2.9,
+        "observedAt": "2026-08-30 15:00"
+      }
+    ]
+  },
+  "forecast7d": [
+    {
+      "day": 1,
+      "forecastDate": "2026-08-31 00:00",
+      "rainfallMm": 2.1789,
+      "labelTh": "ฝนเล็กน้อย",
+      "mediaTimestamp": "2025-04-04 05:05",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    },
+    {
+      "day": 2,
+      "forecastDate": "2026-09-01 00:00",
+      "rainfallMm": 2.1505,
+      "labelTh": "ฝนเล็กน้อย",
+      "mediaTimestamp": "2025-04-04 05:05",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    },
+    {
+      "day": 3,
+      "forecastDate": "2026-09-02 00:00",
+      "rainfallMm": 6.1623,
+      "labelTh": "ฝนเล็กน้อย",
+      "mediaTimestamp": "2025-04-04 05:05",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    },
+    {
+      "day": 4,
+      "forecastDate": "2026-09-03 00:00",
+      "rainfallMm": 22.5865,
+      "labelTh": "ฝนปานกลาง",
+      "mediaTimestamp": "2025-04-04 05:05",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    },
+    {
+      "day": 5,
+      "forecastDate": "2026-09-04 00:00",
+      "rainfallMm": 17.4363,
+      "labelTh": "ฝนปานกลาง",
+      "mediaTimestamp": "2025-04-04 05:06",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    },
+    {
+      "day": 6,
+      "forecastDate": "2026-09-05 00:00",
+      "rainfallMm": 9.3744,
+      "labelTh": "ฝนเล็กน้อย",
+      "mediaTimestamp": "2025-04-04 05:06",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    },
+    {
+      "day": 7,
+      "forecastDate": "2026-09-06 00:00",
+      "rainfallMm": 9.0753,
+      "labelTh": "ฝนเล็กน้อย",
+      "mediaTimestamp": "2025-04-04 05:06",
+      "statusNoteTh": "ข้อมูลจากจุดเชื่อมพยากรณ์รายจังหวัด ThaiWater"
+    }
+  ]
+}

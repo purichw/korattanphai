@@ -1,0 +1,81 @@
+{
+  "bundle": "nakhon_ratchasima_deep_research_bundle_v3",
+  "generatedAt": "2026-08-27",
+  "files": [
+    {
+      "name": "CODEX_NAKHON_RATCHASIMA_IMPLEMENTATION_DELTA.md",
+      "sizeBytes": 6268,
+      "sha256": "e31d3d6026819f26623183f68bc079cae7c827471a3cdd0327f39b96c76b1e93"
+    },
+    {
+      "name": "NAKHON_RATCHASIMA_DEEP_RESEARCH_REPORT.md",
+      "sizeBytes": 33337,
+      "sha256": "e1f96f996ab9c0220cf57745385c08886b27659c156d14069c48d8d5772505ef"
+    },
+    {
+      "name": "README.md",
+      "sizeBytes": 1136,
+      "sha256": "fe59ce62d689972270fcf8e0b793aefbbdc0ae9d2b1e8da35dce690aec9bdec9"
+    },
+    {
+      "name": "VALIDATION.json",
+      "sizeBytes": 652,
+      "sha256": "841dd8b5b765920129008043a7c8e2ec838f395d2e6192c045b2044fb39a8a6a"
+    },
+    {
+      "name": "nakhon_ratchasima_admin_hierarchy.json",
+      "sizeBytes": 342392,
+      "sha256": "beaaa613cf775a8f9df4c7f314db3063ed06f6aaec3b4fca359fcaf5031ea1a6"
+    },
+    {
+      "name": "nakhon_ratchasima_district_subdistrict_matrix.csv",
+      "sizeBytes": 215043,
+      "sha256": "49e72f52831668e3686f5444832fc2a5e69fa2ce8b0f51014b177c69e3be9926"
+    },
+    {
+      "name": "nakhon_ratchasima_evidence_records.json",
+      "sizeBytes": 18650,
+      "sha256": "2510f0c1eb88fa1a8db8ccc5c632d47f3d095e51423514c4a08a61dddfaf6628"
+    },
+    {
+      "name": "nakhon_ratchasima_existing_prototype_province_month.json",
+      "sizeBytes": 12525,
+      "sha256": "9b38c1cd288038d0bbfc12634c6af8af647f2e68fd1f54f891c26fcfc7da765d"
+    },
+    {
+      "name": "nakhon_ratchasima_hotspot_evidence_matrix.csv",
+      "sizeBytes": 3042,
+      "sha256": "eca1e2d34cbd0e896ed9dc4a7f8258dc22311e582c4534634fdde51db3109377"
+    },
+    {
+      "name": "nakhon_ratchasima_local_subset.csv",
+      "sizeBytes": 2618,
+      "sha256": "46cc78e63e9c17066575b89d7caca3ee4b1b2a503ad0baf024566775a4636625"
+    },
+    {
+      "name": "nakhon_ratchasima_local_subset.json",
+      "sizeBytes": 10082,
+      "sha256": "5bc69dedfc74ef1c597c11cbe4db6482691aee2f75aaba9b3ea1efc3f0226ba5"
+    },
+    {
+      "name": "nakhon_ratchasima_map_layers.json",
+      "sizeBytes": 7901,
+      "sha256": "0969f1732ca3cb2ad7cab9cc51668f3e35ec5c2818a6640ef0585b889d37cc46"
+    },
+    {
+      "name": "nakhon_ratchasima_schema_mapping.json",
+      "sizeBytes": 8975,
+      "sha256": "9f816d5c8b5a6b1c9666a48b9dff989ab78a0245f04d638890ba7f228e1163de"
+    },
+    {
+      "name": "nakhon_ratchasima_source_matrix.csv",
+      "sizeBytes": 14456,
+      "sha256": "8f4137052675320e9446f0c06aaee0fece10f53da7246a7adb3bb696bee2a99c"
+    },
+    {
+      "name": "nakhon_ratchasima_temporal_matrix.csv",
+      "sizeBytes": 9381,
+      "sha256": "7d7e5945ae3ca99b6a86d6091b9f277bf742ed2b2800537fdf3650a2f6cfbcd1"
+    }
+  ]
+}

@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "basis": "Existing CODEX_SINGLE_SOURCE_MASTER_PROMPT Appendices B/C/D/G/H/N. All changes additive.",
+    "rule": "Do not rename or destructively change existing fields."
+  },
+  "existingSchemaMapping": [
+    {
+      "researchData": "province/district/subdistrict",
+      "existingObject": "Location (Appendix D)",
+      "existingField": "id, name, type, parent, coverage, nameTh, prototypeRegion",
+      "mappingMethod": "direct + additive admin-code fields",
+      "provenance": "REAL"
+    },
+    {
+      "researchData": "weather/hazard/event",
+      "existingObject": "Agricultural Risk Event (Appendix C)",
+      "existingField": "id, title, hazard, severity, confidence, status, primaryLocation, region, month, timeHorizon, summary, sourceContext",
+      "mappingMethod": "REAL evidence feeds event; unified severity/confidence DERIVED unless explicitly sourced",
+      "provenance": "REAL -> DERIVED"
+    },
+    {
+      "researchData": "rainfall anomaly",
+      "existingObject": "Risk Event Detail Enrichment (Appendix G)",
+      "existingField": "evidence.rainfallAnomalyPct",
+      "mappingMethod": "direct only when unit/geography/time scope matches; otherwise retain as normalized evidence item",
+      "provenance": "REAL"
+    },
+    {
+      "researchData": "temperature anomaly",
+      "existingObject": "Risk Event Detail Enrichment (Appendix G)",
+      "existingField": "evidence.temperatureAnomalyC",
+      "mappingMethod": "direct only at supported scope",
+      "provenance": "REAL"
+    },
+    {
+      "researchData": "water availability/reservoir context",
+      "existingObject": "Risk Event Detail Enrichment (Appendix G)",
+      "existingField": "evidence.waterAvailability; drivers; impacts; recommendedActions.water",
+      "mappingMethod": "REAL evidence + derived interpretation",
+      "provenance": "REAL -> DERIVED"
+    },
+    {
+      "researchData": "priority/drivers/impacts/actions",
+      "existingObject": "Risk Event Detail Enrichment (Appendix G)",
+      "existingField": "priorityReason, drivers, impacts, recommendedActions",
+      "mappingMethod": "derived from evidence and workflow rules",
+      "provenance": "DERIVED"
+    },
+    {
+      "researchData": "field verification",
+      "existingObject": "Field Verification Task (Appendix H)",
+      "existingField": "id, riskEventId, status, priority, locationId, assignedUserId, dueAt, crop, farmerGroup, checklist, seedObservation",
+      "mappingMethod": "existing workflow; officer observation remains runtime",
+      "provenance": "RUNTIME_STATE"
+    },
+    {
+      "researchData": "crop exposure",
+      "existingObject": "Province-month risk / Area Profile",
+      "existingField": "mainCropExposure, agriculturalAreaExposedRai, highRiskAreaRai",
+      "mappingMethod": "do not overwrite synthetic province values with incompatible OAE aggregates; ingest source-scoped REAL exposure first",
+      "provenance": "REAL / DERIVED"
+    },
+    {
+      "researchData": "source registry",
+      "existingObject": "Data & Model Registry (Appendix N)",
+      "existingField": "id, name, family, status, coverage, freshness, version, limitations, provenance",
+      "mappingMethod": "direct registry extension",
+      "provenance": "REAL"
+    },
+    {
+      "researchData": "pest/disease surveillance",
+      "existingObject": "Agricultural Risk Event + Enrichment",
+      "existingField": "hazard, sourceContext, drivers, evidence, auditTrail",
+      "mappingMethod": "REAL evidence; event risk DERIVED; diagnosis text must match official status",
+      "provenance": "REAL -> DERIVED"
+    },
+    {
+      "researchData": "land suitability S1/S2/S3/N",
+      "existingObject": "Area Risk Profile / Evidence layer",
+      "existingField": "no exact scalar field verified",
+      "mappingMethod": "context/evidence only; never map directly to risk severity",
+      "provenance": "REAL"
+    }
+  ],
+  "proposedSchemaExtensions": [
+    {
+      "fieldName": "provinceCode",
+      "type": "string(2)",
+      "parentObject": "Location",
+      "description": "DOPA/TIS province code",
+      "source": "DOPA/GISTDA",
+      "whyRequired": "deterministic cross-agency joins"
+    },
+    {
+      "fieldName": "districtCode",
+      "type": "string(4)",
+      "parentObject": "Location",
+      "description": "DOPA/TIS district code",
+      "source": "DOPA/GISTDA",
+      "whyRequired": "deterministic district joins"
+    },
+    {
+      "fieldName": "subdistrictCode",
+      "type": "string(6)",
+      "parentObject": "Location",
+      "description": "DOPA/TIS subdistrict code",
+      "source": "SIL-TH DOPA/TIS + GISTDA crosswalk",
+      "whyRequired": "deterministic tambon joins"
+    },
+    {
+      "fieldName": "routingSlug",
+      "type": "string",
+      "parentObject": "Location",
+      "description": "Routing/display only, never data join key",
+      "source": "DERIVED implementation",
+      "whyRequired": "district/subdistrict URL routes"
+    },
+    {
+      "fieldName": "geometryRef",
+      "type": "object",
+      "parentObject": "Location",
+      "description": "sourceId, layerId, source keys, CRS",
+      "source": "GISTDA",
+      "whyRequired": "GIS integration without duplicating polygons in every record"
+    },
+    {
+      "fieldName": "accessClassification",
+      "type": "enum",
+      "parentObject": "Data & Model Registry",
+      "description": "PUBLIC_LIVE_API | PUBLIC_DOWNLOAD | TOKEN_REQUIRED | UI_ONLY | DOCUMENTED_STANDARD_NOT_CONFIRMED_PUBLIC_ENDPOINT | UNKNOWN",
+      "source": "research audit",
+      "whyRequired": "implementation-ready source governance"
+    },
+    {
+      "fieldName": "sourceUrl",
+      "type": "url",
+      "parentObject": "Data & Model Registry",
+      "description": "canonical source URL",
+      "source": "research audit",
+      "whyRequired": "traceability"
+    },
+    {
+      "fieldName": "evidenceUrl",
+      "type": "url",
+      "parentObject": "Data & Model Registry",
+      "description": "supporting evidence URL",
+      "source": "research audit",
+      "whyRequired": "traceability"
+    },
+    {
+      "fieldName": "spatialGranularity",
+      "type": "string/enum",
+      "parentObject": "Data & Model Registry",
+      "description": "province/district/subdistrict/station/grid/parcel etc.",
+      "source": "research audit",
+      "whyRequired": "prevent false downscaling"
+    },
+    {
+      "fieldName": "temporalGranularity",
+      "type": "string/enum",
+      "parentObject": "Data & Model Registry",
+      "description": "sub-daily/daily/weekly/monthly/seasonal/reference",
+      "source": "research audit",
+      "whyRequired": "temporal integrity"
+    },
+    {
+      "fieldName": "observationPeriod",
+      "type": "date-range/string",
+      "parentObject": "Evidence item",
+      "description": "period actually observed",
+      "source": "source record",
+      "whyRequired": "observed-vs-forecast separation"
+    },
+    {
+      "fieldName": "asOfDate",
+      "type": "date/datetime",
+      "parentObject": "Evidence item",
+      "description": "freshness/as-of date",
+      "source": "source record",
+      "whyRequired": "operational truth"
+    },
+    {
+      "fieldName": "forecastIssuedAt",
+      "type": "date/datetime",
+      "parentObject": "Evidence item",
+      "description": "forecast issue timestamp",
+      "source": "forecast source",
+      "whyRequired": "forecast provenance"
+    },
+    {
+      "fieldName": "forecastValidFrom",
+      "type": "date/datetime",
+      "parentObject": "Evidence item",
+      "description": "forecast validity start",
+      "source": "forecast source",
+      "whyRequired": "forecast semantics"
+    },
+    {
+      "fieldName": "forecastValidTo",
+      "type": "date/datetime",
+      "parentObject": "Evidence item",
+      "description": "forecast validity end",
+      "source": "forecast source",
+      "whyRequired": "forecast semantics"
+    },
+    {
+      "fieldName": "evidenceItems",
+      "type": "array<object>",
+      "parentObject": "Risk Event Detail Enrichment",
+      "description": "Normalized source-scoped evidence preserving raw value/unit/geography/time/source/provenance",
+      "source": "multiple",
+      "whyRequired": "Existing demo scalar evidence cannot safely hold heterogeneous REAL source values"
+    },
+    {
+      "fieldName": "deepDemoSeeded",
+      "type": "boolean",
+      "parentObject": "Location",
+      "description": "True only for district/subdistrict nodes included in the Nakhon Ratchasima source-backed deep-demo subset.",
+      "source": "DERIVED implementation metadata",
+      "whyRequired": "allows UI to distinguish complete admin coverage from deeper evidence coverage"
+    },
+    {
+      "fieldName": "localEvidenceRefs",
+      "type": "array<string>",
+      "parentObject": "Location",
+      "description": "Evidence record IDs available for this seeded local node.",
+      "source": "bundle evidence registry",
+      "whyRequired": "direct local profile/evidence navigation without inventing values"
+    }
+  ]
+}

@@ -1,0 +1,280 @@
+{
+  "meta": {
+    "id": "NAKHON-RATCHASIMA-LOCAL-SUBSET-V1",
+    "parentProvinceId": "TH-P29",
+    "parentProvinceCode": "30",
+    "parentProvinceNameTh": "นครราชสีมา",
+    "subsetType": "SEEDED_DEEP_DEMO_SUBSET",
+    "generatedAt": "2026-08-27",
+    "purpose": "Provide source-backed local drill-down examples inside Nakhon Ratchasima without pretending all 289 subdistricts have equal evidence depth.",
+    "districtsSeeded": 8,
+    "subdistrictsSeeded": 11,
+    "rules": [
+      "This is a subset of TH-P29, never a sibling province or separate dataset namespace.",
+      "Administrative hierarchy remains complete at 32 districts / 289 subdistricts.",
+      "Only listed areas are deep-demo seeded with local REAL evidence or verified source capability.",
+      "REAL_LOCAL_EVIDENCE means a concrete public source record names or resolves to that local area.",
+      "REAL_SOURCE_CAPABILITY means a local source/station/geometry is verified but no current hazard is asserted.",
+      "Province/regional evidence may appear as inherited context, but must keep its original geographic scope.",
+      "No data must render as insufficient/not seeded, never Normal/green."
+    ]
+  },
+  "provinceContextEvidence": [
+    {
+      "evidenceRef": "EVID-NAKHON-RATCHASIMA-WATER-20260623",
+      "coverageClass": "REAL_PROVINCE_CONTEXT",
+      "topic": "Water availability / drought context",
+      "recommendedDemoUse": "Province context inherited by local pages as context only; never copy 35% storage to each subdistrict."
+    },
+    {
+      "evidenceRef": "EVID-DDPM-20260806",
+      "coverageClass": "REAL_PROVINCE_FORECAST_WARNING",
+      "topic": "Flash-flood / heavy-rain watch",
+      "recommendedDemoUse": "Province watch banner/context for 6–9 Aug 2026; not an observed local flood."
+    },
+    {
+      "evidenceRef": "EVID-TMD-202608",
+      "coverageClass": "REAL_REGIONAL_FORECAST_CONTEXT",
+      "topic": "August weather forecast context",
+      "recommendedDemoUse": "Regional meteorological context on all Nakhon Ratchasima local pages, clearly marked as regional."
+    },
+    {
+      "evidenceRef": "EVID-TMD-202609",
+      "coverageClass": "REAL_REGIONAL_FORECAST_CONTEXT",
+      "topic": "September forecast context",
+      "recommendedDemoUse": "Forward-looking regional context only."
+    },
+    {
+      "evidenceRef": "EVID-TMD-202610",
+      "coverageClass": "REAL_FORECAST_HORIZON_CONTEXT",
+      "topic": "October seasonal transition",
+      "recommendedDemoUse": "Supports selectable Oct horizon, not local numeric probabilities."
+    }
+  ],
+  "districts": [
+    {
+      "districtCode": "3025",
+      "districtId": "TH-P29-D25",
+      "districtTh": "วังน้ำเขียว",
+      "districtEn": "Wang Nam Khiao",
+      "subdistricts": [
+        {
+          "subdistrictCode": "302504",
+          "locationId": "TH-P29-D25-T04",
+          "subdistrictTh": "อุดมทรัพย์",
+          "coverageClass": "REAL_LOCAL_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DWR-20250510-01",
+            "EVID-DWR-20250510-04",
+            "EVID-DWR-20250510-06"
+          ],
+          "sourceCapabilities": [
+            "DWR EWS station evidence",
+            "GISTDA administrative polygon",
+            "GISTDA drought/flood capability",
+            "TMD regional context"
+          ],
+          "recommendedDemoUse": "Historical flash-flood/heavy-rain evidence + hydrology drill-down"
+        },
+        {
+          "subdistrictCode": "302502",
+          "locationId": "TH-P29-D25-T02",
+          "subdistrictTh": "วังหมี",
+          "coverageClass": "REAL_SOURCE_CAPABILITY",
+          "evidenceRefs": [],
+          "sourceCapabilities": [
+            "DWR EWS station coverage verified",
+            "GISTDA administrative polygon",
+            "GISTDA drought/flood capability"
+          ],
+          "recommendedDemoUse": "Station/source-availability example; do not invent an event"
+        }
+      ]
+    },
+    {
+      "districtCode": "3013",
+      "districtId": "TH-P29-D13",
+      "districtTh": "ประทาย",
+      "districtEn": "Prathai",
+      "subdistricts": [
+        {
+          "subdistrictCode": "301306",
+          "locationId": "TH-P29-D13-T06",
+          "subdistrictTh": "ตลาดไทร",
+          "coverageClass": "REAL_LOCAL_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DWR-20250510-08"
+          ],
+          "sourceCapabilities": [
+            "DWR EWS warning evidence",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Historical heavy-rain station evidence"
+        }
+      ]
+    },
+    {
+      "districtCode": "3002",
+      "districtId": "TH-P29-D02",
+      "districtTh": "ครบุรี",
+      "districtEn": "Khon Buri",
+      "subdistricts": [
+        {
+          "subdistrictCode": "300202",
+          "locationId": "TH-P29-D02-T02",
+          "subdistrictTh": "เฉลียง",
+          "coverageClass": "REAL_LOCAL_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DWR-20250510-02"
+          ],
+          "sourceCapabilities": [
+            "DWR EWS water-level warning evidence",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Historical high-water/flood trigger evidence"
+        }
+      ]
+    },
+    {
+      "districtCode": "3014",
+      "districtId": "TH-P29-D14",
+      "districtTh": "ปักธงชัย",
+      "districtEn": "Pak Thong Chai",
+      "subdistricts": [
+        {
+          "subdistrictCode": "301420",
+          "locationId": "TH-P29-D14-T20",
+          "subdistrictTh": "บ่อปลาทอง",
+          "coverageClass": "REAL_LOCAL_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DWR-20250510-03"
+          ],
+          "sourceCapabilities": [
+            "DWR EWS rainfall warning evidence",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Historical heavy-rain station evidence"
+        }
+      ]
+    },
+    {
+      "districtCode": "3006",
+      "districtId": "TH-P29-D06",
+      "districtTh": "จักราช",
+      "districtEn": "Chakkarat",
+      "subdistricts": [
+        {
+          "subdistrictCode": "300601",
+          "locationId": "TH-P29-D06-T01",
+          "subdistrictTh": "จักราช",
+          "coverageClass": "REAL_LOCAL_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DWR-20250510-05"
+          ],
+          "sourceCapabilities": [
+            "DWR EWS rainfall warning evidence",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Historical heavy-rain station evidence"
+        }
+      ]
+    },
+    {
+      "districtCode": "3020",
+      "districtId": "TH-P29-D20",
+      "districtTh": "สีคิ้ว",
+      "districtEn": "Sikhio",
+      "subdistricts": [
+        {
+          "subdistrictCode": "302005",
+          "locationId": "TH-P29-D20-T05",
+          "subdistrictTh": "หนองหญ้าขาว",
+          "coverageClass": "REAL_LOCAL_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DWR-20250510-07"
+          ],
+          "sourceCapabilities": [
+            "DWR EWS rainfall warning evidence",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Historical heavy-rain station evidence"
+        },
+        {
+          "subdistrictCode": "302010",
+          "locationId": "TH-P29-D20-T10",
+          "subdistrictTh": "คลองไผ่",
+          "coverageClass": "REAL_SOURCE_CAPABILITY",
+          "evidenceRefs": [],
+          "sourceCapabilities": [
+            "DWR EWS station STN0549 coverage verified",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Local station/source-availability example"
+        }
+      ]
+    },
+    {
+      "districtCode": "3021",
+      "districtId": "TH-P29-D21",
+      "districtTh": "ปากช่อง",
+      "districtEn": "Pak Chong",
+      "subdistricts": [
+        {
+          "subdistrictCode": "302101",
+          "locationId": "TH-P29-D21-T01",
+          "subdistrictTh": "ปากช่อง",
+          "coverageClass": "REAL_SOURCE_CAPABILITY",
+          "evidenceRefs": [],
+          "sourceCapabilities": [
+            "DWR EWS STN1475/STN1476 station coverage",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Operational station context without fabricating current hazard"
+        },
+        {
+          "subdistrictCode": "302108",
+          "locationId": "TH-P29-D21-T08",
+          "subdistrictTh": "โป่งตาลอง",
+          "coverageClass": "REAL_SOURCE_CAPABILITY",
+          "evidenceRefs": [],
+          "sourceCapabilities": [
+            "DWR EWS STN1477 station coverage",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Operational station context without fabricating current hazard"
+        },
+        {
+          "subdistrictCode": "302112",
+          "locationId": "TH-P29-D21-T12",
+          "subdistrictTh": "พญาเย็น",
+          "coverageClass": "REAL_SOURCE_CAPABILITY",
+          "evidenceRefs": [],
+          "sourceCapabilities": [
+            "DWR EWS STN1478/STN1479 station coverage",
+            "GISTDA administrative polygon"
+          ],
+          "recommendedDemoUse": "Operational station context without fabricating current hazard"
+        }
+      ]
+    },
+    {
+      "districtCode": "3003",
+      "districtId": "TH-P29-D03",
+      "districtTh": "เสิงสาง",
+      "districtEn": "Soeng Sang",
+      "districtOnlyEvidence": [
+        {
+          "coverageClass": "REAL_DISTRICT_EVIDENCE",
+          "evidenceRefs": [
+            "EVID-DOAE-20260820-SOENGSANG"
+          ],
+          "hazard": "Pest / Disease / Crop Health",
+          "crop": "Banana",
+          "status": "Monitoring / Investigation",
+          "recommendedDemoUse": "Current Aug-2026 district-level crop-health surveillance; do not invent tambon or diagnosis"
+        }
+      ],
+      "subdistricts": []
+    }
+  ]
+}

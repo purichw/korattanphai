@@ -1,0 +1,73 @@
+[
+  {
+    "crop": "Rice",
+    "augustCondition": "Watch",
+    "stageSummary": "Vegetative to tillering in seeded demo areas",
+    "provincePresenceRule": "Use province-month records where mainCropExposure == Rice as the synthetic crop-presence proxy.",
+    "activeEventIds": [
+      "ARE-2026-0825-N",
+      "ARE-2026-0825-NE",
+      "ARE-2026-0901-C"
+    ],
+    "seasonalOutlook": "Mixed: localized flood/excess-water risk and localized water-management stress can coexist.",
+    "topActions": [
+      "Check field water status",
+      "Prioritize drainage or supplementary irrigation according to local condition",
+      "Follow crop-stage-specific advice"
+    ]
+  },
+  {
+    "crop": "Cassava",
+    "augustCondition": "Favourable / Watch by location",
+    "stageSummary": "Mixed production stages",
+    "provincePresenceRule": "Use province-month records where mainCropExposure == Cassava.",
+    "activeEventIds": [],
+    "seasonalOutlook": "Use province risk context; no dedicated cassava event is seeded.",
+    "topActions": [
+      "Monitor waterlogging in heavy-rain areas",
+      "Monitor moisture stress in uneven-rainfall areas"
+    ]
+  },
+  {
+    "crop": "Sugarcane",
+    "augustCondition": "Watch",
+    "stageSummary": "Grand growth in seeded western scenario",
+    "provincePresenceRule": "Use province-month records where mainCropExposure == Sugarcane.",
+    "activeEventIds": [
+      "ARE-2026-0901-W"
+    ],
+    "seasonalOutlook": "Heavy rain may affect access/logistics in selected western areas.",
+    "topActions": [
+      "Plan field access",
+      "Monitor drainage",
+      "Adjust logistics around heavy-rain periods"
+    ]
+  },
+  {
+    "crop": "Maize",
+    "augustCondition": "Favourable / Watch by location",
+    "stageSummary": "Mixed",
+    "provincePresenceRule": "Use province-month records where mainCropExposure == Maize.",
+    "activeEventIds": [],
+    "seasonalOutlook": "Use province risk context; no dedicated maize event is seeded.",
+    "topActions": [
+      "Monitor rainfall distribution and soil moisture",
+      "Inspect lodging after storms"
+    ]
+  },
+  {
+    "crop": "Durian",
+    "augustCondition": "Watch",
+    "stageSummary": "Harvest / post-harvest in seeded eastern scenario",
+    "provincePresenceRule": "Use province-month records where mainCropExposure == Durian where present; otherwise use seeded eastern event only.",
+    "activeEventIds": [
+      "ARE-2026-0825-E"
+    ],
+    "seasonalOutlook": "Wind/heavy-rain disruption risk in selected orchard areas.",
+    "topActions": [
+      "Secure vulnerable orchard infrastructure",
+      "Adjust harvest timing when practical",
+      "Inspect damage after strong-wind events"
+    ]
+  }
+]

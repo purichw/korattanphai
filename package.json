@@ -1,0 +1,37 @@
+{
+  "name": "korattanphai",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/run-vite.mjs dev --host 127.0.0.1",
+    "dev:e2e": "node scripts/run-vite.mjs dev --host 127.0.0.1 --port 5173 --strictPort",
+    "build": "tsc -b && vite build",
+    "build:protected": "npm run build && node scripts/protect-build.mjs && node scripts/check-production-exposure.mjs",
+    "check:exposure": "node scripts/check-production-exposure.mjs",
+    "preview": "node scripts/run-vite.mjs preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:e2e": "node scripts/run-playwright.mjs",
+    "test:e2e:attached": "node scripts/run-playwright.mjs --attached",
+    "test:e2e:managed": "node scripts/run-playwright.mjs --managed"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "javascript-obfuscator": "^5.6.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.3",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  }
+}

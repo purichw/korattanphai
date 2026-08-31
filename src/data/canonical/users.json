@@ -1,0 +1,58 @@
+[
+  {
+    "id": "u-national",
+    "username": "national.demo",
+    "name": "Narin K.",
+    "role": "National Agricultural Officer",
+    "scope": "Thailand"
+  },
+  {
+    "id": "u-province",
+    "username": "province.demo",
+    "name": "Pimchanok S.",
+    "role": "Provincial Agricultural Officer",
+    "scope": "Selected province via demo switcher"
+  },
+  {
+    "id": "u-district",
+    "username": "district.demo",
+    "name": "Kittipong W.",
+    "role": "District Agricultural Officer",
+    "scope": "Selected demo district"
+  },
+  {
+    "id": "u-extension",
+    "username": "extension.demo",
+    "name": "Siriporn K.",
+    "role": "Agricultural Extension Officer",
+    "scope": "Selected field-verification cluster"
+  },
+  {
+    "id": "u-analyst",
+    "username": "analyst.demo",
+    "name": "Arthit P.",
+    "role": "Agricultural / Climate Analyst",
+    "scope": "Thailand"
+  },
+  {
+    "id": "u-water",
+    "username": "water.demo",
+    "name": "Wichai S.",
+    "role": "Water / Irrigation Authority",
+    "scope": "Thailand / selected basin"
+  },
+  {
+    "id": "u-supervisor",
+    "username": "supervisor.demo",
+    "name": "Supansa N.",
+    "role": "Supervisor / Approver",
+    "scope": "National / selected jurisdiction"
+  },
+  {
+    "id": "u-farmer",
+    "username": "farmer.demo",
+    "name": "Somchai D.",
+    "role": "Farmer",
+    "scope": "Demo Rice Farm"
+  }
+]

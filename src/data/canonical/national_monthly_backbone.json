@@ -1,0 +1,72 @@
+[
+  {
+    "month": "2026-06",
+    "label": "June 2026",
+    "mode": "Observed / historical context",
+    "sourceType": "Official observed monthly summary",
+    "source": "Thai Meteorological Department",
+    "sourceUrl": "https://www.tmd.go.th/climate/summarymonthly/062026",
+    "nationalContext": [
+      "National mean rainfall was 8% below normal.",
+      "National mean temperature was 0.4°C above normal.",
+      "Rainfall distribution was uneven across the month and regions."
+    ],
+    "prototypeUse": "Use as retrospective context for agricultural water stress, delayed planting, and uneven rainfall. Local event scores are synthetic."
+  },
+  {
+    "month": "2026-07",
+    "label": "July 2026",
+    "mode": "Observed / historical context",
+    "sourceType": "Official observed monthly summary",
+    "source": "Thai Meteorological Department",
+    "sourceUrl": "https://www.tmd.go.th/climate/summarymonthly/072026",
+    "nationalContext": [
+      "National mean rainfall was 8% above normal.",
+      "National mean temperature was 0.2°C above normal.",
+      "Heavy rain affected parts of the North, Northeast and East at times, while rainfall decreased during part of mid-month."
+    ],
+    "prototypeUse": "Demonstrate simultaneous flood/excess-rainfall risk and intermittent dry-spell risk. Local event scores are synthetic."
+  },
+  {
+    "month": "2026-08",
+    "label": "August 2026",
+    "mode": "Current operational month",
+    "sourceType": "Official monthly/agricultural outlook + short-range agromet updates",
+    "source": "Thai Meteorological Department",
+    "sourceUrl": "https://www.tmd.go.th/forecast/monthly/082026",
+    "nationalContext": [
+      "Widespread rain expected, with heavy to very heavy rain in some areas.",
+      "Flash-flood, runoff and river-overflow risk is relevant in vulnerable areas.",
+      "Monthly national rainfall can still be below normal in much of Thailand despite periods of intense rain."
+    ],
+    "prototypeUse": "Default month. Mix current monitoring, 7-day forecast, active field verification and advisory workflows."
+  },
+  {
+    "month": "2026-09",
+    "label": "September 2026",
+    "mode": "Forecast / outlook",
+    "sourceType": "Official monthly forecast",
+    "source": "Thai Meteorological Department",
+    "sourceUrl": "https://www.tmd.go.th/forecast/monthly",
+    "nationalContext": [
+      "Thailand is forecast to remain rainy, with thunderstorm coverage commonly 60–80% of area.",
+      "Heavy to very heavy rain is possible in some areas.",
+      "Flash floods, forest runoff and river overflow are key hazards."
+    ],
+    "prototypeUse": "Show a forward-looking national risk outlook dominated by water-related hazards in vulnerable locations, while still allowing other agricultural risks."
+  },
+  {
+    "month": "2026-10",
+    "label": "October 2026",
+    "mode": "Forecast / outlook",
+    "sourceType": "Official 3-month + agrometeorological forecast horizon",
+    "source": "Thai Meteorological Department",
+    "sourceUrl": "https://tmd.go.th/forecast/threemonthcontentcountry/082026-102026",
+    "supportingUrl": "https://www.tmd.go.th/forecast/agromet/quater/04082026",
+    "nationalContext": [
+      "TMD has published an August–October 2026 three-month forecast and an August–October 2026 agricultural-meteorology outlook.",
+      "Upper Thailand remains within the rainy-season transition through around mid-October, while seasonal timing differs in the South."
+    ],
+    "prototypeUse": "Allow October forecast exploration. Keep local province/district risk classifications synthetic unless a specific official local source is integrated."
+  }
+]

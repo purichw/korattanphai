@@ -1,0 +1,504 @@
+{
+  "meta": {
+    "sourceId": "SRC-OPSMOAC-NAKHON-RATCHASIMA-SITUATION",
+    "sourceAgency": "สำนักงานเกษตรและสหกรณ์ จังหวัดนครราชสีมา",
+    "sourceUrl": "https://www.opsmoac.go.th/nakhonratchasima-news-situation",
+    "capturedAt": "2026-08-28",
+    "canonicalPeriodStart": "2025-01",
+    "canonicalPeriodEnd": "2026-10",
+    "canonicalMonthCount": 22,
+    "firstIndexVisibleRows": 36,
+    "firstIndexTotalRows": 335,
+    "indexedMonthlyReportCount": 18,
+    "linkedAttachmentMonthCount": 12,
+    "relatedWarningOnlyMonths": [
+      "2025-04"
+    ],
+    "currentAndForecastMonths": [
+      "2026-08",
+      "2026-09",
+      "2026-10"
+    ],
+    "scopeRule": "OPSMOAC monthly posts are province-level report index evidence. They support prediction validation/readiness only after detail parsing and geographic/crop normalization; they do not create district/subdistrict risk scores by themselves."
+  },
+  "months": [
+    {
+      "month": "2025-01",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือนมกราคม 2568",
+      "published_date": "2025-01-31",
+      "published_date_th": "31 ม.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471891791046",
+      "index_view_count": 237,
+      "linked_attachment_count": 31,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471891791891",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471891791892"
+      ],
+      "sample_file_sizes": [
+        "499.2 KB",
+        "2.64 MB",
+        "2.59 MB"
+      ],
+      "sample_daily_labels": [
+        "31 ม.ค. 25",
+        "1 มกราคม 2568",
+        "2 มกราคม 2568",
+        "3 มกราคม 2568"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-02",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน กุมภาพันธ์ 2568",
+      "published_date": "2025-02-27",
+      "published_date_th": "27 ก.พ. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471991791958",
+      "index_view_count": 409,
+      "linked_attachment_count": 27,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471991791854",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471991791855"
+      ],
+      "sample_file_sizes": [
+        "488.01 KB",
+        "475.36 KB",
+        "2.7 MB"
+      ],
+      "sample_daily_labels": [
+        "27 ก.พ. 25",
+        "1 กุมภาพันธ์ 2568",
+        "2 กุมภาพันธ์ 2568",
+        "3 กุมภาพันธ์ 2568"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-03",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน มีนาคม 2568",
+      "published_date": "2025-03-06",
+      "published_date_th": "6 มี.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471091791888",
+      "index_view_count": 201,
+      "linked_attachment_count": 6,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471091791829",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471091791830"
+      ],
+      "sample_file_sizes": [
+        "2.17 MB",
+        "2.17 MB",
+        "2.19 MB"
+      ],
+      "sample_daily_labels": [
+        "6 มี.ค. 25",
+        "1 มีนาคม 2568",
+        "2 มีนาคม 2568",
+        "3 มีนาคม 2568"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-04",
+      "temporal_semantics": "OBSERVED_RELATED_WARNING_INDEX",
+      "report_status": "RELATED_WARNING_ONLY_ON_FIRST_INDEX_PAGE",
+      "related_title": "พายุฤดูร้อนบริเวณประเทศไทยตอนบน (มีผลกระทบจนถึงวันที่ 1 พฤษภาคม 2568)",
+      "published_date": "2025-04-30",
+      "published_date_th": "30 เม.ย. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471191792273",
+      "index_view_count": 141,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [],
+      "prediction_use": "event_signal_only_not_monthly_training_row",
+      "ui_rule": "มีโพสต์เตือนภัยที่เกี่ยวข้อง แต่ไม่แทนรายงานรายเดือนและห้ามอนุมานผลกระทบรายตำบล"
+    },
+    {
+      "month": "2025-05",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน พฤษภาคม 2568",
+      "published_date": "2025-05-01",
+      "published_date_th": "1 พ.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471291791805",
+      "index_view_count": 250,
+      "linked_attachment_count": 23,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471291791794",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471291791816"
+      ],
+      "sample_file_sizes": [
+        "1.95 MB",
+        "2.43 MB",
+        "269.51 KB"
+      ],
+      "sample_daily_labels": [
+        "1 พ.ค. 25",
+        "1 พ.ค. 68",
+        "2 พ.ค.68",
+        "3 พ.ค. 68"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-06",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน มิถุนายน 2568",
+      "published_date": "2025-06-30",
+      "published_date_th": "30 มิ.ย. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471391792059",
+      "index_view_count": 167,
+      "linked_attachment_count": 11,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471391791240",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471391791241"
+      ],
+      "sample_file_sizes": [
+        "239.55 KB",
+        "229.51 KB",
+        "230.05 KB"
+      ],
+      "sample_daily_labels": [
+        "30 มิ.ย. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-07",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน กรกฎาคม 2568",
+      "published_date": "2025-07-31",
+      "published_date_th": "31 ก.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471491792067",
+      "index_view_count": 146,
+      "linked_attachment_count": 11,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471491791172",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471491791173"
+      ],
+      "sample_file_sizes": [
+        "372.9 KB",
+        "634.56 KB",
+        "758.39 KB"
+      ],
+      "sample_daily_labels": [
+        "31 ก.ค. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-08",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน สิงหาคม 2568",
+      "published_date": "2025-08-08",
+      "published_date_th": "8 ส.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471591791165",
+      "index_view_count": 146,
+      "linked_attachment_count": 6,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471591791910",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-471591791902"
+      ],
+      "sample_file_sizes": [
+        "1.55 MB",
+        "347.71 KB",
+        "362.84 KB"
+      ],
+      "sample_daily_labels": [
+        "8 ส.ค. 25",
+        "8 สิงหาคม 2568",
+        "1 สิงหาคม 2568",
+        "5 สิงหาคม 2568"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-09",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน กันยายน 2568",
+      "published_date": "2025-09-10",
+      "published_date_th": "10 ก.ย. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-471691791300",
+      "index_view_count": 113,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [
+        "10 ก.ย. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-10",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน ตุลาคม 2568",
+      "published_date": "2025-10-31",
+      "published_date_th": "31 ต.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-472791792205",
+      "index_view_count": 102,
+      "linked_attachment_count": 16,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-472791791273",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-472791791274"
+      ],
+      "sample_file_sizes": [
+        "640.19 KB",
+        "645.16 KB",
+        "635.15 KB"
+      ],
+      "sample_daily_labels": [
+        "31 ต.ค. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-11",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน พฤศจิกายน 2568",
+      "published_date": "2025-11-28",
+      "published_date_th": "28 พ.ย. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-472891792112",
+      "index_view_count": 80,
+      "linked_attachment_count": 19,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-472891791263",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-472891791264"
+      ],
+      "sample_file_sizes": [
+        "1.77 MB",
+        "1.76 MB",
+        "1.62 MB"
+      ],
+      "sample_daily_labels": [
+        "28 พ.ย. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2025-12",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน ธันวาคม 2568",
+      "published_date": "2025-12-01",
+      "published_date_th": "1 ธ.ค. 2568",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-472991791865",
+      "index_view_count": 317,
+      "linked_attachment_count": 23,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-472991791813",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-472991791836"
+      ],
+      "sample_file_sizes": [
+        "1.65 MB",
+        "1.64 MB",
+        "1.64 MB"
+      ],
+      "sample_daily_labels": [
+        "1 ธ.ค. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-01",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน มกราคม 2569",
+      "published_date": "2026-01-07",
+      "published_date_th": "7 ม.ค. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481891791977",
+      "index_view_count": 103,
+      "linked_attachment_count": 9,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-481891791845",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-481891791846"
+      ],
+      "sample_file_sizes": [
+        "1.72 MB",
+        "1.65 MB",
+        "1.63 MB"
+      ],
+      "sample_daily_labels": [
+        "7 ม.ค. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-02",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน กุมภาพันธ์ 2569",
+      "published_date": "2026-02-16",
+      "published_date_th": "16 ก.พ. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481991791520",
+      "index_view_count": 82,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [
+        "16 ก.พ. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-03",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน มีนาคม 2569",
+      "published_date": "2026-03-30",
+      "published_date_th": "30 มี.ค. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481091792296",
+      "index_view_count": 70,
+      "linked_attachment_count": 20,
+      "sample_file_urls": [
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-481091791190",
+        "https://www.opsmoac.go.th/nakhonratchasima-warning-files-481091791191"
+      ],
+      "sample_file_sizes": [
+        "938.94 KB",
+        "935.21 KB",
+        "954.78 KB"
+      ],
+      "sample_daily_labels": [
+        "30 มี.ค. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-04",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน เมษายน 2569",
+      "published_date": "2026-04-01",
+      "published_date_th": "1 เม.ย. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481191791829",
+      "index_view_count": 75,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [
+        "1 เม.ย. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-05",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน พฤษภาคม 2569",
+      "published_date": "2026-05-05",
+      "published_date_th": "5 พ.ค. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481291791896",
+      "index_view_count": 55,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [
+        "5 พ.ค. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-06",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน มิถุนายน 2569",
+      "published_date": "2026-06-30",
+      "published_date_th": "30 มิ.ย. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481391792171",
+      "index_view_count": 35,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [
+        "30 มิ.ย. 25"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-07",
+      "temporal_semantics": "OBSERVED_REPORT_INDEX",
+      "report_status": "MONTHLY_REPORT_INDEXED",
+      "report_title": "ศูนย์ติดตามและแก้ไขปัญหาภัยพิบัติด้านการเกษตรจังหวัดนครราชสีมา ประจำเดือน กรกฎาคม 2569",
+      "published_date": "2026-07-24",
+      "published_date_th": "24 ก.ค. 2569",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-warning-preview-481491792881",
+      "index_view_count": 21,
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [
+        "24 ก.ค. 25",
+        "1 กรกฎาคม 2569",
+        "2 กรกฎาคม 2569",
+        "3 กรกฎาคม 2569"
+      ],
+      "prediction_use": "province_monthly_evidence_for_validation_after_detail_parse",
+      "ui_rule": "ใช้เป็นหลักฐานรายเดือนระดับจังหวัดได้ แต่ห้ามแจกคะแนนอำเภอ/ตำบล/พืช/ไร่ก่อน parse รายละเอียดและ geocode แล้ว"
+    },
+    {
+      "month": "2026-08",
+      "temporal_semantics": "CURRENT_OPERATIONAL_MONTH",
+      "report_status": "CURRENT_MONTH_AWAITING_OFFICIAL_REPORT_PARSE",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-news-situation",
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [],
+      "prediction_use": "current_forecast_target_with_no_observed_monthly_report_yet",
+      "ui_rule": "เดือนปฏิบัติการปัจจุบันใช้กับการคาดการณ์และการขอข้อมูลเพิ่ม ไม่ใช่ observed impact row"
+    },
+    {
+      "month": "2026-09",
+      "temporal_semantics": "FORECAST_OUTLOOK",
+      "report_status": "FORECAST_HORIZON_NO_OBSERVED_REPORT",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-news-situation",
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [],
+      "prediction_use": "forecast_target_no_observed_report",
+      "ui_rule": "ใช้เป็น horizon คาดการณ์เท่านั้น ห้ามแสดงเหมือนรายงานที่เกิดแล้ว"
+    },
+    {
+      "month": "2026-10",
+      "temporal_semantics": "FORECAST_OUTLOOK",
+      "report_status": "FORECAST_HORIZON_NO_OBSERVED_REPORT",
+      "source_url": "https://www.opsmoac.go.th/nakhonratchasima-news-situation",
+      "linked_attachment_count": 0,
+      "sample_file_urls": [],
+      "sample_file_sizes": [],
+      "sample_daily_labels": [],
+      "prediction_use": "forecast_target_no_observed_report",
+      "ui_rule": "ใช้เป็น horizon คาดการณ์เท่านั้น ห้ามแสดงเหมือนรายงานที่เกิดแล้ว"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+ruleId,domain,sourceCondition,normalizedAction,status
+R001,geography,"Never join website data on Thai name, English name, URL slug, or workbook ID.",Join only after Area_Crosswalk has assigned provinceCode/districtCode/subdistrictCode.,applied
+R002,area_crosswalk,"Workbook ID is a source research identifier, not an official administrative code.",Store as sourceResearchId and use canonical subdistrictCode for website joins.,applied
+R003,area_crosswalk,"Source row ID 222 labels Nong Rawiang under Mueang Nakhon Ratchasima, creating one extra area there and one missing Phimai area.",Correct sourceAmphoeEnCorrected to Phimai and map to subdistrictCode 301512.,applied_with_attention_flag
+R004,area_crosswalk,Geodata English labels can be inconsistent with Thai/admin-code evidence.,Override only specific English labels where Thai name and admin code prove the intended area.,applied_with_attention_flag
+R005,irrigation,Source value Irragation is a spelling typo.,Normalize to Irrigation; retain original Irragation in raw sheets and source field.,applied_with_attention_flag
+R006,rainfall,Rainfall duplicate keys have identical Best_Station_Rainfall values in this export.,Keep one normalized monthly record; retain source row numbers and duplicate counts.,applied
+R007,drought,Drought duplicate keys sometimes disagree on Drought_Risk class.,Keep one normalized monthly record using conservative maximum; set droughtRiskConflict=true and retain all raw class values/source rows.,applied_with_attention_flag
+R008,provenance,"This workbook is research/historical evidence, not ThaiWater live operational truth.",Use DERIVED for rainfall/risk values until source/station lineage is confirmed per record.,applied
+R009,precedence,Official ThaiWater operational data prevails if it conflicts with this normalized workbook.,Treat this workbook as historical/model context when ThaiWater live data is present.,applied

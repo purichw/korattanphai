@@ -1,0 +1,523 @@
+{
+  "ARE-2026-0601": {
+    "owner": "National Agricultural Risk Analysis Team",
+    "assignedTeam": "Historical Review",
+    "expectedPeriod": "June 2026",
+    "priorityReason": "Retrospective water-stress signal during a nationally drier-than-normal month.",
+    "locationIds": [
+      "TH"
+    ],
+    "communities": "Selected rain-fed farming communities (prototype)",
+    "irrigationStatus": "Mixed rain-fed and supplementary irrigation",
+    "drivers": [
+      {
+        "label": "National rainfall anomaly",
+        "value": "8% below normal",
+        "provenance": "REAL — TMD June 2026 national summary"
+      },
+      {
+        "label": "Local soil-moisture stress",
+        "value": "Elevated in selected prototype areas",
+        "provenance": "SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Delayed establishment in rain-fed rice areas",
+      "Higher supplementary irrigation demand",
+      "Localized early crop stress where rainfall distribution was poor"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Verify field moisture before planting or irrigation."
+      ],
+      "extension": [
+        "Document areas with delayed establishment."
+      ],
+      "officers": [
+        "Use the event for retrospective seasonal learning."
+      ],
+      "water": [
+        "Review where supplementary irrigation demand increased."
+      ]
+    },
+    "evidence": {
+      "rainfallAnomalyPct": -8,
+      "soilMoistureIndex": 42,
+      "vegetationStressIndex": 38,
+      "temperatureAnomalyC": 0.4,
+      "waterAvailability": "Mixed",
+      "evidenceLabel": "National rainfall/temperature values are REAL; local indices are SYNTHETIC."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-06-30",
+        "action": "Historical event closed",
+        "actor": "National Agricultural Risk Analysis Team"
+      }
+    ]
+  },
+  "ARE-2026-0712": {
+    "owner": "National Agricultural Risk Analysis Team",
+    "assignedTeam": "Flood Impact Review",
+    "expectedPeriod": "July 2026",
+    "priorityReason": "Heavy-rain episodes created localized excess-water risk despite uneven rainfall through the month.",
+    "locationIds": [
+      "TH"
+    ],
+    "communities": "Selected northern, northeastern and eastern farming communities (prototype)",
+    "irrigationStatus": "Mixed",
+    "drivers": [
+      {
+        "label": "National rainfall anomaly",
+        "value": "8% above normal",
+        "provenance": "REAL — TMD July 2026 national summary"
+      },
+      {
+        "label": "Localized flood susceptibility",
+        "value": "High in selected prototype lowlands",
+        "provenance": "SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Waterlogging in low-lying fields",
+      "Crop access disruption",
+      "Localized lodging and nutrient loss"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Keep drainage paths clear in vulnerable fields."
+      ],
+      "extension": [
+        "Record verified waterlogging and access constraints."
+      ],
+      "officers": [
+        "Compare verified impacts against predicted risk."
+      ],
+      "water": [
+        "Track local drainage and river conditions."
+      ]
+    },
+    "evidence": {
+      "rainfallAnomalyPct": 8,
+      "soilMoistureIndex": 76,
+      "vegetationStressIndex": 18,
+      "temperatureAnomalyC": 0.2,
+      "waterAvailability": "High / excess in selected areas",
+      "evidenceLabel": "National rainfall/temperature values are REAL; local indices are SYNTHETIC."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-07-31",
+        "action": "Historical event closed",
+        "actor": "National Agricultural Risk Analysis Team"
+      }
+    ]
+  },
+  "ARE-2026-0825-N": {
+    "owner": "Northern Regional Operations",
+    "assignedTeam": "Northern Extension Verification Team",
+    "expectedPeriod": "25–31 August 2026",
+    "priorityReason": "High short-range flash-flood/runoff consequence in vulnerable agricultural basins.",
+    "locationIds": [
+      "TH-P10",
+      "TH-P10-D01",
+      "TH-P10-D01-T01"
+    ],
+    "communities": "Foothill and low-lying rice communities (prototype)",
+    "irrigationStatus": "Mixed irrigation and rain-fed",
+    "drivers": [
+      {
+        "label": "Heavy-rain signal",
+        "value": "Elevated",
+        "provenance": "REAL CONTEXT — TMD August outlook; local value SYNTHETIC"
+      },
+      {
+        "label": "Runoff susceptibility",
+        "value": "High",
+        "provenance": "SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Rapid inundation of low-lying rice fields",
+      "Field access disruption",
+      "Local erosion/runoff damage"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Clear drainage and avoid entering fast-flowing water."
+      ],
+      "extension": [
+        "Verify flood depth, crop stage and access constraints."
+      ],
+      "officers": [
+        "Prioritize vulnerable basin communities for outreach."
+      ],
+      "water": [
+        "Track basin inflow and local drainage bottlenecks."
+      ]
+    },
+    "evidence": {
+      "rainfallAnomalyPct": 14,
+      "soilMoistureIndex": 82,
+      "vegetationStressIndex": 12,
+      "riverFloodIndex": 78,
+      "forecastProbabilityPct": 72,
+      "evidenceLabel": "All local numeric evidence is SYNTHETIC and anchored only to TMD August context."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T08:30:00+07:00",
+        "action": "Event detected",
+        "actor": "Demo Risk Engine"
+      },
+      {
+        "at": "2026-08-25T10:15:00+07:00",
+        "action": "Field verification assigned",
+        "actor": "Northern Regional Operations"
+      }
+    ]
+  },
+  "ARE-2026-0825-NE": {
+    "owner": "Northeast Regional Operations",
+    "assignedTeam": "Khon Kaen Extension Verification Team",
+    "expectedPeriod": "25 August–10 September 2026",
+    "priorityReason": "Uneven rainfall and field-level water constraints overlap with sensitive rain-fed rice development.",
+    "locationIds": [
+      "TH-P17",
+      "TH-P17-D01",
+      "TH-P17-D01-T01",
+      "TH-P17-D01-T01-V01",
+      "FARM-001"
+    ],
+    "communities": "Demo Rice Community and surrounding rain-fed rice groups",
+    "irrigationStatus": "Rain-fed with supplementary irrigation",
+    "drivers": [
+      {
+        "label": "Rainfall distribution",
+        "value": "Uneven / intermittent",
+        "provenance": "REAL CONTEXT — TMD August outlook; local interpretation SYNTHETIC"
+      },
+      {
+        "label": "Field soil moisture",
+        "value": "Declining between rain episodes",
+        "provenance": "SYNTHETIC"
+      },
+      {
+        "label": "Crop sensitivity",
+        "value": "Rice tillering approaching more water-sensitive stages",
+        "provenance": "SYNTHETIC DEMO AGRONOMIC CONTEXT"
+      }
+    ],
+    "expectedImpacts": [
+      "Localized rice water stress",
+      "Higher supplementary irrigation demand",
+      "Uneven crop development",
+      "Risk of overreacting to province-wide rainfall totals instead of field conditions"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Check actual field water level before irrigation decisions.",
+        "Prioritize water during sensitive crop stages where supply is limited.",
+        "Report visible stress or water constraints."
+      ],
+      "extension": [
+        "Verify crop stage, water availability and visible stress in assigned fields.",
+        "Record farmer-reported water constraints."
+      ],
+      "officers": [
+        "Prioritize verified high-stress communities rather than applying one province-wide response."
+      ],
+      "water": [
+        "Review local supplementary irrigation availability where verification confirms stress."
+      ]
+    },
+    "evidence": {
+      "rainfallAnomalyPct": -9,
+      "soilMoistureIndex": 37,
+      "vegetationStressIndex": 54,
+      "temperatureAnomalyC": 0.6,
+      "waterAvailability": "Constrained in selected rain-fed fields",
+      "forecastProbabilityPct": 64,
+      "modelAgreement": "3 of 5 demo signals support elevated field water stress",
+      "evidenceLabel": "All local numeric evidence is SYNTHETIC. TMD provides the August weather/agromet context only."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T07:45:00+07:00",
+        "action": "Risk event generated",
+        "actor": "Demo Risk Engine"
+      },
+      {
+        "at": "2026-08-25T09:00:00+07:00",
+        "action": "Assigned for local verification",
+        "actor": "Northeast Regional Operations"
+      },
+      {
+        "at": "2026-08-25T09:10:00+07:00",
+        "action": "Draft advisory pre-populated",
+        "actor": "System"
+      }
+    ]
+  },
+  "ARE-2026-0825-E": {
+    "owner": "Eastern Regional Operations",
+    "assignedTeam": "Orchard Risk Team",
+    "expectedPeriod": "25–31 August 2026",
+    "priorityReason": "Wind and heavy-rain exposure overlaps with high-value orchard operations.",
+    "locationIds": [
+      "TH-P09",
+      "TH-P09-D01",
+      "TH-P09-D01-T01"
+    ],
+    "communities": "Selected orchard groups (prototype)",
+    "irrigationStatus": "Managed orchard irrigation",
+    "drivers": [
+      {
+        "label": "Strong-wind / heavy-rain signal",
+        "value": "Elevated",
+        "provenance": "REAL CONTEXT — TMD August outlook; local risk SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Branch/fruit drop",
+      "Harvest interruption",
+      "Access and post-harvest handling disruption"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Secure vulnerable orchard infrastructure and monitor harvest windows."
+      ],
+      "extension": [
+        "Verify wind damage and access constraints."
+      ],
+      "officers": [
+        "Coordinate rapid orchard impact reporting."
+      ],
+      "water": [
+        "No primary action unless drainage issues emerge."
+      ]
+    },
+    "evidence": {
+      "forecastProbabilityPct": 61,
+      "soilMoistureIndex": 71,
+      "windRiskIndex": 68,
+      "evidenceLabel": "SYNTHETIC local evidence."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T08:10:00+07:00",
+        "action": "Event placed on monitoring queue",
+        "actor": "Demo Risk Engine"
+      }
+    ]
+  },
+  "ARE-2026-0825-S": {
+    "owner": "Southern Regional Operations",
+    "assignedTeam": "Crop Health Monitoring Team",
+    "expectedPeriod": "Late August–early September 2026",
+    "priorityReason": "Humid/wet conditions may increase crop-disease pressure in selected production zones.",
+    "locationIds": [
+      "TH-P67",
+      "TH-P67-D01",
+      "TH-P67-D01-T01"
+    ],
+    "communities": "Selected rubber production communities (prototype)",
+    "irrigationStatus": "Rain-fed perennial crop system",
+    "drivers": [
+      {
+        "label": "Humidity / wetness pressure",
+        "value": "Elevated",
+        "provenance": "REAL CONTEXT — TMD agromet; disease inference SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Higher disease scouting burden",
+      "Potential tapping/field-operation disruption",
+      "Localized crop-health deterioration if wetness persists"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Increase crop-health scouting after prolonged wet periods."
+      ],
+      "extension": [
+        "Verify symptoms before escalating disease risk."
+      ],
+      "officers": [
+        "Do not publish disease claims without field verification."
+      ],
+      "water": [
+        "No primary action."
+      ]
+    },
+    "evidence": {
+      "humidityRiskIndex": 73,
+      "soilMoistureIndex": 79,
+      "vegetationStressIndex": 21,
+      "evidenceLabel": "SYNTHETIC local evidence; not an official pest/disease forecast."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T08:20:00+07:00",
+        "action": "Disease-pressure watch created",
+        "actor": "Demo Risk Engine"
+      }
+    ]
+  },
+  "ARE-2026-0901-C": {
+    "owner": "Central Regional Operations",
+    "assignedTeam": "Flood Preparedness Team",
+    "expectedPeriod": "September 2026",
+    "priorityReason": "Wet September outlook combined with lowland agricultural exposure raises waterlogging/overflow concern.",
+    "locationIds": [
+      "TH-P46",
+      "TH-P46-D01",
+      "TH-P46-D01-T01"
+    ],
+    "communities": "Selected central lowland rice communities (prototype)",
+    "irrigationStatus": "Irrigated lowland agriculture",
+    "drivers": [
+      {
+        "label": "September wet-season outlook",
+        "value": "Rainy / heavy-rain potential",
+        "provenance": "REAL — TMD national outlook"
+      },
+      {
+        "label": "Lowland exposure",
+        "value": "High",
+        "provenance": "SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Waterlogging",
+      "Delayed field operations",
+      "Crop lodging where water persists"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Maintain drainage readiness and monitor field water depth."
+      ],
+      "extension": [
+        "Identify low-lying hotspots before peak rain episodes."
+      ],
+      "officers": [
+        "Prepare targeted flood/waterlogging advisories."
+      ],
+      "water": [
+        "Coordinate drainage and river-level monitoring."
+      ]
+    },
+    "evidence": {
+      "forecastProbabilityPct": 75,
+      "soilMoistureIndex": 81,
+      "riverFloodIndex": 72,
+      "evidenceLabel": "TMD supports the wet outlook; local indices are SYNTHETIC."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T12:00:00+07:00",
+        "action": "September outlook event created",
+        "actor": "Demo Risk Engine"
+      }
+    ]
+  },
+  "ARE-2026-0901-W": {
+    "owner": "Western Regional Operations",
+    "assignedTeam": "Agricultural Logistics Team",
+    "expectedPeriod": "September 2026",
+    "priorityReason": "Heavy-rain conditions can disrupt crop access and agricultural logistics in selected western areas.",
+    "locationIds": [
+      "TH-P52",
+      "TH-P52-D01",
+      "TH-P52-D01-T01"
+    ],
+    "communities": "Selected sugarcane production/logistics areas (prototype)",
+    "irrigationStatus": "Mixed",
+    "drivers": [
+      {
+        "label": "Heavy-rain outlook",
+        "value": "Elevated",
+        "provenance": "REAL CONTEXT — TMD; local logistics exposure SYNTHETIC"
+      }
+    ],
+    "expectedImpacts": [
+      "Field access disruption",
+      "Transport delays",
+      "Temporary harvest/handling constraints"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Plan field access around heavy-rain windows."
+      ],
+      "extension": [
+        "Report inaccessible production clusters."
+      ],
+      "officers": [
+        "Coordinate with local logistics stakeholders."
+      ],
+      "water": [
+        "Monitor drainage where access routes are flood-prone."
+      ]
+    },
+    "evidence": {
+      "forecastProbabilityPct": 66,
+      "accessDisruptionIndex": 62,
+      "soilMoistureIndex": 74,
+      "evidenceLabel": "SYNTHETIC local evidence."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T12:10:00+07:00",
+        "action": "September logistics risk created",
+        "actor": "Demo Risk Engine"
+      }
+    ]
+  },
+  "ARE-2026-1001-TRANS": {
+    "owner": "National Seasonal Planning Team",
+    "assignedTeam": "Seasonal Outlook Team",
+    "expectedPeriod": "October 2026",
+    "priorityReason": "October requires region-specific transition planning rather than one national hazard assumption.",
+    "locationIds": [
+      "TH"
+    ],
+    "communities": "Nationwide planning view",
+    "irrigationStatus": "Varies by region",
+    "drivers": [
+      {
+        "label": "Seasonal transition",
+        "value": "Regionally variable through October",
+        "provenance": "REAL — TMD Aug–Oct outlook horizon"
+      }
+    ],
+    "expectedImpacts": [
+      "Different planting/harvest implications by region",
+      "Continued rain-related risk in some areas",
+      "Transition toward drier conditions in others"
+    ],
+    "recommendedActions": {
+      "farmers": [
+        "Follow local rather than national-average advisories."
+      ],
+      "extension": [
+        "Use region-specific October outlooks."
+      ],
+      "officers": [
+        "Avoid a single nationwide October risk classification."
+      ],
+      "water": [
+        "Adjust planning by basin and regional rainfall outlook."
+      ]
+    },
+    "evidence": {
+      "forecastConfidence": "Medium",
+      "evidenceLabel": "REAL horizon and seasonal framing; province-level risk values remain SYNTHETIC."
+    },
+    "auditTrail": [
+      {
+        "at": "2026-08-25T13:00:00+07:00",
+        "action": "October planning outlook seeded",
+        "actor": "National Seasonal Planning Team"
+      }
+    ]
+  }
+}

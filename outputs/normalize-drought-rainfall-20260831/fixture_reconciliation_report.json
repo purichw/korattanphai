@@ -1,0 +1,140 @@
+{
+  "generatedAt": "2026-08-31T16:08:59+07:00",
+  "source": {
+    "monthlyCsv": "outputs/normalize-drought-rainfall-20260831/Monthly_Panel.csv",
+    "normalizedWorkbook": "outputs/normalize-drought-rainfall-20260831/kaset-tan-phai-nakhon-ratchasima-drought-rainfall-normalized.xlsx",
+    "monthlyFixture": "src/data/canonical/nakhon_ratchasima/normalized_research_monthly_panel.json",
+    "summaryFixture": "src/data/canonical/nakhon_ratchasima/normalized_research_panel_summary.json"
+  },
+  "result": "pass",
+  "blockingFailures": [],
+  "checks": {
+    "areaAndPeriodCompleteness": {
+      "districts": 32,
+      "subdistricts": 289,
+      "periods": 127,
+      "expectedRows": 36703,
+      "actualRows": 36703,
+      "complete": true
+    },
+    "monthlyFixture": {
+      "checkedRows": 36703,
+      "periods": 127,
+      "subdistricts": 289,
+      "missingInFixture": [],
+      "missingInFixtureCount": 0,
+      "extraInFixture": [],
+      "extraInFixtureCount": 0,
+      "valueMismatchSamples": [],
+      "valueMismatchCount": 0
+    },
+    "summaryFixture": {
+      "summaryMismatchSamples": [],
+      "summaryMismatchCount": 0
+    },
+    "normalizedWorkbook": {
+      "normalizedWorkbookMonthlyPanelShape": [
+        36703,
+        50
+      ],
+      "monthlyCsvShape": [
+        36703,
+        50
+      ],
+      "shapeMatches": true,
+      "cellMismatchCount": 0,
+      "cellMismatchSamples": []
+    },
+    "flaggedExceptions": {
+      "droughtConflictRows": 2915,
+      "droughtConflictRowsInPanel": 2915,
+      "attentionFlagRows": 2941,
+      "attentionFlagCounts": {
+        "DROUGHT_RISK_CONFLICT": 2915,
+        "GEODATA_EN_LABEL_OVERRIDE": 5,
+        "IRRIGATION_STATUS_NORMALIZED": 20,
+        "SOURCE_ADMIN_CORRECTION": 1
+      },
+      "qualityMetrics": [
+        {
+          "domain": "canonical_area_crosswalk",
+          "metric": "matched_areas",
+          "value": "289",
+          "note": "All workbook areas map to canonical province/district/subdistrict codes."
+        },
+        {
+          "domain": "canonical_area_crosswalk",
+          "metric": "unmatched_areas",
+          "value": "0",
+          "note": "Import should fail if this becomes non-zero."
+        },
+        {
+          "domain": "canonical_area_crosswalk",
+          "metric": "source_admin_corrections",
+          "value": "1",
+          "note": "ID 222 / Nong Rawiang corrected from Mueang Nakhon Ratchasima to Phimai before joining."
+        },
+        {
+          "domain": "canonical_area_crosswalk",
+          "metric": "geodata_label_overrides",
+          "value": "5",
+          "note": "English labels overridden only where geodata Thai/admin-code evidence supports it."
+        },
+        {
+          "domain": "canonical_area_crosswalk",
+          "metric": "irrigation_status_normalized",
+          "value": "20",
+          "note": "Source value Irragation normalized to Irrigation."
+        },
+        {
+          "domain": "rainfall",
+          "metric": "source_rows",
+          "value": "58312",
+          "note": "Raw rows retained in Raw_Rainfall."
+        },
+        {
+          "domain": "rainfall",
+          "metric": "normalized_panel_rows",
+          "value": "36703",
+          "note": "One record per month per canonical subdistrict after identical duplicate removal."
+        },
+        {
+          "domain": "rainfall",
+          "metric": "duplicate_source_rows_removed",
+          "value": "21609",
+          "note": "Rainfall duplicates are identical by key/value and source rows remain traceable."
+        },
+        {
+          "domain": "rainfall",
+          "metric": "period_range",
+          "value": "2015-06 to 2025-12",
+          "note": "Monthly historical series."
+        },
+        {
+          "domain": "drought",
+          "metric": "source_rows",
+          "value": "58312",
+          "note": "Raw rows retained in Raw_Drought."
+        },
+        {
+          "domain": "drought",
+          "metric": "normalized_panel_rows",
+          "value": "36703",
+          "note": "One record per month per canonical subdistrict."
+        },
+        {
+          "domain": "drought",
+          "metric": "duplicate_source_rows_grouped",
+          "value": "21609",
+          "note": "Duplicate source rows are grouped; conflicts remain explicitly flagged."
+        },
+        {
+          "domain": "drought",
+          "metric": "conflicting_monthly_area_records",
+          "value": "2915",
+          "note": "droughtRiskLevel uses conservative maximum for import while retaining raw values."
+        }
+      ]
+    }
+  }
+}

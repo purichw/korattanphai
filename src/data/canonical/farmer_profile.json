@@ -1,0 +1,32 @@
+{
+  "farmerUserId": "u-farmer",
+  "farmId": "FARM-001",
+  "farmName": "Demo Rice Farm",
+  "locationId": "TH-P17-D01-T01-V01",
+  "areaRai": 18,
+  "crop": "Rice",
+  "cropStage": "Tillering",
+  "irrigation": "Supplementary irrigation",
+  "linkedRiskEventIds": [
+    "ARE-2026-0825-NE"
+  ],
+  "seasonalRisk": [
+    {
+      "month": "2026-08",
+      "hazard": "Agricultural Water Stress",
+      "severity": "Warning"
+    },
+    {
+      "month": "2026-09",
+      "hazard": "Water-management variability",
+      "severity": "Watch"
+    },
+    {
+      "month": "2026-10",
+      "hazard": "Seasonal transition",
+      "severity": "Watch"
+    }
+  ],
+  "inboxSeed": [],
+  "publicationRule": "When ADV-2026-824 is Approved and then Published, create one farmer inbox alert linked to the advisory. Do not show it before publication."
+}

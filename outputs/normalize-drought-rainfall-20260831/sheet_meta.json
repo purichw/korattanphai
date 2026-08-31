@@ -1,0 +1,68 @@
+[
+  {
+    "sheet": "README",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/README.csv",
+    "rows_with_header": 17,
+    "cols": 2
+  },
+  {
+    "sheet": "Monthly_Panel",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Monthly_Panel.csv",
+    "rows_with_header": 36704,
+    "cols": 50
+  },
+  {
+    "sheet": "Area_Crosswalk",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Area_Crosswalk.csv",
+    "rows_with_header": 290,
+    "cols": 28
+  },
+  {
+    "sheet": "Drought_Conflicts",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Drought_Conflicts.csv",
+    "rows_with_header": 2916,
+    "cols": 17
+  },
+  {
+    "sheet": "Attention_Flags",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Attention_Flags.csv",
+    "rows_with_header": 2942,
+    "cols": 19
+  },
+  {
+    "sheet": "Duplicate_Audit",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Duplicate_Audit.csv",
+    "rows_with_header": 43219,
+    "cols": 11
+  },
+  {
+    "sheet": "Resolution_Rules",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Resolution_Rules.csv",
+    "rows_with_header": 10,
+    "cols": 5
+  },
+  {
+    "sheet": "Quality_Summary",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Quality_Summary.csv",
+    "rows_with_header": 14,
+    "cols": 4
+  },
+  {
+    "sheet": "Data_Contract",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Data_Contract.csv",
+    "rows_with_header": 17,
+    "cols": 4
+  },
+  {
+    "sheet": "Raw_Drought",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Raw_Drought.csv",
+    "rows_with_header": 58313,
+    "cols": 10
+  },
+  {
+    "sheet": "Raw_Rainfall",
+    "csv": "/Users/point/Kaset-Tan-Phai/outputs/normalize-drought-rainfall-20260831/Raw_Rainfall.csv",
+    "rows_with_header": 58313,
+    "cols": 10
+  }
+]

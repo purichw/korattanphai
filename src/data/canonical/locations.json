@@ -1,0 +1,802 @@
+[
+  {
+    "id": "TH",
+    "name": "Thailand",
+    "type": "country",
+    "parent": null
+  },
+  {
+    "id": "TH-P01",
+    "name": "Bangkok",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "กรุงเทพมหานคร",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P02",
+    "name": "Amnat Charoen",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "อำนาจเจริญ",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P03",
+    "name": "Ang Thong",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "อ่างทอง",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P04",
+    "name": "Bueng Kan",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "บึงกาฬ",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P05",
+    "name": "Buriram",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "บุรีรัมย์",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P06",
+    "name": "Chachoengsao",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ฉะเชิงเทรา",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P07",
+    "name": "Chai Nat",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ชัยนาท",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P08",
+    "name": "Chaiyaphum",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ชัยภูมิ",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P09",
+    "name": "Chanthaburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "จันทบุรี",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P10",
+    "name": "Chiang Mai",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "เชียงใหม่",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P11",
+    "name": "Chiang Rai",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "เชียงราย",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P12",
+    "name": "Chonburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ชลบุรี",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P13",
+    "name": "Chumphon",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ชุมพร",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P14",
+    "name": "Kalasin",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "กาฬสินธุ์",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P15",
+    "name": "Kamphaeng Phet",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "กำแพงเพชร",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P16",
+    "name": "Kanchanaburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "กาญจนบุรี",
+    "prototypeRegion": "West"
+  },
+  {
+    "id": "TH-P17",
+    "name": "Khon Kaen",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ขอนแก่น",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P18",
+    "name": "Krabi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "กระบี่",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P19",
+    "name": "Lampang",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ลำปาง",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P20",
+    "name": "Lamphun",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ลำพูน",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P21",
+    "name": "Loei",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "เลย",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P22",
+    "name": "Lopburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ลพบุรี",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P23",
+    "name": "Mae Hong Son",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "แม่ฮ่องสอน",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P24",
+    "name": "Maha Sarakham",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "มหาสารคาม",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P25",
+    "name": "Mukdahan",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "มุกดาหาร",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P26",
+    "name": "Nakhon Nayok",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นครนายก",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P27",
+    "name": "Nakhon Pathom",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นครปฐม",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P28",
+    "name": "Nakhon Phanom",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นครพนม",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P29",
+    "name": "Nakhon Ratchasima",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นครราชสีมา",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P30",
+    "name": "Nakhon Sawan",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นครสวรรค์",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P31",
+    "name": "Nakhon Si Thammarat",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นครศรีธรรมราช",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P32",
+    "name": "Nan",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "น่าน",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P33",
+    "name": "Narathiwat",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นราธิวาส",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P34",
+    "name": "Nong Bua Lamphu",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "หนองบัวลำภู",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P35",
+    "name": "Nong Khai",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "หนองคาย",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P36",
+    "name": "Nonthaburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "นนทบุรี",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P37",
+    "name": "Pathum Thani",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ปทุมธานี",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P38",
+    "name": "Pattani",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ปัตตานี",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P39",
+    "name": "Phang Nga",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "พังงา",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P40",
+    "name": "Phatthalung",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "พัทลุง",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P41",
+    "name": "Phayao",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "พะเยา",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P42",
+    "name": "Phetchabun",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "เพชรบูรณ์",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P43",
+    "name": "Phetchaburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "เพชรบุรี",
+    "prototypeRegion": "West"
+  },
+  {
+    "id": "TH-P44",
+    "name": "Phichit",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "พิจิตร",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P45",
+    "name": "Phitsanulok",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "พิษณุโลก",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P46",
+    "name": "Phra Nakhon Si Ayutthaya",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "พระนครศรีอยุธยา",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P47",
+    "name": "Phrae",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "แพร่",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P48",
+    "name": "Phuket",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ภูเก็ต",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P49",
+    "name": "Prachinburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ปราจีนบุรี",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P50",
+    "name": "Prachuap Khiri Khan",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ประจวบคีรีขันธ์",
+    "prototypeRegion": "West"
+  },
+  {
+    "id": "TH-P51",
+    "name": "Ranong",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ระนอง",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P52",
+    "name": "Ratchaburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ราชบุรี",
+    "prototypeRegion": "West"
+  },
+  {
+    "id": "TH-P53",
+    "name": "Rayong",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ระยอง",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P54",
+    "name": "Roi Et",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ร้อยเอ็ด",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P55",
+    "name": "Sa Kaeo",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สระแก้ว",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P56",
+    "name": "Sakon Nakhon",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สกลนคร",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P57",
+    "name": "Samut Prakan",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สมุทรปราการ",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P58",
+    "name": "Samut Sakhon",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สมุทรสาคร",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P59",
+    "name": "Samut Songkhram",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สมุทรสงคราม",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P60",
+    "name": "Saraburi",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สระบุรี",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P61",
+    "name": "Satun",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สตูล",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P62",
+    "name": "Sing Buri",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สิงห์บุรี",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P63",
+    "name": "Sisaket",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ศรีสะเกษ",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P64",
+    "name": "Songkhla",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สงขลา",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P65",
+    "name": "Sukhothai",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สุโขทัย",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P66",
+    "name": "Suphan Buri",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สุพรรณบุรี",
+    "prototypeRegion": "Central"
+  },
+  {
+    "id": "TH-P67",
+    "name": "Surat Thani",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สุราษฎร์ธานี",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P68",
+    "name": "Surin",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "สุรินทร์",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P69",
+    "name": "Tak",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ตาก",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P70",
+    "name": "Trang",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ตรัง",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P71",
+    "name": "Trat",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ตราด",
+    "prototypeRegion": "East"
+  },
+  {
+    "id": "TH-P72",
+    "name": "Ubon Ratchathani",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "อุบลราชธานี",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P73",
+    "name": "Udon Thani",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "อุดรธานี",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P74",
+    "name": "Uthai Thani",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "อุทัยธานี",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P75",
+    "name": "Uttaradit",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "อุตรดิตถ์",
+    "prototypeRegion": "North"
+  },
+  {
+    "id": "TH-P76",
+    "name": "Yala",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ยะลา",
+    "prototypeRegion": "South"
+  },
+  {
+    "id": "TH-P77",
+    "name": "Yasothon",
+    "type": "province",
+    "parent": "TH",
+    "coverage": "nationwide-province-summary",
+    "nameTh": "ยโสธร",
+    "prototypeRegion": "Northeast"
+  },
+  {
+    "id": "TH-P10-D01",
+    "name": "Mae Rim",
+    "type": "district",
+    "parent": "TH-P10",
+    "region": "North"
+  },
+  {
+    "id": "TH-P10-D01-T01",
+    "name": "Rim Tai",
+    "type": "subdistrict",
+    "parent": "TH-P10-D01",
+    "region": "North"
+  },
+  {
+    "id": "TH-P17-D01",
+    "name": "Ban Phai",
+    "type": "district",
+    "parent": "TH-P17",
+    "region": "Northeast"
+  },
+  {
+    "id": "TH-P17-D01-T01",
+    "name": "Nai Mueang",
+    "type": "subdistrict",
+    "parent": "TH-P17-D01",
+    "region": "Northeast"
+  },
+  {
+    "id": "TH-P46-D01",
+    "name": "Bang Sai",
+    "type": "district",
+    "parent": "TH-P46",
+    "region": "Central"
+  },
+  {
+    "id": "TH-P46-D01-T01",
+    "name": "Bang Sai",
+    "type": "subdistrict",
+    "parent": "TH-P46-D01",
+    "region": "Central"
+  },
+  {
+    "id": "TH-P09-D01",
+    "name": "Mueang Chanthaburi",
+    "type": "district",
+    "parent": "TH-P09",
+    "region": "East"
+  },
+  {
+    "id": "TH-P09-D01-T01",
+    "name": "Khlong Narai",
+    "type": "subdistrict",
+    "parent": "TH-P09-D01",
+    "region": "East"
+  },
+  {
+    "id": "TH-P52-D01",
+    "name": "Mueang Ratchaburi",
+    "type": "district",
+    "parent": "TH-P52",
+    "region": "West"
+  },
+  {
+    "id": "TH-P52-D01-T01",
+    "name": "Ko Phlapphla",
+    "type": "subdistrict",
+    "parent": "TH-P52-D01",
+    "region": "West"
+  },
+  {
+    "id": "TH-P67-D01",
+    "name": "Phunphin",
+    "type": "district",
+    "parent": "TH-P67",
+    "region": "South"
+  },
+  {
+    "id": "TH-P67-D01-T01",
+    "name": "Tha Kham",
+    "type": "subdistrict",
+    "parent": "TH-P67-D01",
+    "region": "South"
+  },
+  {
+    "id": "TH-P17-D01-T01-V01",
+    "name": "Demo Rice Community",
+    "type": "village",
+    "parent": "TH-P17-D01-T01",
+    "region": "Northeast"
+  },
+  {
+    "id": "FARM-001",
+    "name": "Demo Rice Farm",
+    "type": "farm",
+    "parent": "TH-P17-D01-T01-V01",
+    "areaRai": 18,
+    "crop": "Rice",
+    "cropStage": "Tillering",
+    "irrigation": "Supplementary irrigation"
+  }
+]

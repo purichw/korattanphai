@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "generatedAt": "2026-08-30T17:03:00+07:00",
+    "status": "REGIONAL_CONTEXT_ONLY_NO_SUBDISTRICT_MONTHLY_TOTALS",
+    "sourceIds": [
+      "SRC-TMD"
+    ],
+    "unit": "mm where source gives rainfall range; percent where source gives anomaly",
+    "timezone": "Asia/Bangkok",
+    "guardrailTh": "ข้อมูลนี้เป็นบริบทระดับประเทศ/ภูมิภาค ไม่ใช่ค่าฝนรายเดือนระดับตำบลนครราชสีมา",
+    "historicalIngestAttempt": {
+      "sourceId": "SRC-HII-THAIWATER",
+      "requestedFromMonth": "2025-01",
+      "attemptedAt": "2026-08-30T17:03:00+07:00",
+      "status": "PUBLIC_PROVINCIAL_ENDPOINTS_RETURN_LATEST_ONLY",
+      "resultTh": "ยังไม่ได้ดึงชุดย้อนหลังตั้งแต่ Jan 2025 เข้าระบบ เพราะ endpoint หลังบ้านเว็บจังหวัดคืนค่าล่าสุด/ช่วงล่าสุดแม้ส่งพารามิเตอร์วันที่ และ ThaiWater Standard /Rainfall ไม่ได้เปิดที่ public provincial API base ที่ทดสอบ",
+      "nextStepTh": "ต้องใช้ endpoint มาตรฐานหรือ export ทางการที่รองรับ latest=false พร้อม startDatetime/endDatetime ก่อนจึงจะเพิ่ม records รายเดือนเป็น REAL ได้"
+    }
+  },
+  "records": [
+    {
+      "evidenceId": "EVID-TMD-202606",
+      "month": "2026-06",
+      "scope": "Thailand national context; meteorological context for Nakhon Ratchasima province, not a local measurement",
+      "sourceId": "SRC-TMD-OBS-JUN",
+      "provenance": "REAL",
+      "facts": {
+        "national_mean_rainfall_anomaly_pct": -8
+      },
+      "usageNoteTh": "บริบทฝนระดับประเทศ ห้ามผูกเป็นค่าฝนรายตำบลนครราชสีมา"
+    },
+    {
+      "evidenceId": "EVID-TMD-202607",
+      "month": "2026-07",
+      "scope": "Thailand national/regional context",
+      "sourceId": "SRC-TMD-OBS-JUL",
+      "provenance": "REAL",
+      "facts": {
+        "national_mean_rainfall_anomaly_pct": 8,
+        "narrative": "Heavy rain occurred in parts of the Northeast at times; rainfall also decreased during part of mid-month."
+      },
+      "usageNoteTh": "บริบทฝนระดับประเทศ ห้ามผูกเป็นค่าฝนรายตำบลนครราชสีมา"
+    },
+    {
+      "evidenceId": "EVID-TMD-202608",
+      "month": "2026-08",
+      "scope": "Northeast regional context; Nakhon Ratchasima province is in Northeast",
+      "sourceId": "SRC-TMD-FCST-AUG",
+      "provenance": "REAL",
+      "facts": {
+        "northeast_forecast_rainfall_mm_min": 230,
+        "northeast_forecast_rainfall_mm_max": 280,
+        "rainy_days_min": 18,
+        "rainy_days_max": 20,
+        "narrative": "Heavy to very heavy rain possible in some locations."
+      },
+      "usageNoteTh": "บริบทฝนระดับภูมิภาคอีสาน ห้ามผูกเป็นค่าฝนรายตำบล"
+    },
+    {
+      "evidenceId": "EVID-TMD-202609",
+      "month": "2026-09",
+      "scope": "Northeast regional context",
+      "sourceId": "SRC-TMD-FCST-SEP",
+      "provenance": "REAL",
+      "facts": {
+        "northeast_forecast_rainfall_mm_min": 200,
+        "northeast_forecast_rainfall_mm_max": 250,
+        "rainy_days_min": 17,
+        "rainy_days_max": 19,
+        "narrative": "Rainy conditions continue; heavy/very heavy rain possible in some locations."
+      },
+      "usageNoteTh": "บริบทฝนระดับภูมิภาคอีสาน ห้ามผูกเป็นค่าฝนรายตำบล"
+    }
+  ]
+}

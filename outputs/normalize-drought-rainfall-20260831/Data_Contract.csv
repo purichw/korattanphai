@@ -1,0 +1,17 @@
+field,type,definition,sheet
+recordId,string,Stable derived ID for one monthly canonical subdistrict record.,Monthly_Panel
+period,YYYY-MM,Monthly observation/model period.,Monthly_Panel
+provinceId,string,Existing canonical province ID; remains TH-P29.,Monthly_Panel
+provinceCode,string,DOPA/TIS province code.,Monthly_Panel
+districtCode,string,Canonical district code used for joins.,Monthly_Panel
+subdistrictCode,string,Canonical subdistrict code used for joins.,Monthly_Panel
+researchAreaId,string,Stable wrapper around workbook ID; not an official admin code.,Area_Crosswalk
+sourceResearchId,integer,Original workbook ID retained for audit only.,Monthly_Panel
+irrigationStatus,enum,"Collecting, RainFed, or Irrigation after typo normalization.",Monthly_Panel
+rainfallMm,number,"Monthly Best_Station_Rainfall from source workbook, unit mm.",Monthly_Panel
+rainfallProvenanceClass,enum,DERIVED until station/source lineage is confirmed per record.,Monthly_Panel
+droughtRiskLevel,integer,"0 normal, 1 watch, 2 severe; uses risk max when source conflicts.",Monthly_Panel
+droughtRiskConflict,boolean,True when duplicated source rows disagree on risk class.,Monthly_Panel
+droughtRiskValuesRaw,string,All distinct drought risk values in source rows.,Monthly_Panel
+qualityFlags,string,Semicolon-delimited import/audit flags.,Monthly_Panel
+source rows,string,Excel source row numbers retained for raw-data traceability.,Monthly_Panel

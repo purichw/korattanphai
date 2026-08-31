@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "generatedAt": "2026-08-30T17:03:00+07:00",
+    "status": "THAIWATER_SNAPSHOT_AVAILABLE_NO_CONFIRMED_SUBDISTRICT_CROSSWALK",
+    "sourceIds": [
+      "SRC-HII-THAIWATER",
+      "SRC-DWR-EWS"
+    ],
+    "unit": "mm",
+    "accumulationWindow": "24h",
+    "timezone": "Asia/Bangkok",
+    "observationCount": 0,
+    "guardrailTh": "มี snapshot ฝน 24 ชม. จาก ThaiWater ใน official_water_snapshot.json แต่ยังไม่มี station/admin-code crosswalk ที่ยืนยันสำหรับแจกค่าลงตำบล; ห้าม fallback เป็นค่าฝนต่ำหรือปกติ",
+    "stationSpecificEndpointAuditTh": "ThaiWater rain24 คืน 104 สถานีสำหรับ province_code=30 แต่ station IDs ไม่ overlap กับ DWR EWS coverage registry 49 จุด และ payload ที่ทดสอบยังไม่มีรหัสตำบลสำหรับ join จึงยังไม่ import เป็น observations รายตำบล"
+  },
+  "observations": [],
+  "historicalWarningSamples": [
+    {
+      "evidenceId": "EVID-DWR-20250510-01",
+      "stationId": "STN0981",
+      "stationNameTh": "บ้านอุดมทรัพย์พัฒนา",
+      "districtCode": "3025",
+      "subdistrictCode": "302504",
+      "observedAt": "2025-05-10",
+      "reportedValue": 84.5,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    },
+    {
+      "evidenceId": "EVID-DWR-20250510-03",
+      "stationId": "STN2023",
+      "stationNameTh": "บ้านพระบึงนอก",
+      "districtCode": "3014",
+      "subdistrictCode": "301420",
+      "observedAt": "2025-05-10",
+      "reportedValue": 83,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    },
+    {
+      "evidenceId": "EVID-DWR-20250510-04",
+      "stationId": "STN0982",
+      "stationNameTh": "บ้านห้วยน้ำเค็ม",
+      "districtCode": "3025",
+      "subdistrictCode": "302504",
+      "observedAt": "2025-05-10",
+      "reportedValue": 93,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    },
+    {
+      "evidenceId": "EVID-DWR-20250510-05",
+      "stationId": "STN2020",
+      "stationNameTh": "บ้านจักราช",
+      "districtCode": "3006",
+      "subdistrictCode": "300601",
+      "observedAt": "2025-05-10",
+      "reportedValue": 83,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    },
+    {
+      "evidenceId": "EVID-DWR-20250510-06",
+      "stationId": "STN0778",
+      "stationNameTh": "บ้านซับเต่า",
+      "districtCode": "3025",
+      "subdistrictCode": "302504",
+      "observedAt": "2025-05-10",
+      "reportedValue": 98.5,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    },
+    {
+      "evidenceId": "EVID-DWR-20250510-07",
+      "stationId": "STN0988",
+      "stationNameTh": "บ้านหนองไผ่",
+      "districtCode": "3020",
+      "subdistrictCode": "302005",
+      "observedAt": "2025-05-10",
+      "reportedValue": 84.5,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    },
+    {
+      "evidenceId": "EVID-DWR-20250510-08",
+      "stationId": "STN2022",
+      "stationNameTh": "บ้านธรรมจักรพัฒนา",
+      "districtCode": "3013",
+      "subdistrictCode": "301306",
+      "observedAt": "2025-05-10",
+      "reportedValue": 116.5,
+      "unit": "mm",
+      "provenance": "REAL",
+      "sourceId": "SRC-DWR-HIST-20250510",
+      "usageNoteTh": "ตัวอย่างบันทึกเตือนภัยย้อนหลังจาก DWR ไม่ใช่ค่าฝน 24 ชม. ปัจจุบัน"
+    }
+  ]
+}

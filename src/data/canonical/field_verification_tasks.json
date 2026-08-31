@@ -1,0 +1,45 @@
+[
+  {
+    "id": "FV-0825-NE-01",
+    "riskEventId": "ARE-2026-0825-NE",
+    "status": "Pending",
+    "priority": "High",
+    "locationId": "TH-P17-D01-T01-V01",
+    "assignedUserId": "u-extension",
+    "dueAt": "2026-08-26T16:00:00+07:00",
+    "crop": "Rice",
+    "farmerGroup": "Demo Rice Community",
+    "checklist": [
+      "Confirm crop stage",
+      "Check standing field water",
+      "Assess visible leaf rolling/stress",
+      "Ask about recent rainfall and irrigation access",
+      "Record farmer-reported constraints"
+    ],
+    "seedObservation": null
+  },
+  {
+    "id": "FV-0825-N-01",
+    "riskEventId": "ARE-2026-0825-N",
+    "status": "In Progress",
+    "priority": "Severe",
+    "locationId": "TH-P10-D01-T01",
+    "assignedUserId": "u-extension",
+    "dueAt": "2026-08-25T18:00:00+07:00",
+    "crop": "Rice",
+    "farmerGroup": "Northern basin demo group",
+    "checklist": [
+      "Check inundation depth",
+      "Check drainage condition",
+      "Record access disruption",
+      "Confirm crop stage"
+    ],
+    "seedObservation": {
+      "fieldCondition": "Wet / localized inundation",
+      "cropStage": "Vegetative",
+      "waterAvailability": "Excess water",
+      "visibleStress": "Low",
+      "note": "Prototype pre-seeded partial observation."
+    }
+  }
+]

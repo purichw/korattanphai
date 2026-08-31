@@ -1,0 +1,14 @@
+domain,metric,value,note
+canonical_area_crosswalk,matched_areas,289,All workbook areas map to canonical province/district/subdistrict codes.
+canonical_area_crosswalk,unmatched_areas,0,Import should fail if this becomes non-zero.
+canonical_area_crosswalk,source_admin_corrections,1,ID 222 / Nong Rawiang corrected from Mueang Nakhon Ratchasima to Phimai before joining.
+canonical_area_crosswalk,geodata_label_overrides,5,English labels overridden only where geodata Thai/admin-code evidence supports it.
+canonical_area_crosswalk,irrigation_status_normalized,20,Source value Irragation normalized to Irrigation.
+rainfall,source_rows,58312,Raw rows retained in Raw_Rainfall.
+rainfall,normalized_panel_rows,36703,One record per month per canonical subdistrict after identical duplicate removal.
+rainfall,duplicate_source_rows_removed,21609,Rainfall duplicates are identical by key/value and source rows remain traceable.
+rainfall,period_range,2015-06 to 2025-12,Monthly historical series.
+drought,source_rows,58312,Raw rows retained in Raw_Drought.
+drought,normalized_panel_rows,36703,One record per month per canonical subdistrict.
+drought,duplicate_source_rows_grouped,21609,Duplicate source rows are grouped; conflicts remain explicitly flagged.
+drought,conflicting_monthly_area_records,2915,droughtRiskLevel uses conservative maximum for import while retaining raw values.
