@@ -4578,6 +4578,11 @@ textarea {
   align-items: stretch;
 }
 
+.nr-subdistrict-decision-row {
+  grid-template-columns: minmax(0, 0.66fr) minmax(290px, 0.34fr);
+  align-items: start;
+}
+
 .nr-area-lower-row {
   grid-template-columns: minmax(0, 0.56fr) minmax(380px, 0.44fr);
   align-items: start;
@@ -4590,6 +4595,28 @@ textarea {
 
 .nr-area-decision-row > * {
   min-height: 100%;
+}
+
+.nr-subdistrict-decision-row > * {
+  min-height: 0;
+}
+
+.nr-subdistrict-rail {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.nr-subdistrict-rail .nr-compact-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nr-subdistrict-gap-section .nr-research-stat-grid {
+  grid-template-columns: 1fr;
+}
+
+.nr-subdistrict-gap-section .metric-card {
+  min-height: 76px;
 }
 
 .nr-area-template .nr-area-situation-section .nr-research-stat-grid {
@@ -7768,6 +7795,11 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .nr-subdistrict-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
   .nr-area-template .nr-area-situation-section .nr-research-stat-grid,
   .nr-area-lower-row .nr-area-subdistrict-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -7781,6 +7813,11 @@ textarea {
 
   .nr-area-template .nr-area-situation-section .nr-research-stat-grid,
   .nr-area-lower-row .nr-area-subdistrict-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nr-subdistrict-rail,
+  .nr-subdistrict-rail .nr-compact-list {
     grid-template-columns: 1fr;
   }
 

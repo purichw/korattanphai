@@ -2246,11 +2246,16 @@ function ResearchAreaMapSection({
   monthOptions: AppSelectOption[];
   onMonthChange: (month: string) => void;
 }) {
+  const isSubdistrict = target.level === "subdistrict";
   return (
     <DashboardSection
       eyebrow="แผนที่"
-      title={target.level === "district" ? "แผนที่ตำบลในอำเภอ" : "แผนที่ตำบลที่เลือก"}
-      description="ใช้ตัวกรองร่วมกันบนแผนที่: ข้อมูลในระบบและระดับความเสี่ยง สามารถกรองซ้อนกันแบบตรงทุกเงื่อนไขได้"
+      title={target.level === "district" ? "แผนที่ตำบลในอำเภอ" : "แผนที่ตำบล"}
+      description={
+        isSubdistrict
+          ? "แผนที่แสดงตำแหน่งและระดับความเสี่ยงของตำบลนี้ตามชุดข้อมูลปัจจุบัน"
+          : "ใช้ตัวกรองร่วมกันบนแผนที่: ข้อมูลในระบบและระดับความเสี่ยง สามารถกรองซ้อนกันแบบตรงทุกเงื่อนไขได้"
+      }
       provenance="REAL"
       className="nr-area-map-section"
     >
@@ -2437,6 +2442,41 @@ function ResearchSubdistrictProfilePanel({
           <dd>{subdistrict.subdistrictCode}</dd>
         </div>
       </dl>
+    </DashboardSection>
+  );
+}
+
+function ResearchSubdistrictDataGapPanel({
+  stats,
+  activePeriod,
+}: {
+  stats: ResearchAreaStats;
+  activePeriod: { period: string; isFallback: boolean };
+}) {
+  return (
+    <DashboardSection
+      eyebrow="ช่องว่างข้อมูล"
+      title="ช่องว่างของตำบล"
+      description="ตัวชี้วัดนี้สรุปรายการข้อมูลรายเดือนที่ยังไม่เชื่อมกับพื้นที่"
+      provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"}
+      className="nr-area-side-section nr-subdistrict-gap-section"
+    >
+      <ResearchStatGrid>
+        <MetricCard
+          label="รายการที่ยังไม่มี"
+          value={`${formatThaiNumber(stats.missingCount)} รายการ`}
+          detail={activePeriod.isFallback ? "ใช้เดือนล่าสุดแทนเดือนที่เลือก" : formatMonth(activePeriod.period, "th")}
+          provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"}
+          tone={stats.missingCount > 0 ? "watch" : "good"}
+        />
+        <MetricCard
+          label="รายการต้องตรวจซ้ำ"
+          value={stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ"}
+          detail="อ่านจากข้อมูลรายเดือน"
+          provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"}
+          tone={stats.droughtConflictKeys > 0 ? "watch" : "good"}
+        />
+      </ResearchStatGrid>
     </DashboardSection>
   );
 }
@@ -4161,52 +4201,37 @@ function SubdistrictView({
   const droughtForecast = getNakhonRatchasimaThaiWaterDroughtForecast();
 
   return (
-    <>
+    <div className="nr-area-template is-subdistrict">
       <ResearchAreaHeading district={district} subdistrict={subdistrict} activePeriod={activeResearchPeriod} stats={stats} />
 
-      <section className="nr-dashboard-layout nr-area-dashboard is-subdistrict">
-        <div className="nr-dashboard-main">
-          <ResearchAreaForecastPanel
-            district={district}
-            subdistrict={subdistrict}
-            droughtForecast={droughtForecast}
-          />
-          <ResearchAreaSituationPanel
-            district={district}
-            subdistrict={subdistrict}
-            stats={stats}
-            activePeriod={activeResearchPeriod}
-          />
-          <ResearchAreaMapSection
-            target={{ valid: true, level: "subdistrict", district, subdistrict }}
-            layer={layer}
-            mapMode={mapMode}
-            onMapModeChange={onMapModeChange}
-            onNavigate={onNavigate}
-            selectedMonth={selectedMonth}
-            monthOptions={monthOptions}
-            onMonthChange={onMonthChange}
-          />
-          <div className="nr-dashboard-module-grid">
-            <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของตำบล" series={monthlySeries} isSubdistrict />
-          </div>
-        </div>
-        <aside className="nr-dashboard-aside">
+      <section className="nr-area-decision-row nr-subdistrict-decision-row" aria-label="พยากรณ์และบริบทของตำบล">
+        <ResearchAreaForecastPanel
+          district={district}
+          subdistrict={subdistrict}
+          droughtForecast={droughtForecast}
+        />
+        <aside className="nr-subdistrict-rail" aria-label="โปรไฟล์และช่องว่างข้อมูลตำบล">
           <ResearchSubdistrictProfilePanel district={district} subdistrict={subdistrict} record={researchRecord} />
-          <DashboardSection
-            eyebrow="ข้อมูลที่ยังไม่มี"
-            title="ช่องว่างของตำบล"
-            description="ค่าที่ไม่มีในชุดข้อมูลจะแสดงเป็นไม่มีข้อมูล ไม่ใช้สถานีหรือหลักฐานเก่าแทนตัวเลขหลัก"
-            provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
-            className="nr-area-side-section"
-          >
-            <ResearchStatGrid>
-              <MetricCard label="รายการข้อมูลรายเดือน" value={stats.recordCount > 0 ? "มีข้อมูล" : "ไม่มีข้อมูล"} provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"} />
-              <MetricCard label="รายการตรวจซ้ำ" value={stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ"} provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"} tone={stats.droughtConflictKeys > 0 ? "watch" : "good"} />
-            </ResearchStatGrid>
-          </DashboardSection>
+          <ResearchSubdistrictDataGapPanel stats={stats} activePeriod={activeResearchPeriod} />
         </aside>
       </section>
+      <ResearchAreaSituationPanel
+        district={district}
+        subdistrict={subdistrict}
+        stats={stats}
+        activePeriod={activeResearchPeriod}
+      />
+      <ResearchAreaMapSection
+        target={{ valid: true, level: "subdistrict", district, subdistrict }}
+        layer={layer}
+        mapMode={mapMode}
+        onMapModeChange={onMapModeChange}
+        onNavigate={onNavigate}
+        selectedMonth={selectedMonth}
+        monthOptions={monthOptions}
+        onMonthChange={onMonthChange}
+      />
+      <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของตำบล" series={monthlySeries} isSubdistrict />
       <ResearchAreaSourceLimitsPanel
         district={district}
         subdistrict={subdistrict}
@@ -4214,7 +4239,7 @@ function SubdistrictView({
         directRecords={evidence.direct}
         inheritedRecords={evidence.inherited}
       />
-    </>
+    </div>
   );
 }
 

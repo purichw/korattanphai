@@ -532,8 +532,8 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page).toHaveURL(/\/nakhon-ratchasima\/wang-nam-khiao\/t-302504$/);
   await expect(page.getByRole("heading", { name: "อุดมทรัพย์", exact: true })).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
-  await expect(page.getByText("ข้อมูลที่ยังไม่มี").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "แผนที่ตำบลที่เลือก" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "ช่องว่างของตำบล" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "แผนที่ตำบล", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();
@@ -558,7 +558,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByText("ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ").first()).toBeVisible();
   await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูลพยากรณ์")).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
-  await expect(page.getByText("ไม่มีข้อมูล").first()).toBeVisible();
+  await expect(page.locator(".nr-subdistrict-gap-section")).toContainText("รายการที่ยังไม่มี");
 
   await page.goto("/");
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
