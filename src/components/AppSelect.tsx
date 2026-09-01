@@ -1,9 +1,10 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 
 export type AppSelectOption = {
   value: string;
   label: string;
+  triggerLabel?: string;
   group?: string;
   description?: string;
   badge?: string;
@@ -20,6 +21,7 @@ type AppSelectProps = {
   icon?: ReactNode;
   className?: string;
   menuClassName?: string;
+  compactValue?: boolean;
 };
 
 function normalizeSearch(value: string) {
@@ -35,6 +37,7 @@ export function AppSelect({
   icon,
   className,
   menuClassName,
+  compactValue = false,
 }: AppSelectProps) {
   const generatedId = useId().replaceAll(":", "");
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -159,6 +162,7 @@ export function AppSelect({
 
     if (event.key === "Escape") {
       event.preventDefault();
+      if (isOpen) event.stopPropagation();
       closeMenu();
       return;
     }
@@ -212,7 +216,7 @@ export function AppSelect({
         onKeyDown={handleKeyDown}
       >
         <span id={valueId} className="app-select-value">
-          {selectedOption?.label ?? ""}
+          {(compactValue ? selectedOption?.triggerLabel : undefined) ?? selectedOption?.label ?? ""}
         </span>
         <ChevronDown size={17} aria-hidden="true" />
       </button>
@@ -227,59 +231,67 @@ export function AppSelect({
             }}
           />
           <div
-            id={listboxId}
             className={["app-select-menu", menuClassName ?? ""].join(" ")}
-            role="listbox"
-            aria-labelledby={label ? labelId : undefined}
-            aria-label={label ? undefined : ariaLabel}
+            role="presentation"
           >
             <div className="app-select-menu-header" role="presentation">
-              {label ?? ariaLabel ?? "ตัวเลือก"}
+              <span>{label ?? ariaLabel ?? "ตัวเลือก"}</span>
+              <button type="button" className="app-select-menu-close" aria-label="ปิดตัวเลือก" onClick={closeMenu}>
+                <X size={16} aria-hidden="true" />
+              </button>
             </div>
-            {options.map((option, index) => {
-              const showGroup = option.group && option.group !== currentGroup;
-              currentGroup = option.group;
-              const isSelected = option.value === value;
-              const isActive = index === activeIndex;
-              return (
-                <div key={option.value}>
-                  {showGroup && (
-                    <div className="app-select-group" role="presentation">
-                      {option.group}
-                    </div>
-                  )}
-                  <div
-                    id={`${generatedId}-option-${index}`}
-                    className={[
-                      "app-select-option",
-                      option.description ? "has-description" : "",
-                      option.badge ? "has-badge" : "",
-                      isSelected ? "is-selected" : "",
-                      isActive ? "is-active" : "",
-                      option.disabled ? "is-disabled" : "",
-                    ].join(" ")}
-                    role="option"
-                    aria-selected={isSelected}
-                    aria-disabled={option.disabled || undefined}
-                    data-select-value={option.value}
-                    onMouseEnter={() => {
-                      if (!option.disabled) setActiveIndex(index);
-                    }}
-                    onPointerDown={(event) => event.preventDefault()}
-                    onClick={() => chooseIndex(index)}
-                  >
-                    <span className="app-select-option-copy">
-                      <span>{option.label}</span>
-                      {option.description && <small>{option.description}</small>}
-                    </span>
-                    {option.badge && (
-                      <span className={`app-select-badge is-${option.badgeTone ?? "muted"}`}>{option.badge}</span>
+            <div
+              id={listboxId}
+              className="app-select-options"
+              role="listbox"
+              aria-labelledby={label ? labelId : undefined}
+              aria-label={label ? undefined : ariaLabel}
+            >
+              {options.map((option, index) => {
+                const showGroup = option.group && option.group !== currentGroup;
+                currentGroup = option.group;
+                const isSelected = option.value === value;
+                const isActive = index === activeIndex;
+                return (
+                  <div key={option.value}>
+                    {showGroup && (
+                      <div className="app-select-group" role="presentation">
+                        {option.group}
+                      </div>
                     )}
-                    <Check size={16} aria-hidden="true" />
+                    <div
+                      id={`${generatedId}-option-${index}`}
+                      className={[
+                        "app-select-option",
+                        option.description ? "has-description" : "",
+                        option.badge ? "has-badge" : "",
+                        isSelected ? "is-selected" : "",
+                        isActive ? "is-active" : "",
+                        option.disabled ? "is-disabled" : "",
+                      ].join(" ")}
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-disabled={option.disabled || undefined}
+                      data-select-value={option.value}
+                      onMouseEnter={() => {
+                        if (!option.disabled) setActiveIndex(index);
+                      }}
+                      onPointerDown={(event) => event.preventDefault()}
+                      onClick={() => chooseIndex(index)}
+                    >
+                      <span className="app-select-option-copy">
+                        <span>{option.label}</span>
+                        {option.description && <small>{option.description}</small>}
+                      </span>
+                      {option.badge && (
+                        <span className={`app-select-badge is-${option.badgeTone ?? "muted"}`}>{option.badge}</span>
+                      )}
+                      <Check size={16} aria-hidden="true" />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </>
       )}

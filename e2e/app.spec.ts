@@ -26,6 +26,27 @@ async function loginAs(page: Page, username: string) {
   await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
 }
 
+async function expectProvinceOverviewHeading(page: Page) {
+  const mobileHeading = page.locator(".nr-mobile-page-identity h1", { hasText: "จังหวัดนครราชสีมา" });
+  if (await mobileHeading.isVisible()) {
+    await expect(mobileHeading).toBeVisible();
+    return;
+  }
+  await expect(page.locator(".nr-dashboard-heading h2", { hasText: "จังหวัดนครราชสีมา" })).toBeVisible();
+}
+
+async function openMobileFilterSheet(page: Page) {
+  await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" }).click();
+  const sheet = page.locator(".operational-filter-sheet");
+  await expect(sheet).toBeVisible();
+  return sheet;
+}
+
+async function closeMobileFilterSheet(page: Page) {
+  const applyButton = page.getByRole("button", { name: "แสดงผล" });
+  if (await applyButton.isVisible()) await applyButton.click();
+}
+
 async function readMapTransform(svg: Locator, transformSelector = ".map-transform-layer") {
   return svg.locator(transformSelector).evaluate((element) => {
     const values = (element.getAttribute("transform") ?? "")
@@ -159,7 +180,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
 
   await expect(page).toHaveURL(/\/$/);
   await expect(page).toHaveTitle(/Korat Tan Phai/);
-  await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+  await expectProvinceOverviewHeading(page);
   const accountTrigger = page.getByRole("button", { name: /บัญชีผู้ใช้/ });
   await expect(accountTrigger).toBeVisible();
   await expect(page.locator(".topbar .login-session-chip")).toHaveCount(0);
@@ -262,7 +283,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     "href",
     "/brand/korat-tan-phai-favicon.png?v=3",
   );
-  await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+  await expectProvinceOverviewHeading(page);
 });
 
 test("removed water route no longer renders the province water page", async ({ page }) => {
@@ -281,8 +302,17 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
 
   await expect(page.locator("select")).toHaveCount(0);
 
-  const filters = page.locator(".control-band");
-  const hazard = filters.getByRole("combobox", { name: /^ภัย/ });
+  const editFiltersButton = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
+  const isMobileSummary = await editFiltersButton.isVisible();
+  if (isMobileSummary) {
+    await expect(page.locator(".operational-filter-mobile-summary")).toBeVisible();
+    await expect(page.locator(".operational-filter-fields")).toBeHidden();
+    await editFiltersButton.click();
+    await expect(page.getByRole("dialog", { name: "ตัวกรองข้อมูล" })).toBeVisible();
+  }
+
+  const filters = isMobileSummary ? page.locator(".operational-filter-sheet") : page.locator(".control-band");
+  const hazard = filters.getByRole("combobox", { name: /ภัย/ });
   await hazard.focus();
   await page.keyboard.press("Enter");
   const listboxId = await hazard.getAttribute("aria-controls");
@@ -300,7 +330,7 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
   await expect(hazard).toContainText("ภัยแล้ง");
   await expect(hazard).toHaveAttribute("aria-expanded", "false");
 
-  const crop = filters.getByRole("combobox", { name: /^พืช/ });
+  const crop = filters.getByRole("combobox", { name: /พืช/ });
   await crop.click();
   const cropListboxId = await crop.getAttribute("aria-controls");
   expect(cropListboxId).toBeTruthy();
@@ -311,6 +341,10 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
   await expect(cropMenu).not.toContainText("อ้อย");
   await page.keyboard.press("Escape");
   await expect(crop).toHaveAttribute("aria-expanded", "false");
+  if (isMobileSummary) {
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".operational-filter-sheet")).toHaveCount(0);
+  }
   await expect(page.locator(".nr-layer-control")).toHaveCount(0);
 });
 
@@ -448,7 +482,7 @@ test.skip("national map preview stays actionable and opens the supported provinc
   await expect(preview).toContainText("นครราชสีมา");
   await preview.getByRole("button", { name: "ดูรายละเอียด →" }).click();
   await expect(page).toHaveURL(/\/nakhon-ratchasima$/);
-  await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+  await expectProvinceOverviewHeading(page);
 });
 
 test("Nakhon Ratchasima province drill-down preserves code-based evidence and no-data wording", async ({ page }) => {
@@ -457,7 +491,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await loginAs(page, smokeUsername);
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("heading", { name: "พืชที่ได้รับผลกระทบ" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+  await expectProvinceOverviewHeading(page);
   await expect(page.locator(".data-provenance-chip.is-real").first()).toBeVisible();
   await expect(page.locator(".data-provenance-chip.is-synthetic").first()).toBeVisible();
   await expect(page.locator(".data-provenance-chip.is-derived").first()).toBeVisible();
@@ -471,17 +505,30 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(localSvg.locator(".nr-map-context-layer path")).toHaveCount(289);
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
   await expect(localMap.locator(".map-overlay-controls").getByTitle("ขยายแผนที่")).toBeVisible();
-  const guardrail = page.locator(".nr-guardrail details");
-  await expect(guardrail.getByText("ข้อกำกับข้อมูลสำคัญ")).toBeVisible();
+  const guardrail = page.locator(".nr-data-transparency-row.is-limitations").first();
+  await expect(guardrail.getByText("ข้อจำกัดสำคัญ")).toBeVisible();
   await guardrail.locator("summary").click();
   await expect(guardrail).toContainText("การเชื่อมข้อมูลใช้รหัสจังหวัด/อำเภอ/ตำบลเท่านั้น");
 
   const nakhonRatchasimaFilters = page.locator(".nr-workspace > .control-band").first();
-  await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^เดือน/ })).toBeVisible();
-  await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^ภัย/ })).toBeVisible();
-  await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^พืช/ })).toBeVisible();
-  await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^ตำบล/ })).toHaveCount(0);
-  const provinceDistrictSelect = nakhonRatchasimaFilters.getByRole("combobox", { name: /^อำเภอ/ });
+  const usesMobileFilterSheet = await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" }).isVisible();
+  let provinceDistrictSelect: Locator;
+  if (usesMobileFilterSheet) {
+    await expect(nakhonRatchasimaFilters.locator(".operational-filter-mobile-summary")).toBeVisible();
+    await expect(nakhonRatchasimaFilters.locator(".operational-filter-chip b", { hasText: "ทุกอำเภอ" })).toBeVisible();
+    const sheet = await openMobileFilterSheet(page);
+    await expect(sheet.getByRole("combobox", { name: "เลือกเดือน" })).toBeVisible();
+    await expect(sheet.getByRole("combobox", { name: "เลือกภัย" })).toBeVisible();
+    await expect(sheet.getByRole("combobox", { name: "เลือกพืช" })).toBeVisible();
+    await expect(sheet.getByRole("combobox", { name: /^เลือกตำบล/ })).toHaveCount(0);
+    provinceDistrictSelect = sheet.getByRole("combobox", { name: /^เลือกอำเภอ/ });
+  } else {
+    await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^เดือน/ })).toBeVisible();
+    await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^ภัย/ })).toBeVisible();
+    await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^พืช/ })).toBeVisible();
+    await expect(nakhonRatchasimaFilters.getByRole("combobox", { name: /^ตำบล/ })).toHaveCount(0);
+    provinceDistrictSelect = nakhonRatchasimaFilters.getByRole("combobox", { name: /^อำเภอ/ });
+  }
   await expect(provinceDistrictSelect).toBeVisible();
   await provinceDistrictSelect.click();
   const provinceDistrictListboxId = await provinceDistrictSelect.getAttribute("aria-controls");
@@ -491,9 +538,17 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(provinceDistrictMenu).toContainText("มีข้อมูล");
   await provinceDistrictMenu.locator('[data-select-value="3025"]').click();
   await expect(page).toHaveURL(/\/wang-nam-khiao$/);
+  if (usesMobileFilterSheet) await closeMobileFilterSheet(page);
   await expect(page.getByRole("heading", { name: "วังน้ำเขียว", exact: true })).toBeVisible();
   const districtAreaFiltersFromProvince = page.locator(".nr-workspace > .control-band").first();
-  const districtSubdistrictSelect = districtAreaFiltersFromProvince.getByRole("combobox", { name: /^ตำบล/ });
+  let districtSubdistrictSelect: Locator;
+  if (usesMobileFilterSheet) {
+    await expect(districtAreaFiltersFromProvince.locator(".operational-filter-chip b", { hasText: "ทุกตำบล" })).toBeVisible();
+    const sheet = await openMobileFilterSheet(page);
+    districtSubdistrictSelect = sheet.getByRole("combobox", { name: /^เลือกตำบล/ });
+  } else {
+    districtSubdistrictSelect = districtAreaFiltersFromProvince.getByRole("combobox", { name: /^ตำบล/ });
+  }
   await expect(districtSubdistrictSelect).toBeVisible();
   await districtSubdistrictSelect.click();
   const districtSubdistrictListboxId = await districtSubdistrictSelect.getAttribute("aria-controls");
@@ -503,18 +558,29 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(districtSubdistrictMenu).not.toContainText("ใช้สถานีใกล้สุด");
   await districtSubdistrictMenu.locator('[data-select-value="302504"]').click();
   await expect(page).toHaveURL(/\/wang-nam-khiao\/t-302504$/);
+  if (usesMobileFilterSheet) await closeMobileFilterSheet(page);
   await expect(page.getByRole("heading", { name: "อุดมทรัพย์", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   const subdistrictFilters = page.locator(".nr-workspace > .control-band").first();
-  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(3);
-  await expect(subdistrictFilters.getByRole("combobox", { name: /^ตำบล/ })).toHaveCount(0);
+  if (usesMobileFilterSheet) {
+    await expect(subdistrictFilters.locator(".operational-filter-mobile-summary")).toBeVisible();
+    await expect(subdistrictFilters.locator(".operational-filter-chip b", { hasText: "อุดมทรัพย์" })).toBeVisible();
+    await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(0);
+  } else {
+    await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(3);
+    await expect(subdistrictFilters.getByRole("combobox", { name: /^ตำบล/ })).toHaveCount(0);
+  }
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();
   await expect(page).toHaveURL(/\/wang-nam-khiao$/);
   await expect(page.getByRole("button", { name: "กลับจังหวัด" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   const districtFilters = page.locator(".nr-workspace > .control-band").first();
-  await expect(districtFilters.getByRole("combobox", { name: /^ตำบล/ })).toBeVisible();
+  if (usesMobileFilterSheet) {
+    await expect(districtFilters.locator(".operational-filter-chip b", { hasText: "ทุกตำบล" })).toBeVisible();
+  } else {
+    await expect(districtFilters.getByRole("combobox", { name: /^ตำบล/ })).toBeVisible();
+  }
   await page.getByRole("button", { name: "กลับจังหวัด" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
@@ -564,7 +630,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { name: "จังหวัดนครราชสีมา" })).toBeVisible();
+  await expectProvinceOverviewHeading(page);
 });
 
 test("Nakhon Ratchasima local map preview actions stay layered and depth-aware", async ({ page }, testInfo) => {
