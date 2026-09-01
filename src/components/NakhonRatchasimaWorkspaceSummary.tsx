@@ -21,7 +21,7 @@ export function NakhonRatchasimaWorkspaceSummary({ compact = false }: { compact?
       <div className="province-workspace-copy">
         <p className="eyebrow">พื้นที่ปฏิบัติการระดับจังหวัด</p>
         <strong>จังหวัดนครราชสีมา</strong>
-        <span>ข้อมูลลงลึกถึงอำเภอและตำบล แยกหลักฐานจริงออกจากค่าที่ระบบคำนวณ</span>
+        <span>ข้อมูลลงลึกถึงอำเภอและตำบล แยกหลักฐานจริงออกจากผลคำนวณของระบบ</span>
       </div>
       <div className="mini-stat-grid" aria-label="จำนวนพื้นที่ย่อยจังหวัดนครราชสีมา">
         <MetricCard label="อำเภอ" value={summary.districtCount} />

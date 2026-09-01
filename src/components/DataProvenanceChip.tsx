@@ -5,11 +5,11 @@ export type DataProvenanceChipKind = DataClass | "PROXY" | "PENDING_SOURCE";
 const provenanceChipLabels: Record<Language, Record<DataProvenanceChipKind, string>> = {
   th: {
     REAL: "ข้อมูลจริง",
-    CANONICAL_SYNTHETIC: "ข้อมูลต้นแบบ",
-    DERIVED: "ระบบคำนวณ",
+    CANONICAL_SYNTHETIC: "ข้อมูลตัวอย่าง",
+    DERIVED: "ผลคำนวณ",
     RUNTIME_STATE: "สถานะใช้งาน",
-    PROXY: "ข้อมูลตัวแทน",
-    PENDING_SOURCE: "รอเชื่อม",
+    PROXY: "ข้อมูลประมาณค่า",
+    PENDING_SOURCE: "รอยืนยันข้อมูล",
   },
   en: {
     REAL: "Real data",
@@ -24,11 +24,11 @@ const provenanceChipLabels: Record<Language, Record<DataProvenanceChipKind, stri
 const provenanceChipDescriptions: Record<Language, Record<DataProvenanceChipKind, string>> = {
   th: {
     REAL: "มาจากแหล่งข้อมูลจริงหรือเอกสารทางการ",
-    CANONICAL_SYNTHETIC: "ข้อมูลตัวอย่างสำหรับการสาธิต",
-    DERIVED: "ค่าที่ระบบคำนวณจากข้อมูลตั้งต้น",
+    CANONICAL_SYNTHETIC: "ข้อมูลตัวอย่างสำหรับตรวจสอบรูปแบบการทำงาน",
+    DERIVED: "ผลคำนวณจากข้อมูลตั้งต้น",
     RUNTIME_STATE: "สถานะจากการใช้งานในระบบ",
     PROXY: "ใช้สถานีหรือข้อมูลใกล้เคียงเป็นตัวแทน ไม่ใช่ค่าตรวจวัดตรงพื้นที่",
-    PENDING_SOURCE: "ยังรอการเชื่อมต่อหรือยืนยันแหล่งข้อมูล",
+    PENDING_SOURCE: "ยังรอการยืนยันแหล่งข้อมูล",
   },
   en: {
     REAL: "From a real source or official document",

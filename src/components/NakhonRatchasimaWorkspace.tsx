@@ -328,11 +328,11 @@ const coverageLabels: Record<LocalMapStatus, string> = {
   "local-evidence": "มีหลักฐานท้องถิ่น",
   "source-capability": "มีแหล่งข้อมูลตั้งต้น",
   "district-evidence": "มีหลักฐานระดับอำเภอ",
-  "research-drought-normal": "ปกติในชุดข้อมูล",
-  "research-drought-watch": "เฝ้าระวังในชุดข้อมูล",
-  "research-drought-severe": "เสี่ยงสูงในชุดข้อมูล",
-  "research-study-ready": "มีข้อมูลในระบบ",
-  "research-study-missing": "ไม่มีข้อมูลในระบบ",
+  "research-drought-normal": "ปกติ",
+  "research-drought-watch": "เฝ้าระวัง",
+  "research-drought-severe": "เสี่ยงสูง",
+  "research-study-ready": "มีข้อมูลรองรับ",
+  "research-study-missing": "ยังไม่พบข้อมูลรองรับ",
   insufficient: "ข้อมูลไม่พอคำนวณ",
   "no-data": "ยังไม่มีหลักฐานเชิงลึก",
 };
@@ -363,14 +363,14 @@ const coverageLabelsByMode: Record<LocalMapMode, Record<LocalMapStatus, string>>
   "prediction-readiness": {
     admin: "ขอบเขตการปกครอง",
     "local-evidence": "พร้อมคาดการณ์ระดับพื้นที่",
-    "source-capability": "มีข้อมูลนำเข้าตั้งต้น",
+    "source-capability": "มีข้อมูลตั้งต้น",
     "district-evidence": "มีบริบทระดับอำเภอ",
-    "research-drought-normal": "ปกติในชุดข้อมูล",
-    "research-drought-watch": "เฝ้าระวังในชุดข้อมูล",
-    "research-drought-severe": "เสี่ยงสูงในชุดข้อมูล",
-    "research-study-ready": "มีข้อมูลในระบบ",
-    "research-study-missing": "ไม่มีข้อมูลในระบบ",
-    insufficient: "ต้องเติมข้อมูลก่อนคำนวณ",
+    "research-drought-normal": "ปกติ",
+    "research-drought-watch": "เฝ้าระวัง",
+    "research-drought-severe": "เสี่ยงสูง",
+    "research-study-ready": "มีข้อมูลรองรับ",
+    "research-study-missing": "ยังไม่พบข้อมูลรองรับ",
+    insufficient: "ข้อมูลยังไม่เพียงพอ",
     "no-data": "ยังไม่พอคาดการณ์",
   },
   "evidence-coverage": coverageLabels,
@@ -379,12 +379,12 @@ const coverageLabelsByMode: Record<LocalMapMode, Record<LocalMapStatus, string>>
     "local-evidence": "มีหลักฐานท้องถิ่น",
     "source-capability": "มีช่องทางข้อมูล",
     "district-evidence": "มีรายงานระดับอำเภอ",
-    "research-drought-normal": "ปกติในชุดข้อมูล",
-    "research-drought-watch": "เฝ้าระวังในชุดข้อมูล",
-    "research-drought-severe": "เสี่ยงสูงในชุดข้อมูล",
-    "research-study-ready": "มีข้อมูลในระบบ",
-    "research-study-missing": "ไม่มีข้อมูลในระบบ",
-    insufficient: "รอเชื่อมแหล่งข้อมูล",
+    "research-drought-normal": "ปกติ",
+    "research-drought-watch": "เฝ้าระวัง",
+    "research-drought-severe": "เสี่ยงสูง",
+    "research-study-ready": "มีข้อมูลรองรับ",
+    "research-study-missing": "ยังไม่พบข้อมูลรองรับ",
+    insufficient: "รอยืนยันแหล่งข้อมูล",
     "no-data": "ยังไม่พบแหล่งข้อมูลท้องถิ่น",
   },
 };
@@ -418,8 +418,8 @@ const localMapViewOptions: AppSelectOption[] = [
 
 const localStudyCriterionOptions: AppSelectOption[] = [
   { value: "all", label: "ทุกตำบล", triggerLabel: "ทุกตำบล", group: "สถานะข้อมูล" },
-  { value: "studied", label: "มีข้อมูลในระบบ", triggerLabel: "มีข้อมูล", group: "สถานะข้อมูล" },
-  { value: "unstudied", label: "ไม่มีข้อมูลในระบบ", triggerLabel: "ไม่มีข้อมูล", group: "สถานะข้อมูล" },
+  { value: "studied", label: "มีข้อมูลรองรับ", triggerLabel: "มีข้อมูล", group: "สถานะข้อมูล" },
+  { value: "unstudied", label: "ยังไม่พบข้อมูลรองรับ", triggerLabel: "ไม่มีข้อมูล", group: "สถานะข้อมูล" },
 ];
 
 const localRiskCriterionOptions: AppSelectOption[] = [
@@ -812,7 +812,7 @@ function translateAccess(value: string) {
     UI_ONLY: "มีเฉพาะหน้าจอใช้งาน",
     UNKNOWN: "ยังต้องตรวจสอบ",
     "internal calculation": "คำนวณภายในระบบ",
-    "local bundle index referencing REAL sources": "ดัชนีข้อมูลในชุดข้อมูลที่อ้างอิงแหล่งข้อมูลจริง",
+    "local bundle index referencing REAL sources": "ดัชนีข้อมูลที่อ้างอิงแหล่งข้อมูลจริง",
     runtime: "สถานะภายในระบบ",
   };
   return labels[value] ?? value;
@@ -857,7 +857,7 @@ function translateStatus(value: string) {
       "แหล่งข้อมูลพร้อม แต่ต้องแยกข้อมูลที่สังเกตแล้ว คาดการณ์ และประวัติซ้ำ",
     STATS_SOURCE_READY_SPATIAL_NOT_BULK_INGESTED: "แหล่งสถิติพร้อม แต่ยังไม่เชื่อมเชิงพื้นที่ครบ",
     STATION_COVERAGE_READY_LIVE_RAINFALL_PENDING:
-      "พร้อมแสดงสถานีและข้อมูลตัวแทนแล้ว แต่ยังรอเชื่อมค่าฝนสดที่ยืนยัน",
+      "พร้อมแสดงสถานีและข้อมูลประมาณค่าแล้ว แต่ยังรอยืนยันค่าฝนสด",
     UI_SOURCE_VERIFIED: "ยืนยันแหล่งข้อมูลจากหน้าจอใช้งาน",
   };
   return labels[value] ?? value;
@@ -865,7 +865,7 @@ function translateStatus(value: string) {
 
 function translateClassification(value: string) {
   if (value.startsWith("REAL")) return "ข้อมูลจริง";
-  if (value === "DERIVED") return "ค่าที่ระบบคำนวณ";
+  if (value === "DERIVED") return "ผลคำนวณจากข้อมูลตั้งต้น";
   if (value === "CANONICAL_SYNTHETIC") return "ข้อมูลต้นแบบ";
   if (value === "RUNTIME_STATE") return "สถานะจากการใช้งาน";
   return value;
@@ -1076,7 +1076,7 @@ function translateRecommendedUse(value: string) {
 
 function translateSpatialGranularity(value: string) {
   const labels: Record<string, string> = {
-    "Asset / command-area / province depending dataset": "ระดับทรัพยากรน้ำ พื้นที่ชลประทาน หรือจังหวัดตามชุดข้อมูล",
+    "Asset / command-area / province depending dataset": "ระดับทรัพยากรน้ำ พื้นที่ชลประทาน หรือจังหวัดตามขอบเขตข้อมูล",
     "Asset point / reservoir system": "ระดับอ่างเก็บน้ำหรือระบบอ่าง",
     "District/subdistrict station locations where published": "ตำแหน่งสถานีระดับอำเภอ/ตำบลตามที่เผยแพร่",
     "Event report geography": "พื้นที่ตามรายงานเหตุการณ์",
@@ -1156,10 +1156,10 @@ function translateLimitation(value: string) {
     "DOPA/TIS-derived terminology publication; not a verified live DOPA subdistrict registry endpoint.":
       "เป็นเอกสารคำศัพท์ที่อ้างอิง DOPA/TIS ไม่ใช่ทะเบียนตำบลสดของ DOPA ที่ยืนยันแล้ว",
     "Geometry payload is referenced, not embedded; validate actual key values at ingestion.":
-      "ชุดข้อมูลอ้างอิงขอบเขตแผนที่ ต้องตรวจค่ารหัสจริงเมื่อเชื่อมข้อมูล",
+      "ข้อมูลอ้างอิงขอบเขตแผนที่ ต้องตรวจค่ารหัสจริงเมื่อเชื่อมข้อมูล",
     "Forecast/watch evidence, not observed flood impact.": "เป็นหลักฐานเชิงคาดการณ์/เฝ้าระวัง ไม่ใช่พื้นที่น้ำท่วมที่สังเกตแล้ว",
     "Historical DWR warning record. This bundle does not infer agricultural severity from the raw station value.":
-      "เป็นบันทึกเตือนภัยย้อนหลังของสถานี DWR ชุดข้อมูลนี้ไม่อนุมานระดับความเสียหายเกษตรจากค่าดิบของสถานี",
+      "เป็นบันทึกเตือนภัยย้อนหลังของสถานี DWR ข้อมูลส่วนนี้ไม่อนุมานระดับความเสียหายเกษตรจากค่าดิบของสถานี",
     "National values cannot be assigned to a Nakhon Ratchasima district/subdistrict.":
       "ค่าระดับประเทศห้ามนำไปผูกเป็นค่าระดับอำเภอหรือตำบลของนครราชสีมา",
     "No exact Nakhon Ratchasima province/district probability from this evidence.":
@@ -1228,7 +1228,7 @@ function EmptyLocalEvidence() {
     <div className="nr-no-data">
       <AlertTriangle size={18} />
       <div>
-        <strong>พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในชุดข้อมูลนี้</strong>
+        <strong>พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในรอบข้อมูลนี้</strong>
         <p>ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ และระบบจะไม่แสดงเป็นสีเขียวหรือ “ปกติ” โดยไม่มีหลักฐานรองรับ</p>
       </div>
     </div>
@@ -1408,10 +1408,10 @@ function predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes: string[
     readySubdistricts > 0
       ? "พร้อมใช้ระดับพื้นที่"
       : sourceInputSubdistricts > 0
-        ? "มีข้อมูลนำเข้าตั้งต้น"
+        ? "มีข้อมูลตั้งต้น"
         : districtContextSubdistricts > 0
           ? "มีบริบทระดับอำเภอ"
-          : "ยังต้องเติมก่อนคำนวณ";
+          : "ข้อมูลยังไม่เพียงพอ";
 
   return {
     districtCount: districtsInScope.size,
@@ -1502,7 +1502,7 @@ function ProvinceDashboardHeading({ research }: { research: NakhonRatchasimaRese
         </div>
         <strong>แหล่งข้อมูลหลัก: ข้อมูลสถานการณ์เกษตรและภัยแล้งที่จัดมาตรฐานแล้ว</strong>
         <small>
-          {researchDisplayPeriod(research)} · เดือนล่าสุดในชุดข้อมูล {researchLatestPeriod(research)}
+          {researchDisplayPeriod(research)} · รอบข้อมูลล่าสุด {researchLatestPeriod(research)}
         </small>
       </div>
       <DataProvenanceLegend
@@ -1591,7 +1591,7 @@ const dataGovernanceGuardrailItems = [
   <>ใช้ <code>TH-P29</code> เป็นจังหวัดเดิม ไม่สร้างจังหวัดนครราชสีมาซ้ำ</>,
   <>ป้ายชื่อระดับจังหวัดต้องใช้ “นครราชสีมา” หรือ “จังหวัดนครราชสีมา” เท่านั้น</>,
   <>การเชื่อมข้อมูลใช้รหัสจังหวัด/อำเภอ/ตำบลเท่านั้น ไม่ใช้ชื่อหรือที่อยู่เว็บ</>,
-  <>ข้อมูลจริงจากแหล่งข้อมูลไม่เท่ากับคะแนนความเสี่ยงรวมที่ระบบคำนวณ</>,
+  <>ข้อมูลจากแหล่งอ้างอิงไม่ใช่คะแนนความเสี่ยงรวมของพื้นที่</>,
   <>พื้นที่ที่ยังไม่มีหลักฐานเชิงลึกต้องแสดงว่า “ยังไม่มีข้อมูล” ไม่ใช่ “ปกติ”</>,
 ];
 
@@ -1672,7 +1672,7 @@ function SourceTruthNote({
 }) {
   const selectedLabel = "ภัยแล้ง";
   const forecastSourceLabel = `ข้อมูลพยากรณ์ 6 เดือน · รอบ ${formatMonth(droughtForecast.meta.issueMonth, "th")}`;
-  const forecastHeading = "พยากรณ์ภัยแล้ง · ข้อมูลย้อนหลังและความเสี่ยงจากชุดข้อมูลที่จัดมาตรฐานแล้ว";
+  const forecastHeading = "พยากรณ์ภัยแล้ง · ข้อมูลย้อนหลังและความเสี่ยงที่จัดมาตรฐานแล้ว";
   const periodValue = formatMonth(droughtForecast.meta.issueMonth, "th");
   const periodDescription = `พยากรณ์ภัยแล้ง ${formatThaiNumber(droughtForecast.monthly.length)} เดือนล่าสุด`;
 
@@ -1682,7 +1682,7 @@ function SourceTruthNote({
         <p className="eyebrow">{selectedLabel}</p>
         <strong>{forecastHeading}</strong>
         <span>
-          พยากรณ์ใช้ {forecastSourceLabel} · ข้อมูลย้อนหลังและภัยแล้งใช้ชุดข้อมูลที่จัดมาตรฐานแล้ว{" "}
+          พยากรณ์ใช้ {forecastSourceLabel} · ข้อมูลย้อนหลังและภัยแล้งใช้ข้อมูลที่จัดมาตรฐานแล้ว{" "}
           {formatThaiNumber(research.meta.normalizedRowCount)} รายการ ครอบคลุม {formatThaiNumber(research.meta.districtCount)} อำเภอ /{" "}
           {formatThaiNumber(research.meta.subdistrictCount)} ตำบล · รหัสจากงานวิจัยเดิมไม่ใช่รหัสราชการ
         </span>
@@ -1959,7 +1959,7 @@ function ResearchAreaForecastPanel({
             ? hasDroughtRiskSignal
               ? `กรองข้อมูลพยากรณ์ตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} ${droughtCoverageRemark} มีพื้นที่ขาดข้อมูล ${formatThaiNumber(droughtArea.missingSubdistricts)} ตำบล`
               : `กราฟเป็น 0 ทุกเดือน เพราะข้อมูลพยากรณ์ระบุว่าไม่เสี่ยงในช่วงพยากรณ์นี้ หลังกรองตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} (${droughtCoverageRemark})`
-            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูลพยากรณ์"}
+            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในรอบข้อมูลพยากรณ์"}
         </p>
       </div>
     </DashboardSection>
@@ -2071,8 +2071,8 @@ function DroughtForecastPriorityPanel({ forecast }: { forecast: NakhonRatchasima
 function ResearchDroughtSituationPanel({ research }: { research: NakhonRatchasimaResearchPanelSummary }) {
   return (
     <DashboardSection
-      eyebrow="ชุดข้อมูลภัยแล้ง"
-      title="สถานการณ์ภัยแล้งจากชุดข้อมูล"
+      eyebrow="ข้อมูลภัยแล้ง"
+      title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่"
       description="ใช้สถานะภัยแล้งที่จัดมาตรฐานแล้วเป็นแกนหลัก เพื่อแยกพื้นที่เฝ้าระวังออกจากพื้นที่ปกติในเดือนล่าสุด"
       provenance="DERIVED"
       className="nr-drought-situation-section"
@@ -2207,13 +2207,13 @@ function ResearchSourceLimitsPanel({ research }: { research: NakhonRatchasimaRes
   return (
     <DataTransparencyPanel
       className="nr-research-source-section"
-      sourceSummary="ชุดข้อมูลหลักและรอบข้อมูลล่าสุดของหน้าภัยแล้ง"
+      sourceSummary="แหล่งข้อมูลหลักและรอบข้อมูลล่าสุดของหน้าภัยแล้ง"
       limitationsSummary="ข้อควรระวังก่อนใช้ข้อมูลเพื่อคาดการณ์หรือตัดสินใจ"
       sourceChildren={
         <>
           <dl className="nr-research-source-grid">
             <div>
-              <dt>ข้อตกลงชุดข้อมูล</dt>
+              <dt>ขอบเขตข้อมูล</dt>
               <dd>ข้อมูลสถานการณ์และภัยแล้งที่จัดมาตรฐานแล้ว</dd>
             </div>
             <div>
@@ -2272,7 +2272,7 @@ function ResearchAreaHeading({
       </div>
       <div className="summary-strip nr-area-heading-metrics">
         <MetricCard
-          label="ข้อมูลในระบบ"
+          label="ข้อมูลรองรับ"
           value={isSubdistrict ? (stats.recordCount > 0 ? "มีข้อมูล" : "ไม่มีข้อมูล") : `${stats.recordCount}/${stats.totalSubdistricts} ตำบล`}
           detail={isSubdistrict ? `${formatMonth(activePeriod.period, "th")}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}` : `${formatPercent(coveragePercent, 0)} ครอบคลุมทุกพื้นที่`}
           provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
@@ -2280,7 +2280,7 @@ function ResearchAreaHeading({
         <MetricCard
           label="สถานะภัยแล้ง"
           value={researchAreaDroughtLabel(stats)}
-          detail={isSubdistrict ? "จากรายการข้อมูลตำบล" : `${formatThaiNumber(stats.droughtWatchSubdistricts + stats.droughtSevereSubdistricts)} ตำบลเฝ้าระวัง`}
+          detail={isSubdistrict ? "จากข้อมูลรายตำบล" : `${formatThaiNumber(stats.droughtWatchSubdistricts + stats.droughtSevereSubdistricts)} ตำบลเฝ้าระวัง`}
           provenance={stats.recordCount > 0 ? "DERIVED" : "PENDING_SOURCE"}
           tone={researchAreaDroughtTone(stats)}
         />
@@ -2323,11 +2323,11 @@ function ResearchAreaSituationPanel({
   return (
     <DashboardSection
       eyebrow="ข้อมูลรายเดือน"
-      title={isSubdistrict ? "สถานการณ์ตำบลจากชุดข้อมูล" : "สถานการณ์อำเภอจากชุดข้อมูล"}
+      title={isSubdistrict ? "สถานการณ์ตำบลตามข้อมูลพื้นที่" : "สถานการณ์อำเภอตามข้อมูลพื้นที่"}
       description={
         isSubdistrict
           ? "แสดงข้อมูลรายตำบลตรงจากตารางข้อมูลรายเดือน ถ้ารายการข้อมูลขาดจะไม่เดาค่าทดแทน"
-          : "สรุปจากรายการรายตำบลในอำเภอนี้ ไม่ใช้ข้อมูลจำลองหรือหลักฐานเก่าเป็นตัวเลขหลัก"
+          : "สรุปจากรายการรายตำบลในอำเภอนี้ ไม่ใช้ค่าประมาณหรือหลักฐานเก่าเป็นตัวเลขหลัก"
       }
       provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
       className="nr-area-situation-section"
@@ -2336,11 +2336,11 @@ function ResearchAreaSituationPanel({
         <MetricCard
           label="รอบข้อมูล"
           value={formatMonth(activePeriod.period, "th")}
-          detail={activePeriod.isFallback ? "เดือนที่เลือกไม่มีในชุดข้อมูล จึงใช้เดือนล่าสุด" : "ตรงกับเดือนที่เลือก"}
+          detail={activePeriod.isFallback ? "ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุด" : "ตรงกับเดือนที่เลือก"}
           provenance="REAL"
         />
         <MetricCard
-          label="ข้อมูลในระบบ"
+          label="ข้อมูลรองรับ"
           value={isSubdistrict ? (stats.recordCount > 0 ? "มีข้อมูล" : "ไม่มีข้อมูล") : `${formatThaiNumber(stats.recordCount)}/${formatThaiNumber(stats.totalSubdistricts)} ตำบล`}
           provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
         />
@@ -2389,8 +2389,8 @@ function ResearchAreaMapSection({
       title={target.level === "district" ? "แผนที่ตำบลในอำเภอ" : "แผนที่ตำบล"}
       description={
         isSubdistrict
-          ? "แผนที่แสดงตำแหน่งและระดับความเสี่ยงของตำบลนี้ตามชุดข้อมูลปัจจุบัน"
-          : "ใช้ตัวกรองร่วมกันบนแผนที่: ข้อมูลในระบบและระดับความเสี่ยง สามารถกรองซ้อนกันแบบตรงทุกเงื่อนไขได้"
+          ? "แผนที่แสดงตำแหน่งและระดับความเสี่ยงของตำบลนี้ตามข้อมูลปัจจุบัน"
+          : "ใช้ตัวกรองร่วมกันบนแผนที่: ข้อมูลรองรับและระดับความเสี่ยง สามารถกรองซ้อนกันแบบตรงทุกเงื่อนไขได้"
       }
       provenance="REAL"
       className="nr-area-map-section"
@@ -2474,7 +2474,7 @@ function ResearchAreaSubdistrictsPanel({
       id="district-subdistricts"
       eyebrow="ลำดับชั้นพื้นที่"
       title="ตำบลในอำเภอนี้"
-      description="ทุกตำบลในอำเภอใช้โครงเดียวกันและดึงรายการรายเดือนจากชุดข้อมูลที่จัดมาตรฐานแล้ว"
+      description="แสดงสถานะรายตำบลในอำเภอตามรอบข้อมูลเดียวกัน"
       provenance="REAL"
       className="nr-area-subdistrict-section"
     >
@@ -2556,7 +2556,7 @@ function ResearchSubdistrictProfilePanel({
     <DashboardSection
       eyebrow="พื้นที่"
       title="โปรไฟล์ตำบล"
-      description="ข้อมูลอ้างอิงพื้นที่และรายการรายเดือนที่มีในชุดข้อมูล"
+      description="ข้อมูลอ้างอิงพื้นที่และรายการรายเดือนที่ตรวจสอบได้"
       provenance={record ? "REAL" : "PENDING_SOURCE"}
       className="nr-area-side-section"
     >
@@ -2645,7 +2645,7 @@ function ResearchAreaSourceLimitsPanel({
               <dd>{areaName}</dd>
             </div>
             <div>
-              <dt>ข้อตกลงชุดข้อมูล</dt>
+              <dt>ขอบเขตข้อมูล</dt>
               <dd>ข้อมูลสถานการณ์และภัยแล้งที่จัดมาตรฐานแล้ว</dd>
             </div>
             <div>
@@ -2744,7 +2744,7 @@ function ProvinceSituationCards({ provinceRecord }: { provinceRecord: ProvinceMo
           <p className="eyebrow">ภาพรวมสถานการณ์วันนี้</p>
           <h2>ข้อมูลเกษตรที่เจ้าหน้าที่ควรรู้ก่อนเปิดพื้นที่</h2>
         </div>
-        <span className="nr-inline-status">อ้างอิงชุดข้อมูลเกษตรล่าสุด</span>
+        <span className="nr-inline-status">อ้างอิงข้อมูลเกษตรรอบล่าสุด</span>
       </div>
       <div className="nr-dashboard-situation-cards">
         <OfficialMetricCard
@@ -2769,7 +2769,7 @@ function ProvinceSituationCards({ provinceRecord }: { provinceRecord: ProvinceMo
         />
         <OfficialMetricCard
           icon={<Gauge size={18} />}
-          label="พื้นที่เปิดรับ"
+          label="พื้นที่ในขอบเขตประเมิน"
           value={provinceRecord ? `${formatRai(provinceRecord.agriculturalAreaExposedRai)} ไร่` : "รอข้อมูล"}
           detail={provinceRecord ? `พื้นที่เสี่ยงสูง ${formatRai(provinceRecord.highRiskAreaRai)} ไร่` : "ยังไม่คำนวณ"}
           tone={provinceRecord && provinceRecord.highRiskAreaRai > 0 ? "watch" : "default"}
@@ -2814,12 +2814,12 @@ function ProvinceDashboardMapCard({
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
   const mapMonthLabel = formatMonth(activeResearchPeriod.period, "th");
-  const title = activeTab === "drought" ? "แผนที่ภัยแล้งจากชุดข้อมูล" : "แผนที่สถานการณ์ภัยแล้ง";
+  const title = "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     activeTab === "drought"
-      ? `ชุดข้อมูลภัยแล้ง · ${mapMonthLabel} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
-      : `${mapMonthLabel} · สีแสดงสถานะจากชุดข้อมูลที่จัดมาตรฐานแล้ว ไม่ใช่ประกาศภัยทางการ${
-          activeResearchPeriod.isFallback ? " · เดือนที่เลือกไม่มีในชุดข้อมูล จึงใช้เดือนล่าสุดแทน" : ""
+      ? `ข้อมูลภัยแล้ง · ${mapMonthLabel} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
+      : `${mapMonthLabel} · สีแสดงสถานะจากข้อมูลที่จัดมาตรฐานแล้ว ไม่ใช่ประกาศภัยทางการ${
+          activeResearchPeriod.isFallback ? " · ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุดแทน" : ""
         }`;
 
   return (
@@ -2857,7 +2857,7 @@ function AgricultureVisibilityPanel({
   return (
     <section className="nr-dashboard-module nr-agri-impact-module">
       <div className="nr-module-title-row">
-        <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่ระบบมองเห็น" />
+        <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่นำมาประเมิน" />
         <DataProvenanceChip kind={provenance} />
       </div>
       <dl className="nr-agri-impact-summary">
@@ -2883,7 +2883,7 @@ function AgricultureImpactPanel({ provinceRecord }: { provinceRecord: ProvinceMo
     return (
       <section className="nr-dashboard-module nr-agri-impact-module">
         <div className="nr-module-title-row">
-          <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่ระบบมองเห็น" />
+          <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่นำมาประเมิน" />
           <DataProvenanceChip kind="PENDING_SOURCE" />
         </div>
         <EmptyLocalEvidence />
@@ -2903,7 +2903,7 @@ function AgricultureImpactPanel({ provinceRecord }: { provinceRecord: ProvinceMo
         },
         {
           id: "exposed-area",
-          label: "พื้นที่เปิดรับ",
+          label: "พื้นที่ในขอบเขตประเมิน",
           value: `${formatRai(provinceRecord.agriculturalAreaExposedRai)} ไร่`,
           icon: <Gauge size={18} />,
         },
@@ -2959,7 +2959,7 @@ function ResearchAreaAgricultureImpactPanel({
         },
         {
           id: "visible-scope",
-          label: "พื้นที่ที่ระบบเห็น",
+          label: "พื้นที่ในขอบเขตประเมิน",
           value: isSubdistrict ? "1 ตำบล" : `${formatThaiNumber(stats.totalSubdistricts)} ตำบล`,
           detail: isSubdistrict ? `อำเภอ${district.nameTh}` : `อำเภอ${district.nameTh}`,
           icon: <MapPin size={18} />,
@@ -3005,7 +3005,7 @@ function PredictionReadinessPanel({
     },
     {
       id: "source",
-      label: "มีข้อมูลนำเข้าตั้งต้น",
+      label: "มีข้อมูลตั้งต้น",
       count: readiness.sourceInputSubdistricts,
       tone: "info",
     },
@@ -3017,7 +3017,7 @@ function PredictionReadinessPanel({
     },
     {
       id: "blocked",
-      label: "ยังต้องเติมก่อนคำนวณ",
+      label: "ข้อมูลยังไม่เพียงพอ",
       count: readiness.blockedSubdistricts,
       tone: "watch",
     },
@@ -3071,7 +3071,7 @@ function PredictionReadinessPanel({
         </dl>
       </div>
       <div className="nr-readiness-footer">
-        <p>รายการด้านล่างเป็นสถานะความพร้อมของข้อมูลและหลักฐานคนละประเภท ไม่ใช่ระดับภัยที่เกิดแล้ว</p>
+        <p>รายการเหล่านี้เป็นสถานะความพร้อมของข้อมูลและหลักฐานคนละประเภท ไม่ใช่ระดับภัยที่เกิดแล้ว</p>
         <button type="button" className="secondary-button nr-readiness-map-action" onClick={onOpenMap}>
           <MapIcon size={18} aria-hidden="true" />
           ดูความพร้อมบนแผนที่
@@ -4225,7 +4225,7 @@ function NakhonRatchasimaLocalMap({
                 <dt>เดือนข้อมูล</dt>
                 <dd>
                   {formatMonth(previewResearch.period, "th")}
-                  {activeResearchPeriod.isFallback ? " · ใช้เดือนล่าสุดจากชุดข้อมูลแทน" : ""}
+                  {activeResearchPeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}
                 </dd>
               </div>
             )}
@@ -4271,7 +4271,7 @@ function NakhonRatchasimaLocalMap({
         {useResearchCriteriaMap && (
           <>
             {criteriaNarrowed && <strong>{localMapCriteriaSummaryLabel(criteria)}</strong>}
-            {activeResearchPeriod.isFallback && <span>เดือนที่เลือกไม่มีในชุดข้อมูล จึงใช้เดือนล่าสุดของชุดข้อมูลแทน</span>}
+            {activeResearchPeriod.isFallback && <span>ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุดแทน</span>}
           </>
         )}
       </div>
@@ -4454,7 +4454,7 @@ function ProvinceView({
             className="nr-data-readiness-section"
             eyebrow="ความพร้อมข้อมูล"
             title="ก่อนใช้ข้อมูลเพื่อคาดการณ์หรือตัดสินใจ"
-            description="ส่วนนี้บอกว่าข้อมูลระดับพื้นที่พร้อมแค่ไหน และอะไรยังไม่ควรถูกตีความเป็นระดับความเสี่ยง"
+            description="แสดงระดับความพร้อมของข้อมูลพื้นที่ และแยกสิ่งที่ยังไม่ควรตีความเป็นระดับความเสี่ยง"
           >
             <div className="nr-data-readiness-stack">
               <PredictionReadinessPanel month={formatMonth(selectedMonth, "th")} onOpenMap={openPredictionReadinessMap} />
@@ -4545,7 +4545,7 @@ function DistrictView({
         className="nr-data-readiness-section"
         eyebrow="ความพร้อมข้อมูล"
         title="ก่อนใช้ข้อมูลเพื่อคาดการณ์หรือตัดสินใจ"
-        description="ส่วนนี้บอกว่าข้อมูลระดับพื้นที่พร้อมแค่ไหน และแยกจากระดับความรุนแรงของภัย"
+        description="แสดงระดับความพร้อมของข้อมูลพื้นที่ โดยแยกจากระดับความรุนแรงของภัย"
       >
         <PredictionReadinessPanel
           month={formatMonth(activeResearchPeriod.period, "th")}
@@ -4653,7 +4653,7 @@ function SubdistrictView({
         className="nr-data-readiness-section"
         eyebrow="ความพร้อมข้อมูล"
         title="ก่อนใช้ข้อมูลเพื่อคาดการณ์หรือตัดสินใจ"
-        description="ส่วนนี้บอกว่าข้อมูลตำบลพร้อมใช้แค่ไหน และแยกจากระดับความรุนแรงของภัย"
+        description="แสดงระดับความพร้อมของข้อมูลตำบล โดยแยกจากระดับความรุนแรงของภัย"
       >
         <PredictionReadinessPanel
           month={formatMonth(activeResearchPeriod.period, "th")}
@@ -4816,7 +4816,7 @@ export function NakhonRatchasimaWorkspace({
     return [
       {
         value: workspaceMonth,
-        label: `${formatMonth(workspaceMonth, "th")} · นอกชุดข้อมูล`,
+        label: `${formatMonth(workspaceMonth, "th")} · ไม่มีข้อมูลในรอบนี้`,
         group: "เดือนที่เลือกอยู่",
         badge: "ใช้เดือนล่าสุดแทน",
         badgeTone: "watch" as const,

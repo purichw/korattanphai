@@ -91,9 +91,9 @@ export function OperationalFilters({
     : [
         {
           value: selectedMonth,
-          label: `${formatMonth(selectedMonth, language)} · นอกชุดข้อมูล`,
-          group: "เดือนที่เลือกอยู่",
-          badge: "fallback",
+          label: `${formatMonth(selectedMonth, language)} · ไม่มีข้อมูลในรอบนี้`,
+          group: "เดือนที่เลือก",
+          badge: "ใช้รอบล่าสุด",
           badgeTone: "watch" as const,
         },
         ...baseMonthOptions,

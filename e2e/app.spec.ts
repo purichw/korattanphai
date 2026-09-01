@@ -165,14 +165,14 @@ test("login route accepts only the two allowed usernames without listing them", 
 
   await page.getByLabel("ชื่อผู้ใช้").fill("pointy");
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ Pointy/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ เจ้าหน้าที่เกษตรจังหวัด/ })).toBeVisible();
 
   await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
   await page.getByRole("menuitem", { name: /ออกจากระบบ/ }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel("ชื่อผู้ใช้").fill("SOMSAK");
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ Somsak/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ เจ้าหน้าที่เกษตรจังหวัด/ })).toBeVisible();
 });
 
 test("Nakhon Ratchasima-only shell opens the provincial overview with nested drought nav", async ({ page }) => {
@@ -188,13 +188,15 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.locator(".topbar .secondary-button")).toHaveCount(0);
   await accountTrigger.click();
   const accountMenu = page.getByRole("menu", { name: "บัญชีผู้ใช้" });
-  await expect(accountMenu).toContainText("Pointy");
+  await expect(accountMenu).toContainText("บัญชีผู้ใช้งาน");
   await expect(accountMenu).toContainText("เจ้าหน้าที่เกษตรจังหวัด");
   await expect(accountMenu.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
-  await expect(accountMenu.getByRole("menuitem", { name: /รีเซ็ตข้อมูลเดโม/ })).toBeVisible();
+  await expect(accountMenu).not.toContainText(".demo");
+  await expect(accountMenu).not.toContainText("หน่วยงานน้ำและชลประทาน");
+  await expect(accountMenu.getByRole("menuitem", { name: /คืนค่าข้อมูลเริ่มต้น/ })).toBeVisible();
   await expect(accountMenu.getByRole("menuitem", { name: /ออกจากระบบ/ })).toBeVisible();
   await accountMenu.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรอำเภอ/ }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ Pointy เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
   await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
   await page.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรจังหวัด/ }).click();
   await expect(page.getByRole("heading", { name: "แผนที่สถานการณ์ภัยแล้ง" })).toBeVisible();
@@ -234,7 +236,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const mapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card"));
   const mapToolbar = page.locator(".nr-dashboard-map-card .nr-local-map-criteria");
   const mapControls = page.locator(".nr-dashboard-map-card .nr-map-controls");
-  await expect(page.getByRole("heading", { name: "แผนที่ภัยแล้งจากชุดข้อมูล" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "แผนที่สถานการณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox")).toHaveCount(4);
   await expect(mapToolbar.getByRole("combobox", { name: "เดือนข้อมูลบนแผนที่จังหวัดนครราชสีมา" })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox", { name: "มุมมองแผนที่" })).toBeVisible();
@@ -620,9 +622,9 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
 
   await page.goto("/mueang-nakhon-ratchasima/t-300101");
   await expect(page.getByRole("heading", { name: "ในเมือง", exact: true })).toBeVisible();
-  await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในชุดข้อมูลนี้").first()).toBeVisible();
+  await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในรอบข้อมูลนี้").first()).toBeVisible();
   await expect(page.getByText("ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ").first()).toBeVisible();
-  await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในชุดข้อมูลพยากรณ์")).toBeVisible();
+  await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในรอบข้อมูลพยากรณ์")).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.locator(".nr-subdistrict-gap-section")).toContainText("รายการที่ยังไม่มี");
 
@@ -746,6 +748,6 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
     await nakhonRatchasimaPreview.getByRole("button", { name: "เปิดตำบลนี้" }).click();
     await expect(page).toHaveURL(/\/mueang-nakhon-ratchasima\/t-300101$/);
     await expect(page.getByRole("heading", { name: "ในเมือง", exact: true })).toBeVisible();
-    await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในชุดข้อมูลนี้").first()).toBeVisible();
+    await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในรอบข้อมูลนี้").first()).toBeVisible();
   }
 });

@@ -78,7 +78,7 @@ function ProvinceRouteNotFound({ slug, onNavigate }: { slug: string; onNavigate:
             <strong>ยังไม่มีจังหวัดสำหรับ /{slug}</strong>
           </div>
         </div>
-        <p>เส้นทางจังหวัดต้องมาจาก slug ของจังหวัดในชุดข้อมูลหลักเท่านั้น กลับไปเลือกจังหวัดจากแผนที่ประเทศเพื่อเปิดหน้าที่ถูกต้อง</p>
+        <p>เส้นทางจังหวัดต้องมาจากรายชื่อจังหวัดที่รองรับเท่านั้น กลับไปเลือกจังหวัดจากแผนที่ประเทศเพื่อเปิดหน้าที่ถูกต้อง</p>
       </section>
     </div>
   );
@@ -190,7 +190,7 @@ export function ProvinceWorkspacePlaceholder({
       </section>
 
       <section className="province-container-grid">
-        <PlaceholderPanel icon={<Database size={18} />} eyebrow="ข้อมูลจังหวัด" title="รอชุดข้อมูลจังหวัด">
+        <PlaceholderPanel icon={<Database size={18} />} eyebrow="ข้อมูลจังหวัด" title="ยังไม่รองรับจังหวัดนี้">
           <p>ยังไม่มีข้อมูลเฉพาะจังหวัดนี้ในโปรเจกต์ จึงไม่แสดงตัวเลขสถานการณ์เป็นค่าจริง</p>
         </PlaceholderPanel>
 

@@ -102,7 +102,7 @@ export function appReducer(state: AppState, action: Action): AppState {
         ...state,
         personaId: action.personaId,
         section: persona?.role === "Farmer" ? "alerts" : state.section,
-        toast: persona ? "เปลี่ยนบทบาทผู้ใช้งานแล้ว" : undefined,
+        toast: persona ? "ปรับบทบาทการใช้งานแล้ว" : undefined,
       };
     }
     case "setSection":
@@ -151,8 +151,8 @@ export function appReducer(state: AppState, action: Action): AppState {
           eventAuditTrail: addEventAudit(
             state.runtime,
             MAIN_EVENT_ID,
-            "Field verification submitted; event confidence increased for demo",
-            "extension.demo",
+            "Field verification submitted; event confidence increased",
+            "เจ้าหน้าที่ส่งเสริมการเกษตร",
           ),
         },
         toast: localizedToast(state.language, "ส่งผลตรวจภาคสนามและอัปเดตเหตุการณ์แล้ว", "Field verification submitted and event updated"),
@@ -167,7 +167,7 @@ export function appReducer(state: AppState, action: Action): AppState {
           advisoryActions: actions,
           advisoryVersionHistory: [
             ...state.runtime.advisoryVersionHistory,
-            nowAudit("Advisory recommendation edited", "province.demo"),
+            nowAudit("Advisory recommendation edited", "เจ้าหน้าที่เกษตรจังหวัด"),
           ],
         },
       };
@@ -178,7 +178,7 @@ export function appReducer(state: AppState, action: Action): AppState {
         runtime: {
           ...state.runtime,
           advisoryStatus: "Ready for Review",
-          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Advisory submitted for supervisor review", "province.demo"),
+          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Advisory submitted for supervisor review", "เจ้าหน้าที่เกษตรจังหวัด"),
         },
         toast: localizedToast(state.language, "ส่งคำแนะนำเข้าสู่คิวตรวจอนุมัติแล้ว", "Advisory sent to supervisor review queue"),
       };
@@ -188,7 +188,7 @@ export function appReducer(state: AppState, action: Action): AppState {
         runtime: {
           ...state.runtime,
           advisoryStatus: "Approved",
-          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Advisory approved", "supervisor.demo"),
+          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Advisory approved", "ผู้ตรวจอนุมัติ"),
         },
         toast: localizedToast(state.language, "อนุมัติคำแนะนำแล้ว พร้อมเผยแพร่", "Advisory approved; publication enabled"),
       };
@@ -198,7 +198,7 @@ export function appReducer(state: AppState, action: Action): AppState {
         runtime: {
           ...state.runtime,
           advisoryStatus: "Changes Requested",
-          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Supervisor requested advisory changes", "supervisor.demo"),
+          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Supervisor requested advisory changes", "ผู้ตรวจอนุมัติ"),
         },
         toast: localizedToast(state.language, "ส่งกลับให้ผู้จัดทำแก้ไขคำแนะนำแล้ว", "Changes requested and returned to advisory author"),
       };
@@ -229,7 +229,7 @@ export function appReducer(state: AppState, action: Action): AppState {
           deliveryRecords: records,
           farmerAlerts: [farmerAlert],
           eventStatus: { ...state.runtime.eventStatus, [MAIN_EVENT_ID]: "Published / Monitoring" },
-          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Advisory published to selected channels", "national.demo"),
+          eventAuditTrail: addEventAudit(state.runtime, MAIN_EVENT_ID, "Advisory published to selected channels", "เจ้าหน้าที่เกษตรระดับประเทศ"),
         },
         toast: localizedToast(state.language, "เผยแพร่แล้ว และสร้างคำเตือนสำหรับ FARM-001", "Published; farmer alert created for FARM-001"),
       };
@@ -245,7 +245,7 @@ export function appReducer(state: AppState, action: Action): AppState {
         },
       };
     case "resetDemo":
-      return { ...createInitialState(), toast: localizedToast(state.language, "รีเซ็ตข้อมูลต้นแบบแล้ว", "Demo data reset") };
+      return { ...createInitialState(), toast: localizedToast(state.language, "คืนค่าข้อมูลเริ่มต้นแล้ว", "Data reset") };
     case "toast":
       return { ...state, toast: action.message };
     default:

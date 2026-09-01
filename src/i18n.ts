@@ -82,8 +82,8 @@ const dictionary: Record<Key, Record<Language, string>> = {
   riskLayer: { th: "ชั้นความเสี่ยง", en: "Risk layer" },
   evidenceLayer: { th: "ชั้นหลักฐาน", en: "Evidence layer" },
   officialContext: { th: "บริบททางการ", en: "Official context" },
-  prototypeAssessment: { th: "ค่าประเมินต้นแบบ", en: "Prototype assessment" },
-  resetDemo: { th: "รีเซ็ตข้อมูลเดโม", en: "Reset demo data" },
+  prototypeAssessment: { th: "ค่าประเมินประกอบ", en: "Prototype assessment" },
+  resetDemo: { th: "คืนค่าข้อมูลเริ่มต้น", en: "Reset data" },
   submitVerification: { th: "ส่งผลตรวจภาคสนาม", en: "Submit verification" },
   submitReview: { th: "ส่งตรวจอนุมัติ", en: "Submit for review" },
   approve: { th: "อนุมัติ", en: "Approve" },
@@ -91,11 +91,11 @@ const dictionary: Record<Key, Record<Language, string>> = {
   publish: { th: "เผยแพร่", en: "Publish" },
   farmerView: { th: "มุมมองเกษตรกร", en: "Farmer view" },
   dataNotice: {
-    th: "คะแนนระดับจังหวัด/อำเภอเป็นข้อมูลสังเคราะห์สำหรับต้นแบบ ไม่ใช่ประกาศทางการ",
+    th: "คะแนนระดับจังหวัด/อำเภอเป็นข้อมูลประกอบการประเมิน ไม่ใช่ประกาศทางการ",
     en: "Province and local risk scores are synthetic prototype values, not official warnings.",
   },
   notSeeded: {
-    th: "พื้นที่นี้ยังไม่มีข้อมูลเดโมระดับท้องถิ่น",
+    th: "พื้นที่นี้ยังไม่มีข้อมูลระดับท้องถิ่น",
     en: "Detailed local demo data is not seeded for this area.",
   },
 };
@@ -189,7 +189,7 @@ const cropStageTh: Record<string, string> = {
   "Harvest / post-harvest in seeded eastern scenario": "ระยะเก็บเกี่ยวและหลังเก็บเกี่ยวในฉากจำลองภาคตะวันออก",
   Mixed: "หลายระยะการเจริญเติบโต",
   "Mixed production stages": "หลายระยะการผลิต",
-  "Vegetative to tillering in seeded demo areas": "ระยะเจริญทางใบถึงแตกกอในพื้นที่ต้นแบบ",
+  "Vegetative to tillering in seeded demo areas": "ระยะเจริญทางใบถึงแตกกอในพื้นที่ที่มีข้อมูลรองรับ",
 };
 
 export function labelCropStageSummary(summary: string, language: Language) {
@@ -202,9 +202,9 @@ const cropOutlookTh: Record<string, string> = {
   "Mixed: localized flood/excess-water risk and localized water-management stress can coexist.":
     "ต้องติดตามทั้งความเสี่ยงน้ำมากเฉพาะพื้นที่และความเครียดจากการจัดการน้ำในแปลง ซึ่งอาจเกิดพร้อมกันได้",
   "Use province risk context; no dedicated cassava event is seeded.":
-    "ใช้บริบทความเสี่ยงระดับจังหวัดเป็นหลัก โดยยังไม่มีเหตุการณ์เฉพาะของมันสำปะหลังในชุดข้อมูลต้นแบบ",
+    "ใช้บริบทความเสี่ยงระดับจังหวัดเป็นหลัก โดยยังไม่มีเหตุการณ์เฉพาะของมันสำปะหลังในข้อมูลปัจจุบัน",
   "Use province risk context; no dedicated maize event is seeded.":
-    "ใช้บริบทความเสี่ยงระดับจังหวัดเป็นหลัก โดยยังไม่มีเหตุการณ์เฉพาะของข้าวโพดในชุดข้อมูลต้นแบบ",
+    "ใช้บริบทความเสี่ยงระดับจังหวัดเป็นหลัก โดยยังไม่มีเหตุการณ์เฉพาะของข้าวโพดในข้อมูลปัจจุบัน",
   "Wind/heavy-rain disruption risk in selected orchard areas.":
     "ลมแรงและฝนหนักอาจรบกวนการจัดการสวนในบางพื้นที่ไม้ผล",
 };
@@ -424,7 +424,7 @@ export function labelAdvisoryTitle(title: string, language: Language) {
 
 const advisorySummaryTh: Record<string, string> = {
   "Short intense rainfall and uneven distribution can still leave some rain-fed rice fields under water-management stress. This local risk assessment is synthetic and used for prototype demonstration.":
-    "ฝนตกหนักช่วงสั้นและกระจายตัวไม่สม่ำเสมอ อาจทำให้นาข้าวนาน้ำฝนบางพื้นที่ยังมีภาวะเครียดจากการจัดการน้ำ การประเมินระดับพื้นที่นี้เป็นข้อมูลสังเคราะห์สำหรับสาธิตต้นแบบ",
+    "ฝนตกหนักช่วงสั้นและกระจายตัวไม่สม่ำเสมอ อาจทำให้นาข้าวนาน้ำฝนบางพื้นที่ยังมีภาวะเครียดจากการจัดการน้ำ การประเมินระดับพื้นที่นี้เป็นข้อมูลประกอบการตัดสินใจ",
 };
 
 export function labelAdvisorySummary(summary: string, language: Language) {
@@ -485,8 +485,8 @@ const modelFamilyTh: Record<string, string> = {
 const modelNameTh: Record<string, string> = {
   "Demo Crop Exposure / Crop Stage": "ชั้นข้อมูลต้นแบบพื้นที่พืชและระยะพืช",
   "Demo Hydrological Risk Layer": "ชั้นข้อมูลต้นแบบความเสี่ยงอุทกวิทยา",
-  "Demo Soil Moisture Layer": "ชั้นข้อมูลต้นแบบความชื้นดิน",
-  "Demo Vegetation Stress Layer": "ชั้นข้อมูลต้นแบบความเครียดพืช",
+  "Demo Soil Moisture Layer": "ชั้นข้อมูลความชื้นดิน",
+  "Demo Vegetation Stress Layer": "ชั้นข้อมูลความเครียดพืช",
   "GISTDA Crops Drought pattern": "รูปแบบภัยแล้งพืชจาก GISTDA",
   "TMD monthly / 3-month / agromet outlook": "แนวโน้มรายเดือน/3 เดือน/อุตุนิยมเกษตร จากกรมอุตุนิยมวิทยา",
   "TMD observed/monthly summaries": "สรุปข้อมูลตรวจอากาศและรายเดือนจากกรมอุตุนิยมวิทยา",
@@ -494,8 +494,8 @@ const modelNameTh: Record<string, string> = {
 
 const modelCoverageTh: Record<string, string> = {
   "Nationwide province summaries + seeded deep areas": "สรุประดับจังหวัดทั่วประเทศและพื้นที่ลึกที่เตรียมข้อมูลไว้",
-  "Seeded demo areas": "พื้นที่ต้นแบบที่เตรียมข้อมูลไว้",
-  "Seeded flood demo areas": "พื้นที่ต้นแบบด้านน้ำท่วมที่เตรียมข้อมูลไว้",
+  "Seeded demo areas": "พื้นที่ที่เตรียมข้อมูลไว้",
+  "Seeded flood demo areas": "พื้นที่ด้านน้ำท่วมที่เตรียมข้อมูลไว้",
   Thailand: "ประเทศไทย",
   "Thailand / national-regional context": "ประเทศไทยและบริบทระดับประเทศ/ภูมิภาค",
   "Thailand / published forecast scope": "ประเทศไทยตามขอบเขตพยากรณ์ที่เผยแพร่",
@@ -511,7 +511,7 @@ const modelFreshnessTh: Record<string, string> = {
 };
 
 const modelVersionTh: Record<string, string> = {
-  "demo-v1": "ต้นแบบรุ่น 1",
+  "demo-v1": "รุ่นข้อมูล 1",
   "External reference": "แหล่งอ้างอิงภายนอก",
   "Official source product": "ผลิตภัณฑ์ข้อมูลทางการ",
 };
@@ -739,11 +739,11 @@ const organizationTh: Record<string, string> = {
   "Southern Regional Operations": "ศูนย์ปฏิบัติการภาคใต้",
   System: "ระบบ",
   "Western Regional Operations": "ศูนย์ปฏิบัติการภาคตะวันตก",
-  "analyst.demo": "นักวิเคราะห์เดโม",
-  "extension.demo": "เจ้าหน้าที่ส่งเสริมเดโม",
-  "national.demo": "เจ้าหน้าที่ระดับประเทศเดโม",
-  "province.demo": "เจ้าหน้าที่จังหวัดเดโม",
-  "supervisor.demo": "ผู้ตรวจอนุมัติเดโม",
+  "analyst.demo": "นักวิเคราะห์เกษตรและภูมิอากาศ",
+  "extension.demo": "เจ้าหน้าที่ส่งเสริมการเกษตร",
+  "national.demo": "เจ้าหน้าที่เกษตรระดับประเทศ",
+  "province.demo": "เจ้าหน้าที่เกษตรจังหวัด",
+  "supervisor.demo": "ผู้ตรวจอนุมัติ",
 };
 
 export function labelOrganization(name: string, language: Language) {
@@ -932,7 +932,7 @@ const evidenceKeyTh: Record<string, string> = {
 };
 
 const evidenceValueTh: Record<string, string> = {
-  "3 of 5 demo signals support elevated field water stress": "สัญญาณเดโม 3 จาก 5 รายการสนับสนุนภาวะเครียดน้ำระดับแปลง",
+  "3 of 5 demo signals support elevated field water stress": "สัญญาณข้อมูล 3 จาก 5 รายการสนับสนุนภาวะเครียดน้ำระดับแปลง",
   "Constrained in selected rain-fed fields": "จำกัดในนาน้ำฝนบางพื้นที่",
   High: "สูง",
   "High / excess in selected areas": "สูงหรือมากเกินในบางพื้นที่",
@@ -977,6 +977,8 @@ const auditActionTh: Record<string, string> = {
   "Event detected": "ตรวจพบเหตุการณ์เสี่ยง",
   "Event placed on monitoring queue": "เพิ่มเหตุการณ์เข้าคิวเฝ้าระวัง",
   "Field verification assigned": "มอบหมายงานตรวจภาคสนาม",
+  "Field verification submitted; event confidence increased":
+    "รับผลตรวจภาคสนามและปรับความเชื่อมั่นของเหตุการณ์",
   "Field verification submitted; event confidence increased for demo":
     "รับผลตรวจภาคสนามและปรับความเชื่อมั่นของเหตุการณ์",
   "Historical event closed": "ปิดเหตุการณ์ย้อนหลัง",

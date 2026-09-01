@@ -177,6 +177,8 @@ const publicationChannels = [
   "Voice / IVR",
 ];
 
+const accountPersonaOptions = users.filter((user) => user.id !== "u-water");
+
 function AccountControl({
   loginUser,
   persona,
@@ -199,7 +201,8 @@ function AccountControl({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const menuId = useId().replaceAll(":", "");
   const roleLabel = labelPersonaRole(persona.role, language);
-  const accountLabel = `บัญชีผู้ใช้ ${loginUser.name} ${roleLabel}`;
+  const accountDisplayName = "บัญชีผู้ใช้งาน";
+  const accountLabel = `บัญชีผู้ใช้ ${roleLabel}`;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -246,7 +249,7 @@ function AccountControl({
       >
         <UserRound size={18} aria-hidden="true" />
         <span className="account-trigger-copy">
-          <strong>{loginUser.name}</strong>
+          <strong>{accountDisplayName}</strong>
           <small>{roleLabel}</small>
         </span>
         <ChevronDown className="account-trigger-chevron" size={17} aria-hidden="true" />
@@ -268,15 +271,15 @@ function AccountControl({
             <div className="account-menu-profile" role="presentation">
               <UserRound size={18} aria-hidden="true" />
               <span>
-                <strong>{loginUser.name}</strong>
+                <strong>{accountDisplayName}</strong>
                 <small>{roleLabel}</small>
               </span>
             </div>
             <div className="account-menu-divider" role="presentation" />
             <div className="account-menu-section" role="presentation">
-              <span className="account-menu-section-label">เปลี่ยนบทบาท</span>
-              <div className="account-role-options" role="group" aria-label="เปลี่ยนบทบาท">
-                {users.map((user) => {
+              <span className="account-menu-section-label">บทบาทการใช้งาน</span>
+              <div className="account-role-options" role="group" aria-label="บทบาทการใช้งาน">
+                {accountPersonaOptions.map((user) => {
                   const optionRole = labelPersonaRole(user.role, language);
                   const isSelected = user.id === persona.id;
                   return (
@@ -291,7 +294,6 @@ function AccountControl({
                       <UsersRound size={16} aria-hidden="true" />
                       <span>
                         <strong>{optionRole}</strong>
-                        <small>{user.username}</small>
                       </span>
                       {isSelected && <CheckCircle2 size={16} aria-hidden="true" />}
                     </button>
@@ -345,7 +347,7 @@ function AppShell({
   const state = useAppState();
   const dispatch = useAppDispatch();
   const language = state.language;
-  const persona = users.find((user) => user.id === state.personaId) ?? users[0];
+  const persona = accountPersonaOptions.find((user) => user.id === state.personaId) ?? accountPersonaOptions[0] ?? users[0];
   const selectedRecord = getProvinceRecord(state.selectedProvinceId, state.selectedMonth);
   const selectedProvince = provinces.find((province) => province.id === state.selectedProvinceId);
   const visibleSections: AppSection[] = ["overview"];
@@ -368,8 +370,8 @@ function AppShell({
               <source media="(max-width: 720px)" srcSet="/brand/korat-tan-phai-emblem.webp" />
               <img
                 src="/brand/korat-tan-phai-sidebar-logo.webp"
-                width="644"
-                height="720"
+                width="640"
+                height="585"
                 alt={t("brand", language)}
                 decoding="async"
               />
@@ -772,7 +774,7 @@ function RisksSection() {
             <>
               <div className="provenance-corner-host">
                 <DataProvenanceChip kind="DERIVED" language={language} />
-                <p className="eyebrow">{language === "th" ? "ระบบคำนวณ" : "Computed"}</p>
+                <p className="eyebrow">{language === "th" ? "ผลคำนวณ" : "Computed"}</p>
                 <h3>{fusion.resultLabelTh}</h3>
                 <p>{fusion.formulaTh}</p>
               </div>
@@ -790,7 +792,7 @@ function RisksSection() {
           ) : (
             <div className="provenance-corner-host">
               <DataProvenanceChip kind="PENDING_SOURCE" language={language} />
-              <p className="eyebrow">{language === "th" ? "รอเชื่อมข้อมูล" : "Pending source"}</p>
+              <p className="eyebrow">{language === "th" ? "รอยืนยันข้อมูล" : "Pending source"}</p>
               <h3>{fusionFailed ? "ไม่สามารถโหลดคำอธิบายความเสี่ยงได้" : "กำลังโหลดคำอธิบายความเสี่ยง"}</h3>
               <p>{fusionFailed ? "โปรดลองเปิดเหตุการณ์นี้อีกครั้ง" : "กำลังดึงข้อมูลจากส่วนประมวลผล"}</p>
             </div>
@@ -1075,7 +1077,7 @@ function AlertsSection() {
         )}
       </section>
       <section className="panel-list">
-        <PanelHeader icon={<BarChart3 size={18} />} title="สถิติเดโมหลังเผยแพร่" />
+        <PanelHeader icon={<BarChart3 size={18} />} title="สถิติหลังเผยแพร่" />
         {state.runtime.deliveryRecords.length === 0 ? (
           <p className="empty-note">ยังไม่มีข้อมูลส่งออก เพราะยังไม่ได้เผยแพร่</p>
         ) : (
@@ -1201,7 +1203,7 @@ function DataModelsSection() {
     <div className="page-stack">
       <section className="detail-panel">
         <PanelHeader icon={<Database size={18} />} title={t("models", language)} />
-        <p>ทะเบียนนี้แยกข้อมูลจริง ข้อมูลต้นแบบ ค่าที่ระบบคำนวณ และสถานะจากการใช้งาน เพื่อไม่ให้ผู้ใช้เข้าใจว่าคะแนนรวมเป็นประกาศทางการจากหน่วยงานใดหน่วยงานหนึ่ง</p>
+        <p>ทะเบียนนี้แยกข้อมูลจริง ข้อมูลตัวอย่าง ผลคำนวณ และสถานะจากการใช้งาน เพื่อไม่ให้ผู้ใช้เข้าใจว่าคะแนนรวมเป็นประกาศทางการจากหน่วยงานใดหน่วยงานหนึ่ง</p>
         <DataProvenanceLegend kinds={["REAL", "CANONICAL_SYNTHETIC", "DERIVED", "RUNTIME_STATE", "PENDING_SOURCE"]} language={language} />
       </section>
 
@@ -1266,7 +1268,7 @@ function DataModelsSection() {
       </section>
 
       <section className="detail-panel">
-        <PanelHeader icon={<Database size={18} />} title="แบบจำลองและชุดข้อมูลต้นแบบเดิม" />
+        <PanelHeader icon={<Database size={18} />} title="แบบจำลองและข้อมูลอ้างอิง" />
         <div className="model-grid">
           {dataModelRegistry.map((record) => (
             <section key={record.id} className="model-card provenance-corner-host">
@@ -1316,7 +1318,7 @@ function labelQueueItem(label: string, _language: "th" | "en") {
 function labelQueueDetail(detail: string, _language: "th" | "en") {
   return detail
     .replace("Demo Rice Community", "ชุมชนนาข้าวต้นแบบ")
-    .replace("Northern basin demo group", "กลุ่มลุ่มน้ำภาคเหนือต้นแบบ")
+    .replace("Northern basin demo group", "กลุ่มลุ่มน้ำภาคเหนือ")
     .replace("Rice", "ข้าว")
     .replace("Edit and submit for supervisor review", "แก้ไขแล้วส่งให้ผู้อนุมัติตรวจ")
     .replace("Supervisor review queue", "คิวตรวจของผู้อนุมัติ")
