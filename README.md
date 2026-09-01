@@ -116,6 +116,9 @@ user task explicitly authorizes it.
   an official subdistrict risk score.
 - Nakhon Ratchasima local geometry is served from
   `public/geodata/nakhon-ratchasima-subdistricts.geojson`.
+- The visible Nakhon Ratchasima local province outline is generated from that
+  same subdistrict source and served from
+  `public/geodata/nakhon-ratchasima-boundary.geojson`.
 - Local Nakhon Ratchasima joins must use admin codes, not Thai names or route
   slugs. Missing local evidence must render as no-data/insufficient evidence,
   not low risk.

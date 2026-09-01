@@ -94,12 +94,13 @@ After deploy:
 5. Confirm the primary sidebar shows only `ภาพรวม`.
 6. Confirm `/geodata/thailand-neighbor-context.geojson` loads.
 7. Confirm `/geodata/nakhon-ratchasima-subdistricts.geojson` loads.
-8. Confirm `/api/risk-fusion?eventId=ARE-2026-0825-NE` returns JSON.
-9. Check desktop and mobile widths for no horizontal overflow.
-10. Confirm `/`, `/drought`, `/wang-nam-khiao`, and
+8. Confirm `/geodata/nakhon-ratchasima-boundary.geojson` loads.
+9. Confirm `/api/risk-fusion?eventId=ARE-2026-0825-NE` returns JSON.
+10. Check desktop and mobile widths for no horizontal overflow.
+11. Confirm `/`, `/drought`, `/wang-nam-khiao`, and
     `/wang-nam-khiao/t-302504` load after login.
-11. Confirm legacy `/nakhon-ratchasima/...` URLs still load for old links.
-12. Confirm the Nakhon Ratchasima layer selector hides water, flood, reservoir,
+12. Confirm legacy `/nakhon-ratchasima/...` URLs still load for old links.
+13. Confirm the Nakhon Ratchasima layer selector hides water, flood, reservoir,
     weather, and rainfall layers from the current product UI.
 13. Confirm `/wang-nam-khiao/t-302504` does not show station, rainfall,
     water-level, reservoir, or irrigation detail panels.

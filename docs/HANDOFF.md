@@ -90,6 +90,68 @@ Current province workspace/navigation patch:
   containers, but they must not display missing local evidence as normal risk or
   a completed data-readiness feature.
 
+Current Nakhon Ratchasima SVG map zoom performance patch:
+
+- Confirmed the production map renders 590 paths under
+  `g.nr-map-transform-layer`; button and wheel zoom previously updated React
+  state on every animation frame, forcing repeated reconciliation of the large
+  SVG layer while the transform was moving.
+- Added an imperative transient transform path for zoom, wheel, drag, and pinch:
+  the visible SVG matrix is written directly during interaction, then React
+  state is committed once after the visual transform settles. The deferred
+  state commit is cancelable so rapid follow-up input does not wait behind an
+  older reconciliation pass.
+- Added a separate intended button-zoom target so rapid repeated clicks stack
+  the configured zoom step, clamp to the configured bounds, and do not animate
+  toward stale partial transforms. Zoom in followed immediately by zoom out now
+  returns to the prior intended transform.
+- Memoized local feature path strings for the heavy map layers so the final
+  React commit no longer recomputes every SVG path string from GeoJSON.
+- Preserved GeoJSON, feature counts, risk/readiness semantics, colors, labels,
+  route focus, reset/current-area behavior, pan clamping, wheel containment,
+  drag/pinch, fullscreen, preview cards, Thai accessible labels, and responsive
+  layout.
+- Before measurement against production: one button zoom caused 4 React commits
+  and the sampled transform tail lasted roughly 354-407 ms; wheel/reset cases
+  showed tails around 1.3-1.5 s, and three rapid zoom-in clicks only advanced
+  one zoom step.
+- After measurement against a local production build (`npm run preview`):
+  1440, 1024, 768, 430, and 390 px viewports all kept 590 transform-layer
+  paths, showed button first response in 18-40 ms, button visual settlement in
+  136-148 ms, rapid three-click zoom reached the full intended target, wheel
+  zoom settled in roughly 155-174 ms where tested, reduced-motion zoom settled
+  in roughly 11 ms, and no JavaScript errors or horizontal overflow were
+  observed.
+- Verification for this patch: `git diff --check`, `npm test`,
+  `npm run build`, and `npm run test:e2e:managed`.
+
+Current Nakhon Ratchasima local boundary patch:
+
+- Confirmed a separate geometry issue from the zoom-performance issue: the 289
+  colored local polygons came from
+  `public/geodata/nakhon-ratchasima-subdistricts.geojson`, but the visible white
+  province outline came from the separate ADM1 dataset. The two sources do not
+  match exactly, so the outline visibly separated from the colored union when
+  zoomed.
+- Added `scripts/generate-nr-boundary.mjs` and `npm run generate:nr-boundary`
+  to deterministically dissolve the 289 local subdistrict geometries into
+  `public/geodata/nakhon-ratchasima-boundary.geojson`. The generated artifact
+  records source metadata, all 289 Admin codes, source feature count, and bbox.
+- Updated `NakhonRatchasimaWorkspace` so the local map fetches the generated
+  boundary artifact for the visible Nakhon Ratchasima province outline.
+  `thailand-adm1.geojson` remains in use only for national/neighboring-province
+  context and labels.
+- Removed the redundant province halo/base casing paths, removed the large
+  province drop shadow, and now render one clipped white boundary after the
+  colored subdistrict polygons. The stroke remains non-scaling, but the clip
+  keeps the visible weight inside the dissolved local boundary.
+- Audited district/subdistrict focus casing and reduced the focused-area white
+  casing from the previous heavy treatment to a lighter non-scaling outline
+  while preserving selection and preview halos.
+- Added deterministic artifact validation in `tests/domain.test.ts` and browser
+  contract coverage in `e2e/app.spec.ts` for artifact loading, removed casing
+  layer, clipped province boundary, and focus-casing stroke weight.
+
 ## Open Risks
 
 - The app is not operationally safe for real emergency alerting yet.

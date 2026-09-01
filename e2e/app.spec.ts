@@ -57,6 +57,68 @@ async function readMapTransform(svg: Locator, transformSelector = ".map-transfor
   });
 }
 
+async function installReactCommitCounter(page: Page) {
+  await page.addInitScript({
+    content: `
+      (() => {
+        window.__reactCommitCount = 0;
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+          supportsFiber: true,
+          renderers: new Map(),
+          inject(renderer) {
+            const id = this.renderers.size + 1;
+            this.renderers.set(id, renderer);
+            return id;
+          },
+          onCommitFiberRoot() {
+            window.__reactCommitCount = (window.__reactCommitCount || 0) + 1;
+          },
+          onCommitFiberUnmount() {}
+        };
+      })();
+    `,
+  });
+}
+
+async function startNrMapTransformProbe(page: Page) {
+  await page.evaluate(() => {
+    const layer = document.querySelector("g.nr-map-transform-layer");
+    if (!layer) throw new Error("Nakhon Ratchasima transform layer was not found");
+    const samples: string[] = [];
+    let mutationCount = 0;
+    let rafId = 0;
+    const startCommitCount = ((window as unknown as { __reactCommitCount?: number }).__reactCommitCount ?? 0);
+    const observer = new MutationObserver((records) => {
+      mutationCount += records.filter((record) => record.type === "attributes" && record.attributeName === "transform").length;
+    });
+    observer.observe(layer, { attributes: true, attributeFilter: ["transform"] });
+    const tick = () => {
+      samples.push(layer.getAttribute("transform") ?? "");
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    (window as unknown as { __stopNrMapTransformProbe?: () => { distinctTransforms: number; mutationCount: number; reactCommits: number } }).__stopNrMapTransformProbe = () => {
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+      return {
+        distinctTransforms: new Set(samples).size,
+        mutationCount,
+        reactCommits: ((window as unknown as { __reactCommitCount?: number }).__reactCommitCount ?? 0) - startCommitCount,
+      };
+    };
+  });
+}
+
+async function stopNrMapTransformProbe(page: Page) {
+  return page.evaluate(() => {
+    const stop = (window as unknown as {
+      __stopNrMapTransformProbe?: () => { distinctTransforms: number; mutationCount: number; reactCommits: number };
+    }).__stopNrMapTransformProbe;
+    if (!stop) throw new Error("Nakhon Ratchasima transform probe was not started");
+    return stop();
+  });
+}
+
 async function centerInViewport(locator: Locator) {
   await locator.evaluate((element) => element.scrollIntoView({ block: "center", inline: "nearest" }));
 }
@@ -70,6 +132,32 @@ async function expectPreviewInsideMap(preview: Locator, map: Locator) {
   expect(previewBox.y).toBeGreaterThanOrEqual(mapBox.y - 1);
   expect(previewBox.x + previewBox.width).toBeLessThanOrEqual(mapBox.x + mapBox.width + 1);
   expect(previewBox.y + previewBox.height).toBeLessThanOrEqual(mapBox.y + mapBox.height + 1);
+}
+
+async function expectLocalProvinceBoundary(page: Page, localSvg: Locator) {
+  const boundaryResponse = await page.request.get("/geodata/nakhon-ratchasima-boundary.geojson");
+  expect(boundaryResponse.ok()).toBe(true);
+  const boundary = await boundaryResponse.json();
+  expect(boundary.features).toHaveLength(1);
+  expect(boundary.features[0].properties.sourceFeatureCount).toBe(289);
+
+  await expect(localSvg.locator(".nr-map-province-casing-layer")).toHaveCount(0);
+  await expect(localSvg.locator("clipPath#nr-local-province-boundary-clip path")).toHaveCount(1);
+  const boundaryLayer = localSvg.locator(".nr-map-province-boundary-layer");
+  await expect(boundaryLayer).toHaveAttribute("clip-path", "url(#nr-local-province-boundary-clip)");
+  await expect(boundaryLayer.locator("path")).toHaveCount(1);
+  const boundaryStyle = await boundaryLayer.locator("path").evaluate((element) => {
+    const styles = window.getComputedStyle(element);
+    return {
+      filter: styles.filter,
+      strokeWidth: Number.parseFloat(styles.strokeWidth),
+      vectorEffect: styles.getPropertyValue("vector-effect"),
+    };
+  });
+  expect(boundaryStyle.filter).toBe("none");
+  expect(boundaryStyle.strokeWidth).toBeGreaterThanOrEqual(3.4);
+  expect(boundaryStyle.strokeWidth).toBeLessThanOrEqual(3.8);
+  expect(boundaryStyle.vectorEffect).toBe("non-scaling-stroke");
 }
 
 async function boundingBoxOrThrow(locator: Locator) {
@@ -506,6 +594,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await centerInViewport(localMap);
   await expect(localSvg.locator(".nr-map-context-layer path")).toHaveCount(289);
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
+  await expectLocalProvinceBoundary(page, localSvg);
   await expect(localMap.locator(".map-overlay-controls").getByTitle("ขยายแผนที่")).toBeVisible();
   const guardrail = page.locator(".nr-data-transparency-row.is-limitations").first();
   await expect(guardrail.getByText("ข้อจำกัดสำคัญ")).toBeVisible();
@@ -647,6 +736,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   const nakhonRatchasimaPreview = page.locator(".nr-map-preview-card");
   await expect(localSvg).toBeVisible();
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
+  await expectLocalProvinceBoundary(page, localSvg);
   await expect(localMap.getByText("ขอบเขตตำบล")).toHaveCount(0);
 
   await expect(page.locator(".nr-layer-control")).toHaveCount(0);
@@ -715,6 +805,15 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
 
   await expect(page).toHaveURL(/\/wang-nam-khiao$/);
   await expect(page.getByRole("heading", { name: "วังน้ำเขียว", exact: true })).toBeVisible();
+  const focusCasingStyle = await localSvg.locator(".nr-map-focus-casing-layer path").first().evaluate((element) => {
+    const styles = window.getComputedStyle(element);
+    return {
+      strokeWidth: Number.parseFloat(styles.strokeWidth),
+      vectorEffect: styles.getPropertyValue("vector-effect"),
+    };
+  });
+  expect(focusCasingStyle.strokeWidth).toBeLessThanOrEqual(2.8);
+  expect(focusCasingStyle.vectorEffect).toBe("non-scaling-stroke");
   if (isMobile) {
     await page.getByRole("button", { name: /^อุดมทรัพย์/ }).click();
   } else {
@@ -750,4 +849,71 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
     await expect(page.getByRole("heading", { name: "ในเมือง", exact: true })).toBeVisible();
     await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในรอบข้อมูลนี้").first()).toBeVisible();
   }
+});
+
+test("Nakhon Ratchasima local map zoom controls do not re-render per animation frame", async ({ page }, testInfo) => {
+  test.setTimeout(45_000);
+  if (testInfo.project.name === "mobile") test.skip(true, "React commit instrumentation is covered on desktop.");
+
+  await installReactCommitCounter(page);
+  await loginAs(page, smokeUsername);
+  await page.goto("/");
+
+  const localMap = page.locator(".nr-map-panel").first();
+  const localSvg = page.getByRole("img", { name: "แผนที่ตำบลจังหวัดนครราชสีมา" });
+  await expect(localSvg).toBeVisible();
+  await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
+  const transformLayerPathCount = await localSvg.locator(".nr-map-transform-layer path").count();
+  expect(transformLayerPathCount).toBeGreaterThanOrEqual(500);
+  expect(transformLayerPathCount).toBeLessThan(700);
+  await centerInViewport(localMap);
+
+  const resetButton = localMap.getByTitle("กลับมุมมองพื้นที่นี้");
+  const zoomInButton = localMap.getByTitle("ขยายแผนที่");
+  const zoomOutButton = localMap.getByTitle("ย่อแผนที่");
+
+  await resetButton.click();
+  await page.waitForTimeout(260);
+  const initial = await readMapTransform(localSvg, ".nr-map-transform-layer");
+
+  await startNrMapTransformProbe(page);
+  await zoomInButton.click();
+  await page.waitForTimeout(260);
+  const singleZoomProbe = await stopNrMapTransformProbe(page);
+  const singleZoom = await readMapTransform(localSvg, ".nr-map-transform-layer");
+  expect(singleZoom.k).toBeGreaterThan(initial.k + 0.4);
+  expect(singleZoomProbe.distinctTransforms).toBeGreaterThan(1);
+  expect(singleZoomProbe.mutationCount).toBeGreaterThan(1);
+  expect(singleZoomProbe.reactCommits).toBeLessThanOrEqual(2);
+
+  await resetButton.click();
+  await page.waitForTimeout(260);
+  const reset = await readMapTransform(localSvg, ".nr-map-transform-layer");
+  await page.evaluate(() => {
+    const button = document.querySelector<HTMLButtonElement>('button[title="ขยายแผนที่"]');
+    button?.click();
+    button?.click();
+    button?.click();
+  });
+  await page.waitForTimeout(260);
+  const rapidZoom = await readMapTransform(localSvg, ".nr-map-transform-layer");
+  expect(rapidZoom.k).toBeCloseTo(Math.min(reset.k + 0.52 * 3, 7.2), 2);
+
+  await resetButton.click();
+  await page.waitForTimeout(260);
+  const beforeInOut = await readMapTransform(localSvg, ".nr-map-transform-layer");
+  await page.evaluate(() => {
+    document.querySelector<HTMLButtonElement>('button[title="ขยายแผนที่"]')?.click();
+    document.querySelector<HTMLButtonElement>('button[title="ย่อแผนที่"]')?.click();
+  });
+  await page.waitForTimeout(260);
+  const afterInOut = await readMapTransform(localSvg, ".nr-map-transform-layer");
+  expect(afterInOut.k).toBeCloseTo(beforeInOut.k, 2);
+  expect(afterInOut.x).toBeCloseTo(beforeInOut.x, 1);
+  expect(afterInOut.y).toBeCloseTo(beforeInOut.y, 1);
+
+  await zoomOutButton.click();
+  await page.waitForTimeout(260);
+  const zoomedOut = await readMapTransform(localSvg, ".nr-map-transform-layer");
+  expect(zoomedOut.k).toBeLessThan(beforeInOut.k);
 });

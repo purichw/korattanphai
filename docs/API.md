@@ -10,6 +10,8 @@ Network activity:
 - The browser fetches `/geodata/thailand-neighbor-context.geojson`.
 - The browser fetches `/geodata/nakhon-ratchasima-subdistricts.geojson` for the
   Nakhon Ratchasima local workspace.
+- The browser fetches `/geodata/nakhon-ratchasima-boundary.geojson` for the
+  visible Nakhon Ratchasima province outline in the local workspace.
 - In production, the browser fetches `/api/risk-fusion?eventId=...` for the
   risk-fusion explanation shown in the risk detail panel.
 - Google Fonts may be requested by the browser from the stylesheet in
@@ -107,6 +109,36 @@ Tests:
 
 - `tests/domain.test.ts` checks all 289 subdistrict codes match
   `src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json`.
+
+`GET /geodata/nakhon-ratchasima-boundary.geojson`
+
+Purpose:
+
+- Provides the visible province outline for the Nakhon Ratchasima local SVG map.
+- The boundary is dissolved from the same 289 subdistrict geometries used for
+  the colored local map polygons.
+- `thailand-adm1.geojson` remains available for neighboring-province context
+  and the national map, but it must not be used as the visible local province
+  outline.
+
+Expected shape:
+
+- GeoJSON `FeatureCollection`.
+- One `Polygon` or `MultiPolygon` feature for province code `30`.
+- `properties.derivedFrom` points to
+  `public/geodata/nakhon-ratchasima-subdistricts.geojson`.
+- `properties.sourceFeatureCount` is `289`.
+- `properties.sourceAdminCodes` includes all 289 source subdistrict codes.
+
+Regeneration:
+
+- Run `npm run generate:nr-boundary`.
+- Do not hand-edit coordinates in the generated artifact.
+
+Tests:
+
+- `tests/domain.test.ts` checks source feature count, source code coverage,
+  ring closure, geometry type, and bbox parity with the subdistrict dataset.
 
 ## Future API Principles
 

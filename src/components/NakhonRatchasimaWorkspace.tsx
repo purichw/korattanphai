@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -26,9 +26,12 @@ import { OperationalFilters } from "./OperationalFilters";
 import { MetricCard, PageSummary } from "./PageSummary";
 import {
   getAnchoredZoomTransform,
+  getSequentialButtonZoomTarget,
   getSharedMapWheelAction,
   interpolateMapTransform,
+  isMapTransformEffectivelyEqual,
   isMapTransformSettled,
+  serializeMapTransform,
   sharedMapButtonZoomStep,
 } from "../mapInteraction";
 import {
@@ -125,6 +128,25 @@ type ProvinceContextGeoCollection = {
   features: ProvinceContextGeoFeature[];
 };
 
+type LocalProvinceBoundaryGeoFeature = {
+  type: "Feature";
+  properties: {
+    provinceCode: string;
+    provinceNameTh: string;
+    derivedFrom: string;
+    sourceFeatureCount: number;
+    sourceAdminCodes: string[];
+  };
+  bbox?: number[];
+  geometry: NakhonRatchasimaGeoFeature["geometry"];
+};
+
+type LocalProvinceBoundaryGeoCollection = {
+  type: "FeatureCollection";
+  bbox?: number[];
+  features: LocalProvinceBoundaryGeoFeature[];
+};
+
 type Projection = {
   x: (lon: number) => number;
   y: (lat: number) => number;
@@ -141,7 +163,6 @@ const NAKHON_RATCHASIMA_NEIGHBOR_BOUNDARY_ISOS = new Set([
   "TH-36",
   "TH-40",
 ]);
-const NAKHON_RATCHASIMA_BOUNDARY_ISO = "TH-30";
 const NAKHON_RATCHASIMA_NEIGHBOR_LABELS_TH: Record<string, string> = {
   "TH-16": "ลพบุรี",
   "TH-19": "สระบุรี",
@@ -229,6 +250,10 @@ const localMobileOverviewPadding = { top: 38, right: 22, bottom: 82, left: 22 };
 const localDesktopFocusPadding = { top: 76, right: 82, bottom: 64, left: 38 };
 const localMobileDistrictFocusPadding = { top: 104, right: 22, bottom: 106, left: 22 };
 const localMobileSelectedFocusPadding = { top: 104, right: 22, bottom: 278, left: 22 };
+const localButtonAnimationDurationMs = 160;
+const localAnimationSnapPositionThreshold = 4;
+const localAnimationSnapZoomThreshold = 0.012;
+const localDeferredTransformCommitDelayMs = 180;
 const primaryCropLabelTh = "ข้าว";
 const primaryHazardLabelTh = "ภัยแล้ง";
 const primaryRiskScopeLabelTh = "ความเสี่ยงภัยแล้ง";
@@ -300,6 +325,15 @@ function clampLocalTransform(next: LocalMapTransform): LocalMapTransform {
     y: clamp(next.y, localMapHeight * (1 - k), 0),
     k,
   };
+}
+
+function isLocalTransformVisuallySettled(current: LocalMapTransform, target: LocalMapTransform) {
+  return isMapTransformEffectivelyEqual(
+    current,
+    target,
+    localAnimationSnapPositionThreshold,
+    localAnimationSnapZoomThreshold,
+  );
 }
 
 function prefersReducedMotion() {
@@ -3108,6 +3142,7 @@ function NakhonRatchasimaLocalMap({
   const activeSelectedSubdistrictCode = externalSelectedSubdistrictCode ?? routeSelectedSubdistrictCode;
   const [geo, setGeo] = useState<NakhonRatchasimaGeoCollection | null>(null);
   const [provinceContextGeo, setProvinceContextGeo] = useState<ProvinceContextGeoCollection | null>(null);
+  const [localProvinceBoundaryGeo, setLocalProvinceBoundaryGeo] = useState<LocalProvinceBoundaryGeoCollection | null>(null);
   const [error, setError] = useState(false);
   const [transform, setTransform] = useState<LocalMapTransform>(localFitTransform);
   const [isDragging, setIsDragging] = useState(false);
@@ -3115,10 +3150,17 @@ function NakhonRatchasimaLocalMap({
   const [preview, setPreview] = useState<LocalMapPreview | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const transformLayerRef = useRef<SVGGElement | null>(null);
   const transformRef = useRef<LocalMapTransform>(transform);
   const animationFrame = useRef<number | null>(null);
+  const animationRunId = useRef(0);
+  const animationSettleTimer = useRef<number | null>(null);
+  const transformStateCommitTimer = useRef<number | null>(null);
+  const transformStateCommitRunId = useRef(0);
   const wheelAnimationFrame = useRef<number | null>(null);
+  const wheelAnimationRunId = useRef(0);
   const wheelTargetTransform = useRef<LocalMapTransform | null>(null);
+  const buttonTargetTransform = useRef<LocalMapTransform | null>(null);
   const suppressClick = useRef(false);
   const lastPointerType = useRef("mouse");
   const longPressTimer = useRef<number | null>(null);
@@ -3173,16 +3215,31 @@ function NakhonRatchasimaLocalMap({
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    fetch("/geodata/nakhon-ratchasima-boundary.geojson")
+      .then((response) => {
+        if (!response.ok) throw new Error("Local province boundary unavailable");
+        return response.json();
+      })
+      .then((data: LocalProvinceBoundaryGeoCollection) => {
+        if (active) setLocalProvinceBoundaryGeo(data);
+      })
+      .catch(() => {
+        if (active) setLocalProvinceBoundaryGeo(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const focusDistrictCode = target.valid && target.level !== "province" ? target.district.districtCode : undefined;
   const projection = useMemo(() => (geo ? createProjection(geo.features) : null), [geo]);
   const provinceContextFeatures = useMemo(
     () => provinceContextGeo?.features.filter((feature) => NAKHON_RATCHASIMA_NEIGHBOR_BOUNDARY_ISOS.has(feature.properties.shapeISO)) ?? [],
     [provinceContextGeo],
   );
-  const provinceBoundaryFeature = useMemo(
-    () => provinceContextGeo?.features.find((feature) => feature.properties.shapeISO === NAKHON_RATCHASIMA_BOUNDARY_ISO) ?? null,
-    [provinceContextGeo],
-  );
+  const localProvinceBoundaryFeature = useMemo(() => localProvinceBoundaryGeo?.features[0] ?? null, [localProvinceBoundaryGeo]);
   const focusFeatures = useMemo(() => {
     if (!geo) return [];
     if (activeSelectedSubdistrictCode) {
@@ -3246,13 +3303,49 @@ function NakhonRatchasimaLocalMap({
   const researchSummary = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, researchSummary);
 
+  const cancelPendingTransformStateCommit = () => {
+    transformStateCommitRunId.current += 1;
+    if (transformStateCommitTimer.current !== null) window.clearTimeout(transformStateCommitTimer.current);
+    transformStateCommitTimer.current = null;
+  };
+
+  const writeTransformAttribute = (next: LocalMapTransform) => {
+    const layer = transformLayerRef.current;
+    const matrix = serializeMapTransform(next);
+    if (layer?.getAttribute("transform") !== matrix) layer?.setAttribute("transform", matrix);
+  };
+
+  const applyTransientTransform = (next: LocalMapTransform) => {
+    cancelPendingTransformStateCommit();
+    const clamped = clampLocalTransform(next);
+    transformRef.current = clamped;
+    writeTransformAttribute(clamped);
+    return clamped;
+  };
+
+  const commitTransform = (next: LocalMapTransform, options: { deferReactState?: boolean } = {}) => {
+    const clamped = applyTransientTransform(next);
+    if (options.deferReactState) {
+      const runId = ++transformStateCommitRunId.current;
+      transformStateCommitTimer.current = window.setTimeout(() => {
+        transformStateCommitTimer.current = null;
+        if (runId !== transformStateCommitRunId.current) return;
+        if (!isLocalTransformVisuallySettled(transformRef.current, clamped)) return;
+        setTransform((current) => (isMapTransformEffectivelyEqual(current, clamped) ? current : clamped));
+      }, localDeferredTransformCommitDelayMs);
+    } else {
+      setTransform((current) => (isMapTransformEffectivelyEqual(current, clamped) ? current : clamped));
+    }
+    return clamped;
+  };
+
   useEffect(() => {
     setCriteria(criteriaDefaults);
   }, [criteriaDefaults]);
 
-  useEffect(() => {
-    transformRef.current = transform;
-  }, [transform]);
+  useLayoutEffect(() => {
+    writeTransformAttribute(transformRef.current);
+  });
 
   useEffect(() => {
     previewMode.current = preview?.mode ?? null;
@@ -3261,6 +3354,8 @@ function NakhonRatchasimaLocalMap({
   useEffect(
     () => () => {
       if (animationFrame.current !== null) window.cancelAnimationFrame(animationFrame.current);
+      if (animationSettleTimer.current !== null) window.clearTimeout(animationSettleTimer.current);
+      if (transformStateCommitTimer.current !== null) window.clearTimeout(transformStateCommitTimer.current);
       if (wheelAnimationFrame.current !== null) window.cancelAnimationFrame(wheelAnimationFrame.current);
       if (longPressTimer.current !== null) window.clearTimeout(longPressTimer.current);
       if (previewDismissTimer.current !== null) window.clearTimeout(previewDismissTimer.current);
@@ -3290,34 +3385,68 @@ function NakhonRatchasimaLocalMap({
     return () => window.removeEventListener("pointerdown", dismissOnOutsideTap);
   }, [preview?.mode]);
 
+  const cancelButtonAnimation = ({ clearTarget = true }: { clearTarget?: boolean } = {}) => {
+    animationRunId.current += 1;
+    if (animationFrame.current !== null) window.cancelAnimationFrame(animationFrame.current);
+    animationFrame.current = null;
+    if (animationSettleTimer.current !== null) window.clearTimeout(animationSettleTimer.current);
+    animationSettleTimer.current = null;
+    cancelPendingTransformStateCommit();
+    if (clearTarget) buttonTargetTransform.current = null;
+  };
+
   const cancelWheelAnimation = () => {
+    wheelAnimationRunId.current += 1;
     if (wheelAnimationFrame.current !== null) window.cancelAnimationFrame(wheelAnimationFrame.current);
     wheelAnimationFrame.current = null;
     wheelTargetTransform.current = null;
+    cancelPendingTransformStateCommit();
   };
 
-  const setClampedTransform = (next: LocalMapTransform) => {
-    const clamped = clampLocalTransform(next);
-    transformRef.current = clamped;
-    setTransform(clamped);
+  const clearSettledButtonTarget = (target: LocalMapTransform) => {
+    if (buttonTargetTransform.current && isMapTransformEffectivelyEqual(buttonTargetTransform.current, target)) {
+      buttonTargetTransform.current = null;
+    }
   };
 
-  const animateTransform = (targetTransform: LocalMapTransform) => {
+  const animateTransform = (targetTransform: LocalMapTransform, options: { preserveButtonTarget?: boolean } = {}) => {
     cancelWheelAnimation();
     const clampedTarget = clampLocalTransform(targetTransform);
+    const preserveButtonTarget = options.preserveButtonTarget ?? false;
+    if (!preserveButtonTarget) buttonTargetTransform.current = null;
 
     if (prefersReducedMotion()) {
-      setClampedTransform(clampedTarget);
+      cancelButtonAnimation({ clearTarget: !preserveButtonTarget });
+      commitTransform(clampedTarget, { deferReactState: true });
+      clearSettledButtonTarget(clampedTarget);
       return;
     }
 
-    if (animationFrame.current !== null) window.cancelAnimationFrame(animationFrame.current);
+    if (isMapTransformEffectivelyEqual(transformRef.current, clampedTarget)) {
+      cancelButtonAnimation({ clearTarget: !preserveButtonTarget });
+      commitTransform(clampedTarget);
+      clearSettledButtonTarget(clampedTarget);
+      return;
+    }
+
+    cancelButtonAnimation({ clearTarget: false });
+    const runId = animationRunId.current;
 
     const start = transformRef.current;
     const startedAt = performance.now();
-    const duration = 180;
+    const duration = localButtonAnimationDurationMs;
+
+    animationSettleTimer.current = window.setTimeout(() => {
+      if (runId !== animationRunId.current) return;
+      if (animationFrame.current !== null) window.cancelAnimationFrame(animationFrame.current);
+      animationFrame.current = null;
+      animationSettleTimer.current = null;
+      commitTransform(clampedTarget, { deferReactState: true });
+      clearSettledButtonTarget(clampedTarget);
+    }, duration + 24);
 
     const tick = (now: number) => {
+      if (runId !== animationRunId.current) return;
       const progress = clamp((now - startedAt) / duration, 0, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       const next = {
@@ -3325,15 +3454,18 @@ function NakhonRatchasimaLocalMap({
         y: start.y + (clampedTarget.y - start.y) * eased,
         k: start.k + (clampedTarget.k - start.k) * eased,
       };
+      const shouldSettle = progress >= 1 || isLocalTransformVisuallySettled(next, clampedTarget);
 
-      transformRef.current = next;
-      setTransform(next);
+      applyTransientTransform(shouldSettle ? clampedTarget : next);
 
-      if (progress < 1) {
+      if (!shouldSettle) {
         animationFrame.current = window.requestAnimationFrame(tick);
       } else {
         animationFrame.current = null;
-        setClampedTransform(clampedTarget);
+        if (animationSettleTimer.current !== null) window.clearTimeout(animationSettleTimer.current);
+        animationSettleTimer.current = null;
+        commitTransform(clampedTarget, { deferReactState: true });
+        clearSettledButtonTarget(clampedTarget);
       }
     };
 
@@ -3341,16 +3473,19 @@ function NakhonRatchasimaLocalMap({
   };
 
   const scheduleWheelTransform = (targetTransform: LocalMapTransform) => {
-    if (animationFrame.current !== null) {
-      window.cancelAnimationFrame(animationFrame.current);
-      animationFrame.current = null;
-    }
+    cancelButtonAnimation();
 
     const clampedTarget = clampLocalTransform(targetTransform);
 
     if (prefersReducedMotion()) {
       cancelWheelAnimation();
-      setClampedTransform(clampedTarget);
+      commitTransform(clampedTarget, { deferReactState: true });
+      return;
+    }
+
+    if (isMapTransformEffectivelyEqual(transformRef.current, clampedTarget)) {
+      cancelWheelAnimation();
+      commitTransform(clampedTarget);
       return;
     }
 
@@ -3358,7 +3493,11 @@ function NakhonRatchasimaLocalMap({
 
     if (wheelAnimationFrame.current !== null) return;
 
+    wheelAnimationRunId.current += 1;
+    const runId = wheelAnimationRunId.current;
+
     const tick = () => {
+      if (runId !== wheelAnimationRunId.current) return;
       const wheelTarget = wheelTargetTransform.current;
       if (!wheelTarget) {
         wheelAnimationFrame.current = null;
@@ -3367,15 +3506,14 @@ function NakhonRatchasimaLocalMap({
 
       const next = clampLocalTransform(interpolateMapTransform(transformRef.current, wheelTarget));
 
-      if (isMapTransformSettled(next, wheelTarget)) {
-        setClampedTransform(wheelTarget);
+      if (isMapTransformSettled(next, wheelTarget) || isLocalTransformVisuallySettled(next, wheelTarget)) {
+        commitTransform(wheelTarget, { deferReactState: true });
         wheelTargetTransform.current = null;
         wheelAnimationFrame.current = null;
         return;
       }
 
-      transformRef.current = next;
-      setTransform(next);
+      applyTransientTransform(next);
       wheelAnimationFrame.current = window.requestAnimationFrame(tick);
     };
 
@@ -3560,7 +3698,7 @@ function NakhonRatchasimaLocalMap({
     const clientCenter = getPinchClientCenter(points);
     const panDelta = svgDeltaForClient(start.clientCenter, clientCenter);
     const k = clamp(Number((start.transform.k * (getPinchDistance(points) / start.distance)).toFixed(3)), localMinZoom, localMaxZoom);
-    setClampedTransform({
+    applyTransientTransform({
       x: start.center.x + panDelta.x - ((start.center.x - start.transform.x) / start.transform.k) * k,
       y: start.center.y + panDelta.y - ((start.center.y - start.transform.y) / start.transform.k) * k,
       k,
@@ -3568,16 +3706,22 @@ function NakhonRatchasimaLocalMap({
     suppressClick.current = true;
   };
 
-  const zoomToPoint = (targetZoom: number, center = { x: localMapWidth / 2, y: localMapHeight / 2 }, animated = true) => {
-    const current = transformRef.current;
-    const targetTransform = getAnchoredZoomTransform(current, targetZoom, center, localMinZoom, localMaxZoom);
-
-    if (animated) animateTransform(targetTransform);
-    else setClampedTransform(targetTransform);
-  };
-
   const zoomFromPoint = (delta: number, center = { x: localMapWidth / 2, y: localMapHeight / 2 }, animated = true) => {
-    zoomToPoint(transformRef.current.k + delta, center, animated);
+    const targetTransform = getSequentialButtonZoomTarget(
+      transformRef.current,
+      buttonTargetTransform.current,
+      delta,
+      center,
+      localMinZoom,
+      localMaxZoom,
+    );
+    buttonTargetTransform.current = clampLocalTransform(targetTransform);
+
+    if (animated) animateTransform(targetTransform, { preserveButtonTarget: true });
+    else {
+      commitTransform(targetTransform);
+      clearSettledButtonTarget(targetTransform);
+    }
   };
 
   const handleMapWheel = (event: WheelEvent) => {
@@ -3609,10 +3753,12 @@ function NakhonRatchasimaLocalMap({
       window.clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+    const finalTransform = transformRef.current;
     dragStart.current = null;
     pinchStart.current = null;
     activePointers.current.clear();
     touchPanReady.current = false;
+    commitTransform(finalTransform);
     setIsDragging(false);
   };
 
@@ -3624,6 +3770,28 @@ function NakhonRatchasimaLocalMap({
     setPreview(null);
     onSelectedSubdistrictChange?.(null);
   }, [activeResearchPeriod.period, criteria, onSelectedSubdistrictChange, routeSelectedSubdistrictCode, selectedCode]);
+
+  const featureModels = useMemo(
+    () =>
+      geo && projection
+        ? geo.features.map((feature) => ({
+            feature,
+            featurePath: pathForFeature(feature, projection),
+            ...featureModel(feature),
+          }))
+        : [],
+    [activeResearchPeriod.period, criteria, geo, layer.id, mapMode, projection, useResearchCriteriaMap],
+  );
+  const provinceContextPaths = useMemo(
+    () =>
+      projection
+        ? provinceContextFeatures.map((feature) => ({
+            key: `${feature.properties.shapeISO}-${feature.properties.shapeName}`,
+            path: pathForGeometry(feature.geometry, projection),
+          }))
+        : [],
+    [projection, provinceContextFeatures],
+  );
 
   if (error) {
     return <div className="nr-map-loading">ไม่สามารถโหลดขอบเขตตำบลนครราชสีมาได้</div>;
@@ -3648,10 +3816,6 @@ function NakhonRatchasimaLocalMap({
           "--nr-map-preview-width": string;
         })
       : undefined;
-  const featureModels = geo.features.map((feature) => ({
-    feature,
-    ...featureModel(feature),
-  }));
   const focusedFeatureModels = featureModels.filter((model) =>
     activeSelectedSubdistrictCode
       ? model.subdistrictCode === activeSelectedSubdistrictCode
@@ -3666,7 +3830,8 @@ function NakhonRatchasimaLocalMap({
         ? `แสดง ${formatThaiNumber(criteriaMatchedCount)} จาก ${formatThaiNumber(focusAreaCount)} ตำบล`
         : "ไม่พบตำบลที่ตรงกับตัวกรอง"
       : null;
-  const provinceBoundaryPath = provinceBoundaryFeature ? pathForGeometry(provinceBoundaryFeature.geometry, projection) : "";
+  const provinceBoundaryPath = localProvinceBoundaryFeature ? pathForGeometry(localProvinceBoundaryFeature.geometry, projection) : "";
+  const provinceBoundaryClipId = "nr-local-province-boundary-clip";
   const activeFocusSubdistrictCode = activeSelectedSubdistrictCode ?? selectedCode;
   const showProvinceSilhouette =
     target.valid && target.level === "province" && !activeFocusSubdistrictCode && provinceBoundaryPath.length > 0;
@@ -3925,10 +4090,7 @@ function NakhonRatchasimaLocalMap({
             dismissPreview();
           }
           cancelWheelAnimation();
-          if (animationFrame.current !== null) {
-            window.cancelAnimationFrame(animationFrame.current);
-            animationFrame.current = null;
-          }
+          cancelButtonAnimation();
           const captureTarget = event.target as Element & { setPointerCapture?: (pointerId: number) => void };
           activePointers.current.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
           if (activePointers.current.size >= 2) {
@@ -3998,7 +4160,7 @@ function NakhonRatchasimaLocalMap({
             }
             suppressClick.current = true;
           }
-          setClampedTransform({
+          applyTransientTransform({
             x: start.tx + delta.x,
             y: start.ty + delta.y,
             k: start.k,
@@ -4045,37 +4207,39 @@ function NakhonRatchasimaLocalMap({
           event.preventDefault();
         }}
       >
+        {showProvinceSilhouette && (
+          <defs>
+            <clipPath id={provinceBoundaryClipId} clipPathUnits="userSpaceOnUse">
+              <path d={provinceBoundaryPath} clipRule="evenodd" />
+            </clipPath>
+          </defs>
+        )}
         <rect width={localMapWidth} height={localMapHeight} className="nr-map-water" />
-        <g className="nr-map-transform-layer" transform={`matrix(${transform.k} 0 0 ${transform.k} ${transform.x} ${transform.y})`}>
+        <g ref={transformLayerRef} className="nr-map-transform-layer" transform={serializeMapTransform(transform)}>
           {provinceContextFeatures.length > 0 && (
             <g className="nr-map-neighbor-province-layer" aria-hidden="true">
-              {provinceContextFeatures.map((feature) => (
-                <path
-                  key={`${feature.properties.shapeISO}-${feature.properties.shapeName}`}
-                  d={pathForGeometry(feature.geometry, projection)}
-                />
+              {provinceContextPaths.map((featurePath) => (
+                <path key={featurePath.key} d={featurePath.path} />
               ))}
-            </g>
-          )}
-          {showProvinceSilhouette && (
-            <g className="nr-map-province-casing-layer" aria-hidden="true">
-              <path className="nr-map-province-halo" d={provinceBoundaryPath} />
-              <path className="nr-map-province-base-boundary" d={provinceBoundaryPath} />
             </g>
           )}
           {!showProvinceSilhouette && focusCasingModels.length > 0 && (
             <g className="nr-map-focus-casing-layer" aria-hidden="true">
               {focusCasingModels.map((model) => (
-                <path key={`${model.subdistrictCode}-focus-casing`} d={pathForFeature(model.feature, projection)} />
+                <path key={`${model.subdistrictCode}-focus-casing`} d={model.featurePath} />
               ))}
             </g>
           )}
           <g className="nr-map-context-layer" aria-hidden="true">
-            {geo.features.map((feature) => (
+            {featureModels.map((model) => (
               <path
-                key={`${feature.properties.Admin_code}-context`}
-                d={pathForFeature(feature, projection)}
-                className={focusDistrictCode && districtCodeForFeature(feature) === focusDistrictCode ? "is-context-focus" : undefined}
+                key={`${model.subdistrictCode}-context`}
+                d={model.featurePath}
+                className={
+                  focusDistrictCode && (model.row?.district_code ?? districtCodeForFeature(model.feature)) === focusDistrictCode
+                    ? "is-context-focus"
+                    : undefined
+                }
               />
             ))}
           </g>
@@ -4090,7 +4254,7 @@ function NakhonRatchasimaLocalMap({
               <path
                 key={subdistrictCode}
                 data-nr-subdistrict-code={subdistrictCode}
-                d={pathForFeature(feature, projection)}
+                d={model.featurePath}
                 className={[
                   "nr-map-shape",
                   `is-${status}`,
@@ -4154,7 +4318,7 @@ function NakhonRatchasimaLocalMap({
             );
           })}
           {showProvinceSilhouette && (
-            <g className="nr-map-province-boundary-layer" aria-hidden="true">
+            <g className="nr-map-province-boundary-layer" clipPath={`url(#${provinceBoundaryClipId})`} aria-hidden="true">
               <path d={provinceBoundaryPath} />
             </g>
           )}

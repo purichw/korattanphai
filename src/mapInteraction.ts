@@ -82,6 +82,18 @@ export function getAnchoredZoomTransform<TTransform extends SharedMapTransform>(
   };
 }
 
+export function getSequentialButtonZoomTarget<TTransform extends SharedMapTransform>(
+  visibleTransform: TTransform,
+  intendedTargetTransform: TTransform | null,
+  zoomDelta: number,
+  center: SharedMapPoint,
+  minZoom: number,
+  maxZoom: number,
+): TTransform {
+  const base = intendedTargetTransform ?? visibleTransform;
+  return getAnchoredZoomTransform(base, base.k + zoomDelta, center, minZoom, maxZoom);
+}
+
 export function interpolateMapTransform<TTransform extends SharedMapTransform>(
   current: TTransform,
   target: TTransform,
@@ -100,5 +112,22 @@ export function isMapTransformSettled(current: SharedMapTransform, target: Share
     Math.abs(current.x - target.x) < wheelSettlePixelThreshold &&
     Math.abs(current.y - target.y) < wheelSettlePixelThreshold &&
     Math.abs(current.k - target.k) < wheelSettleZoomThreshold
+  );
+}
+
+export function serializeMapTransform(transform: SharedMapTransform) {
+  return `matrix(${transform.k} 0 0 ${transform.k} ${transform.x} ${transform.y})`;
+}
+
+export function isMapTransformEffectivelyEqual(
+  current: SharedMapTransform,
+  target: SharedMapTransform,
+  positionThreshold = 0.01,
+  zoomThreshold = 0.0005,
+) {
+  return (
+    Math.abs(current.x - target.x) <= positionThreshold &&
+    Math.abs(current.y - target.y) <= positionThreshold &&
+    Math.abs(current.k - target.k) <= zoomThreshold
   );
 }

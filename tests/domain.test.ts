@@ -473,7 +473,7 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     const geo = JSON.parse(fs.readFileSync(geoPath, "utf8")) as {
       features: Array<{
         properties: { Admin_code: string; P_code: string; Source_Nam: string };
-        geometry: { coordinates: number[][][] | number[][][][] };
+        geometry: { type: "Polygon" | "MultiPolygon"; coordinates: number[][][] | number[][][][] };
       }>;
     };
     const matrixCodes = new Set(nakhonRatchasimaDistrictSubdistrictMatrix.map((row) => row.subdistrict_code));
@@ -490,6 +490,60 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(Number(firstCoordinate?.[1])).toBeLessThan(103);
     expect(Number(firstCoordinate?.[2])).toBeGreaterThan(14);
     expect(Number(firstCoordinate?.[2])).toBeLessThan(16);
+
+    const boundaryPath = path.resolve(process.cwd(), "public/geodata/nakhon-ratchasima-boundary.geojson");
+    const boundary = JSON.parse(fs.readFileSync(boundaryPath, "utf8")) as {
+      type: "FeatureCollection";
+      bbox?: number[];
+      features: Array<{
+        type: "Feature";
+        properties: {
+          derivedFrom: string;
+          sourceFeatureCount: number;
+          sourceAdminCodes: string[];
+          boundaryRingCount: number;
+        };
+        geometry: { type: "Polygon" | "MultiPolygon"; coordinates: number[][][] | number[][][][] };
+      }>;
+    };
+    const ringsForGeometry = (geometry: { type: "Polygon" | "MultiPolygon"; coordinates: number[][][] | number[][][][] }) =>
+      geometry.type === "Polygon" ? (geometry.coordinates as number[][][]) : (geometry.coordinates as number[][][][]).flat();
+    const bboxForRings = (rings: number[][][]) =>
+      rings.reduce(
+        (bbox, ring) => {
+          ring.forEach(([longitude, latitude]) => {
+            bbox[0] = Math.min(bbox[0], longitude);
+            bbox[1] = Math.min(bbox[1], latitude);
+            bbox[2] = Math.max(bbox[2], longitude);
+            bbox[3] = Math.max(bbox[3], latitude);
+          });
+          return bbox;
+        },
+        [Infinity, Infinity, -Infinity, -Infinity],
+      );
+    const sourceBbox = bboxForRings(geo.features.flatMap((feature) => ringsForGeometry(feature.geometry)));
+
+    expect(boundary.type).toBe("FeatureCollection");
+    expect(boundary.features).toHaveLength(1);
+    expect(boundary.bbox).toHaveLength(4);
+    const boundaryFeature = boundary.features[0];
+    expect(["Polygon", "MultiPolygon"]).toContain(boundaryFeature.geometry.type);
+    expect(boundaryFeature.properties.derivedFrom).toBe("public/geodata/nakhon-ratchasima-subdistricts.geojson");
+    expect(boundaryFeature.properties.sourceFeatureCount).toBe(289);
+    expect(boundaryFeature.properties.sourceAdminCodes).toHaveLength(289);
+    expect(new Set(boundaryFeature.properties.sourceAdminCodes)).toEqual(geoCodes);
+    const boundaryRings = ringsForGeometry(boundaryFeature.geometry);
+    expect(boundaryFeature.properties.boundaryRingCount).toBe(boundaryRings.length);
+    expect(boundaryRings.length).toBeGreaterThan(0);
+    boundaryRings.forEach((ring) => {
+      expect(ring.length).toBeGreaterThanOrEqual(4);
+      expect(ring[0]).toEqual(ring.at(-1));
+    });
+    const boundaryBbox = bboxForRings(boundaryRings);
+    boundaryBbox.forEach((value, index) => {
+      expect(value).toBeCloseTo(boundary.bbox![index], 11);
+      expect(value).toBeCloseTo(sourceBbox[index], 11);
+    });
   });
 
   it("adds Nakhon Ratchasima rainfall station coverage without fabricating rainfall observations", () => {

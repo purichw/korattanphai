@@ -337,6 +337,9 @@ Map join rules:
   non-interactive orientation underlay, not as a risk layer.
 - Nakhon Ratchasima subdistrict geometry is
   `public/geodata/nakhon-ratchasima-subdistricts.geojson`.
+- The visible Nakhon Ratchasima local province outline is
+  `public/geodata/nakhon-ratchasima-boundary.geojson`, generated from the same
+  289 subdistrict geometries with `npm run generate:nr-boundary`.
 - `normalizeName` in `src/domain.ts` removes `Province`, whitespace, casing, and
   non-alpha characters for joins.
 - Tests require all 77 canonical provinces to join to GeoJSON.
@@ -382,6 +385,7 @@ Static fetch:
 - `GET /geodata/thailand-adm1.geojson`
 - `GET /geodata/thailand-neighbor-context.geojson`
 - `GET /geodata/nakhon-ratchasima-subdistricts.geojson`
+- `GET /geodata/nakhon-ratchasima-boundary.geojson`
 
 `GET /api/risk-fusion` returns `RiskFusionBreakdown` for the selected event in
 production. It is read-only, has no credentials, and must not be treated as real

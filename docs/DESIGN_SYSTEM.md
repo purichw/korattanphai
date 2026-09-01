@@ -80,6 +80,8 @@ Do not rely on color alone; always pair severity colors with labels.
   `public/geodata/thailand-neighbor-context.geojson`
 - Nakhon Ratchasima subdistrict map:
   `public/geodata/nakhon-ratchasima-subdistricts.geojson`
+- Nakhon Ratchasima local province outline:
+  `public/geodata/nakhon-ratchasima-boundary.geojson`
 - Primary product logo and compact emblem: `public/brand/`.
 - Icons come from `lucide-react`.
 - Screenshots used for handoff should live outside git unless intentionally

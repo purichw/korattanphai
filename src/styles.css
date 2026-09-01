@@ -5737,13 +5737,11 @@ textarea {
   shape-rendering: geometricPrecision;
 }
 
-.nr-map-province-casing-layer,
 .nr-map-focus-casing-layer,
 .nr-map-province-boundary-layer {
   pointer-events: none;
 }
 
-.nr-map-province-casing-layer path,
 .nr-map-focus-casing-layer path,
 .nr-map-province-boundary-layer path {
   fill: none;
@@ -5753,20 +5751,9 @@ textarea {
   shape-rendering: geometricPrecision;
 }
 
-.nr-map-province-halo {
-  stroke: rgba(255, 255, 255, 0.96);
-  stroke-width: 7.2;
-  filter: drop-shadow(0 3px 7px rgba(29, 52, 42, 0.15));
-}
-
-.nr-map-province-base-boundary {
-  stroke: rgba(255, 255, 255, 0.98);
-  stroke-width: 3.4;
-}
-
 .nr-map-focus-casing-layer path {
-  stroke: rgba(255, 255, 255, 0.92);
-  stroke-width: 5.2;
+  stroke: rgba(255, 255, 255, 0.88);
+  stroke-width: 2.6;
 }
 
 .nr-map-context-layer {
@@ -5831,8 +5818,8 @@ textarea {
 }
 
 .nr-map-province-boundary-layer path {
-  stroke: #ffffff;
-  stroke-width: 2.8;
+  stroke: rgba(255, 255, 255, 0.98);
+  stroke-width: 3.6;
 }
 
 .nr-map-preview-halo,

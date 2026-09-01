@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "build:protected": "npm run build && node scripts/protect-build.mjs && node scripts/check-production-exposure.mjs",
     "check:exposure": "node scripts/check-production-exposure.mjs",
+    "generate:nr-boundary": "node scripts/generate-nr-boundary.mjs",
     "preview": "node scripts/run-vite.mjs preview --host 127.0.0.1",
     "test": "vitest run",
     "test:e2e": "node scripts/run-playwright.mjs",
