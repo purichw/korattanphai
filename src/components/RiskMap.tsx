@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Layers, LocateFixed, Maximize2, Minimize2, Minus, Plus, RotateCcw } from "lucide-react";
 import { AppSelect } from "./AppSelect";
 import { DataProvenanceChip, dataProvenanceChipKindFromText } from "./DataProvenanceChip";
+import { MapPreviewFooter } from "./MapPreviewFooter";
 import { NakhonRatchasimaWorkspaceSummary } from "./NakhonRatchasimaWorkspaceSummary";
 import { mapLayerCatalog, months, provinceMonthlyRisk, provinces } from "../data/catalog";
 import {
@@ -1408,13 +1409,7 @@ export function RiskMap({
                   <dd>{formatMonth(preview.record.month, language)}</dd>
                 </div>
               </dl>
-              <button
-                type="button"
-                className="map-preview-action"
-                onClick={openPreviewDetails}
-              >
-                ดูรายละเอียด →
-              </button>
+              <MapPreviewFooter action={{ label: "ดูรายละเอียด →", onClick: openPreviewDetails }} />
             </article>
           )}
         </div>

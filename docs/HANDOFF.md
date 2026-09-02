@@ -8,7 +8,7 @@ Tan Phai / โคราชทันภัย.
 
 - Repo: `/Users/point/korattanphai`
 - Production: `https://korattanphai.vercel.app`
-- Branch: `main`
+- Primary release branch: `main`
 - Source snapshot: copied from Kaset Tan Phai commit
   `0f16794bb57d5dec93b7c6312de7d9362bb97013`.
 
@@ -152,6 +152,29 @@ Current Nakhon Ratchasima local boundary patch:
   contract coverage in `e2e/app.spec.ts` for artifact loading, removed casing
   layer, clipped province boundary, and focus-casing stroke weight.
 
+Current shared UI and component-memory patch:
+
+- Added `docs/SHARED_COMPONENTS.md` as the living inventory for exported shared
+  components and local Nakhon workspace primitives.
+- Created local Codex skills:
+  `$korat-tan-phai-shared-components` for component reuse and
+  `$korat-tan-phai-new-chat` for up-to-date fresh-chat onboarding.
+- Expanded `AppSelect` with explicit `align` support and kept product dropdown
+  trigger text centered by default across province, district, subdistrict, and
+  map filter surfaces.
+- Expanded `MetricCard`/`MetricGrid` contracts and routed stat-only agriculture
+  and readiness cards through shared centered stat primitives.
+- Added `MapPreviewFooter` and reused it from both `RiskMap` and the local
+  Nakhon map so preview actions and fallback notes share one implementation.
+- Fixed province-map transient selection so a selected feature can be cleared
+  without refreshing, while route-selected subdistricts remain locked only on
+  the matching route.
+- Raised local map preview card stacking and overflow behavior so district and
+  subdistrict preview cards are not hidden behind following agriculture or
+  readiness sections.
+- Centered the shared preview fallback note, including the "insufficient data to
+  open detail" state.
+
 ## Open Risks
 
 - The app is not operationally safe for real emergency alerting yet.
@@ -173,6 +196,8 @@ Current Nakhon Ratchasima local boundary patch:
   even though canonical fixture actions are English strings.
 - Production copy still includes necessary codes/acronyms such as TMD, GISTDA,
   ARE, ADV, FARM, SMS, LINE.
+- Local Codex skills live under `/Users/point/.codex/skills/` and are not part
+  of the GitHub repository unless explicitly copied into project docs.
 - This repo has no markdown lint command.
 
 ## Commands Run Recently
@@ -195,8 +220,9 @@ Docs pass expected checks:
 git status --short
 git diff --check
 npm run build
+npm run build:protected
 npm test
-npm run test:e2e
+npm run test:e2e:managed
 ```
 
 Latest local verification for the source/layer Thai-only patch:
@@ -252,6 +278,8 @@ Notes:
 
 - Start with `README.md`, then `PROJECT_MAP.md` when starting a fresh Codex
   task.
+- Use `$korat-tan-phai-new-chat` for a fresh Codex chat and
+  `$korat-tan-phai-shared-components` before changing shared UI primitives.
 - Read the focused doc for the surface being changed.
 - Check `git status --short` before editing.
 - Do not use chat history as the source of truth when docs and code are present.

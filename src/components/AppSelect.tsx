@@ -22,6 +22,7 @@ type AppSelectProps = {
   className?: string;
   menuClassName?: string;
   compactValue?: boolean;
+  align?: "center" | "start";
 };
 
 function normalizeSearch(value: string) {
@@ -38,6 +39,7 @@ export function AppSelect({
   className,
   menuClassName,
   compactValue = false,
+  align = "center",
 }: AppSelectProps) {
   const generatedId = useId().replaceAll(":", "");
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -187,6 +189,7 @@ export function AppSelect({
         "app-select-field",
         icon ? "has-leading-icon" : "",
         label ? "has-visible-label" : "",
+        `is-align-${align}`,
         isOpen ? "is-open" : "",
         className ?? "",
       ].join(" ")}

@@ -796,6 +796,25 @@ textarea {
   text-align: center;
 }
 
+.app-select-field.is-align-center .app-select-trigger {
+  justify-content: center;
+  text-align: center;
+}
+
+.app-select-field.is-align-center .app-select-value {
+  text-align: center;
+}
+
+.app-select-field.is-align-start .app-select-trigger {
+  justify-content: flex-start;
+  padding-inline: 12px 32px;
+  text-align: left;
+}
+
+.app-select-field.is-align-start .app-select-value {
+  text-align: left;
+}
+
 .app-select-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -1178,8 +1197,14 @@ textarea {
   line-height: 1.15;
 }
 
+.metric-grid,
 .summary-strip {
   display: grid;
+  min-width: 0;
+}
+
+.metric-grid.is-default,
+.summary-strip {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 8px;
 }
@@ -1207,7 +1232,8 @@ textarea {
 }
 
 .metric-card.has-provenance {
-  padding-inline: 20px 30px;
+  padding-inline: 18px;
+  padding-block-start: 16px;
 }
 
 .metric-card-icon {
@@ -1246,6 +1272,25 @@ textarea {
 .metric-card.is-good {
   border-color: rgba(72, 142, 103, 0.28);
   background: #f1f8f4;
+}
+
+.metric-card.is-danger {
+  border-color: rgba(210, 57, 51, 0.26);
+  background: #fff2ef;
+}
+
+.metric-card.is-danger .metric-card-value {
+  color: #d23933;
+}
+
+.metric-card.is-info {
+  border-color: rgba(48, 126, 166, 0.24);
+  background: #eef7fb;
+}
+
+.metric-card.is-context {
+  border-color: rgba(120, 77, 170, 0.2);
+  background: #f7f2fb;
 }
 
 .metric-card.is-muted {
@@ -2005,7 +2050,11 @@ textarea {
 }
 
 .map-preview-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 12px 0 0;
+  min-height: 38px;
   padding: 9px 10px;
   border: 1px solid rgba(173, 190, 180, 0.76);
   border-radius: 7px;
@@ -2014,6 +2063,7 @@ textarea {
   font-size: 0.84rem;
   font-weight: 800;
   line-height: 1.35;
+  text-align: center;
 }
 
 .map-preview-card.is-touch {
@@ -2021,7 +2071,7 @@ textarea {
   right: max(12px, env(safe-area-inset-right));
   bottom: max(12px, env(safe-area-inset-bottom));
   left: max(12px, env(safe-area-inset-left));
-  z-index: 50;
+  z-index: 180;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   width: auto;
@@ -2035,13 +2085,25 @@ textarea {
   overflow-y: auto;
 }
 
+.nr-map-panel.has-preview {
+  z-index: 140;
+}
+
+.nr-dashboard-section:has(.nr-map-panel.has-preview),
+.nr-dashboard-map-card:has(.nr-map-panel.has-preview),
+.nr-subdistrict-map-status-row:has(.nr-map-panel.has-preview) {
+  position: relative;
+  z-index: 140;
+  overflow: visible;
+}
+
 .nr-map-preview-card {
-  z-index: 18;
+  z-index: 160;
 }
 
 .nr-map-preview-card:not(.is-touch) {
   width: min(var(--nr-map-preview-width, 344px), calc(100% - 24px));
-  max-height: min(var(--nr-map-preview-max-height, 380px), calc(100vh - 168px));
+  max-height: min(var(--nr-map-preview-max-height, 420px), calc(100vh - 168px));
   grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: hidden;
 }
@@ -2049,7 +2111,7 @@ textarea {
 .nr-map-preview-card:not(.is-touch) dl {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px 12px;
-  max-height: min(calc(var(--nr-map-preview-max-height, 380px) - 112px), calc(100vh - 292px));
+  max-height: max(168px, min(calc(var(--nr-map-preview-max-height, 420px) - 122px), calc(100vh - 292px)));
   overflow-y: auto;
 }
 
@@ -3528,7 +3590,7 @@ textarea {
   place-items: center;
   align-content: center;
   min-height: 72px;
-  padding: 10px 28px 10px 12px;
+  padding: 10px 28px;
   border: 1px solid rgba(178, 195, 184, 0.86);
   border-radius: 8px;
   background: #f8fbf8;
@@ -4312,7 +4374,7 @@ textarea {
 
 .nr-water-readiness-summary.is-compact .nr-water-kpis .metric-card {
   min-height: 58px;
-  padding: 8px 30px 8px 12px;
+  padding: 8px 30px;
 }
 
 .nr-water-readiness-summary.is-compact .nr-water-kpis .metric-card-value {
@@ -4977,8 +5039,8 @@ textarea {
 }
 
 .nr-agri-impact-summary {
-  display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
   overflow: hidden;
   margin: 0;
   border: 1px solid rgba(188, 205, 195, 0.9);
@@ -4989,26 +5051,32 @@ textarea {
 .nr-agri-impact-cell {
   position: relative;
   display: grid;
+  place-items: center;
   align-content: center;
+  justify-items: center;
   gap: 4px;
   min-width: 0;
   min-height: 94px;
-  padding: 14px 44px 14px 14px;
+  padding: 16px 38px;
+  border: 0;
   border-inline-end: 1px solid rgba(188, 205, 195, 0.72);
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
 }
 
 .nr-agri-impact-cell:last-child {
   border-inline-end: 0;
 }
 
-.nr-agri-impact-cell dt {
+.nr-agri-impact-cell .metric-card-label {
   color: var(--muted);
   font-size: 0.74rem;
   font-weight: 860;
   line-height: 1.35;
 }
 
-.nr-agri-impact-cell dd {
+.nr-agri-impact-cell .metric-card-value {
   margin: 0;
   color: var(--ink);
   font-size: 1.08rem;
@@ -5017,14 +5085,14 @@ textarea {
   overflow-wrap: anywhere;
 }
 
-.nr-agri-impact-cell small {
+.nr-agri-impact-cell .metric-card-detail {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 760;
   line-height: 1.35;
 }
 
-.nr-agri-impact-cell > span[aria-hidden="true"] {
+.nr-agri-impact-cell .metric-card-icon {
   position: absolute;
   right: 14px;
   bottom: 14px;
@@ -5037,28 +5105,28 @@ textarea {
   color: #277a4e;
 }
 
-.nr-agri-impact-cell.is-watch dd {
+.nr-agri-impact-cell.is-watch .metric-card-value {
   color: #c87508;
 }
 
-.nr-agri-impact-cell.is-danger dd {
+.nr-agri-impact-cell.is-danger .metric-card-value {
   color: #d23933;
 }
 
-.nr-agri-impact-cell.is-good dd {
+.nr-agri-impact-cell.is-good .metric-card-value {
   color: #177447;
 }
 
-.nr-agri-impact-cell.is-muted dd {
+.nr-agri-impact-cell.is-muted .metric-card-value {
   color: var(--muted);
 }
 
-.nr-agri-impact-cell.is-watch > span[aria-hidden="true"] {
+.nr-agri-impact-cell.is-watch .metric-card-icon {
   background: rgba(241, 156, 22, 0.12);
   color: #d08009;
 }
 
-.nr-agri-impact-cell.is-danger > span[aria-hidden="true"] {
+.nr-agri-impact-cell.is-danger .metric-card-icon {
   background: rgba(210, 57, 51, 0.1);
   color: #d23933;
 }
@@ -5662,18 +5730,19 @@ textarea {
 }
 
 .nr-local-map-select .app-select-trigger {
-  justify-content: flex-start;
+  justify-content: center;
   min-height: 42px;
-  padding: 8px 32px 8px 12px;
+  padding: 8px 32px;
   border-color: rgba(178, 195, 184, 0.82);
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.88);
+  text-align: center;
   font-size: 0.78rem;
   font-weight: 900;
 }
 
 .nr-local-map-select .app-select-value {
-  text-align: left;
+  text-align: center;
 }
 
 .nr-local-map-select .app-select-menu {
@@ -7582,14 +7651,15 @@ textarea {
   }
 
   .nr-map-panel.has-criteria-map .nr-local-map-select .app-select-trigger {
-    justify-content: flex-start;
+    justify-content: center;
     width: auto;
     min-width: min(42vw, 150px);
     min-height: 44px;
-    padding: 8px 34px 8px 14px;
+    padding: 8px 34px;
     border-color: rgba(178, 195, 184, 0.84);
     border-radius: 999px;
     background: #ffffff;
+    text-align: center;
     font-size: 0.8rem;
     box-shadow: 0 7px 16px rgba(31, 50, 42, 0.07);
   }
@@ -7842,7 +7912,7 @@ textarea {
 
   .nr-research-stat-grid .metric-card {
     min-height: 74px;
-    padding: 10px 28px 10px 10px;
+    padding: 10px 28px;
   }
 
   .nr-area-heading-metrics {
@@ -8137,7 +8207,7 @@ textarea {
 
   .nr-water-kpis .metric-card {
     min-height: 62px;
-    padding: 9px 30px 9px 12px;
+    padding: 9px 30px;
   }
 
   .nr-water-kpis .is-live-status {
@@ -8369,12 +8439,12 @@ textarea {
     right: max(10px, env(safe-area-inset-right));
     bottom: max(10px, env(safe-area-inset-bottom));
     left: max(10px, env(safe-area-inset-left));
-    z-index: 36;
+    z-index: 180;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     width: auto;
     max-width: none;
-    max-height: min(42svh, 300px);
+    max-height: min(58svh, 420px);
     margin: 0;
     padding: 18px 14px 13px;
     border: 1px solid rgba(178, 195, 184, 0.88);
@@ -8417,7 +8487,7 @@ textarea {
   .nr-map-panel.has-criteria-map .nr-map-preview-card.is-touch dl {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px 10px;
-    max-height: 128px;
+    max-height: min(220px, calc(58svh - 156px));
     min-height: 0;
     overflow-y: auto;
     padding-right: 2px;
@@ -8666,7 +8736,7 @@ textarea {
     flex: 0 1 auto;
     gap: 8px;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     max-width: 100%;
     min-height: 39px;
     padding: 8px 11px;
@@ -8833,17 +8903,17 @@ textarea {
   }
 
   .operational-filter-sheet .app-select-trigger {
-    justify-content: flex-start;
+    justify-content: center;
     min-height: 46px;
-    padding: 9px 40px 9px 12px;
+    padding: 9px 40px;
     border-color: rgba(183, 199, 188, 0.9);
     border-radius: 10px;
     background: #ffffff;
-    text-align: left;
+    text-align: center;
   }
 
   .operational-filter-sheet .app-select-value {
-    text-align: left;
+    text-align: center;
   }
 
   .operational-filter-sheet-static-row strong {

@@ -12,7 +12,9 @@ agricultural water-risk alert prototype. The site brand is Korat Tan Phai /
    or user-facing surfaces.
 3. Read [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md) before changing canonical
    JSON, runtime state, alert payloads, or map joins.
-4. Read [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md) before commit, push,
+4. Read [docs/SHARED_COMPONENTS.md](docs/SHARED_COMPONENTS.md) before adding,
+   changing, or standardizing shared UI components.
+5. Read [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md) before commit, push,
    deploy, or production smoke work.
 
 ## Main Surfaces
@@ -81,6 +83,7 @@ user task explicitly authorizes it.
 - [docs/NON_FUNCTIONAL_REQUIREMENTS.md](docs/NON_FUNCTIONAL_REQUIREMENTS.md)
 - [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md)
 - [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
+- [docs/SHARED_COMPONENTS.md](docs/SHARED_COMPONENTS.md)
 - [docs/HANDOFF.md](docs/HANDOFF.md)
 - [docs/ALERTING.md](docs/ALERTING.md)
 - [docs/NOTIFICATION_CONTRACT.md](docs/NOTIFICATION_CONTRACT.md)

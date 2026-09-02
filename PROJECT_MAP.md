@@ -23,6 +23,9 @@ in this repo.
 - Domain selectors and workflow helpers: `src/domain.ts`
 - Static map component: `src/components/RiskMap.tsx`
 - Nakhon Ratchasima workspace: `src/components/NakhonRatchasimaWorkspace.tsx`
+- Shared select component: `src/components/AppSelect.tsx`
+- Shared metric components: `src/components/PageSummary.tsx`
+- Shared map preview footer: `src/components/MapPreviewFooter.tsx`
 - Canonical data imports: `src/data/catalog.ts`
 - Canonical JSON package copy: `src/data/canonical/`
 - Nakhon Ratchasima local research/data patch:
@@ -124,6 +127,8 @@ Production smoke checks after an authorized deploy:
   rollback.
 - [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md): visual direction, typography,
   colors, responsive rules, screenshot QA.
+- [docs/SHARED_COMPONENTS.md](docs/SHARED_COMPONENTS.md): exported and local
+  shared component inventory, reuse rules, and component contracts.
 - [docs/ANALYTICS.md](docs/ANALYTICS.md): current analytics state and future
   event taxonomy.
 - [docs/SEO.md](docs/SEO.md): current SPA metadata and future indexing rules.
@@ -155,6 +160,11 @@ Production smoke checks after an authorized deploy:
 - `src/components/RiskMap.tsx`: interactive Thailand ADM1 SVG map.
 - `src/components/NakhonRatchasimaWorkspace.tsx`: province -> district ->
   subdistrict drill-down for Nakhon Ratchasima using admin-code joins.
+- `src/components/AppSelect.tsx`: shared centered dropdown/listbox component.
+- `src/components/PageSummary.tsx`: shared `PageSummary`, `MetricCard`, and
+  `MetricGrid` components.
+- `src/components/MapPreviewFooter.tsx`: shared map preview footer for actions
+  and centered fallback notes.
 - `src/data/catalog.ts`: typed imports and derived catalog lists.
 - `src/data/canonical/*.json`: product/spec data copied into source.
 - `src/data/canonical/nakhon_ratchasima/*.json`: incremental Nakhon Ratchasima province research
@@ -290,6 +300,9 @@ FACT:
   than the current user request.
 - Current code beats old notes when they conflict.
 - Latest explicit product decisions beat older design references.
+- Reuse the shared components in `docs/SHARED_COMPONENTS.md` instead of
+  duplicating stat cards, dropdowns, map preview footers, provenance markers,
+  or dashboard section shells.
 - Do not invent deployed services, APIs, env vars, database collections, or real
   alert-delivery guarantees.
 - Do not fabricate district/subdistrict/raster data for areas that are not
@@ -306,6 +319,8 @@ FACT:
 - `README.md` and this project map: onboarding a fresh Codex task for this
   project.
 - `$docs-cartographer`: documentation maps and handoff docs.
+- `$korat-tan-phai-new-chat`: fresh-chat onboarding for this repo.
+- `$korat-tan-phai-shared-components`: shared component reuse and consistency.
 - `$ui-ux-expert`: UI/product surface changes and screenshot QA.
 - `$typography-refinement`: Thai typography, required acronyms, wrapping, long
   labels.
@@ -318,15 +333,16 @@ Project checks:
 
 ```bash
 npm run build
+npm run build:protected
 npm test
-npm run test:e2e
+npm run test:e2e:managed
 ```
 
 ## Maintainer Reading Order
 
 - Start here: `README.md`, then `PROJECT_MAP.md`, then `docs/HANDOFF.md`.
-- Before changing UI: `docs/DESIGN_SYSTEM.md`, `docs/APP_MAP.md`, and
-  `docs/INTERACTION_MAP.md`.
+- Before changing UI: `docs/DESIGN_SYSTEM.md`, `docs/APP_MAP.md`,
+  `docs/INTERACTION_MAP.md`, and `docs/SHARED_COMPONENTS.md`.
 - Before changing data/API: `docs/DATA_CONTRACT.md`, `docs/API.md`, and
   `docs/ARCHITECTURE.md`.
 - Before deploying: `docs/RELEASE_RUNBOOK.md`,

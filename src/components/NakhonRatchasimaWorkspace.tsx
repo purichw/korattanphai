@@ -22,8 +22,9 @@ import { AppSelect, type AppSelectOption } from "./AppSelect";
 import { AuditTrailFootnotes, type AuditTrailSection } from "./AuditTrail";
 import { ContentSection } from "./ContentSection";
 import { DataProvenanceChip, DataProvenanceLegend, dataProvenanceChipKindFromText, type DataProvenanceChipKind } from "./DataProvenanceChip";
+import { MapPreviewFooter } from "./MapPreviewFooter";
 import { OperationalFilters } from "./OperationalFilters";
-import { MetricCard, PageSummary } from "./PageSummary";
+import { MetricCard, MetricGrid, PageSummary } from "./PageSummary";
 import {
   getAnchoredZoomTransform,
   getSequentialButtonZoomTarget,
@@ -2894,16 +2895,19 @@ function AgricultureVisibilityPanel({
         <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่นำมาประเมิน" />
         <DataProvenanceChip kind={provenance} />
       </div>
-      <dl className="nr-agri-impact-summary">
+      <MetricGrid className="nr-agri-impact-summary" variant="segmented" ariaLabel="พื้นที่เกษตรที่นำมาประเมิน">
         {facts.map((fact) => (
-          <div key={fact.id} className={["nr-agri-impact-cell", fact.tone ? `is-${fact.tone}` : ""].filter(Boolean).join(" ")}>
-            <dt>{fact.label}</dt>
-            <dd>{fact.value}</dd>
-            {fact.detail ? <small>{fact.detail}</small> : null}
-            {fact.icon ? <span aria-hidden="true">{fact.icon}</span> : null}
-          </div>
+          <MetricCard
+            key={fact.id}
+            className="nr-agri-impact-cell"
+            label={fact.label}
+            value={fact.value}
+            detail={fact.detail}
+            icon={fact.icon}
+            tone={fact.tone ?? "default"}
+          />
         ))}
-      </dl>
+      </MetricGrid>
       <p className="nr-compact-note nr-agri-impact-disclaimer">
         <Info size={15} aria-hidden="true" />
         ไม่ใช่ตัวเลขเสียหายทางการ
@@ -3604,8 +3608,10 @@ function NakhonRatchasimaLocalMap({
     }, 24);
 
     const cardWidth = Math.min(344, Math.max(240, rect.width - 24));
-    const availableHeight = Math.max(180, rect.height - topReserved - bottomReserved);
-    const cardHeight = Math.min(410, availableHeight);
+    const viewportHeight = typeof window !== "undefined" ? window.innerHeight : rect.height;
+    const viewportSafeHeight = Math.max(260, viewportHeight - Math.max(rect.top, 0) - 24);
+    const availableHeight = Math.max(320, rect.height - topReserved - bottomReserved);
+    const cardHeight = Math.min(430, availableHeight, viewportSafeHeight);
     const gap = 14;
     const maxY = Math.max(topReserved, rect.height - bottomReserved - cardHeight);
     let x = point.clientX - rect.left + gap;
@@ -3657,6 +3663,23 @@ function NakhonRatchasimaLocalMap({
     preservePreviewOnSelectionSync.current = true;
     onSelectedSubdistrictChange?.(model.subdistrictCode);
     animateTransform(transformForLocalFocus([feature], projection, subdistrictFocusZoom, subdistrictMinimumZoom, selectedFocusPadding));
+  };
+
+  const clearFeatureSelection = () => {
+    if (routeSelectedSubdistrictCode) return;
+    if (!activeSelectedSubdistrictCode && !selectedCode && !preview) return;
+    setSelectedCode(null);
+    setPreview(null);
+    preservePreviewOnSelectionSync.current = false;
+    onSelectedSubdistrictChange?.(null);
+
+    if (!projection || !geo) return;
+    if (focusDistrictCode) {
+      const districtFeatures = geo.features.filter((feature) => districtCodeForFeature(feature) === focusDistrictCode);
+      animateTransform(transformForLocalFocus(districtFeatures, projection, districtFocusZoom, districtMinimumZoom, districtFocusPadding));
+      return;
+    }
+    animateTransform(fitTransform);
   };
 
   const getPinchPoints = () => Array.from(activePointers.current.values()).slice(0, 2);
@@ -3817,8 +3840,8 @@ function NakhonRatchasimaLocalMap({
         })
       : undefined;
   const focusedFeatureModels = featureModels.filter((model) =>
-    activeSelectedSubdistrictCode
-      ? model.subdistrictCode === activeSelectedSubdistrictCode
+    routeSelectedSubdistrictCode
+      ? model.subdistrictCode === routeSelectedSubdistrictCode
       : !focusDistrictCode || model.row?.district_code === focusDistrictCode,
   );
   const criteriaMatchedCount = focusedFeatureModels.filter((model) => model.matchesCriteria).length;
@@ -3997,6 +4020,7 @@ function NakhonRatchasimaLocalMap({
   const mapPanelClassName = [
     "nr-map-panel",
     isDragging ? "is-dragging" : "",
+    preview ? "has-preview" : "",
     preview?.mode === "touch" ? "has-touch-preview" : "",
     useResearchCriteriaMap ? "has-criteria-map" : "",
     isMobileMap ? "is-mobile-map" : "",
@@ -4206,6 +4230,12 @@ function NakhonRatchasimaLocalMap({
         onDragStart={(event) => {
           event.preventDefault();
         }}
+        onClick={(event) => {
+          const pointerTarget = event.target as Element | null;
+          if (pointerTarget?.closest("[data-nr-subdistrict-code]")) return;
+          if (suppressClick.current) return;
+          clearFeatureSelection();
+        }}
       >
         {showProvinceSilhouette && (
           <defs>
@@ -4245,10 +4275,10 @@ function NakhonRatchasimaLocalMap({
           </g>
           {featureModels.map((model) => {
             const { feature, row, status, subdistrictCode } = model;
-            const isInRouteScope = activeSelectedSubdistrictCode
-              ? subdistrictCode === activeSelectedSubdistrictCode
+            const isInRouteScope = routeSelectedSubdistrictCode
+              ? subdistrictCode === routeSelectedSubdistrictCode
               : !focusDistrictCode || row?.district_code === focusDistrictCode;
-            const isSelected = activeSelectedSubdistrictCode === subdistrictCode;
+            const isSelected = activeSelectedSubdistrictCode === subdistrictCode || selectedCode === subdistrictCode;
             const isCriteriaFiltered = useResearchCriteriaMap && (!isInRouteScope || !model.matchesCriteria);
             return (
               <path
@@ -4259,7 +4289,7 @@ function NakhonRatchasimaLocalMap({
                   "nr-map-shape",
                   `is-${status}`,
                   isInRouteScope ? "in-focus" : "out-of-focus",
-                  isSelected || selectedCode === subdistrictCode ? "is-selected" : "",
+                  isSelected ? "is-selected" : "",
                   isCriteriaFiltered ? "is-criteria-filtered" : "",
                 ].join(" ")}
                 role="button"
@@ -4296,6 +4326,12 @@ function NakhonRatchasimaLocalMap({
                     suppressClick.current = false;
                     return;
                   }
+                  if (isSelected && !routeSelectedSubdistrictCode) {
+                    event.preventDefault();
+                    clearFeatureSelection();
+                    (event.currentTarget as SVGElement & { blur?: () => void }).blur?.();
+                    return;
+                  }
                   if (lastPointerType.current === "touch") {
                     event.preventDefault();
                     showSubdistrictPreview(feature, event, "touch");
@@ -4311,6 +4347,10 @@ function NakhonRatchasimaLocalMap({
                   if (isCriteriaFiltered) return;
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
+                    if (isSelected && !routeSelectedSubdistrictCode) {
+                      clearFeatureSelection();
+                      return;
+                    }
                     focusFeature(feature);
                   }
                 }}
@@ -4400,20 +4440,20 @@ function NakhonRatchasimaLocalMap({
               </div>
             )}
           </dl>
-          {previewAction ? (
-            <button
-              type="button"
-              className="map-preview-action"
-              onClick={() => {
-                dismissPreview();
-                onNavigate(previewAction.path);
-              }}
-            >
-              {previewAction.label}
-            </button>
-          ) : (
-            <p className="map-preview-note">ยังไม่มีข้อมูลพอให้เปิดรายละเอียดระดับตำบล</p>
-          )}
+          <MapPreviewFooter
+            action={
+              previewAction
+                ? {
+                    label: previewAction.label,
+                    onClick: () => {
+                      dismissPreview();
+                      onNavigate(previewAction.path);
+                    },
+                  }
+                : null
+            }
+            fallback="ยังไม่มีข้อมูลพอให้เปิดรายละเอียดระดับตำบล"
+          />
         </article>
       )}
       <div className="nr-map-legend" aria-label="คำอธิบายแผนที่จังหวัดนครราชสีมา">
