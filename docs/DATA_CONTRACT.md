@@ -152,9 +152,16 @@ gating.
 
 ## Nakhon Ratchasima Research Period
 
-The Nakhon Ratchasima local research bundle is aligned to the same canonical
-period as `province_monthly_risk.json`: `2025-01` through `2026-10` inclusive.
-`temporal_matrix.json` must have one row per canonical month in the same order.
+The nationwide canonical period remains `2025-01` through `2026-10` inclusive,
+and `temporal_matrix.json` must still have one row per canonical month in the
+same order. The Nakhon Ratchasima local research map bundle was intentionally
+cleared on `2026-09-02` for a dataset refresh: live local map data now retains
+only the latest normalized period, `2025-12`, with 289 subdistrict records.
+
+Historical local map periods before `2025-12` are parked outside the live app in
+the rollback checkpoint noted in `docs/rollback-parking-lot.md`. Do not restore
+or reintroduce those historical map periods unless a new source-backed dataset
+refresh explicitly requires it.
 
 Source coverage and observed impact are intentionally separate:
 

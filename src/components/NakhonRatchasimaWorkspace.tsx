@@ -1286,6 +1286,7 @@ function formatPercent(value: number, maximumFractionDigits = 0) {
 }
 
 function researchDisplayPeriod(summary: NakhonRatchasimaResearchPanelSummary) {
+  if (summary.meta.periodStart === summary.meta.periodEnd) return formatMonth(summary.meta.periodEnd, "th");
   return `${formatMonth(summary.meta.periodStart, "th")} ถึง ${formatMonth(summary.meta.periodEnd, "th")}`;
 }
 

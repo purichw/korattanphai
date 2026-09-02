@@ -1,5 +1,27 @@
 # Rollback Parking Lot
 
+## 2026-09-02 12:19 +07:00 — Clear Historical Local Map Research Data
+
+- Request: remove historical data that feeds the map/month selector before
+  loading a new dataset, while keeping ThaiWater predictions intact.
+- Checkpoint:
+  `/tmp/codex-rollback-checkpoints/korattanphai-clear-historical-map-data-20260902-121928/`
+- Release status: verified locally for the local research map dataset cleanup.
+- Will remove from live data:
+  - local research map periods before `2025-12` from
+    `normalized_research_monthly_panel.json`;
+  - historical province research summary rows before `2025-12` from
+    `normalized_research_panel_summary.json`.
+- Will keep in the app:
+  - the latest local research map period, all 289 subdistrict records, district
+    and subdistrict latest summaries;
+  - ThaiWater prediction fixtures and point-in-time ThaiWater snapshot data;
+  - OPSMOAC prediction-readiness and canonical nationwide month contracts.
+- Restore checklist:
+  - restore the two normalized research JSON files from the checkpoint if the
+    historical map periods are needed again;
+  - rerun domain tests, typecheck, lint, build, and route smoke before release.
+
 ## 2026-08-31 22:43 +07:00 — Hide Technical Source Names From User-Facing Copy
 
 - Request: remove end-user-facing references to ThaiWater and Excel-style source

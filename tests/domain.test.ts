@@ -25,6 +25,7 @@ import {
   nakhonRatchasimaSourceMatrix,
   nakhonRatchasimaSubdistrictRainfallCoverage,
   nakhonRatchasimaTemporalMatrix,
+  nakhonRatchasimaThaiWaterDroughtForecast,
   provinceMonthlyRisk,
   provinces,
   sourceRegistry,
@@ -51,6 +52,9 @@ import {
   getNakhonRatchasimaRainfallCoverageRecord,
   getNakhonRatchasimaRainfallStation,
   getNakhonRatchasimaRainfallStations,
+  getNakhonRatchasimaResearchPanelSummary,
+  getNakhonRatchasimaResearchPeriods,
+  getNakhonRatchasimaResearchSubdistrictMonth,
   getProvinceWorkspacePath,
   MAIN_ADVISORY_ID,
   MAIN_EVENT_ID,
@@ -419,6 +423,36 @@ describe("Nakhon Ratchasima incremental research patch", () => {
       true,
     );
     expect(nakhonRatchasimaDwrEwsStationCoverage.meta.usageRule).toContain("Month-specific hazard status");
+  });
+
+  it("keeps local map research data latest-only without removing ThaiWater predictions", () => {
+    const research = getNakhonRatchasimaResearchPanelSummary();
+    const meta = research.meta as typeof research.meta & { historicalDataStatus?: string };
+    const periods = getNakhonRatchasimaResearchPeriods();
+
+    expect(meta.historicalDataStatus).toBe("CLEARED_FOR_DATASET_REFRESH");
+    expect(research.meta.periodStart).toBe("2025-12");
+    expect(research.meta.periodEnd).toBe("2025-12");
+    expect(research.meta.periodCount).toBe(1);
+    expect(research.meta.normalizedRowCount).toBe(289);
+    expect(periods).toEqual(["2025-12"]);
+    expect(research.monthlyProvince.map((row) => row.period)).toEqual(["2025-12"]);
+    expect(research.subdistrictsLatest).toHaveLength(289);
+    expect(getNakhonRatchasimaResearchSubdistrictMonth("300101", "2025-12")).toMatchObject({
+      period: "2025-12",
+      subdistrictCode: "300101",
+    });
+    expect(getNakhonRatchasimaResearchSubdistrictMonth("300101", "2025-11")).toBeUndefined();
+
+    expect(nakhonRatchasimaThaiWaterDroughtForecast.monthly.map((row) => row.period)).toEqual([
+      "2026-08",
+      "2026-09",
+      "2026-10",
+      "2026-11",
+      "2026-12",
+      "2027-01",
+    ]);
+    expect(nakhonRatchasimaThaiWaterDroughtForecast.records).toHaveLength(1710);
   });
 
   it("tracks OPSMOAC monthly report readiness without turning it into local predictions", () => {
