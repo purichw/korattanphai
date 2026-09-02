@@ -168,7 +168,8 @@ Current shared UI and component-memory patch:
   Nakhon map so preview actions and fallback notes share one implementation.
 - Fixed province-map transient selection so a selected feature can be cleared
   without refreshing, while route-selected subdistricts remain locked only on
-  the matching route.
+  the matching route; clearing also suppresses immediate hover preview repaint
+  while the map animates back.
 - Raised local map preview card stacking and overflow behavior so district and
   subdistrict preview cards are not hidden behind following agriculture or
   readiness sections.

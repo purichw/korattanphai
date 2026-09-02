@@ -120,8 +120,10 @@ should be treated as shared components and reused instead of duplicated.
 ## Interaction Contracts To Preserve
 
 - Selecting an area on the province map is transient and can be cleared by
-  clicking the selected feature again or the map background. A route-selected
-  subdistrict remains selected only while the user is on that subdistrict route.
+  clicking the selected feature again or the map background. Clearing selection
+  should not immediately reopen a new hover preview while the map animates back.
+  A route-selected subdistrict remains selected only while the user is on that
+  subdistrict route.
 - Hover/preview cards on district and subdistrict maps must use the same layout
   priority as the province map and must not be hidden behind following sections.
 - The map footer fallback text is a centered shared component state, not a

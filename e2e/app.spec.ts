@@ -780,11 +780,8 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   const resetTransform = await readMapTransform(localSvg, ".nr-map-transform-layer");
   expect(resetTransform.k).toBeCloseTo(initialTransform.k, 1);
 
-  await clickSvgPathFillPoint(
-    page,
-    localSvg.locator('[data-nr-subdistrict-code="302505"]'),
-    isMobile,
-  );
+  const wangNamKhiaoFeature = localSvg.locator('[data-nr-subdistrict-code="302505"]');
+  await clickSvgPathFillPoint(page, wangNamKhiaoFeature, isMobile);
   await expect(nakhonRatchasimaPreview).toContainText("วังน้ำเขียว");
   await expect(nakhonRatchasimaPreview).toContainText("ไทยสามัคคี");
   await expect(nakhonRatchasimaPreview.getByRole("button", { name: "เปิดอำเภอนี้" })).toBeVisible();
@@ -800,6 +797,12 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   expect(overlayOrder.previewZIndex).toBeGreaterThan(overlayOrder.legendZIndex);
   if (!isMobile) {
     await expect(localSvg.locator(".nr-map-selection-halo")).toHaveCount(1);
+    await clickSvgPathFillPoint(page, wangNamKhiaoFeature, false);
+    await expect(nakhonRatchasimaPreview).toHaveCount(0);
+    await expect(localSvg.locator(".nr-map-selection-halo")).toHaveCount(0);
+    await clickSvgPathFillPoint(page, wangNamKhiaoFeature, false);
+    await expect(nakhonRatchasimaPreview).toContainText("วังน้ำเขียว");
+    await expect(nakhonRatchasimaPreview.getByRole("button", { name: "เปิดอำเภอนี้" })).toBeVisible();
   }
   await nakhonRatchasimaPreview.getByRole("button", { name: "เปิดอำเภอนี้" }).click();
 

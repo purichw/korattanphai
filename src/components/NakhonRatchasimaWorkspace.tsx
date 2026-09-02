@@ -3170,6 +3170,7 @@ function NakhonRatchasimaLocalMap({
   const longPressTimer = useRef<number | null>(null);
   const previewDismissTimer = useRef<number | null>(null);
   const previewMode = useRef<PreviewMode | null>(null);
+  const suppressHoverPreviewUntil = useRef(0);
   const preservePreviewOnSelectionSync = useRef(false);
   const touchPanReady = useRef(false);
   const dragStart = useRef<{ x: number; y: number; tx: number; ty: number; k: number; moved: boolean } | null>(
@@ -3629,7 +3630,10 @@ function NakhonRatchasimaLocalMap({
   };
 
   const showSubdistrictPreview = (feature: NakhonRatchasimaGeoFeature, point: ClientPoint, mode: PreviewMode) => {
-    if (mode === "hover" && (previewMode.current === "selected" || previewMode.current === "touch")) return;
+    if (mode === "hover") {
+      if (Date.now() < suppressHoverPreviewUntil.current) return;
+      if (previewMode.current === "selected" || previewMode.current === "touch") return;
+    }
     const model = featureModel(feature);
     if (!model.district || !model.subdistrict) {
       dismissPreview();
@@ -3668,6 +3672,9 @@ function NakhonRatchasimaLocalMap({
   const clearFeatureSelection = () => {
     if (routeSelectedSubdistrictCode) return;
     if (!activeSelectedSubdistrictCode && !selectedCode && !preview) return;
+    suppressHoverPreviewUntil.current = Date.now() + 450;
+    previewMode.current = null;
+    cancelPreviewDismiss();
     setSelectedCode(null);
     setPreview(null);
     preservePreviewOnSelectionSync.current = false;
