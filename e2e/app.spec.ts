@@ -290,9 +290,25 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.getByRole("heading", { name: "แผนที่สถานการณ์ภัยแล้ง" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "บริบทความเสี่ยงภัยแล้ง" })).toHaveCount(0);
   await expect(page.getByText("ความเชื่อมั่นของข้อมูล").first()).toBeVisible();
+  const archiveEntry = page.locator(".nr-forecast-archive-entry");
+  await expect(archiveEntry).toBeVisible();
+  await expect(archiveEntry).toContainText("คลังพยากรณ์ย้อนหลัง");
+  await expect(archiveEntry).toContainText("ดูคำพยากรณ์ที่โมเดลเคยออกไว้");
+  await expect(archiveEntry).toContainText("T+1–T+6");
+  await expect(archiveEntry).toContainText("285/289 ตำบล");
+  await expect(archiveEntry).toContainText("T+1");
+  await expect(archiveEntry.getByRole("link", { name: /เปิดในหน้าภัยแล้ง/ })).toHaveAttribute(
+    "href",
+    "/drought?mapLayer=forecast-archive&horizon=1",
+  );
+  await expect(archiveEntry.getByRole("combobox")).toHaveCount(0);
+  const overviewSituationBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-situation"));
+  const archiveEntryBox = await boundingBoxOrThrow(archiveEntry);
   const overviewMapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card.is-overview-map"));
   const overviewWorkspaceBox = await boundingBoxOrThrow(page.locator(".nr-workspace"));
   expect(overviewMapBox.width).toBeGreaterThan(overviewWorkspaceBox.width * 0.88);
+  expect(archiveEntryBox.y).toBeGreaterThan(overviewSituationBox.y);
+  expect(overviewMapBox.y).toBeGreaterThan(archiveEntryBox.y);
   const nav = await openPrimaryNav(page);
   await expect(nav.getByRole("button")).toHaveCount(2);
   await expect(nav.getByRole("button", { name: "ภาพรวม", exact: true })).toBeVisible();
@@ -321,19 +337,31 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const forecastBox = await boundingBoxOrThrow(page.locator(".nr-drought-forecast-section"));
   const attentionBox = await boundingBoxOrThrow(page.locator(".nr-research-attention"));
   const situationBox = await boundingBoxOrThrow(page.locator(".nr-drought-situation-section"));
+  const archiveMode = page.locator(".nr-forecast-archive-mode-section.is-province");
+  await expect(archiveMode).toBeVisible();
+  await expect(archiveMode).toContainText("คำพยากรณ์ที่ใช้วาดแผนที่ย้อนหลัง");
+  await expect(archiveMode).toContainText("ค่าจากการพยากรณ์ ไม่ใช่ข้อมูลความเสียหายทางการ");
+  await expect(archiveMode).toContainText("285/289 ตำบล");
+  await expect(archiveMode.getByRole("tab")).toHaveCount(6);
+  await expect(archiveMode.getByRole("tab", { name: /T\+1/ })).toHaveAttribute("aria-selected", "true");
   const mapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card"));
+  const archiveModeBox = await boundingBoxOrThrow(archiveMode);
   const mapToolbar = page.locator(".nr-dashboard-map-card .nr-local-map-criteria");
   const mapControls = page.locator(".nr-dashboard-map-card .nr-map-controls");
-  await expect(page.getByRole("heading", { name: "แผนที่สถานการณ์ภัยแล้ง" })).toBeVisible();
-  await expect(mapToolbar.getByRole("combobox")).toHaveCount(4);
-  await expect(mapToolbar.getByRole("combobox", { name: "เดือนข้อมูลบนแผนที่จังหวัดนครราชสีมา" })).toBeVisible();
-  await expect(mapToolbar.getByRole("combobox", { name: "มุมมองแผนที่" })).toBeVisible();
-  await expect(mapToolbar.getByRole("combobox", { name: "สถานะข้อมูล" })).toBeVisible();
-  await expect(mapToolbar.getByRole("combobox", { name: "ระดับภัยแล้ง" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox")).toHaveCount(2);
+  await expect(mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
   await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
-  await mapToolbar.getByRole("combobox", { name: "ระดับภัยแล้ง" }).click();
-  await page.getByRole("option", { name: "เสี่ยงสูง" }).click();
+  await archiveMode.getByRole("tab", { name: /T\+2/ }).click();
+  await expect(archiveMode.getByRole("tab", { name: /T\+2/ })).toHaveAttribute("aria-selected", "true");
+  await expect(archiveMode).toContainText("0/289 ตำบล");
+  await mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" }).click();
+  await page.getByRole("option", { name: /เป้าหมาย · ก.ย. 2569/ }).click();
+  await expect(archiveMode).toContainText("51 ตำบล");
+  await mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" }).click();
+  await page.getByRole("option", { name: "ไม่พบสัญญาณเสี่ยง" }).click();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toContainText(/แสดง .* จาก .* ตำบล|ไม่พบตำบลที่ตรงกับตัวกรอง/);
   await mapToolbar.getByRole("button", { name: "รีเซ็ต" }).click();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
@@ -349,7 +377,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     expect(attentionBox.y).toBeGreaterThan(forecastBox.y);
   }
   expect(situationBox.y).toBeGreaterThan(forecastBox.y);
-  expect(mapBox.y).toBeGreaterThan(situationBox.y);
+  expect(archiveModeBox.y).toBeGreaterThan(situationBox.y);
+  expect(mapBox.y).toBeGreaterThan(archiveModeBox.y);
   expect(mapBox.width).toBeGreaterThan(dashboardBox.width * 0.94);
   const droughtNav = await openPrimaryNav(page);
   await expect(droughtNav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toHaveClass(/active/);
@@ -363,10 +392,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.locator(".topbar-logo")).toHaveCount(0);
   await expect(page.getByText("ข่าวกรองความเสี่ยงเกษตรและการเตือนภัยล่วงหน้าระดับประเทศ")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
-  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab")).toHaveCount(2);
-  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /ภาพรวม/ })).toBeVisible();
-  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /ภัยแล้ง/ })).toBeVisible();
-  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /^น้ำ/ })).toHaveCount(0);
+  await expect(page.locator(".nr-dashboard-tabs")).toHaveCount(0);
   await expect(page.locator(".brand-mark img")).toHaveAttribute("src", "/brand/korat-tan-phai-sidebar-logo.webp");
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute("sizes", "512x512");
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
@@ -384,7 +410,31 @@ test("removed water route no longer renders the province water page", async ({ p
   await expect(page.getByRole("button", { name: "กลับภาพรวม" })).toBeVisible();
   await expect(page.getByText("แผนที่ฝนย้อนหลังในชุดข้อมูล")).toHaveCount(0);
   await expect(page.getByText("พยากรณ์ฝน")).toHaveCount(0);
-  await expect(page.locator(".nr-dashboard-tabs").getByRole("tab", { name: /^น้ำ/ })).toHaveCount(0);
+  await expect(page.locator(".nr-dashboard-tabs")).toHaveCount(0);
+});
+
+test("drought forecast archive components are shared across province, district, and subdistrict maps", async ({ page }) => {
+  await loginAs(page, smokeUsername);
+
+  await page.goto("/drought?mapLayer=forecast-archive&horizon=1");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-province")).toContainText("คำพยากรณ์ที่ใช้วาดแผนที่ย้อนหลัง");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-province").getByRole("tab")).toHaveCount(6);
+  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
+  await expect(page.locator(".nr-dashboard-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
+
+  await page.goto("/dan-khun-thot?mapLayer=forecast-archive&horizon=1");
+  await expect(page.getByRole("heading", { name: "ด่านขุนทด", exact: true })).toBeVisible();
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).toContainText("พยากรณ์ย้อนหลังระดับอำเภอ");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).toContainText("Weighted signal index");
+  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งระดับตำบล" })).toBeVisible();
+  await expect(page.locator(".nr-area-map-section .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
+
+  await page.goto("/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2026-08&horizon=1");
+  await expect(page.getByRole("heading", { name: "บ้านเก่า", exact: true })).toBeVisible();
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-subdistrict")).toContainText("พยากรณ์ย้อนหลังของตำบล");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-subdistrict")).toContainText("ค่าที่พยากรณ์");
+  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล" })).toBeVisible();
+  await expect(page.locator(".nr-area-map-section .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
 });
 
 test("custom dropdowns are app-rendered and keyboard operable", async ({ page }) => {
@@ -690,7 +740,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("heading", { name: "อุดมทรัพย์", exact: true })).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "ช่องว่างของตำบล" }).first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "แผนที่ตำบล", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();

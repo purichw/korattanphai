@@ -50,7 +50,6 @@ should be treated as shared components and reused instead of duplicated.
 | Primitive | Use For |
 | --- | --- |
 | `OfficialMetricCard` | Nakhon-specific metric cards backed by `MetricCard`. |
-| `ProvinceDashboardTabBar` | Province dashboard tab navigation. |
 | `ProvinceDashboardHeading` | Province heading with source/readiness context. |
 | `DashboardSection` | Standard titled Nakhon dashboard section shell. |
 | `DashboardAccordionSection` | Compact disclosure section for source/detail content. |
@@ -61,6 +60,10 @@ should be treated as shared components and reused instead of duplicated.
 | `ResearchStatGrid` | Local grid wrapper for research metric groups. |
 | `DroughtForecastTrendGraph` | Shared drought forecast/historical trend chart. |
 | `ResearchAreaForecastPanel` | District/subdistrict forecast panel. |
+| `DroughtForecastArchivePanel` | Shared historical drought forecast archive module for province, district, and subdistrict drought pages. It takes the selected target month plus T+ horizon and never fabricates missing vintage data. |
+| `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
+| `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`; keeps coverage, no-risk, risk, missing, and level-specific metrics centered and source-aware. |
+| `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. |
 | `DroughtForecastPriorityPanel` | Province-level drought priority panel. |
 | `ResearchDroughtSituationPanel` | Province drought status summary. |
 | `ResearchDroughtDistrictPanel` | District ranking/status module. |
@@ -81,7 +84,7 @@ should be treated as shared components and reused instead of duplicated.
 | `AgricultureImpactPanel` | Province agriculture impact panel. |
 | `ResearchAreaAgricultureImpactPanel` | District/subdistrict agriculture facts panel. |
 | `PredictionReadinessPanel` | Readiness summary and breakdown panel. |
-| `NakhonRatchasimaLocalMap` | Shared local SVG map across province, district, and subdistrict levels. |
+| `NakhonRatchasimaLocalMap` | Shared local SVG map across province, district, and subdistrict levels. Supports normal/research criteria maps and drought forecast archive mode keyed by target month + T+ horizon. |
 | `NakhonRatchasimaBreadcrumbs` | Local route breadcrumbs. |
 | `NakhonRatchasimaLayerInspector` | Layer/provenance inspector. |
 | `SourceDecisionFootnotes` | Source-decision footnotes. |
@@ -109,6 +112,11 @@ should be treated as shared components and reused instead of duplicated.
   not duplicate SVG map interaction logic; shared math and labels live in
   `src/mapInteraction.ts`, `src/mapLabels.ts`, and
   `src/useFullscreenTarget.ts`.
+- **Forecast archive:** use `DroughtForecastArchivePanel` above the shared
+  `NakhonRatchasimaLocalMap` on drought pages, and use
+  `DroughtForecastArchiveMapFilters` inside the map. The archive selection is
+  target month + T+ horizon; changing T+ must not silently switch target month,
+  and no-data combinations must stay no-data.
 - **Provenance:** use `DataProvenanceChip` and `DataProvenanceLegend`. Missing
   evidence must not be rendered as normal, green, or low-risk.
 - **Section shells:** use `DashboardSection` or `DashboardAccordionSection`
