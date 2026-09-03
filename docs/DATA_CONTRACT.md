@@ -155,13 +155,13 @@ gating.
 The nationwide canonical period remains `2025-01` through `2026-10` inclusive,
 and `temporal_matrix.json` must still have one row per canonical month in the
 same order. The Nakhon Ratchasima local research map bundle was intentionally
-cleared on `2026-09-02` for a dataset refresh: live local map data now retains
-only the latest normalized period, `2025-12`, with 289 subdistrict records.
+cleared on `2026-09-02` for a dataset refresh: live local map data currently
+has no active research period and no subdistrict hazard rows.
 
-Historical local map periods before `2025-12` are parked outside the live app in
-the rollback checkpoint noted in `docs/rollback-parking-lot.md`. Do not restore
-or reintroduce those historical map periods unless a new source-backed dataset
-refresh explicitly requires it.
+Historical local map periods, including the formerly retained `2025-12` period,
+are parked outside the live app in the rollback checkpoints noted in
+`docs/rollback-parking-lot.md`. Do not restore or reintroduce those map periods
+unless a new source-backed dataset refresh explicitly requires it.
 
 Source coverage and observed impact are intentionally separate:
 

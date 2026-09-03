@@ -489,18 +489,41 @@ function localMapCriteriaSummaryLabel(criteria: LocalMapCriteria) {
   return parts.length > 0 ? parts.join(" + ") : "ไม่มีเงื่อนไขเพิ่มเติม";
 }
 
-function localResearchPeriodForSelectedMonth(selectedMonth: string, summary: NakhonRatchasimaResearchPanelSummary) {
-  const periods = getNakhonRatchasimaResearchPeriods();
-  if (periods.includes(selectedMonth)) return { period: selectedMonth, isFallback: false };
-  return { period: summary.meta.periodEnd, isFallback: selectedMonth !== summary.meta.periodEnd };
-}
-
 type LocalResearchRecord =
   | NakhonRatchasimaResearchMonthlySubdistrictRecord
   | NakhonRatchasimaResearchSubdistrictLatest
   | undefined;
 
-function localResearchRecordForSubdistrict(subdistrictCode: string | undefined | null, period: string) {
+type ActiveResearchPeriod = {
+  period: string;
+  isFallback: boolean;
+  hasData: boolean;
+  isCleared: boolean;
+};
+
+const localResearchPendingLabel = "รอชุดข้อมูลใหม่";
+
+function localResearchPeriodForSelectedMonth(selectedMonth: string, summary: NakhonRatchasimaResearchPanelSummary): ActiveResearchPeriod {
+  const periods = getNakhonRatchasimaResearchPeriods();
+  if (periods.length === 0 || summary.meta.periodCount === 0 || !summary.meta.periodEnd) {
+    return { period: "", isFallback: false, hasData: false, isCleared: true };
+  }
+  if (periods.includes(selectedMonth)) return { period: selectedMonth, isFallback: false, hasData: true, isCleared: false };
+  return { period: summary.meta.periodEnd, isFallback: selectedMonth !== summary.meta.periodEnd, hasData: true, isCleared: false };
+}
+
+function localResearchPeriodLabel(period: ActiveResearchPeriod | string | undefined | null) {
+  const value = typeof period === "string" ? period : period?.period;
+  return value ? formatMonth(value, "th") : localResearchPendingLabel;
+}
+
+function localResearchPeriodDetail(activePeriod: ActiveResearchPeriod) {
+  if (activePeriod.isCleared) return "ยังไม่มีชุดข้อมูลแผนที่ในรอบนี้";
+  return activePeriod.isFallback ? "ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุด" : "ตรงกับเดือนที่เลือก";
+}
+
+function localResearchRecordForSubdistrict(subdistrictCode: string | undefined | null, period: string): LocalResearchRecord {
+  if (!period) return undefined;
   return getNakhonRatchasimaResearchSubdistrictMonth(subdistrictCode, period) ?? getNakhonRatchasimaResearchSubdistrictLatest(subdistrictCode);
 }
 
@@ -1286,11 +1309,13 @@ function formatPercent(value: number, maximumFractionDigits = 0) {
 }
 
 function researchDisplayPeriod(summary: NakhonRatchasimaResearchPanelSummary) {
+  if (summary.meta.periodCount === 0 || !summary.meta.periodEnd) return localResearchPendingLabel;
   if (summary.meta.periodStart === summary.meta.periodEnd) return formatMonth(summary.meta.periodEnd, "th");
   return `${formatMonth(summary.meta.periodStart, "th")} ถึง ${formatMonth(summary.meta.periodEnd, "th")}`;
 }
 
 function researchLatestPeriod(summary: NakhonRatchasimaResearchPanelSummary) {
+  if (summary.meta.periodCount === 0 || !summary.meta.periodEnd) return localResearchPendingLabel;
   return formatMonth(summary.meta.periodEnd, "th");
 }
 
@@ -1299,6 +1324,7 @@ function researchJoinPolicyNote() {
 }
 
 function researchPeriodsEndingAt(period: string, count = 12) {
+  if (!period) return [];
   const periods = getNakhonRatchasimaResearchPeriods();
   const endIndex = Math.max(0, periods.indexOf(period));
   return periods.slice(Math.max(0, endIndex - count + 1), endIndex + 1);
@@ -2288,7 +2314,7 @@ function ResearchAreaHeading({
 }: {
   district: NakhonRatchasimaDistrict;
   subdistrict?: NakhonRatchasimaSubdistrict;
-  activePeriod: { period: string; isFallback: boolean };
+  activePeriod: ActiveResearchPeriod;
   stats: ResearchAreaStats;
 }) {
   const isSubdistrict = subdistrict !== undefined;
@@ -2310,7 +2336,7 @@ function ResearchAreaHeading({
         <MetricCard
           label="ข้อมูลรองรับ"
           value={isSubdistrict ? (stats.recordCount > 0 ? "มีข้อมูล" : "ไม่มีข้อมูล") : `${stats.recordCount}/${stats.totalSubdistricts} ตำบล`}
-          detail={isSubdistrict ? `${formatMonth(activePeriod.period, "th")}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}` : `${formatPercent(coveragePercent, 0)} ครอบคลุมทุกพื้นที่`}
+          detail={isSubdistrict ? `${localResearchPeriodLabel(activePeriod)}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}` : `${formatPercent(coveragePercent, 0)} ครอบคลุมทุกพื้นที่`}
           provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
         />
         <MetricCard
@@ -2352,7 +2378,7 @@ function ResearchAreaSituationPanel({
   district: NakhonRatchasimaDistrict;
   subdistrict?: NakhonRatchasimaSubdistrict;
   stats: ResearchAreaStats;
-  activePeriod: { period: string; isFallback: boolean };
+  activePeriod: ActiveResearchPeriod;
 }) {
   const isSubdistrict = Boolean(subdistrict);
 
@@ -2371,9 +2397,9 @@ function ResearchAreaSituationPanel({
       <ResearchStatGrid>
         <MetricCard
           label="รอบข้อมูล"
-          value={formatMonth(activePeriod.period, "th")}
-          detail={activePeriod.isFallback ? "ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุด" : "ตรงกับเดือนที่เลือก"}
-          provenance="REAL"
+          value={localResearchPeriodLabel(activePeriod)}
+          detail={localResearchPeriodDetail(activePeriod)}
+          provenance={activePeriod.hasData ? "REAL" : "PENDING_SOURCE"}
         />
         <MetricCard
           label="ข้อมูลรองรับ"
@@ -2623,7 +2649,7 @@ function ResearchSubdistrictDataGapPanel({
   activePeriod,
 }: {
   stats: ResearchAreaStats;
-  activePeriod: { period: string; isFallback: boolean };
+  activePeriod: ActiveResearchPeriod;
 }) {
   return (
     <DashboardSection
@@ -2637,7 +2663,7 @@ function ResearchSubdistrictDataGapPanel({
         <MetricCard
           label="รายการที่ยังไม่มี"
           value={`${formatThaiNumber(stats.missingCount)} รายการ`}
-          detail={activePeriod.isFallback ? "ใช้เดือนล่าสุดแทนเดือนที่เลือก" : formatMonth(activePeriod.period, "th")}
+          detail={activePeriod.isCleared ? localResearchPendingLabel : activePeriod.isFallback ? "ใช้เดือนล่าสุดแทนเดือนที่เลือก" : localResearchPeriodLabel(activePeriod)}
           provenance={stats.missingCount > 0 ? "PENDING_SOURCE" : "REAL"}
           tone={stats.missingCount > 0 ? "watch" : "good"}
         />
@@ -2849,11 +2875,13 @@ function ProvinceDashboardMapCard({
 }) {
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
-  const mapMonthLabel = formatMonth(activeResearchPeriod.period, "th");
+  const mapMonthLabel = localResearchPeriodLabel(activeResearchPeriod);
   const title = "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     activeTab === "drought"
-      ? `ข้อมูลภัยแล้ง · ${mapMonthLabel} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
+      ? activeResearchPeriod.isCleared
+        ? "ยังไม่มีชุดข้อมูลภัยแล้งรายตำบลสำหรับแผนที่ รอชุดข้อมูลใหม่"
+        : `ข้อมูลภัยแล้ง · ${mapMonthLabel} · สีแสดงสถานะปกติ/เฝ้าระวัง/เสี่ยงสูง`
       : `${mapMonthLabel} · สีแสดงสถานะจากข้อมูลที่จัดมาตรฐานแล้ว ไม่ใช่ประกาศภัยทางการ${
           activeResearchPeriod.isFallback ? " · ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุดแทน" : ""
         }`;
@@ -2974,7 +3002,7 @@ function ResearchAreaAgricultureImpactPanel({
   district: NakhonRatchasimaDistrict;
   subdistrict?: NakhonRatchasimaSubdistrict;
   stats: ResearchAreaStats;
-  activePeriod: { period: string; isFallback: boolean };
+  activePeriod: ActiveResearchPeriod;
 }) {
   const isSubdistrict = Boolean(subdistrict);
   const riskSubdistricts = stats.droughtWatchSubdistricts + stats.droughtSevereSubdistricts;
@@ -3007,7 +3035,7 @@ function ResearchAreaAgricultureImpactPanel({
           id: "drought-risk",
           label: isSubdistrict ? "สถานะภัยแล้ง" : "พื้นที่เฝ้าระวัง",
           value: isSubdistrict ? researchAreaDroughtLabel(stats) : `${formatThaiNumber(riskSubdistricts)} ตำบล`,
-          detail: formatMonth(activePeriod.period, "th"),
+          detail: localResearchPeriodLabel(activePeriod),
           tone: riskTone,
           icon: <TrendingUp size={18} />,
         },
@@ -3015,7 +3043,7 @@ function ResearchAreaAgricultureImpactPanel({
           id: "data-coverage",
           label: "ความครบข้อมูล",
           value: dataCoverageValue,
-          detail: activePeriod.isFallback ? "ใช้เดือนล่าสุดแทน" : "รอบข้อมูลที่เลือก",
+          detail: activePeriod.isCleared ? localResearchPendingLabel : activePeriod.isFallback ? "ใช้เดือนล่าสุดแทน" : "รอบข้อมูลที่เลือก",
           tone: dataCoverageTone,
           icon: <ShieldAlert size={18} />,
         },
@@ -4467,7 +4495,7 @@ function NakhonRatchasimaLocalMap({
       <div className="nr-map-legend" aria-label="คำอธิบายแผนที่จังหวัดนครราชสีมา">
         {useResearchCriteriaMap ? (
           <strong>
-            {localMapViewOptions.find((option) => option.value === criteria.viewMode)?.label} {formatMonth(activeResearchPeriod.period, "th")}
+            {localMapViewOptions.find((option) => option.value === criteria.viewMode)?.label} {localResearchPeriodLabel(activeResearchPeriod)}
           </strong>
         ) : (
           <>
@@ -4483,6 +4511,7 @@ function NakhonRatchasimaLocalMap({
         {useResearchCriteriaMap && (
           <>
             {criteriaNarrowed && <strong>{localMapCriteriaSummaryLabel(criteria)}</strong>}
+            {activeResearchPeriod.isCleared && <span>ยังไม่มีชุดข้อมูลแผนที่ในรอบนี้</span>}
             {activeResearchPeriod.isFallback && <span>ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุดแทน</span>}
           </>
         )}
@@ -4760,7 +4789,7 @@ function DistrictView({
         description="แสดงระดับความพร้อมของข้อมูลพื้นที่ โดยแยกจากระดับความรุนแรงของภัย"
       >
         <PredictionReadinessPanel
-          month={formatMonth(activeResearchPeriod.period, "th")}
+          month={localResearchPeriodLabel(activeResearchPeriod)}
           readiness={readiness}
           onOpenMap={openPredictionReadinessMap}
         />
@@ -4868,7 +4897,7 @@ function SubdistrictView({
         description="แสดงระดับความพร้อมของข้อมูลตำบล โดยแยกจากระดับความรุนแรงของภัย"
       >
         <PredictionReadinessPanel
-          month={formatMonth(activeResearchPeriod.period, "th")}
+          month={localResearchPeriodLabel(activeResearchPeriod)}
           readiness={readiness}
           onOpenMap={openPredictionReadinessMap}
         />
@@ -5015,10 +5044,22 @@ export function NakhonRatchasimaWorkspace({
     route.valid && (route.level === "district" || route.level === "subdistrict" || (route.level === "province" && route.tab === "drought"));
   const researchPeriods = useMemo(() => getNakhonRatchasimaResearchPeriods(), []);
   const [workspaceMonth, setWorkspaceMonth] = useState(() =>
-    researchPeriods.includes(state.selectedMonth) ? state.selectedMonth : researchPeriods[researchPeriods.length - 1],
+    researchPeriods.includes(state.selectedMonth) ? state.selectedMonth : (researchPeriods[researchPeriods.length - 1] ?? state.selectedMonth),
   );
   const researchMonthOptions = useMemo(() => {
     const periods = researchPeriods.slice().reverse();
+    if (periods.length === 0) {
+      return [
+        {
+          value: workspaceMonth,
+          label: localResearchPendingLabel,
+          group: "สถานะข้อมูล",
+          badge: "ไม่มีข้อมูลแผนที่",
+          badgeTone: "watch" as const,
+          disabled: true,
+        },
+      ];
+    }
     const options = periods.map((period) => ({
       value: period,
       label: formatMonth(period, "th"),
