@@ -929,6 +929,12 @@ textarea {
   color: #73551b;
 }
 
+.app-select-badge.is-danger {
+  border-color: rgba(217, 93, 89, 0.34);
+  background: #fff0ef;
+  color: #9c3834;
+}
+
 .app-select-badge.is-muted {
   background: #f4f6f4;
   color: #68766e;
@@ -6231,8 +6237,17 @@ textarea {
   fill: #5dae79;
 }
 
-.nr-map-shape.is-forecast-risk {
+.nr-map-shape.is-forecast-risk,
+.nr-map-shape.is-forecast-moderate {
   fill: #f1b84b;
+}
+
+.nr-map-shape.is-forecast-high {
+  fill: #d95d59;
+}
+
+.nr-map-shape.is-forecast-out-of-scope {
+  fill: #e2e8e4;
 }
 
 .nr-map-shape.is-forecast-missing {
@@ -6376,8 +6391,22 @@ textarea {
   background: #5dae79;
 }
 
-.nr-map-legend .is-forecast-risk {
+.nr-map-legend .is-forecast-risk,
+.nr-map-legend .is-forecast-moderate {
   background: #f1b84b;
+}
+
+.nr-map-legend .is-forecast-high {
+  background: #d95d59;
+}
+
+.nr-map-legend .is-forecast-out-of-scope {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #e2e8e4 0 5px,
+      #b8c4bd 5px 7px
+    );
 }
 
 .nr-map-legend .is-forecast-missing {

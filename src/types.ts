@@ -715,6 +715,145 @@ export interface NakhonRatchasimaThaiWaterDroughtForecast {
   records: NakhonRatchasimaThaiWaterDroughtForecastRecord[];
 }
 
+export type NakhonRatchasimaDroughtForecastArchiveRisk = 0 | 1 | 2 | null;
+
+export type NakhonRatchasimaDroughtForecastArchiveScope = "in_scope" | "out_of_scope";
+
+export interface NakhonRatchasimaDroughtForecastArchiveLocation {
+  sourceId: string;
+  sourceAreaKey: string;
+  sourceTambonEn: string;
+  sourceAmphoeEn: string;
+  sourceAmphoeEnCorrected: string;
+  sourceAdminCorrectionApplied: boolean;
+  irrigationStatusRaw: string;
+  irrigationStatus: string;
+  provinceId: string;
+  provinceCode: string;
+  provinceNameTh: string;
+  provinceNameEn: string;
+  districtCode: string;
+  districtId: string;
+  districtNameTh: string;
+  districtNameEn: string;
+  districtSlug: string;
+  subdistrictCode: string;
+  subdistrictId: string;
+  subdistrictNameTh: string;
+  subdistrictSlug: string;
+  matchStatus: "MATCHED";
+  matchMethod: string;
+  qualityFlags: string;
+}
+
+export interface NakhonRatchasimaDroughtForecastArchiveHorizonSummary {
+  horizon: 1 | 2 | 3 | 4 | 5 | 6;
+  horizonLabel: string;
+  issueMonth: string;
+  targetMonth: string;
+  vintageCount: number;
+  inScopeSubdistricts: number;
+  outOfScopeSubdistricts: number;
+  noRiskSubdistricts: number;
+  moderateRiskSubdistricts: number;
+  highRiskSubdistricts: number;
+}
+
+export interface NakhonRatchasimaDroughtForecastArchiveTargetMonth {
+  period: string;
+  labelTh: string;
+  horizons: NakhonRatchasimaDroughtForecastArchiveHorizonSummary[];
+}
+
+export interface NakhonRatchasimaDroughtForecastArchiveRecord {
+  sourceId: string;
+  subdistrictCode: string;
+  subdistrictNameTh: string;
+  districtCode: string;
+  districtNameTh: string;
+  sourceYearMonth: string;
+  targetMonth: string;
+  issueMonth: string;
+  horizon: 1 | 2 | 3 | 4 | 5 | 6;
+  horizonLabel: string;
+  forecastRisk: NakhonRatchasimaDroughtForecastArchiveRisk;
+  riskLabelTh: string;
+  scopeStatus: NakhonRatchasimaDroughtForecastArchiveScope;
+  vintageKey: string;
+  sourceVintageKey: string;
+}
+
+export interface NakhonRatchasimaDroughtForecastArchive {
+  meta: {
+    sourceOfTruth: string;
+    sourceWorkbook: string;
+    sourceWorkbookOriginal: string;
+    sourceSheet: string;
+    locationSheet: string;
+    generatedAt: string;
+    timezone: "Asia/Bangkok";
+    provinceId: "TH-P29";
+    provinceCode: "30";
+    provinceNameTh: "นครราชสีมา";
+    provinceNameEn: "Nakhon Ratchasima";
+    provenance: DataClass;
+    semanticsTh: string;
+    sourceRowCountOriginal: number;
+    sourceRowCountDeduped: number;
+    duplicateSourceRowsRemoved: number;
+    sourceIdCount: number;
+    targetMonthCount: number;
+    horizonCount: 6;
+    forecastVintageCount: number;
+    sourceVintageKeyCount: number;
+    forecastVintageIdentity: string;
+    totalCanonicalSubdistricts: number;
+    periodStart: string;
+    periodEnd: string;
+    targetMonthStart: string;
+    targetMonthEnd: string;
+    issueMonthStart: string;
+    issueMonthEnd: string;
+    temporalInterpretation: "SOURCE_YEARMONTH_IS_TARGET_MONTH";
+    targetMonthRule: string;
+    issueMonthRule: string;
+    temporalInterpretationEvidence: string[];
+  };
+  riskSemantics: Array<{
+    forecastRisk: NakhonRatchasimaDroughtForecastArchiveRisk;
+    scopeStatus: NakhonRatchasimaDroughtForecastArchiveScope;
+    labelTh: string;
+    mapStatus: string;
+  }>;
+  mapping: {
+    sourceIdCount: number;
+    mappedSourceIdCount: number;
+    mappedCanonicalSubdistrictCount: number;
+    duplicateSourceIds: string[];
+    unmappedSourceIds: string[];
+    unmatchedSources: Array<Record<string, string>>;
+    ambiguousSourceIds: string[];
+    ambiguousSources: Array<Record<string, unknown>>;
+    duplicateCanonicalSubdistrictCodes: string[];
+    sourceCorrections: Array<Record<string, string>>;
+    geodataLabelOverrides: Array<Record<string, string>>;
+  };
+  locations: NakhonRatchasimaDroughtForecastArchiveLocation[];
+  targetMonths: NakhonRatchasimaDroughtForecastArchiveTargetMonth[];
+  horizonSummary: Array<{
+    horizon: 1 | 2 | 3 | 4 | 5 | 6;
+    horizonLabel: string;
+    vintageCount: number;
+    inScopeVintages: number;
+    outOfScopeVintages: number;
+    noRiskVintages: number;
+    moderateRiskVintages: number;
+    highRiskVintages: number;
+  }>;
+  validationExamples: Record<string, unknown>;
+  packedRiskByTargetMonth: Record<string, Record<string, NakhonRatchasimaDroughtForecastArchiveRisk[]>>;
+}
+
 export type NakhonRatchasimaOpsmoacReportStatus =
   | "MONTHLY_REPORT_INDEXED"
   | "RELATED_WARNING_ONLY_ON_FIRST_INDEX_PAGE"

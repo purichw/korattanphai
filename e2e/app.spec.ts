@@ -295,11 +295,11 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(archiveEntry).toContainText("คลังพยากรณ์ย้อนหลัง");
   await expect(archiveEntry).toContainText("ดูคำพยากรณ์ที่โมเดลเคยออกไว้");
   await expect(archiveEntry).toContainText("T+1–T+6");
-  await expect(archiveEntry).toContainText("285/289 ตำบล");
+  await expect(archiveEntry).toContainText("142/289 ตำบล");
   await expect(archiveEntry).toContainText("T+1");
   await expect(archiveEntry.getByRole("link", { name: /เปิดในหน้าภัยแล้ง/ })).toHaveAttribute(
     "href",
-    "/drought?mapLayer=forecast-archive&horizon=1",
+    "/drought?mapLayer=forecast-archive&target=2025-12&horizon=1",
   );
   await expect(archiveEntry.getByRole("combobox")).toHaveCount(0);
   const overviewSituationBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-situation"));
@@ -341,7 +341,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(archiveMode).toBeVisible();
   await expect(archiveMode).toContainText("คำพยากรณ์ที่ใช้วาดแผนที่ย้อนหลัง");
   await expect(archiveMode).toContainText("ค่าจากการพยากรณ์ ไม่ใช่ข้อมูลความเสียหายทางการ");
-  await expect(archiveMode).toContainText("285/289 ตำบล");
+  await expect(archiveMode).toContainText("142/289 ตำบล");
+  await expect(archiveMode).toContainText("นอกขอบเขต147 ตำบล");
   await expect(archiveMode.getByRole("tab")).toHaveCount(6);
   await expect(archiveMode.getByRole("tab", { name: /T\+1/ })).toHaveAttribute("aria-selected", "true");
   const mapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card"));
@@ -356,12 +357,14 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
   await archiveMode.getByRole("tab", { name: /T\+2/ }).click();
   await expect(archiveMode.getByRole("tab", { name: /T\+2/ })).toHaveAttribute("aria-selected", "true");
-  await expect(archiveMode).toContainText("0/289 ตำบล");
+  await expect(archiveMode).toContainText("142/289 ตำบล");
+  await expect(archiveMode).toContainText("เสี่ยงปานกลาง120 ตำบล");
   await mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" }).click();
-  await page.getByRole("option", { name: /เป้าหมาย · ก.ย. 2569/ }).click();
-  await expect(archiveMode).toContainText("51 ตำบล");
+  await page.getByRole("option", { name: /เป้าหมาย · ก.ย. 2568/ }).click();
+  await expect(archiveMode).toContainText("117/289 ตำบล");
+  await expect(archiveMode).toContainText("เสี่ยงปานกลาง17 ตำบล");
   await mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" }).click();
-  await page.getByRole("option", { name: "ไม่พบสัญญาณเสี่ยง" }).click();
+  await page.getByRole("option", { name: "ไม่มีความเสี่ยง" }).click();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toContainText(/แสดง .* จาก .* ตำบล|ไม่พบตำบลที่ตรงกับตัวกรอง/);
   await mapToolbar.getByRole("button", { name: "รีเซ็ต" }).click();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
@@ -425,14 +428,17 @@ test("drought forecast archive components are shared across province, district, 
   await page.goto("/dan-khun-thot?mapLayer=forecast-archive&horizon=1");
   await expect(page.getByRole("heading", { name: "ด่านขุนทด", exact: true })).toBeVisible();
   await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).toContainText("พยากรณ์ย้อนหลังระดับอำเภอ");
-  await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).toContainText("Weighted signal index");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).toContainText("6/16 ตำบล");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).toContainText("นอกขอบเขต10 ตำบล");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-district")).not.toContainText("Weighted signal index");
   await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งระดับตำบล" })).toBeVisible();
   await expect(page.locator(".nr-area-map-section .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
 
-  await page.goto("/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2026-08&horizon=1");
+  await page.goto("/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=1");
   await expect(page.getByRole("heading", { name: "บ้านเก่า", exact: true })).toBeVisible();
   await expect(page.locator(".nr-forecast-archive-mode-section.is-subdistrict")).toContainText("พยากรณ์ย้อนหลังของตำบล");
   await expect(page.locator(".nr-forecast-archive-mode-section.is-subdistrict")).toContainText("ค่าที่พยากรณ์");
+  await expect(page.locator(".nr-forecast-archive-mode-section.is-subdistrict")).toContainText("1 · เสี่ยงปานกลาง");
   await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล" })).toBeVisible();
   await expect(page.locator(".nr-area-map-section .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
 });

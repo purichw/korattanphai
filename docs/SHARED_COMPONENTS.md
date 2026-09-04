@@ -14,7 +14,7 @@ files.
 
 | Component | File | Use For | Current Contract |
 | --- | --- | --- | --- |
-| `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, `align="start"` only when scan-left text is intentionally needed. |
+| `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, option badges support `good`, `watch`, `danger`, and `muted`, and `align="start"` only when scan-left text is intentionally needed. |
 | `MetricCard` | `src/components/PageSummary.tsx` | Individual stat-only cards | Centered content by default; use `tone`, `icon`, `detail`, and `provenance` instead of one-off stat tile classes. |
 | `MetricGrid` | `src/components/PageSummary.tsx` | Groups of stat cards | Variants: `default`, `segmented`, `compact`; use for repeated KPI/stat groups instead of custom grids. |
 | `PageSummary` | `src/components/PageSummary.tsx` | Top summary panels with copy plus metrics | Use for high-level overview summaries where a short narrative and metrics share one surface. |
@@ -62,7 +62,7 @@ should be treated as shared components and reused instead of duplicated.
 | `ResearchAreaForecastPanel` | District/subdistrict forecast panel. |
 | `DroughtForecastArchivePanel` | Shared historical drought forecast archive module for province, district, and subdistrict drought pages. It takes the selected target month plus T+ horizon and never fabricates missing vintage data. |
 | `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
-| `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`; keeps coverage, no-risk, risk, missing, and level-specific metrics centered and source-aware. |
+| `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`; keeps in-scope, no-risk, moderate-risk, high-risk, out-of-scope, and subdistrict value metrics centered and source-aware. |
 | `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. |
 | `DroughtForecastPriorityPanel` | Province-level drought priority panel. |
 | `ResearchDroughtSituationPanel` | Province drought status summary. |
@@ -84,7 +84,7 @@ should be treated as shared components and reused instead of duplicated.
 | `AgricultureImpactPanel` | Province agriculture impact panel. |
 | `ResearchAreaAgricultureImpactPanel` | District/subdistrict agriculture facts panel. |
 | `PredictionReadinessPanel` | Readiness summary and breakdown panel. |
-| `NakhonRatchasimaLocalMap` | Shared local SVG map across province, district, and subdistrict levels. Supports normal/research criteria maps and drought forecast archive mode keyed by target month + T+ horizon. |
+| `NakhonRatchasimaLocalMap` | Shared local SVG map across province, district, and subdistrict levels. Supports normal/research criteria maps and drought forecast archive mode keyed by target month + T+ horizon, including no-risk, moderate, high, and out-of-scope map states. |
 | `NakhonRatchasimaBreadcrumbs` | Local route breadcrumbs. |
 | `NakhonRatchasimaLayerInspector` | Layer/provenance inspector. |
 | `SourceDecisionFootnotes` | Source-decision footnotes. |
@@ -116,7 +116,9 @@ should be treated as shared components and reused instead of duplicated.
   `NakhonRatchasimaLocalMap` on drought pages, and use
   `DroughtForecastArchiveMapFilters` inside the map. The archive selection is
   target month + T+ horizon; changing T+ must not silently switch target month,
-  and no-data combinations must stay no-data.
+  and no-data combinations must stay no-data. The rev02 archive maps numeric
+  values as `0` no-risk, `1` moderate risk, `2` high risk, and blank workbook
+  cells as out-of-scope with a muted hatched map style.
 - **Provenance:** use `DataProvenanceChip` and `DataProvenanceLegend`. Missing
   evidence must not be rendered as normal, green, or low-risk.
 - **Section shells:** use `DashboardSection` or `DashboardAccordionSection`

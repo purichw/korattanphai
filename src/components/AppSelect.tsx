@@ -8,7 +8,7 @@ export type AppSelectOption = {
   group?: string;
   description?: string;
   badge?: string;
-  badgeTone?: "good" | "watch" | "muted";
+  badgeTone?: "good" | "watch" | "danger" | "muted";
   disabled?: boolean;
 };
 

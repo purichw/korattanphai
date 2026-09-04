@@ -26,6 +26,7 @@ Static source files:
 - `src/data/canonical/users.json`
 - `src/data/canonical/nakhon_ratchasima/admin_hierarchy.json`
 - `src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json`
+- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
 - `src/data/canonical/nakhon_ratchasima/dwr_ews_station_coverage.json`
 - `src/data/canonical/nakhon_ratchasima/evidence_records.json`
 - `src/data/canonical/nakhon_ratchasima/local_subset.json`
@@ -90,6 +91,7 @@ Key models:
 - `NakhonRatchasimaHierarchy`
 - `NakhonRatchasimaDistrict`
 - `NakhonRatchasimaSubdistrict`
+- `NakhonRatchasimaDroughtForecastArchive`
 - `NakhonRatchasimaEvidenceRecord`
 - `NakhonRatchasimaMapLayer`
 - `NakhonRatchasimaMatrixRow`
@@ -115,6 +117,9 @@ Current facts:
 - Nakhon Ratchasima canonical province: `TH-P29`.
 - Nakhon Ratchasima admin province code: `30`.
 - Nakhon Ratchasima local hierarchy: 32 districts and 289 subdistricts.
+- Nakhon Ratchasima drought forecast archive rev02: 289 mapped Source_IDs,
+  127 target months from `2015-06` through `2025-12`, 6 horizons per target
+  month, and 220,218 canonical forecast vintages.
 - Naming contract: "Nakhon Ratchasima" is the province. Local nicknames and
   district/local names must not be used as province-level synonyms.
 - Nakhon Ratchasima seeded local subset: 8 districts and 11 subdistricts with
@@ -183,6 +188,59 @@ Source coverage and observed impact are intentionally separate:
 For local maps, missing local evidence remains `no-data`, never low risk or
 normal. A source pathway may reduce “unknown source coverage” without reducing
 “unknown local hazard/impact.”
+
+## Nakhon Ratchasima Drought Forecast Archive
+
+FACT: `drought_forecast_archive_rev02.json` is the source-backed T+1 through
+T+6 drought forecast archive built from
+`Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx`. It is separate from the
+current ThaiWater operational prediction fixture.
+
+Source and mapping contract:
+
+- Source sheet: `Forecast_Archive_Long`.
+- Location sheet: `Location_Master`.
+- Original workbook lineage: `Drought_T1-6_rev02.xlsx`.
+- Workbook source rows: 58,312.
+- Deduplicated source rows: 36,703.
+- Exact duplicate source rows removed: 21,609.
+- Mapped source IDs: 289 of 289.
+- Mapped canonical subdistricts: 289 of 289.
+- Forecast vintage identity: `subdistrictCode + targetMonth + horizon`.
+- `Source_YearMonth` is interpreted as `targetMonth`.
+- `issueMonth = targetMonth - horizon`.
+- Equal numeric values across T+ horizons remain separate forecast vintages.
+
+Risk value contract:
+
+- `0` means no forecast risk.
+- `1` means moderate forecast risk.
+- `2` means high forecast risk.
+- Blank workbook cells are represented as `null` and mean out of scope for the
+  archive, not no risk and not missing evidence.
+- Missing records after a join failure are a separate `PENDING_SOURCE` problem
+  and must not be collapsed into blank/out-of-scope or green/no-risk.
+
+UI contract:
+
+- Drought archive modules use the selected target month plus a single T+
+  selector.
+- Province, district, and subdistrict drought maps use the same archive fixture
+  and the same map status semantics.
+- Archive map legends show no-risk, moderate risk, high risk, and out-of-scope
+  states. Out-of-scope areas use a muted hatched treatment.
+- Tooltip/detail copy must identify target month, issue month, T+ horizon,
+  numeric risk value, and semantic label.
+- Archive forecasts are not official damage figures and are not observed
+  historical drought impacts.
+
+The ThaiWater drought forecast fixture remains operational-current context:
+
+- Source file: `thaiwater_drought_forecast.json`.
+- Current issue month in this fixture: `2026-08`.
+- Forecast periods: `2026-08` through `2027-01`.
+- This fixture must not be deleted or overwritten when refreshing the rev02
+  archive.
 
 ## Nakhon Ratchasima Rainfall Contract
 

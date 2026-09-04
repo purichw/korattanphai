@@ -13,6 +13,7 @@ import {
   months,
   nakhonRatchasimaDistrictSubdistrictMatrix,
   nakhonRatchasimaDwrEwsStationCoverage,
+  nakhonRatchasimaDroughtForecastArchive,
   nakhonRatchasimaEvidenceRecords,
   nakhonRatchasimaHierarchy,
   nakhonRatchasimaMapLayers,
@@ -43,6 +44,7 @@ import {
   getLocationById,
   getNakhonRatchasimaDistrictBySlug,
   getNakhonRatchasimaDistricts,
+  getNakhonRatchasimaDroughtForecastArchive,
   getNakhonRatchasimaEvidenceForLocation,
   getNakhonRatchasimaLocalSubsetForSubdistrict,
   getNakhonRatchasimaMatrixRowBySubdistrictCode,
@@ -451,6 +453,119 @@ describe("Nakhon Ratchasima incremental research patch", () => {
       "2027-01",
     ]);
     expect(nakhonRatchasimaThaiWaterDroughtForecast.records).toHaveLength(1710);
+  });
+
+  it("integrates the rev02 drought forecast archive without collapsing T+ vintages", () => {
+    const archive = getNakhonRatchasimaDroughtForecastArchive();
+    expect(archive).toBe(nakhonRatchasimaDroughtForecastArchive);
+    expect(archive.meta).toMatchObject({
+      sourceOfTruth: "normalized_rev02_forecast_archive_workbook",
+      sourceWorkbookOriginal: "Drought_T1-6_rev02.xlsx",
+      sourceSheet: "Forecast_Archive_Long",
+      locationSheet: "Location_Master",
+      provenance: "REAL",
+      sourceRowCountOriginal: 58312,
+      sourceRowCountDeduped: 36703,
+      duplicateSourceRowsRemoved: 21609,
+      sourceIdCount: 289,
+      targetMonthCount: 127,
+      horizonCount: 6,
+      forecastVintageCount: 220218,
+      sourceVintageKeyCount: 220218,
+      forecastVintageIdentity: "subdistrictCode + targetMonth + horizon",
+      totalCanonicalSubdistricts: 289,
+      targetMonthStart: "2015-06",
+      targetMonthEnd: "2025-12",
+      issueMonthStart: "2014-12",
+      issueMonthEnd: "2025-11",
+      temporalInterpretation: "SOURCE_YEARMONTH_IS_TARGET_MONTH",
+    });
+
+    expect(archive.mapping).toMatchObject({
+      sourceIdCount: 289,
+      mappedSourceIdCount: 289,
+      mappedCanonicalSubdistrictCount: 289,
+      duplicateSourceIds: [],
+      unmappedSourceIds: [],
+      unmatchedSources: [],
+      ambiguousSourceIds: [],
+      ambiguousSources: [],
+      duplicateCanonicalSubdistrictCodes: [],
+    });
+    expect(archive.mapping.sourceCorrections).toEqual([
+      expect.objectContaining({ sourceId: "222", sourceAmphoeEnCorrected: "Phimai", subdistrictCode: "301512" }),
+    ]);
+
+    expect(archive.riskSemantics).toContainEqual(
+      expect.objectContaining({
+        forecastRisk: null,
+        scopeStatus: "out_of_scope",
+        labelTh: "นอกขอบเขตการศึกษา",
+        mapStatus: "forecast-out-of-scope",
+      }),
+    );
+
+    expect(archive.horizonSummary.map((row) => row.vintageCount)).toEqual([36703, 36703, 36703, 36703, 36703, 36703]);
+    expect(archive.horizonSummary.map((row) => row.outOfScopeVintages)).toEqual([20874, 20874, 20874, 20874, 20874, 20874]);
+    expect(archive.horizonSummary.map((row) => row.inScopeVintages)).toEqual([15829, 15829, 15829, 15829, 15829, 15829]);
+
+    const latest = archive.targetMonths.find((month) => month.period === "2025-12");
+    expect(latest?.horizons.map((horizon) => horizon.issueMonth)).toEqual([
+      "2025-11",
+      "2025-10",
+      "2025-09",
+      "2025-08",
+      "2025-07",
+      "2025-06",
+    ]);
+    expect(latest?.horizons.map((horizon) => horizon.noRiskSubdistricts)).toEqual([0, 0, 0, 4, 26, 59]);
+    expect(latest?.horizons.map((horizon) => horizon.moderateRiskSubdistricts)).toEqual([129, 120, 81, 56, 38, 14]);
+    expect(latest?.horizons.map((horizon) => horizon.highRiskSubdistricts)).toEqual([13, 22, 61, 82, 78, 69]);
+    expect(latest?.horizons.map((horizon) => horizon.outOfScopeSubdistricts)).toEqual([147, 147, 147, 147, 147, 147]);
+
+    expect(archive.packedRiskByTargetMonth["2025-12"]["300806"]).toEqual([1, 1, 1, 2, 2, 2]);
+    expect(archive.packedRiskByTargetMonth["2025-12"]["300101"]).toEqual([null, null, null, null, null, null]);
+    expect(archive.validationExamples.canonicalSubdistrict300806).toMatchObject({
+      sourceId: "101",
+      districtCode: "3008",
+      subdistrictCode: "300806",
+      targetMonth: "2025-12",
+      risksByHorizon: [1, 1, 1, 2, 2, 2],
+      issueMonths: ["2025-11", "2025-10", "2025-09", "2025-08", "2025-07", "2025-06"],
+    });
+    expect(archive.validationExamples.equalValuedTPlusVintagesRemainSeparate).toMatchObject({
+      targetMonth: "2025-12",
+      vintageKeys: [
+        "300806|2025-12|T+1",
+        "300806|2025-12|T+2",
+        "300806|2025-12|T+3",
+        "300806|2025-12|T+4",
+        "300806|2025-12|T+5",
+        "300806|2025-12|T+6",
+      ],
+    });
+
+    const danKhunThotCodes = nakhonRatchasimaDistrictSubdistrictMatrix
+      .filter((row) => row.district_code === "3008")
+      .map((row) => row.subdistrict_code);
+    const danKhunThotT1Risks = danKhunThotCodes.map((code) => archive.packedRiskByTargetMonth["2025-12"][code][0]);
+    expect(danKhunThotCodes).toHaveLength(16);
+    expect(danKhunThotT1Risks.filter((risk) => risk === null)).toHaveLength(10);
+    expect(danKhunThotT1Risks.filter((risk) => risk !== null)).toHaveLength(6);
+    expect(danKhunThotT1Risks.filter((risk) => risk === 1)).toHaveLength(6);
+    expect(danKhunThotT1Risks.filter((risk) => risk === 2)).toHaveLength(0);
+    expect(archive.validationExamples.danKhunThotLatestT1).toMatchObject({
+      districtCode: "3008",
+      targetMonth: "2025-12",
+      horizon: 1,
+      issueMonth: "2025-11",
+      totalSubdistricts: 16,
+      inScopeSubdistricts: 6,
+      noRiskSubdistricts: 0,
+      moderateRiskSubdistricts: 6,
+      highRiskSubdistricts: 0,
+      outOfScopeSubdistricts: 10,
+    });
   });
 
   it("tracks OPSMOAC monthly report readiness without turning it into local predictions", () => {
