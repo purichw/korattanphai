@@ -11,7 +11,7 @@ Routes:
 
 - `/login`: frontend-only username gate.
 - `/`: province-level Nakhon Ratchasima overview.
-- `/drought`: province-level drought context tab.
+- `/drought`: province-level drought context page.
 - `/{district-slug}`: district-level drill-down.
 - `/{district-slug}/{subdistrict-slug}`: subdistrict-level drill-down.
 - `/nakhon-ratchasima/...`: legacy alias accepted for old links.
@@ -29,6 +29,12 @@ Primary user-facing surface:
   planning, operations, and data-readiness layers; water, flood, reservoir,
   weather, and rainfall catalog entries are retained in source but hidden from
   the current product UI.
+- Drought pages at province, district, and subdistrict level include the shared
+  source-backed forecast archive experience: target month selection, one T+
+  horizon selector, archive summary metrics, shared map filters, the local
+  Nakhon map, trend context, readiness, and source/limitation disclosures. These
+  pages use the same archive fixture and semantics across all three geography
+  levels.
 
 Inherited nationwide/workflow components remain in source for later extraction
 or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
@@ -82,6 +88,10 @@ needs audit:
 - Nakhon Ratchasima local controls mirror the nationwide select component:
   province/district views show month, hazard, crop, and subdistrict filters;
   subdistrict views show month, hazard, and crop only.
+- Drought archive controls use target month + T+ horizon as the primary
+  navigation state. Changing T+ must not silently change the selected target
+  month, and a no-data/out-of-scope archive combination must remain visibly
+  distinct from no-risk.
 - Nakhon Ratchasima route slugs are navigation-only. Data joins must use admin
   codes.
 - Nakhon Ratchasima rainfall layer navigation may open subdistrict detail for
@@ -106,6 +116,11 @@ needs audit:
 - Data/model registry: `DataModelsSection`.
 - Nakhon Ratchasima workspace: `NakhonRatchasimaWorkspace` in
   `src/components/NakhonRatchasimaWorkspace.tsx`.
+- Drought forecast archive: `DroughtForecastArchivePanel`,
+  `DroughtForecastArchiveHorizonSelector`,
+  `DroughtForecastArchiveSummaryMetrics`, `DroughtForecastArchiveMapFilters`,
+  and `NakhonRatchasimaLocalMap` in
+  `src/components/NakhonRatchasimaWorkspace.tsx`.
 
 ## Do Not Regress
 
@@ -120,4 +135,7 @@ needs audit:
 - Rainfall station coverage must not hide the no-data rule for local evidence:
   a subdistrict can have a nearest station and still have no local impact
   evidence.
+- Forecast archive blank cells mean out of scope, not no-risk. Missing joined
+  archive records are separate source/join problems and must not render as
+  green, normal, or complete.
 - Public/resident alert copy must remain action-oriented and low-jargon.

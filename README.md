@@ -24,7 +24,7 @@ sidebar starts with only the overview entry, and `/` opens the Nakhon Ratchasima
 workspace directly.
 
 - Province overview: `/`
-- Drought tab: `/drought`
+- Province drought context: `/drought`
 - District: `/{district-slug}`
 - Subdistrict: `/{district-slug}/{subdistrict-slug}`
 - Legacy aliases under `/nakhon-ratchasima/...` are still accepted for old links.
@@ -111,6 +111,20 @@ user task explicitly authorizes it.
 - Nakhon Ratchasima local drill-down data lives under
   `src/data/canonical/nakhon_ratchasima/` and preserves `TH-P29` as the existing
   province with admin province code `30`, 32 districts, and 289 subdistricts.
+- Nakhon Ratchasima drought forecast archive lives in
+  `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`.
+  It is source-backed T+1 through T+6 archive data from
+  `Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx`: 289 mapped
+  Source_IDs, 127 target months from June 2015 through December 2025, and
+  220,218 canonical forecast vintages. The product treats `Source_YearMonth` as
+  the target month and computes `issueMonth = targetMonth - horizon`.
+- Archive risk values are semantic forecast values: `0` no forecast risk, `1`
+  moderate forecast risk, `2` high forecast risk, and blank workbook cells are
+  out of scope. Do not collapse blank/out-of-scope values into no-risk or
+  missing-evidence states.
+- `thaiwater_drought_forecast.json` is a separate current operational ThaiWater
+  prediction fixture for issue month August 2026 and periods August 2026 through
+  January 2027. Do not overwrite it when refreshing archive data.
 - Nakhon Ratchasima rainfall fixtures add 49 DWR EWS station points, 29
   direct-station subdistricts, and 260 nearest-station coverage records.
   `official_water_snapshot.json` adds a point-in-time REAL ThaiWater province
@@ -125,6 +139,10 @@ user task explicitly authorizes it.
 - Local Nakhon Ratchasima joins must use admin codes, not Thai names or route
   slugs. Missing local evidence must render as no-data/insufficient evidence,
   not low risk.
+- Historical local map periods from `normalized_research_monthly_panel.json`
+  and `normalized_research_panel_summary.json` were intentionally cleared for a
+  dataset refresh. Do not restore December 2025 historical map periods unless a
+  new source-backed refresh explicitly asks for that.
 
 Province and local risk scores are synthetic prototype data unless explicitly
 labelled as official context. Public-safety wording must keep uncertainty,

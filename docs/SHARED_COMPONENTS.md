@@ -118,7 +118,9 @@ should be treated as shared components and reused instead of duplicated.
   target month + T+ horizon; changing T+ must not silently switch target month,
   and no-data combinations must stay no-data. The rev02 archive maps numeric
   values as `0` no-risk, `1` moderate risk, `2` high risk, and blank workbook
-  cells as out-of-scope with a muted hatched map style.
+  cells as out-of-scope with a muted hatched map style. Keep one shared
+  province/district/subdistrict implementation path unless the breakpoint
+  composition genuinely needs to differ.
 - **Provenance:** use `DataProvenanceChip` and `DataProvenanceLegend`. Missing
   evidence must not be rendered as normal, green, or low-risk.
 - **Section shells:** use `DashboardSection` or `DashboardAccordionSection`

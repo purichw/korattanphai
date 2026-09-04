@@ -176,6 +176,42 @@ Current shared UI and component-memory patch:
 - Centered the shared preview fallback note, including the "insufficient data to
   open detail" state.
 
+Current rev02 drought forecast archive patch:
+
+- Added `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
+  from `Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx` using
+  `scripts/build-nr-drought-forecast-archive.py`.
+- The archive maps 289 Source_IDs to all 289 canonical subdistricts, spans 127
+  target months from `2015-06` through `2025-12`, keeps horizons T+1 through
+  T+6 as separate forecast vintages, and contains 220,218 canonical vintages.
+- Product archive semantics: `Source_YearMonth` is the target month,
+  `issueMonth = targetMonth - horizon`, and record identity is
+  `subdistrictCode + targetMonth + horizon`.
+- Risk values remain source semantics: `0` no forecast risk, `1` moderate
+  forecast risk, `2` high forecast risk, and blank workbook cells are
+  out-of-scope, not no-risk and not join failures.
+- The existing local historical map panel data in
+  `normalized_research_monthly_panel.json` and
+  `normalized_research_panel_summary.json` remains cleared for the dataset
+  refresh. Do not restore the old `2025-12` historical map periods unless a new
+  source-backed refresh explicitly asks for it.
+- `thaiwater_drought_forecast.json` remains separate current ThaiWater
+  prediction context with issue month `2026-08`, periods `2026-08` through
+  `2027-01`, and 1,710 records. It must not be overwritten by archive work.
+- Province, district, and subdistrict drought pages now share the same archive
+  module family: `DroughtForecastArchivePanel`,
+  `DroughtForecastArchiveHorizonSelector`,
+  `DroughtForecastArchiveSummaryMetrics`, `DroughtForecastArchiveMapFilters`,
+  and `NakhonRatchasimaLocalMap`.
+- Latest production deployment after this patch: commit
+  `18d4e9dcb28da78a99343d2e2bd7226905fddce0` (`feat: add rev02 drought
+  forecast archive`) deployed to `https://korattanphai.vercel.app`.
+- Latest release checks passed: `git diff --check`, `npm test`, `npm run build`,
+  `npm run test:e2e:managed`, `npm run build:protected`, Vercel production
+  build/protect/exposure check, and production smoke for `/`, `/drought`,
+  `/dan-khun-thot`, `/dan-khun-thot/t-300806`, the legacy route, an unseeded
+  route, geodata endpoints, and `/api/risk-fusion?eventId=ARE-2026-0825-NE`.
+
 ## Open Risks
 
 - The app is not operationally safe for real emergency alerting yet.
@@ -188,6 +224,10 @@ Current shared UI and component-memory patch:
 - Official data source licensing and attribution need audit before live data use.
 - ThaiWater/DWR station-specific live rainfall access still needs audit before
   importing current 24-hour rainfall readings.
+- The rev02 drought forecast archive is static source-backed fixture data, not
+  a live prediction service. Any future dataset replacement must preserve the
+  target-month/T+ identity and the ThaiWater separation unless the data model is
+  explicitly changed.
 
 ## Known Bugs / Limitations
 
@@ -203,7 +243,7 @@ Current shared UI and component-memory patch:
 
 ## Commands Run Recently
 
-Known release commands from the latest production push/deploy:
+Known release commands from earlier production push/deploys:
 
 ```bash
 git diff --check
@@ -253,6 +293,22 @@ npm test
 ```
 
 Result: 20 unit/data tests passed.
+
+Latest verification for the rev02 drought forecast archive production deploy:
+
+```bash
+git diff --check
+npm test
+npm run build
+npm run test:e2e:managed
+npm run build:protected
+```
+
+Result: 34 unit/data tests passed; 15 managed Playwright checks passed and 5
+were skipped by configured route scope; build and protected build passed. Vercel
+production deployment `dpl_319gogrp1qzKLUApcjdGgQeuszLF` passed production
+smoke with no console errors, failed requests, or horizontal overflow observed
+on the checked pages.
 
 Notes:
 

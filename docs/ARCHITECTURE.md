@@ -28,6 +28,11 @@ serverless endpoint.
   fixtures. `official_water_snapshot.json` adds point-in-time ThaiWater
   province/station context, but no live rainfall readings are ingested into the
   app yet.
+- Drought forecast archive: `drought_forecast_archive_rev02.json` is a packed
+  source-backed T+1 through T+6 archive fixture generated from the normalized
+  rev02 workbook. It is consumed by the same Nakhon workspace at province,
+  district, and subdistrict levels and remains separate from the current
+  ThaiWater drought prediction fixture.
 - Deployment: Vercel static build.
 - Backend/database: no database and no mutation service in the current repo.
 
@@ -50,6 +55,7 @@ flowchart TD
   NR --> NRBoundary["/geodata/nakhon-ratchasima-boundary.geojson"]
   NR --> NRData["src/data/canonical/nakhon_ratchasima/*"]
   NRData --> Rain["rainfall station/coverage fixtures"]
+  NRData --> Archive["drought forecast archive fixture"]
 ```
 
 Boundary rules:
@@ -72,6 +78,10 @@ Boundary rules:
 - Rainfall helper ownership lives in `src/domain.ts`. Components consume
   `getNakhonRatchasimaRainfall*` selectors and must keep direct-station coverage
   separate from nearest-station representative context.
+- Drought forecast archive helpers live in `src/domain.ts` and
+  `src/components/NakhonRatchasimaWorkspace.tsx`. They must preserve target
+  month, issue month, and T+ horizon instead of reducing the archive to a single
+  latest-risk value.
 
 ## Frontend / Backend / API Ownership
 
@@ -126,6 +136,13 @@ Current external-data facts:
 - `src/data/canonical/nakhon_ratchasima/official_water_snapshot.json` contains
   REAL ThaiWater province/station snapshot context. It must not be treated as a
   direct reading for every subdistrict or as a derived agricultural risk score.
+- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
+  contains the source-backed rev02 T+1 through T+6 forecast archive. It was
+  generated from `Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx` using
+  `scripts/build-nr-drought-forecast-archive.py`.
+- `src/data/canonical/nakhon_ratchasima/thaiwater_drought_forecast.json`
+  contains a separate current ThaiWater drought prediction fixture for issue
+  month `2026-08`; archive refreshes must not overwrite it.
 - Canonical risk data is local JSON in `src/data/canonical/`.
 - Documentation names the original local spec/data package path:
   `/Users/point/Downloads/agri_risk_codex_single_source`.
@@ -172,6 +189,13 @@ needs audit:
   source of truth for whether a subdistrict has a direct station, nearest
   station, or no available source. Nearest-station context must never be rendered
   as a direct subdistrict reading.
+- For the drought forecast archive, `Source_YearMonth` is the target month and
+  `issueMonth = targetMonth - horizon`. The record identity is
+  `subdistrictCode + targetMonth + horizon`; equal numeric values across T+
+  horizons are still different forecast vintages.
+- Archive risk values are `0` no forecast risk, `1` moderate forecast risk,
+  `2` high forecast risk, and blank workbook cells are out of scope. Missing
+  joined records are a different data-quality issue.
 - Missing layer data must never be interpreted as low risk without an explicit
   available low-risk record.
 - Public-safety copy must expose uncertainty and provenance.
@@ -202,6 +226,9 @@ PROPOSAL:
 - Nakhon Ratchasima rainfall coverage: 49 stations, 29 direct-station
   subdistricts, and 260 nearest-station records with explicit distance and
   confidence.
+- Nakhon Ratchasima drought archive coverage: 289 mapped Source_IDs, 127 target
+  months from `2015-06` through `2025-12`, 6 horizons, and 220,218 canonical
+  forecast vintages.
 - 22-month province coverage and 1,694 province-month records.
 - Thai-only visible production UI; no TH/EN switch.
 - Farmer alert gating after advisory publication.

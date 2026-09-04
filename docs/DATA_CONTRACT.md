@@ -239,8 +239,19 @@ The ThaiWater drought forecast fixture remains operational-current context:
 - Source file: `thaiwater_drought_forecast.json`.
 - Current issue month in this fixture: `2026-08`.
 - Forecast periods: `2026-08` through `2027-01`.
+- Record count: 1,710.
 - This fixture must not be deleted or overwritten when refreshing the rev02
   archive.
+
+Latest validated target month in the archive:
+
+- Target month `2025-12` (`ธ.ค. 2568`) is archive forecast data, not the old
+  cleared historical map panel.
+- T+1 for `2025-12` has 142 in-scope subdistricts, 147 out-of-scope
+  subdistricts, 0 no-risk, 129 moderate-risk, and 13 high-risk subdistricts.
+- Ban Kao (`300806`) remains a useful validation example: target month
+  `2025-12` has forecast risks `[1, 1, 1, 2, 2, 2]` across T+1 through T+6,
+  with issue months `2025-11` through `2025-06`.
 
 ## Nakhon Ratchasima Rainfall Contract
 
