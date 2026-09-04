@@ -31,7 +31,6 @@ Static source files:
 - `src/data/canonical/nakhon_ratchasima/evidence_records.json`
 - `src/data/canonical/nakhon_ratchasima/local_subset.json`
 - `src/data/canonical/nakhon_ratchasima/map_layers.json`
-- `src/data/canonical/nakhon_ratchasima/official_water_snapshot.json`
 - `src/data/canonical/nakhon_ratchasima/opsmoac_monthly_reports.json`
 - `src/data/canonical/nakhon_ratchasima/rainfall_source_audit.json`
 - `src/data/canonical/nakhon_ratchasima/rainfall_stations.json`
@@ -136,10 +135,6 @@ Current facts:
 - Nakhon Ratchasima rainfall station coverage: 49 REAL DWR EWS station points,
   29 direct-station subdistricts, 260 nearest-station coverage records, and 0
   `no_source_available` subdistricts in the current matrix.
-- Nakhon Ratchasima official water snapshot: point-in-time REAL ThaiWater
-  province dashboard data for rainfall, water level, reservoir, temperature,
-  public-warning, storm, and forecast context. It is bundled as static fixture
-  data and is not a live browser API call.
 - Nakhon Ratchasima current 24-hour rainfall observations fixture:
   `rainfall_observations_24h.json` remains the station-observation schema and is
   intentionally empty until a station-specific live ingest is implemented.
@@ -148,8 +143,8 @@ Current facts:
 - Risk events: 9.
 - Field tasks: 2.
 - Model registry records: 7.
-- Source registry records: 10 audited source families.
-- Map layer catalogue: 6 groups with provenance/no-data metadata.
+- Source registry records: 9 audited source families.
+- Map layer catalogue: 12 layer records with provenance/no-data metadata.
 
 Tests in `tests/domain.test.ts` enforce province/month coverage, GeoJSON join
 coverage, source/layer provenance, canonical workflow chain, and farmer-alert
@@ -193,8 +188,9 @@ normal. A source pathway may reduce “unknown source coverage” without reduci
 
 FACT: `drought_forecast_archive_rev02.json` is the source-backed T+1 through
 T+6 drought forecast archive built from
-`Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx`. It is separate from the
-current ThaiWater operational prediction fixture.
+`Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx`. It is the current public
+drought prediction source used by the province, district, and subdistrict
+workspace surfaces.
 
 Source and mapping contract:
 
@@ -234,15 +230,6 @@ UI contract:
 - Archive forecasts are not official damage figures and are not observed
   historical drought impacts.
 
-The ThaiWater drought forecast fixture remains operational-current context:
-
-- Source file: `thaiwater_drought_forecast.json`.
-- Current issue month in this fixture: `2026-08`.
-- Forecast periods: `2026-08` through `2027-01`.
-- Record count: 1,710.
-- This fixture must not be deleted or overwritten when refreshing the rev02
-  archive.
-
 Latest validated target month in the archive:
 
 - Target month `2025-12` (`ธ.ค. 2568`) is archive forecast data, not the old
@@ -255,23 +242,19 @@ Latest validated target month in the archive:
 
 ## Nakhon Ratchasima Rainfall Contract
 
-FACT: Rainfall is currently represented in two layers: station/source coverage
-for all 289 subdistricts, plus a point-in-time ThaiWater province snapshot. It
-is not yet a live rainfall feed.
+FACT: Rainfall is currently represented as station/source coverage for all 289
+subdistricts plus empty current-observation schemas. It is not yet a live
+rainfall feed and has no bundled province water-provider snapshot.
 
 Source files:
 
 - `rainfall_source_audit.json`: source URLs, access method, fields, timestamp
-  semantics, usage notes, and known limitations for ThaiWater, DWR EWS, and TMD.
+  semantics, usage notes, and known limitations for DWR EWS and TMD context.
 - `rainfall_stations.json`: 49 DWR EWS station points with REAL provenance.
 - `subdistrict_rainfall_coverage.json`: one coverage record for every
   subdistrict code.
 - `rainfall_observations_24h.json`: current-observation schema with zero
-  imported observations plus seven historical DWR rainfall-warning samples.
-- `official_water_snapshot.json`: REAL ThaiWater province snapshot captured from
-  public province endpoints; includes current 24-hour station rainfall summary,
-  water-level station distribution, reservoir usable water, temperature,
-  warning/storm status, and rain forecast context.
+  imported observations.
 - `rainfall_monthly_history.json`: national/regional TMD context records only.
 
 Rules:
@@ -288,9 +271,6 @@ Rules:
   as `24h`.
 - Timezone for source timestamps is `Asia/Bangkok` unless a source response says
   otherwise.
-- ThaiWater snapshot values may be shown as province/station context only. They
-  must not be copied into every subdistrict or converted into a DERIVED
-  agricultural risk score without a documented fusion rule.
 - Station-specific live rainfall values for `rainfall_observations_24h.json`
   remain absent until a live ingest is implemented. Do not hard-code `0 mm` or
   use synthetic values as a fallback.
@@ -312,8 +292,8 @@ Rules:
 - Derived agricultural risk must not be labelled as an official source score.
 - Synthetic local/province values must remain visibly marked as prototype/demo
   data.
-- Source acronyms such as TMD, GISTDA, RID, HII/ThaiWater, DWR, OAE, LDD, DOAE,
-  and DDPM may remain in English when they are official or operational acronyms.
+- Source acronyms such as TMD, GISTDA, RID, DWR, OAE, LDD, DOAE, and DDPM may
+  remain in English when they are official or operational acronyms.
 
 ## Map Layer Contract
 

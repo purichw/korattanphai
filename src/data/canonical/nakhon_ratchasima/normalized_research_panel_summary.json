@@ -39,7 +39,6 @@
     "historicalPeriodCountBeforeClear": 127,
     "historicalNormalizedRowCountBeforeClear": 36703,
     "clearedAt": "2026-09-02T14:58:03+07:00",
-    "thaiWaterPredictionRetention": "UNCHANGED_SEPARATE_FIXTURE",
     "retainedPeriodBeforeFinalClear": "2025-12",
     "retainedRowCountBeforeFinalClear": 289,
     "livePeriodCount": 0,
@@ -204,15 +203,15 @@
     {
       "ruleId": "R008",
       "domain": "provenance",
-      "sourceCondition": "This workbook is research/historical evidence, not ThaiWater live operational truth.",
+      "sourceCondition": "This workbook is research/historical evidence, not live operational truth.",
       "normalizedAction": "Use DERIVED for rainfall/risk values until source/station lineage is confirmed per record.",
       "status": "applied"
     },
     {
       "ruleId": "R009",
       "domain": "precedence",
-      "sourceCondition": "Official ThaiWater operational data prevails if it conflicts with this normalized workbook.",
-      "normalizedAction": "Treat this workbook as historical/model context when ThaiWater live data is present.",
+      "sourceCondition": "Operational source data prevails if it conflicts with this normalized workbook.",
+      "normalizedAction": "Treat this workbook as historical/model context when approved live data is present.",
       "status": "applied"
     }
   ],

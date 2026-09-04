@@ -6,7 +6,14 @@
     "labelTh": "ความเสี่ยงเกษตรที่ระบบคำนวณ",
     "description": "Province-month composite risk from canonical hazard, crop exposure, confidence and workflow context.",
     "descriptionTh": "คะแนนความเสี่ยงรวมระดับจังหวัด-เดือนที่ระบบคำนวณจากภัย พื้นที่พืช ความเชื่อมั่น และบริบทงาน",
-    "sourceIds": ["SRC-TMD", "SRC-GISTDA-DROUGHT", "SRC-GISTDA-FLOOD", "SRC-OAE", "SRC-RID", "SRC-DOAE"],
+    "sourceIds": [
+      "SRC-TMD",
+      "SRC-GISTDA-DROUGHT",
+      "SRC-GISTDA-FLOOD",
+      "SRC-OAE",
+      "SRC-RID",
+      "SRC-DOAE"
+    ],
     "dataClass": "DERIVED",
     "geographyGranularity": "All 77 provinces; seeded local chains only below province",
     "geographyGranularityTh": "ครบ 77 จังหวัด รายละเอียดต่ำกว่าจังหวัดมีเฉพาะพื้นที่ที่เตรียมไว้ในต้นแบบ",
@@ -29,7 +36,11 @@
     "labelTh": "ภัยแล้งและน้ำใช้ของพืช",
     "description": "GISTDA Crops Drought semantics shown as seeded evidence context where the prototype has local data.",
     "descriptionTh": "ใช้แนวคิดข้อมูล GISTDA เช็คแล้งเป็นบริบทหลักฐาน เฉพาะพื้นที่ที่ต้นแบบเตรียมข้อมูลไว้",
-    "sourceIds": ["SRC-GISTDA-DROUGHT", "SRC-TMD", "SRC-RID"],
+    "sourceIds": [
+      "SRC-GISTDA-DROUGHT",
+      "SRC-TMD",
+      "SRC-RID"
+    ],
     "dataClass": "CANONICAL_SYNTHETIC",
     "geographyGranularity": "Seeded province/district/subdistrict/farm chain",
     "geographyGranularityTh": "เฉพาะลำดับพื้นที่จังหวัด/อำเภอ/ตำบล/แปลงที่เตรียมไว้ในต้นแบบ",
@@ -37,9 +48,24 @@
     "temporalGranularityTh": "ช่วงปฏิบัติการปัจจุบันและคาดการณ์",
     "accessMode": "Cached source-shaped fixture; no live token",
     "accessModeTh": "ชุดข้อมูลต้นแบบที่คงรูปข้อมูลแหล่งจริง ยังไม่มีการเข้าถึงข้อมูลสด",
-    "supportedHazards": ["Agricultural Water Stress", "Dry Spell / Rainfall Deficit", "Dry-season Irrigation Pressure", "Crop Stress"],
-    "supportedCrops": ["Rice", "Cassava", "Sugarcane", "Maize"],
-    "seededLocationIds": ["TH-P17", "TH-P17-D01", "TH-P17-D01-T01", "FARM-001"],
+    "supportedHazards": [
+      "Agricultural Water Stress",
+      "Dry Spell / Rainfall Deficit",
+      "Dry-season Irrigation Pressure",
+      "Crop Stress"
+    ],
+    "supportedCrops": [
+      "Rice",
+      "Cassava",
+      "Sugarcane",
+      "Maize"
+    ],
+    "seededLocationIds": [
+      "TH-P17",
+      "TH-P17-D01",
+      "TH-P17-D01-T01",
+      "FARM-001"
+    ],
     "status": "cached",
     "noDataMeaning": "No seeded drought/crop-water evidence for this selected area.",
     "noDataMeaningTh": "ยังไม่มีหลักฐานภัยแล้งหรือน้ำใช้ของพืชที่เตรียมไว้สำหรับพื้นที่นี้",
@@ -55,7 +81,11 @@
     "labelTh": "หลักฐานน้ำท่วมและน้ำขัง",
     "description": "Flood extent and inundation semantics from GISTDA flood/disaster references, shown only for relevant seeded events.",
     "descriptionTh": "แนวคิดขอบเขตน้ำท่วม/น้ำขังจาก GISTDA แสดงเฉพาะเหตุการณ์ที่เกี่ยวข้องและเตรียมข้อมูลไว้",
-    "sourceIds": ["SRC-GISTDA-FLOOD", "SRC-DWR-EWS", "SRC-DDPM"],
+    "sourceIds": [
+      "SRC-GISTDA-FLOOD",
+      "SRC-DWR-EWS",
+      "SRC-DDPM"
+    ],
     "dataClass": "CANONICAL_SYNTHETIC",
     "geographyGranularity": "Seeded event provinces and local chains",
     "geographyGranularityTh": "จังหวัด/พื้นที่ลึกเฉพาะเหตุการณ์ที่เตรียมไว้ในต้นแบบ",
@@ -63,8 +93,17 @@
     "temporalGranularityTh": "ตามช่วงเหตุการณ์",
     "accessMode": "Cached source-shaped fixture; no official polygons rendered",
     "accessModeTh": "ชุดข้อมูลต้นแบบที่คงรูปข้อมูลแหล่งจริง ยังไม่แสดงขอบเขตทางการ",
-    "supportedHazards": ["Flash Flood", "Flood / Excess Rainfall", "River Flood / Waterlogging", "Heavy Rainfall"],
-    "seededLocationIds": ["TH-P10", "TH-P46", "TH-P52"],
+    "supportedHazards": [
+      "Flash Flood",
+      "Flood / Excess Rainfall",
+      "River Flood / Waterlogging",
+      "Heavy Rainfall"
+    ],
+    "seededLocationIds": [
+      "TH-P10",
+      "TH-P46",
+      "TH-P52"
+    ],
     "status": "cached",
     "noDataMeaning": "No seeded flood footprint or station evidence for this area.",
     "noDataMeaningTh": "ยังไม่มีขอบเขตน้ำท่วมหรือหลักฐานสถานีที่เตรียมไว้สำหรับพื้นที่นี้",
@@ -80,7 +119,10 @@
     "labelTh": "พื้นที่พืชที่อาจได้รับผลกระทบ",
     "description": "Crop exposure denominator from canonical province-month records, with OAE as the target real source family.",
     "descriptionTh": "ฐานพื้นที่พืชจากรายการข้อมูลจังหวัด-เดือน โดยมี OAE เป็นแหล่งข้อมูลจริงเป้าหมาย",
-    "sourceIds": ["SRC-OAE", "SRC-GISTDA-FLOOD"],
+    "sourceIds": [
+      "SRC-OAE",
+      "SRC-GISTDA-FLOOD"
+    ],
     "dataClass": "CANONICAL_SYNTHETIC",
     "geographyGranularity": "All 77 provinces",
     "geographyGranularityTh": "ครบ 77 จังหวัด",
@@ -103,7 +145,11 @@
     "labelTh": "สภาพพืช",
     "description": "Prototype crop-condition classes from crop profiles and active event links.",
     "descriptionTh": "สถานะสภาพพืชต้นแบบจากข้อมูลพืชและเหตุการณ์ที่เกี่ยวข้อง",
-    "sourceIds": ["SRC-OAE", "SRC-DOAE", "SRC-TMD"],
+    "sourceIds": [
+      "SRC-OAE",
+      "SRC-DOAE",
+      "SRC-TMD"
+    ],
     "dataClass": "DERIVED",
     "geographyGranularity": "Crop profile plus matching province records",
     "geographyGranularityTh": "ระดับข้อมูลพืชและรายการจังหวัดที่ตรงกับพืช",
@@ -124,9 +170,12 @@
     "group": "hydrology",
     "label": "Water Availability",
     "labelTh": "สถานะน้ำที่ใช้ได้",
-    "description": "RID/HII water-management context represented through seeded event drivers and field verification.",
-    "descriptionTh": "บริบทน้ำจาก RID/HII แสดงผ่านปัจจัยของเหตุการณ์และผลตรวจภาคสนามที่เตรียมไว้",
-    "sourceIds": ["SRC-RID", "SRC-HII-THAIWATER", "SRC-DWR-EWS"],
+    "description": "RID/DWR water-management context represented through seeded event drivers and field verification.",
+    "descriptionTh": "บริบทน้ำจาก RID/DWR แสดงผ่านปัจจัยของเหตุการณ์และผลตรวจภาคสนามที่เตรียมไว้",
+    "sourceIds": [
+      "SRC-RID",
+      "SRC-DWR-EWS"
+    ],
     "dataClass": "CANONICAL_SYNTHETIC",
     "geographyGranularity": "Seeded event areas",
     "geographyGranularityTh": "เฉพาะพื้นที่เหตุการณ์ที่เตรียมไว้ในต้นแบบ",
@@ -134,12 +183,16 @@
     "temporalGranularityTh": "ช่วงเหตุการณ์และกำหนดงานภาคสนาม",
     "accessMode": "Reference/cached fixture",
     "accessModeTh": "ข้อมูลอ้างอิง/ชุดข้อมูลต้นแบบที่เก็บไว้ในแอป",
-    "seededLocationIds": ["TH-P17", "TH-P10", "TH-P46"],
+    "seededLocationIds": [
+      "TH-P17",
+      "TH-P10",
+      "TH-P46"
+    ],
     "status": "cached",
     "noDataMeaning": "No seeded water evidence exists for this area.",
     "noDataMeaningTh": "ยังไม่มีหลักฐานสถานะน้ำที่เตรียมไว้สำหรับพื้นที่นี้",
-    "unavailableMeaning": "RID/HII live services are not integrated in this prototype.",
-    "unavailableMeaningTh": "ต้นแบบนี้ยังไม่ได้เชื่อมบริการสดจาก RID/HII",
+    "unavailableMeaning": "RID/DWR live services are not integrated in this prototype.",
+    "unavailableMeaningTh": "ต้นแบบนี้ยังไม่ได้เชื่อมบริการสดจาก RID/DWR",
     "unsupportedMeaning": "Water availability is shown only where water context affects the selected risk.",
     "unsupportedMeaningTh": "แสดงสถานะน้ำเฉพาะเมื่อเกี่ยวข้องกับความเสี่ยงที่เลือก"
   },
@@ -150,7 +203,9 @@
     "labelTh": "สถานีเตือนภัยล่วงหน้า",
     "description": "DWR EWS station semantics for rainfall, water level and soil moisture near seeded events.",
     "descriptionTh": "แนวคิดสถานี DWR EWS สำหรับฝน ระดับน้ำ และความชื้นดินใกล้เหตุการณ์ที่เตรียมไว้",
-    "sourceIds": ["SRC-DWR-EWS"],
+    "sourceIds": [
+      "SRC-DWR-EWS"
+    ],
     "dataClass": "REAL",
     "geographyGranularity": "Station/village where available; prototype has no live station ingest",
     "geographyGranularityTh": "ระดับสถานี/หมู่บ้านเมื่อมีข้อมูล แต่ต้นแบบยังไม่นำเข้าข้อมูลสถานีสด",
@@ -173,7 +228,9 @@
     "labelTh": "บริบทพยากรณ์อากาศ",
     "description": "TMD monthly, 7-day, 3-month and agrometeorological context used as the forecast spine.",
     "descriptionTh": "บริบทพยากรณ์รายเดือน 7 วัน 3 เดือน และอุตุนิยมเกษตรจากกรมอุตุนิยมวิทยา",
-    "sourceIds": ["SRC-TMD"],
+    "sourceIds": [
+      "SRC-TMD"
+    ],
     "dataClass": "REAL",
     "geographyGranularity": "National/regional product scope",
     "geographyGranularityTh": "ตามขอบเขตผลิตภัณฑ์ระดับประเทศ/ภูมิภาค",
@@ -181,7 +238,11 @@
     "temporalGranularityTh": "7 วัน รายเดือน 3 เดือน และฤดูกาล",
     "accessMode": "Public web products / cached narrative fixture",
     "accessModeTh": "ข้อมูลเผยแพร่สาธารณะ / คำอธิบายต้นแบบที่เก็บไว้ในแอป",
-    "supportedMonths": ["2026-08", "2026-09", "2026-10"],
+    "supportedMonths": [
+      "2026-08",
+      "2026-09",
+      "2026-10"
+    ],
     "status": "available",
     "noDataMeaning": "No TMD forecast context is represented for this selected month.",
     "noDataMeaningTh": "ยังไม่มีบริบทพยากรณ์ TMD สำหรับเดือนนี้ในต้นแบบ",
@@ -197,7 +258,9 @@
     "labelTh": "บริบทอากาศที่สังเกตแล้ว",
     "description": "TMD June-July 2026 observed monthly summaries represented as historical context.",
     "descriptionTh": "สรุปอากาศรายเดือน มิ.ย.-ก.ค. 2569 จากกรมอุตุนิยมวิทยา ใช้เป็นบริบทย้อนหลัง",
-    "sourceIds": ["SRC-TMD"],
+    "sourceIds": [
+      "SRC-TMD"
+    ],
     "dataClass": "REAL",
     "geographyGranularity": "National/regional product scope",
     "geographyGranularityTh": "ตามขอบเขตผลิตภัณฑ์ระดับประเทศ/ภูมิภาค",
@@ -205,7 +268,10 @@
     "temporalGranularityTh": "สรุปข้อมูลตรวจอากาศรายเดือน",
     "accessMode": "Public web products / cached narrative fixture",
     "accessModeTh": "ข้อมูลเผยแพร่สาธารณะ / คำอธิบายต้นแบบที่เก็บไว้ในแอป",
-    "supportedMonths": ["2026-06", "2026-07"],
+    "supportedMonths": [
+      "2026-06",
+      "2026-07"
+    ],
     "status": "available",
     "noDataMeaning": "No observed TMD context is represented for this selected month.",
     "noDataMeaningTh": "ยังไม่มีบริบทอากาศที่สังเกตแล้วสำหรับเดือนนี้ในต้นแบบ",
@@ -221,7 +287,9 @@
     "labelTh": "ความเหมาะสมที่ดิน",
     "description": "Agri-Map/LDD suitability and soil context for structural vulnerability and planning.",
     "descriptionTh": "บริบทความเหมาะสมที่ดินและดินจาก Agri-Map/LDD สำหรับความเปราะบางและการวางแผน",
-    "sourceIds": ["SRC-AGRIMAP-LDD"],
+    "sourceIds": [
+      "SRC-AGRIMAP-LDD"
+    ],
     "dataClass": "REAL",
     "geographyGranularity": "Planning layers; local official layer not ingested",
     "geographyGranularityTh": "ชั้นข้อมูลเชิงวางแผน ยังไม่ได้นำเข้าชั้นข้อมูลพื้นที่ทางการ",
@@ -244,7 +312,12 @@
     "labelTh": "เหตุการณ์เสี่ยงที่เปิดอยู่",
     "description": "Runtime-linked active events and their seeded operational geography.",
     "descriptionTh": "เหตุการณ์เสี่ยงที่ผูกกับสถานะรันไทม์และพื้นที่ปฏิบัติการที่เตรียมไว้",
-    "sourceIds": ["SRC-DDPM", "SRC-TMD", "SRC-GISTDA-DROUGHT", "SRC-GISTDA-FLOOD"],
+    "sourceIds": [
+      "SRC-DDPM",
+      "SRC-TMD",
+      "SRC-GISTDA-DROUGHT",
+      "SRC-GISTDA-FLOOD"
+    ],
     "dataClass": "RUNTIME_STATE",
     "geographyGranularity": "Event geography and seeded location IDs",
     "geographyGranularityTh": "พื้นที่เหตุการณ์และรหัสพื้นที่ที่เตรียมไว้",
@@ -267,7 +340,10 @@
     "labelTh": "งานตรวจภาคสนาม",
     "description": "Field tasks and runtime submissions tied to selected risk events.",
     "descriptionTh": "งานตรวจภาคสนามและผลส่งงานจากสถานะรันไทม์ที่ผูกกับเหตุการณ์เสี่ยง",
-    "sourceIds": ["SRC-DWR-EWS", "SRC-DOAE"],
+    "sourceIds": [
+      "SRC-DWR-EWS",
+      "SRC-DOAE"
+    ],
     "dataClass": "RUNTIME_STATE",
     "geographyGranularity": "Seeded district/subdistrict/village/farm tasks",
     "geographyGranularityTh": "งานระดับอำเภอ/ตำบล/หมู่บ้าน/แปลงที่เตรียมไว้ในต้นแบบ",
@@ -275,7 +351,11 @@
     "temporalGranularityTh": "ตามกำหนดงานและเวลาส่งผล",
     "accessMode": "Local reducer state",
     "accessModeTh": "สถานะในเครื่องจากแอปต้นแบบ",
-    "seededLocationIds": ["TH-P17-D01-T01-V01", "FARM-001", "TH-P10-D01-T01"],
+    "seededLocationIds": [
+      "TH-P17-D01-T01-V01",
+      "FARM-001",
+      "TH-P10-D01-T01"
+    ],
     "status": "available",
     "noDataMeaning": "No field task is seeded for this selected area.",
     "noDataMeaningTh": "ยังไม่มีงานตรวจภาคสนามที่เตรียมไว้สำหรับพื้นที่นี้",

@@ -9,12 +9,11 @@
     "timezone": "Asia/Bangkok",
     "guardrailTh": "ข้อมูลนี้เป็นบริบทระดับประเทศ/ภูมิภาค ไม่ใช่ค่าฝนรายเดือนระดับตำบลนครราชสีมา",
     "historicalIngestAttempt": {
-      "sourceId": "SRC-HII-THAIWATER",
       "requestedFromMonth": "2025-01",
       "attemptedAt": "2026-08-30T17:03:00+07:00",
-      "status": "PUBLIC_PROVINCIAL_ENDPOINTS_RETURN_LATEST_ONLY",
-      "resultTh": "ยังไม่ได้ดึงชุดย้อนหลังตั้งแต่ Jan 2025 เข้าระบบ เพราะ endpoint หลังบ้านเว็บจังหวัดคืนค่าล่าสุด/ช่วงล่าสุดแม้ส่งพารามิเตอร์วันที่ และ ThaiWater Standard /Rainfall ไม่ได้เปิดที่ public provincial API base ที่ทดสอบ",
-      "nextStepTh": "ต้องใช้ endpoint มาตรฐานหรือ export ทางการที่รองรับ latest=false พร้อม startDatetime/endDatetime ก่อนจึงจะเพิ่ม records รายเดือนเป็น REAL ได้"
+      "status": "NO_APPROVED_LOCAL_MONTHLY_SOURCE",
+      "resultTh": "ยังไม่มีชุดย้อนหลังตั้งแต่ Jan 2025 ที่ยืนยันสำหรับค่าฝนรายเดือนระดับตำบลนครราชสีมา",
+      "nextStepTh": "ต้องใช้ endpoint หรือ export ทางการที่รองรับช่วงเวลาและ join ผ่านรหัสสถานี/admin code ก่อนจึงจะเพิ่ม records รายเดือนเป็น REAL ได้"
     }
   },
   "records": [

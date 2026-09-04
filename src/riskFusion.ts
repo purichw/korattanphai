@@ -35,7 +35,7 @@ export function getRiskFusionBreakdown(eventId: string): RiskFusionBreakdown {
         id: "water",
         label: "Water availability",
         labelTh: "สถานะน้ำ",
-        sourceIds: ["SRC-RID", "SRC-HII-THAIWATER", "SRC-DWR-EWS"],
+        sourceIds: ["SRC-RID", "SRC-DWR-EWS"],
         dataClass: "CANONICAL_SYNTHETIC",
         value: String(enrichment.evidence.waterAvailability ?? waterDriver?.value ?? "Seeded event context"),
         valueTh: String(enrichment.evidence.waterAvailability ?? waterDriver?.value ?? "บริบทเหตุการณ์ที่เตรียมไว้ในต้นแบบ"),

@@ -745,15 +745,15 @@ def build_resolution_rules() -> pd.DataFrame:
         [
             "R008",
             "provenance",
-            "This workbook is research/historical evidence, not ThaiWater live operational truth.",
+            "This workbook is research/historical evidence, not live operational truth.",
             "Use DERIVED for rainfall/risk values until source/station lineage is confirmed per record.",
             "applied",
         ],
         [
             "R009",
             "precedence",
-            "Official ThaiWater operational data prevails if it conflicts with this normalized workbook.",
-            "Treat this workbook as historical/model context when ThaiWater live data is present.",
+            "Approved operational source data prevails if it conflicts with this normalized workbook.",
+            "Treat this workbook as historical/model context when approved live data is present.",
             "applied",
         ],
     ]
@@ -819,7 +819,7 @@ def main() -> None:
             ["periodMax", str(panel["period"].max())],
             ["provenancePolicy", "Rainfall and drought values are DERIVED research workbook values until source/station lineage is confirmed."],
             ["droughtConflictPolicy", "Use conservative maximum as droughtRiskLevel and keep droughtRiskConflict=true plus raw values/source rows."],
-            ["thaiWaterPrecedencePolicy", "When official ThaiWater operational data conflicts with this workbook, ThaiWater prevails for live operations."],
+            ["operationalPrecedencePolicy", "When approved operational data conflicts with this workbook, approved operational data prevails for live operations."],
         ],
         columns=["key", "value"],
     )

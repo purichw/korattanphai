@@ -122,15 +122,10 @@ user task explicitly authorizes it.
   moderate forecast risk, `2` high forecast risk, and blank workbook cells are
   out of scope. Do not collapse blank/out-of-scope values into no-risk or
   missing-evidence states.
-- `thaiwater_drought_forecast.json` is a separate current operational ThaiWater
-  prediction fixture for issue month August 2026 and periods August 2026 through
-  January 2027. Do not overwrite it when refreshing archive data.
 - Nakhon Ratchasima rainfall fixtures add 49 DWR EWS station points, 29
   direct-station subdistricts, and 260 nearest-station coverage records.
-  `official_water_snapshot.json` adds a point-in-time REAL ThaiWater province
-  snapshot for rainfall, water level, reservoir, temperature, warnings, and
-  forecast context. It is not a live browser API call and must not be treated as
-  an official subdistrict risk score.
+  They do not include a live province water-provider snapshot and must not be
+  treated as official subdistrict rainfall observations.
 - Nakhon Ratchasima local geometry is served from
   `public/geodata/nakhon-ratchasima-subdistricts.geojson`.
 - The visible Nakhon Ratchasima local province outline is generated from that

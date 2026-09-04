@@ -1,10 +1,41 @@
 # Rollback Parking Lot
 
+## 2026-09-04 23:08 +07:00 - Remove Retired Water-Provider Data From Web
+
+- Request: remove all retired external water-provider data from the website,
+  including bundled fixtures, source IDs, URLs, ingest tooling, public API
+  payloads, and product documentation that could reintroduce that provider.
+- Checkpoint:
+  `/tmp/codex-rollback-checkpoints/korattanphai-remove-retired-water-provider-data-20260904-230833/`
+- Checkpoint branch:
+  `checkpoint/before-retired-water-provider-removal-20260904-230833`
+- Release status: verified locally before the requested push/deploy.
+- Removed from live app:
+  - retired provider forecast fixture and province water snapshot fixture;
+  - retired provider ingest script;
+  - source-registry, source-matrix, rainfall audit, map-layer, API, and
+    risk-fusion references to the retired provider;
+  - public drought trend wiring that depended on the removed current-provider
+    forecast fixture.
+- Will keep in the app:
+  - rev02 drought forecast archive as the public prediction source;
+  - DWR EWS station/source coverage metadata;
+  - TMD regional/monthly context metadata;
+  - empty current rainfall observation schema until an approved live source and
+    station/admin-code crosswalk exist.
+- Restore checklist:
+  - restore the removed fixture/import/script files from the checkpoint branch
+    only if a future product decision explicitly reintroduces that provider;
+  - re-add source registry/source matrix/API references intentionally rather
+    than by partial rollback;
+  - rerun unit tests, build, protected build, full managed e2e, production
+    exposure scan, and production route smoke before release.
+
 ## 2026-09-02 18:46 +07:00 — Clear Remaining Local Map Research Data
 
 - Request: remove all remaining historical data that feeds the local map,
-  including the previously retained `2025-12` period, while keeping ThaiWater
-  predictions intact.
+  including the previously retained `2025-12` period, while keeping the then
+  separate prediction fixtures intact.
 - Checkpoint:
   `/tmp/codex-rollback-checkpoints/korattanphai-clear-remaining-map-data-20260902-184626/`
 - Release status: verified locally before production deployment for the fully
@@ -16,7 +47,7 @@
     attention lists, conflict lists, and top rainfall rows from
     `normalized_research_panel_summary.json`.
 - Will keep in the app:
-  - ThaiWater drought forecast fixtures and point-in-time ThaiWater snapshot
+  - the then separate drought forecast fixtures and point-in-time water snapshot
     data;
   - OPSMOAC prediction-readiness data and canonical nationwide month contracts;
   - Nakhon Ratchasima admin hierarchy, GeoJSON geometry, and map rendering
@@ -30,7 +61,8 @@
 ## 2026-09-02 12:19 +07:00 — Clear Historical Local Map Research Data
 
 - Request: remove historical data that feeds the map/month selector before
-  loading a new dataset, while keeping ThaiWater predictions intact.
+  loading a new dataset, while keeping the then separate prediction fixtures
+  intact.
 - Checkpoint:
   `/tmp/codex-rollback-checkpoints/korattanphai-clear-historical-map-data-20260902-121928/`
 - Release status: verified locally for the local research map dataset cleanup.
@@ -42,7 +74,7 @@
 - Will keep in the app:
   - the latest local research map period, all 289 subdistrict records, district
     and subdistrict latest summaries;
-  - ThaiWater prediction fixtures and point-in-time ThaiWater snapshot data;
+  - the then separate prediction fixtures and point-in-time water snapshot data;
   - OPSMOAC prediction-readiness and canonical nationwide month contracts.
 - Restore checklist:
   - restore the two normalized research JSON files from the checkpoint if the
@@ -51,10 +83,11 @@
 
 ## 2026-08-31 22:43 +07:00 — Hide Technical Source Names From User-Facing Copy
 
-- Request: remove end-user-facing references to ThaiWater and Excel-style source
-  filenames while keeping the demo data and internal provenance records intact.
-- Checkpoint:
-  `/tmp/codex-rollback-checkpoints/korattanphai-remove-thaiwater-copy-20260831-224354/`
+- Request: remove end-user-facing references to the previous water-data provider
+  and Excel-style source filenames while keeping the demo data and internal
+  provenance records intact.
+- Checkpoint: archived local checkpoint path from the 2026-08-31 copy-removal
+  cleanup.
 - Release status: parked for the Nakhon Ratchasima-only demo UX; restore only
   if source/file provenance needs to be exposed in the public UI again.
 - Will remove from live UI:
@@ -88,8 +121,8 @@
 - Will remove from live UI:
   - province overview rainfall, water-level, forecast-rain, station coverage,
     water readiness, and official-water panels;
-  - district/subdistrict forecast graph modules fed by the official ThaiWater
-    rainfall snapshot;
+  - district/subdistrict forecast graph modules fed by the official rainfall
+    snapshot then in use;
   - district/subdistrict rainfall history panels;
   - district/subdistrict rainfall station/readiness panels;
   - visible map-layer/filter affordances that expose rainfall or water-system
@@ -122,8 +155,8 @@
   - the visible `น้ำ` tab and tab-specific navigation target;
   - route/test/docs contracts that say `/water` is a primary surface.
 - Will keep in the app:
-  - ThaiWater/rainfall/water-level evidence that still appears as context in
-    the province overview and forecast/readiness surfaces;
+  - rainfall/water-level evidence that still appeared as context in the
+    province overview and forecast/readiness surfaces;
   - shared map layer and prediction semantics that still depend on water/rain
     evidence.
 - Restore checklist:

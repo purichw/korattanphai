@@ -344,7 +344,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(droughtWorkspace.getByRole("heading", { name: "แนวโน้มจำนวนตำบลที่เสี่ยงภัยแล้ง" })).toBeVisible();
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group")).toHaveCount(6);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group.is-active")).toHaveCount(1);
-  await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-drought-forecast-point-label", { hasText: "167" })).toHaveCount(3);
+  await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-drought-forecast-point-label", { hasText: "142" })).toHaveCount(3);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   await expect(droughtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("ไม่มี/นอกขอบเขต");
   await expect(page.locator(".nr-drought-secondary-grid .nr-research-attention")).toBeVisible();
@@ -846,7 +846,9 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("heading", { name: "ในเมือง", exact: true })).toBeVisible();
   await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในรอบข้อมูลนี้").first()).toBeVisible();
   await expect(page.getByText("ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ").first()).toBeVisible();
-  await expect(page.getByText("ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในรอบข้อมูลพยากรณ์")).toBeVisible();
+  await expect(
+    page.getByText("กราฟเป็น 0 ในกรอบที่เลือก เพราะคลังพยากรณ์ระบุว่าไม่มีสัญญาณเสี่ยงหรืออยู่นอกขอบเขตการศึกษา"),
+  ).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.locator(".nr-subdistrict-gap-section")).toContainText("รายการที่ยังไม่มี");
 

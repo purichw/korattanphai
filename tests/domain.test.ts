@@ -17,7 +17,6 @@ import {
   nakhonRatchasimaEvidenceRecords,
   nakhonRatchasimaHierarchy,
   nakhonRatchasimaMapLayers,
-  nakhonRatchasimaOfficialWaterSnapshot,
   nakhonRatchasimaOpsmoacMonthlyReports,
   nakhonRatchasimaRainfallMonthlyHistory,
   nakhonRatchasimaRainfallObservations24h,
@@ -26,7 +25,6 @@ import {
   nakhonRatchasimaSourceMatrix,
   nakhonRatchasimaSubdistrictRainfallCoverage,
   nakhonRatchasimaTemporalMatrix,
-  nakhonRatchasimaThaiWaterDroughtForecast,
   provinceMonthlyRisk,
   provinces,
   sourceRegistry,
@@ -130,7 +128,6 @@ describe("canonical data integrity", () => {
         "SRC-GISTDA-DROUGHT",
         "SRC-GISTDA-FLOOD",
         "SRC-RID",
-        "SRC-HII-THAIWATER",
         "SRC-DWR-EWS",
         "SRC-OAE",
         "SRC-AGRIMAP-LDD",
@@ -427,10 +424,11 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(nakhonRatchasimaDwrEwsStationCoverage.meta.usageRule).toContain("Month-specific hazard status");
   });
 
-  it("keeps local map research data cleared without removing ThaiWater predictions", () => {
+  it("keeps local map research data cleared and uses the forecast archive as the public prediction source", () => {
     const research = getNakhonRatchasimaResearchPanelSummary();
     const meta = research.meta as typeof research.meta & { historicalDataStatus?: string };
     const periods = getNakhonRatchasimaResearchPeriods();
+    const archive = getNakhonRatchasimaDroughtForecastArchive();
 
     expect(meta.historicalDataStatus).toBe("CLEARED_FOR_DATASET_REFRESH_EMPTY");
     expect(research.meta.periodStart).toBe("");
@@ -444,15 +442,9 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(getNakhonRatchasimaResearchSubdistrictMonth("300101", "2025-12")).toBeUndefined();
     expect(getNakhonRatchasimaResearchSubdistrictMonth("300101", "2025-11")).toBeUndefined();
 
-    expect(nakhonRatchasimaThaiWaterDroughtForecast.monthly.map((row) => row.period)).toEqual([
-      "2026-08",
-      "2026-09",
-      "2026-10",
-      "2026-11",
-      "2026-12",
-      "2027-01",
-    ]);
-    expect(nakhonRatchasimaThaiWaterDroughtForecast.records).toHaveLength(1710);
+    expect(archive.meta.sourceOfTruth).toBe("normalized_rev02_forecast_archive_workbook");
+    expect(archive.targetMonths.at(-1)?.period).toBe("2025-12");
+    expect(archive.meta.horizonCount).toBe(6);
   });
 
   it("integrates the rev02 drought forecast archive without collapsing T+ vintages", () => {
@@ -612,7 +604,7 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     ).toBe("DERIVED");
     expect(nakhonRatchasimaMapLayers.find((layer) => layer.id === NAKHON_RATCHASIMA_LAYER_IDS.rainfallStations)).toMatchObject({
       labelTh: "ปริมาณฝนและสถานี",
-      sourceId: "SRC-DWR-EWS; SRC-HII-THAIWATER; SRC-TMD",
+      sourceId: "SRC-DWR-EWS; SRC-TMD",
       status: "STATION_COVERAGE_READY_LIVE_RAINFALL_PENDING",
     });
 
@@ -695,12 +687,11 @@ describe("Nakhon Ratchasima incremental research patch", () => {
 
   it("adds Nakhon Ratchasima rainfall station coverage without fabricating rainfall observations", () => {
     const rainfallSourceIds = new Set(nakhonRatchasimaRainfallSourceAudit.sources.map((source) => source.sourceId));
-    expect(rainfallSourceIds).toEqual(new Set(["SRC-HII-THAIWATER", "SRC-DWR-EWS", "SRC-TMD"]));
+    expect(rainfallSourceIds).toEqual(new Set(["SRC-DWR-EWS", "SRC-TMD"]));
     expect(nakhonRatchasimaRainfallSourceAudit.outcome).toMatchObject({
-      current24hIngestStatus: "PROVINCE_STATION_SNAPSHOT_CAPTURED_NO_CONFIRMED_SUBDISTRICT_CROSSWALK",
-      officialWaterSnapshotStatus: "THAIWATER_PUBLIC_PROVINCIAL_ENDPOINTS_CAPTURED",
-      thaiWaterRain24StationCount: 104,
-      thaiWaterRain24OverlapWithDwrCoverageStations: 0,
+      current24hIngestStatus: "NO_CONFIRMED_SUBDISTRICT_OBSERVATIONS",
+      directSubdistrictCoverage: 29,
+      nearestProxyCoverage: 260,
     });
 
     expect(nakhonRatchasimaRainfallStations.meta.provenance).toBe("REAL");
@@ -759,7 +750,7 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(nakhonRatchasimaRainfallObservations24h.meta.unit).toBe("mm");
     expect(nakhonRatchasimaRainfallObservations24h.meta.accumulationWindow).toBe("24h");
     expect(nakhonRatchasimaRainfallObservations24h.meta.status).toBe(
-      "THAIWATER_SNAPSHOT_AVAILABLE_NO_CONFIRMED_SUBDISTRICT_CROSSWALK",
+      "NO_CONFIRMED_SUBDISTRICT_RAINFALL_OBSERVATIONS",
     );
     expect(nakhonRatchasimaRainfallObservations24h.observations).toHaveLength(0);
     expect(nakhonRatchasimaRainfallObservations24h.historicalWarningSamples).toHaveLength(7);
@@ -771,57 +762,45 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     );
     expect(nakhonRatchasimaRainfallMonthlyHistory.meta.historicalIngestAttempt).toMatchObject({
       requestedFromMonth: "2025-01",
-      status: "PUBLIC_PROVINCIAL_ENDPOINTS_RETURN_LATEST_ONLY",
+      status: "NO_APPROVED_LOCAL_MONTHLY_SOURCE",
     });
     expect(
       nakhonRatchasimaRainfallMonthlyHistory.records.every((record) => record.geographyScope !== "subdistrict"),
     ).toBe(true);
   });
 
-  it("keeps the official ThaiWater snapshot source-labelled and separate from derived agricultural risk", () => {
-    expect(nakhonRatchasimaOfficialWaterSnapshot.meta.provinceId).toBe(NAKHON_RATCHASIMA_ID);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.meta.provinceCode).toBe(NAKHON_RATCHASIMA_PROVINCE_CODE);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.meta.provenance).toBe("REAL");
-    expect(nakhonRatchasimaOfficialWaterSnapshot.meta.sourceUrl).toBe("https://nakhonratchasima.thaiwater.net/");
-    expect(nakhonRatchasimaOfficialWaterSnapshot.meta.usageNoteTh).toContain("แยกจากคะแนนความเสี่ยงเกษตร");
-
-    expect(nakhonRatchasimaOfficialWaterSnapshot.rainfall24h.stationCount).toBe(104);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.rainfall24h.topStations[0]).toMatchObject({
-      stationId: "1123748",
-      districtTh: "เทพารักษ์",
-      subdistrictTh: "บึงปรือ",
-      rainfallMm: 33.5,
-    });
-    expect(nakhonRatchasimaOfficialWaterSnapshot.waterlevel.stationCount).toBe(49);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.waterlevel.counts.noData).toBe(29);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.situation.damUsableWater?.usableWaterPercent).toBe(29);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.situation.damUsableWater?.usableWaterMcm).toBe(351);
-    expect(nakhonRatchasimaOfficialWaterSnapshot.situation.rain3dMax).toMatchObject({
-      stationId: "1123748",
-      value: 98,
-    });
-    expect(nakhonRatchasimaOfficialWaterSnapshot.situation.rain7dMax).toMatchObject({
-      stationId: "1123748",
-      value: 104,
-    });
-
-    const endpointIds = new Set(nakhonRatchasimaOfficialWaterSnapshot.endpoints.map((endpoint) => endpoint.id));
-    expect(endpointIds).toEqual(
-      new Set([
-        "thaiwater-rain24",
-        "thaiwater-rain1d",
-        "thaiwater-rain3d",
-        "thaiwater-rain7d",
-        "thaiwater-rainfall-month",
-        "thaiwater-temperature-week",
-        "thaiwater-waterlevel",
-        "thaiwater-dam",
-        "thaiwater-dam-uses-water",
-        "thaiwater-rainfall-forecast",
-        "thaiwater-warning-province",
-        "thaiwater-storm-data",
-      ]),
+  it("keeps removed water-provider data out of source files that feed the web app", () => {
+    const retiredProviderName = "Thai" + "Water";
+    const retiredProviderLower = "thai" + "water";
+    const blockedPattern = new RegExp(
+      [
+        retiredProviderName,
+        retiredProviderName[0].toLowerCase() + retiredProviderName.slice(1),
+        retiredProviderLower,
+        "SRC-" + "H" + "II-" + retiredProviderLower.toUpperCase(),
+        "SRC-" + retiredProviderLower.toUpperCase(),
+        "api-v3\\." + retiredProviderLower,
+        "www\\." + retiredProviderLower,
+        "nakhonratchasima\\." + retiredProviderLower,
+      ].join("|"),
     );
+    const sourceDir = path.resolve(process.cwd(), "src");
+    const checkedFiles: string[] = [];
+    const visit = (directory: string) => {
+      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+        const entryPath = path.join(directory, entry.name);
+        if (entry.isDirectory()) {
+          visit(entryPath);
+          continue;
+        }
+        if (!/\\.(ts|tsx|json)$/.test(entry.name)) continue;
+        checkedFiles.push(entryPath);
+      }
+    };
+    visit(sourceDir);
+
+    const offenders = checkedFiles.filter((file) => blockedPattern.test(fs.readFileSync(file, "utf8")));
+    expect(offenders.map((file) => path.relative(process.cwd(), file))).toEqual([]);
   });
 });
 

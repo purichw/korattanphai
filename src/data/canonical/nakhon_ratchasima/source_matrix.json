@@ -234,24 +234,6 @@
     "limitation": "Stable unrestricted API not verified."
   },
   {
-    "source_id": "SRC-THAIWATER",
-    "source_agency": "HII / ThaiWater",
-    "dataset_system_name": "ThaiWater / National Hydroinformatics Data Center",
-    "source_url": "https://www.thaiwater.net/",
-    "evidence_url": "https://platform.thaiwater.net/th",
-    "access_classification": "UI_ONLY",
-    "access_method": "Public platform; selected open-data routes exist",
-    "confirmed_fields": "rainfall; water level; reservoir; water situation; forecast family",
-    "spatial_granularity": "Station/asset/basin/national by dataset",
-    "temporal_granularity": "Operational + historical",
-    "geometry_type": "Point/time-series/mixed",
-    "update_cadence": "Dataset-specific",
-    "geographic_join_keys": "station/asset/coordinates",
-    "date_fields": "observation timestamps",
-    "confidence": "MEDIUM-HIGH",
-    "limitation": "Avoid double-counting underlying agency observations."
-  },
-  {
     "source_id": "SRC-DWR-EWS",
     "source_agency": "กรมทรัพยากรน้ำ (DWR)",
     "dataset_system_name": "Early Warning System น้ำหลาก-ดินถล่ม",

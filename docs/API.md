@@ -18,8 +18,8 @@ Network activity:
   `index.html`.
 - Nakhon Ratchasima water/rainfall data is bundled as static JSON imports from
   `src/data/canonical/nakhon_ratchasima/`; no live rainfall API is called by the
-  browser. `official_water_snapshot.json` is a point-in-time ThaiWater province
-  snapshot, not a client-side live integration.
+  browser. Current bundled rainfall fixtures are station/source coverage and
+  empty observation schemas, not live province water-provider snapshots.
 
 There are no database clients, mutation endpoints, secrets, or environment
 variables in the app code.
@@ -28,13 +28,11 @@ variables in the app code.
 
 Rainfall fixtures:
 
-- `rainfall_source_audit.json`: source audit for ThaiWater, DWR EWS, and TMD.
+- `rainfall_source_audit.json`: source audit for DWR EWS and TMD context.
 - `rainfall_stations.json`: 49 DWR EWS station points for Nakhon Ratchasima.
 - `subdistrict_rainfall_coverage.json`: 289 subdistrict coverage records.
 - `rainfall_observations_24h.json`: current-observation schema with zero
   imported observations.
-- `official_water_snapshot.json`: ThaiWater province snapshot for rainfall,
-  water level, reservoir, temperature, warning/storm, and forecast context.
 - `rainfall_monthly_history.json`: national/regional context only.
 
 These are not network endpoints. They are bundled at build time through

@@ -62,7 +62,7 @@ function getRiskFusionBreakdown(eventId: string): RiskFusionBreakdown {
         id: "water",
         label: "Water availability",
         labelTh: "สถานะน้ำ",
-        sourceIds: ["SRC-RID", "SRC-HII-THAIWATER", "SRC-DWR-EWS"],
+        sourceIds: ["SRC-RID", "SRC-DWR-EWS"],
         dataClass: "CANONICAL_SYNTHETIC",
         value: "Seeded event context",
         valueTh: "บริบทเหตุการณ์ที่เตรียมไว้ในต้นแบบ",

@@ -14,7 +14,6 @@ Current fixture files:
 - `src/data/canonical/nakhon_ratchasima/rainfall_observations_24h.json`
 - `src/data/canonical/nakhon_ratchasima/rainfall_monthly_history.json`
 - `src/data/canonical/nakhon_ratchasima/subdistrict_rainfall_coverage.json`
-- `src/data/canonical/nakhon_ratchasima/official_water_snapshot.json`
 
 Current UI surface:
 
@@ -31,9 +30,6 @@ Current UI surface:
 
 FACT: The v1 source audit inspected these starting sources:
 
-- ThaiWater Standard: `https://standard.thaiwater.net/`
-- ThaiWater rainfall resource documentation: `https://standard.thaiwater.net/data-resource/ข้อมูลน้ำฝน-rainfall/`
-- ThaiWater station resource documentation: `https://standard.thaiwater.net/data-resource/ข้อมูลสถานี-stationinfo/`
 - TMD province weather reference page:
   `https://www.tmd.go.th/en/weather/province/kanchanaburi`
 - DWR EWS Nakhon Ratchasima station page:
@@ -41,9 +37,6 @@ FACT: The v1 source audit inspected these starting sources:
 
 Observed source facts:
 
-- ThaiWater standard documentation defines rainfall/station resource families,
-  including station IDs, timestamps, values, units, and quality fields. The
-  production-access method still needs audit before live ingest.
 - TMD province pages expose rainfall windows such as 15 minutes, 1 hour, and
   from 07:00, all in millimeters. This is used as field-semantics context, not
   as a bulk Nakhon Ratchasima province subdistrict dataset.
@@ -53,8 +46,6 @@ Observed source facts:
 
 needs audit:
 
-- ThaiWater production terms, authentication, rate limits, and endpoint query
-  filters for Nakhon Ratchasima station/rainfall bulk import.
 - DWR station-specific live reading URL parameters. A generic `select-data`
   page exposed rainfall fields but did not reliably select the requested Nakhon Ratchasima
   station through the tested URL parameters.
@@ -97,8 +88,8 @@ Rules:
 - Do not convert no-data or proxy coverage into green/normal/low-risk states.
 - Do not use rainfall station coverage as a DERIVED risk score until a
   documented risk-fusion rule is implemented and tested.
-- Do not join ThaiWater rain readings to subdistrict coverage by Thai names.
-  Use a station/admin-code crosswalk only.
+- Do not join rain readings to subdistrict coverage by Thai names. Use a
+  station/admin-code crosswalk only.
 
 Distance method:
 
@@ -107,35 +98,18 @@ Distance method:
 
 ## Current Rainfall Values
 
-FACT: `official_water_snapshot.json` now contains a point-in-time ThaiWater
-province/station snapshot, including 24-hour station rainfall summary values.
-It is static fixture data and is not a live ingest.
-
-FACT: The latest snapshot was refreshed from ThaiWater public provincial
-dashboard endpoints on 2026-08-30 at 17:01 Asia/Bangkok. For water-situation
-values in this page, ThaiWater values prevail over older static fixture values
-when the two conflict.
-
 FACT: No station-specific live 24-hour rainfall observation values are imported
 into `rainfall_observations_24h.json`.
-
-FACT: The ThaiWater public `rain24` endpoint returned 104 station readings for
-province code `30`, but those station IDs did not overlap with the 49 DWR EWS
-station IDs currently used by `subdistrict_rainfall_coverage.json`. Because the
-rainfall response did not provide a confirmed subdistrict admin-code join in the
-tested payload, those readings stay as province/station context in
-`official_water_snapshot.json` and are not copied into subdistrict coverage.
 
 `rainfall_observations_24h.json` intentionally contains:
 
 - `unit`: `mm`
 - `accumulationWindow`: `24h`
 - `observationCount`: `0`
-- `status`: `THAIWATER_SNAPSHOT_AVAILABLE_NO_CONFIRMED_SUBDISTRICT_CROSSWALK`
+- `status`: `NO_CONFIRMED_SUBDISTRICT_RAINFALL_OBSERVATIONS`
 
-The UI may show ThaiWater snapshot values as province/station context. It must
-not copy those values into every subdistrict, show `0 mm`, `ปกติ`, `ฝนน้อย`, or
-any synthetic station reading as a fallback.
+The UI must not copy unjoined station or province values into every subdistrict,
+show `0 mm`, `ปกติ`, `ฝนน้อย`, or any synthetic station reading as a fallback.
 
 ## Historical And Monthly Context
 
@@ -147,23 +121,9 @@ FACT: Monthly rainfall history currently has only national/regional TMD context
 records. There are no subdistrict monthly rainfall totals in the current
 fixtures.
 
-FACT: A Jan 2025 onward historical import was attempted against the public
-Nakhon Ratchasima ThaiWater dashboard endpoints on 2026-08-30. The tested public
-provincial endpoints did not provide a confirmed historical range:
-
-- `rain24_graph` accepted `start_date` and `end_date` but still returned the
-  same latest seven-day station series.
-- `rain1d` and `rainfall_month` accepted date parameters but still returned the
-  latest provincial maximum.
-- ThaiWater Standard-style `/Rainfall` and `/StationInfo` paths were documented
-  in the public standard, but were not exposed at the tested public
-  `thaiwater30` API base and returned `404 Request to an unknown service`.
-
-Therefore this patch does not add Jan 2025+ historical rainfall records as REAL
-data. The next implementation step is to use the agency-provided ThaiWater
-Standard API base/auth/export for `/Rainfall` with `latest=false`,
-`startDatetime`, `endDatetime`, and an explicit interval such as `P-Daily` or
-`P-Monthly`.
+FACT: A Jan 2025 onward historical rainfall import has no approved local monthly
+source in the current fixture set. Therefore the app does not add Jan 2025+
+historical rainfall records as REAL data.
 
 ## UI Requirements
 
@@ -200,7 +160,7 @@ Regression expectations:
 
 PROPOSAL:
 
-1. Confirm ThaiWater and DWR production access rules.
+1. Confirm DWR and TMD production access rules.
 2. Build a small ingest script that captures station readings with timestamp,
    unit, quality flag, and accumulation window.
 3. Add an immutable import manifest for every rainfall capture.

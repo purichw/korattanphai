@@ -63,7 +63,6 @@ import {
   getNakhonRatchasimaResearchSubdistrictMonth,
   getNakhonRatchasimaResearchSubdistrictLatest,
   getNakhonRatchasimaSourceRows,
-  getNakhonRatchasimaThaiWaterDroughtForecast,
   getProvinceRecord,
   NAKHON_RATCHASIMA_ID,
   NAKHON_RATCHASIMA_LAYER_IDS,
@@ -91,8 +90,6 @@ import type {
   NakhonRatchasimaResearchPanelSummary,
   NakhonRatchasimaResearchSubdistrictLatest,
   NakhonRatchasimaSubdistrict,
-  NakhonRatchasimaThaiWaterDroughtForecast,
-  NakhonRatchasimaThaiWaterDroughtForecastMonth,
   ProvinceMonthRisk,
 } from "../types";
 
@@ -1739,14 +1736,15 @@ function DataGovernanceGuardrailAccordion() {
 }
 
 function DroughtPageHeader({
-  droughtForecast,
+  archive,
   research,
   onBack,
 }: {
-  droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
+  archive: NakhonRatchasimaDroughtForecastArchive;
   research: NakhonRatchasimaResearchPanelSummary;
   onBack: () => void;
 }) {
+  const archiveLatestLabel = formatMonth(archive.meta.targetMonthEnd, "th");
   const contextItems = [
     { icon: <TrendingUp size={17} />, label: "ใช้เป็นสัญญาณล่วงหน้า" },
     { icon: <Database size={17} />, label: "เทียบกับข้อมูลย้อนหลัง" },
@@ -1764,7 +1762,7 @@ function DroughtPageHeader({
         <h1 id="nr-drought-page-title">ภัยแล้ง</h1>
         <p>ติดตามสถานการณ์เกษตรและพื้นที่เสี่ยงภัยแล้งของจังหวัดนครราชสีมา</p>
         <small>
-          อัปเดตล่าสุด {formatMonth(droughtForecast.meta.issueMonth, "th")} <span aria-hidden="true">•</span>{" "}
+          คลังพยากรณ์ถึง {archiveLatestLabel} <span aria-hidden="true">•</span>{" "}
           ข้อมูลย้อนหลังถึง {researchLatestPeriod(research)}
         </small>
       </div>
@@ -1780,45 +1778,8 @@ function DroughtPageHeader({
   );
 }
 
-function SourceTruthNote({
-  research,
-  droughtForecast,
-}: {
-  research: NakhonRatchasimaResearchPanelSummary;
-  droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
-}) {
-  const selectedLabel = "ภัยแล้ง";
-  const forecastSourceLabel = `ข้อมูลพยากรณ์ 6 เดือน · รอบ ${formatMonth(droughtForecast.meta.issueMonth, "th")}`;
-  const forecastHeading = "พยากรณ์ภัยแล้ง · ข้อมูลย้อนหลังและความเสี่ยงที่จัดมาตรฐานแล้ว";
-  const periodValue = formatMonth(droughtForecast.meta.issueMonth, "th");
-  const periodDescription = `พยากรณ์ภัยแล้ง ${formatThaiNumber(droughtForecast.monthly.length)} เดือนล่าสุด`;
-
-  return (
-    <section className="nr-source-truth-note" aria-label="แหล่งข้อมูลหลักของหน้าจังหวัดนครราชสีมา">
-      <div>
-        <p className="eyebrow">{selectedLabel}</p>
-        <strong>{forecastHeading}</strong>
-        <span>
-          พยากรณ์ใช้ {forecastSourceLabel} · ข้อมูลย้อนหลังและภัยแล้งใช้ข้อมูลที่จัดมาตรฐานแล้ว{" "}
-          {formatThaiNumber(research.meta.normalizedRowCount)} รายการ ครอบคลุม {formatThaiNumber(research.meta.districtCount)} อำเภอ /{" "}
-          {formatThaiNumber(research.meta.subdistrictCount)} ตำบล · รหัสจากงานวิจัยเดิมไม่ใช่รหัสราชการ
-        </span>
-      </div>
-      <div className="nr-source-truth-period">
-        <DataProvenanceChip kind="REAL" />
-        <strong>{periodValue}</strong>
-        <span>{periodDescription}</span>
-      </div>
-    </section>
-  );
-}
-
 function ResearchStatGrid({ children }: { children: ReactNode }) {
   return <div className="nr-research-stat-grid">{children}</div>;
-}
-
-function formatForecastAxisDate(value: string) {
-  return formatThaiDate(value).replace(/\s+\d{4}$/, "");
 }
 
 type DroughtForecastBand = "normal" | "watch" | "severe";
@@ -1829,7 +1790,17 @@ const DROUGHT_FORECAST_BAND_RANK: Record<DroughtForecastBand, number> = {
   severe: 2,
 };
 
-function droughtForecastBand(month: NakhonRatchasimaThaiWaterDroughtForecastMonth): DroughtForecastBand {
+type DroughtForecastTrendMonth = {
+  monthIndex: number;
+  period: string;
+  labelTh: string;
+  riskSubdistricts: number;
+  normalSubdistricts: number;
+  totalSubdistricts: number;
+  riskPercent: number;
+};
+
+function droughtForecastBand(month: DroughtForecastTrendMonth): DroughtForecastBand {
   if (month.riskPercent >= 0.5) return "severe";
   if (month.riskSubdistricts > 0) return "watch";
   return "normal";
@@ -1856,11 +1827,11 @@ function droughtForecastBandLabel(band: DroughtForecastBand, scope: "area" | "si
   return labels[band];
 }
 
-function droughtForecastHasRiskSignal(forecast: NakhonRatchasimaThaiWaterDroughtForecast) {
-  return forecast.monthly.some((month) => month.riskSubdistricts > 0);
+function droughtForecastHasRiskSignal(months: DroughtForecastTrendMonth[]) {
+  return months.some((month) => month.riskSubdistricts > 0);
 }
 
-function formatDroughtForecastMonthRange(months: NakhonRatchasimaThaiWaterDroughtForecastMonth[]) {
+function formatDroughtForecastMonthRange(months: DroughtForecastTrendMonth[]) {
   if (months.length === 0) return "";
   if (months.length === 1) return months[0]!.labelTh;
   const ordered = [...months].sort((a, b) => a.monthIndex - b.monthIndex);
@@ -1869,7 +1840,7 @@ function formatDroughtForecastMonthRange(months: NakhonRatchasimaThaiWaterDrough
   return ordered.map((month) => month.labelTh).join(", ");
 }
 
-function droughtForecastPeakSummary(months: NakhonRatchasimaThaiWaterDroughtForecastMonth[]) {
+function droughtForecastPeakSummary(months: DroughtForecastTrendMonth[]) {
   const peakRiskSubdistricts = Math.max(...months.map((month) => month.riskSubdistricts));
   const peakMonths = months.filter((month) => month.riskSubdistricts === peakRiskSubdistricts);
   return {
@@ -1880,21 +1851,22 @@ function droughtForecastPeakSummary(months: NakhonRatchasimaThaiWaterDroughtFore
 }
 
 function DroughtForecastTrendGraph({
-  forecast,
+  months,
+  totalSubdistricts,
   singleSubdistrict = false,
   activeHorizon,
 }: {
-  forecast: NakhonRatchasimaThaiWaterDroughtForecast;
+  months: DroughtForecastTrendMonth[];
+  totalSubdistricts: number;
   singleSubdistrict?: boolean;
   activeHorizon?: ForecastArchiveHorizon;
 }) {
-  const months = forecast.monthly;
   const width = 720;
   const height = 300;
   const padding = { top: 28, right: 34, bottom: 54, left: 62 };
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
-  const denominator = Math.max(...months.map((month) => month.totalSubdistricts), forecast.meta.thaiWaterSubdistricts, 1);
+  const denominator = Math.max(...months.map((month) => month.totalSubdistricts), totalSubdistricts, 1);
   const threshold = Math.round(denominator * 0.5);
   const xStep = months.length > 1 ? plotWidth / (months.length - 1) : 0;
   const yForValue = (value: number) => padding.top + (1 - Math.min(value, denominator) / denominator) * plotHeight;
@@ -1988,10 +1960,6 @@ function DroughtForecastTrendGraph({
       </figcaption>
     </figure>
   );
-}
-
-function droughtForecastRecordIsRisk(record: NakhonRatchasimaThaiWaterDroughtForecast["records"][number]) {
-  return record.statusEn !== "norisk" && !record.statusTh.includes("ไม่เสี่ยง");
 }
 
 type ForecastArchiveHorizon = 1 | 2 | 3 | 4 | 5 | 6;
@@ -2213,6 +2181,26 @@ function forecastArchiveSummaryForSelection(
   };
 }
 
+function forecastArchiveTrendMonthsForSelection(
+  archive: NakhonRatchasimaDroughtForecastArchive,
+  month: NakhonRatchasimaDroughtForecastArchiveTargetMonth,
+  expectedSubdistrictCodes?: string[],
+): DroughtForecastTrendMonth[] {
+  return forecastArchiveHorizonValues.map((horizon) => {
+    const summary = forecastArchiveSummaryForSelection(archive, month, horizon, expectedSubdistrictCodes);
+    const totalSubdistricts = summary.totalSubdistricts;
+    return {
+      monthIndex: horizon,
+      period: `${month.period}-t-plus-${horizon}`,
+      labelTh: `T+${horizon}`,
+      riskSubdistricts: summary.riskSubdistricts,
+      normalSubdistricts: summary.noRiskSubdistricts,
+      totalSubdistricts,
+      riskPercent: totalSubdistricts > 0 ? summary.riskSubdistricts / totalSubdistricts : 0,
+    };
+  });
+}
+
 function forecastArchiveRecordMatchesCriteria(record: NakhonRatchasimaDroughtForecastArchiveRecord | undefined, risk: LocalRiskCriterion) {
   if (risk === "all") return true;
   return localMapStatusForForecastRecord(record) === risk;
@@ -2226,200 +2214,6 @@ function forecastArchiveRecordLabel(record: NakhonRatchasimaDroughtForecastArchi
 function forecastArchiveRecordValueLabel(record: NakhonRatchasimaDroughtForecastArchiveRecord | undefined) {
   if (!record) return "ไม่มีข้อมูล";
   return record.forecastRisk === null ? "นอกขอบเขต" : String(record.forecastRisk);
-}
-
-function droughtForecastForArea({
-  forecast,
-  expectedSubdistrictCodes,
-}: {
-  forecast: NakhonRatchasimaThaiWaterDroughtForecast;
-  expectedSubdistrictCodes: string[];
-}) {
-  const expectedSet = new Set(expectedSubdistrictCodes);
-  const records = forecast.records.filter((record) => expectedSet.has(record.subdistrictCode));
-  const matchedSet = new Set(records.map((record) => record.subdistrictCode));
-  const totalSubdistricts = expectedSubdistrictCodes.length;
-  const monthly = forecast.monthly.map((month) => {
-    const periodRecords = records.filter((record) => record.period === month.period);
-    const riskSubdistricts = periodRecords.filter(droughtForecastRecordIsRisk).length;
-    const normalSubdistricts = periodRecords.filter((record) => !droughtForecastRecordIsRisk(record)).length;
-    return {
-      ...month,
-      riskSubdistricts,
-      normalSubdistricts,
-      totalSubdistricts,
-      riskPercent: totalSubdistricts > 0 ? riskSubdistricts / totalSubdistricts : 0,
-      sourceTypes: Array.from(new Set(periodRecords.map((record) => record.statusTh))).filter(Boolean),
-    };
-  });
-
-  return {
-    forecast: {
-      ...forecast,
-      meta: {
-        ...forecast.meta,
-        thaiWaterSubdistricts: totalSubdistricts,
-        rowCount: records.length,
-      },
-      monthly,
-      records,
-    },
-    matchedSubdistricts: matchedSet.size,
-    missingSubdistricts: Math.max(0, totalSubdistricts - matchedSet.size),
-    totalSubdistricts,
-    hasData: records.length > 0,
-  };
-}
-
-function ResearchAreaForecastPanel({
-  district,
-  subdistrict,
-  droughtForecast,
-}: {
-  district: NakhonRatchasimaDistrict;
-  subdistrict?: NakhonRatchasimaSubdistrict;
-  droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
-}) {
-  const expectedSubdistrictCodes = subdistrict
-    ? [subdistrict.subdistrictCode]
-    : district.subdistricts.map((item) => item.subdistrictCode);
-  const droughtArea = droughtForecastForArea({ forecast: droughtForecast, expectedSubdistrictCodes });
-  const areaLabel = subdistrict ? `ตำบล${subdistrict.nameTh}` : `อำเภอ${district.nameTh}`;
-  const hasDroughtRiskSignal = droughtForecastHasRiskSignal(droughtArea.forecast);
-  const droughtCoverageRemark = subdistrict
-    ? "ตำบลนี้มีข้อมูลพยากรณ์"
-    : `ครอบคลุม ${formatThaiNumber(droughtArea.matchedSubdistricts)}/${formatThaiNumber(droughtArea.totalSubdistricts)} ตำบล`;
-
-  return (
-    <DashboardSection
-      eyebrow="พยากรณ์"
-      title={`สัญญาณพยากรณ์สำหรับ${areaLabel}`}
-      description="พยากรณ์ภัยแล้ง 6 เดือนกรองตามรหัสตำบลของพื้นที่นี้เมื่อมีข้อมูล ไม่สร้างค่าทดแทนให้พื้นที่ที่ไม่มีรายการ"
-      provenance={droughtArea.hasData ? "REAL" : "PENDING_SOURCE"}
-      className="nr-forecast-priority-section nr-area-forecast-section"
-    >
-      <div className="nr-area-forecast-block is-drought">
-        <div className="nr-area-forecast-block-heading">
-          <span>ภัยแล้ง 6 เดือน</span>
-          <strong>พยากรณ์ภัยแล้งของพื้นที่นี้</strong>
-        </div>
-        {droughtArea.hasData ? (
-          <DroughtForecastTrendGraph forecast={droughtArea.forecast} singleSubdistrict={Boolean(subdistrict)} />
-        ) : (
-          <EmptyLocalEvidence />
-        )}
-        <p className={`nr-compact-note${droughtArea.hasData && !hasDroughtRiskSignal ? " nr-forecast-remark" : ""}`}>
-          {droughtArea.hasData
-            ? hasDroughtRiskSignal
-              ? `กรองข้อมูลพยากรณ์ตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} ${droughtCoverageRemark} มีพื้นที่ขาดข้อมูล ${formatThaiNumber(droughtArea.missingSubdistricts)} ตำบล`
-              : `กราฟเป็น 0 ทุกเดือน เพราะข้อมูลพยากรณ์ระบุว่าไม่เสี่ยงในช่วงพยากรณ์นี้ หลังกรองตาม${subdistrict ? "รหัสตำบล" : "รหัสอำเภอ"} (${droughtCoverageRemark})`
-            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในรอบข้อมูลพยากรณ์"}
-        </p>
-      </div>
-    </DashboardSection>
-  );
-}
-
-function DroughtForecastPriorityPanel({ forecast }: { forecast: NakhonRatchasimaThaiWaterDroughtForecast }) {
-  const months = forecast.monthly;
-  const lead = months[0];
-
-  if (months.length === 0 || !lead) {
-    return (
-      <DashboardSection
-        eyebrow="ข้อมูลพยากรณ์"
-        title="พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน"
-        description="ยังไม่มีรายการพยากรณ์ภัยแล้งที่อ่านได้ จึงไม่สร้างค่าทดแทน"
-        provenance="PENDING_SOURCE"
-        className="nr-forecast-priority-section nr-drought-forecast-section is-empty"
-      >
-        <EmptyLocalEvidence />
-      </DashboardSection>
-    );
-  }
-
-  const leadBand = droughtForecastBand(lead);
-  const peak = droughtForecastPeakSummary(months);
-  const ending = months[months.length - 1] ?? lead;
-
-  return (
-    <DashboardSection
-      eyebrow="ข้อมูลพยากรณ์"
-      title="พยากรณ์พื้นที่เสี่ยงภัยแล้ง 6 เดือน"
-      description="ใช้เป็นสัญญาณล่วงหน้าของหน้าภัยแล้ง ก่อนเทียบกับข้อมูลย้อนหลังและรายการพื้นที่ที่ควรตรวจสอบ"
-      provenance="REAL"
-      className="nr-forecast-priority-section nr-drought-forecast-section"
-    >
-      <div className="nr-forecast-priority-grid">
-        <div className="nr-forecast-chart-surface">
-          <div className="nr-forecast-chart-heading">
-            <h3>แนวโน้มจำนวนตำบลที่เสี่ยงภัยแล้ง</h3>
-            <span>จำนวนตำบลที่มีสัญญาณเสี่ยงในแต่ละเดือน เทียบกับเกณฑ์ครึ่งพื้นที่</span>
-          </div>
-          <DroughtForecastTrendGraph forecast={forecast} />
-        </div>
-        <aside className={`nr-forecast-summary-panel is-${leadBand}`} aria-label="สรุปพยากรณ์ภัยแล้ง 6 เดือน">
-          <div className="nr-forecast-summary-primary">
-            <span className="nr-forecast-summary-label">
-              <span className="nr-forecast-summary-icon" aria-hidden="true">
-                <CalendarDays size={18} />
-              </span>
-              เดือนแรกของพยากรณ์
-            </span>
-            <strong>{droughtForecastBandLabel(leadBand)}</strong>
-            <b>{formatThaiNumber(lead.riskSubdistricts)} ตำบล</b>
-            <small>{lead.labelTh}</small>
-          </div>
-          <dl className="nr-forecast-summary-metrics">
-            <div>
-              <dt>
-                <span className="nr-forecast-summary-icon" aria-hidden="true">
-                  <TrendingUp size={17} />
-                </span>
-                ระดับเสี่ยงสูงสุด
-              </dt>
-              <dd>
-                <strong>{formatThaiNumber(peak.riskSubdistricts)} ตำบล</strong>
-                <span>{peak.monthLabel}</span>
-                <small>{formatPercent(peak.riskPercent * 100, 1)}</small>
-              </dd>
-            </div>
-            <div>
-              <dt>
-                <span className="nr-forecast-summary-icon" aria-hidden="true">
-                  <RotateCcw size={17} />
-                </span>
-                รอบข้อมูล
-              </dt>
-              <dd>
-                <strong>{formatMonth(forecast.meta.issueMonth, "th")}</strong>
-                <span>
-                  {formatThaiNumber(months.length)} เดือน ถึง {ending.labelTh}
-                </span>
-              </dd>
-            </div>
-          </dl>
-        </aside>
-      </div>
-      <ol className="nr-forecast-primary-strip nr-drought-forecast-month-strip nr-forecast-timeline" aria-label="พยากรณ์ภัยแล้งรายเดือน 6 เดือน">
-        {months.map((month) => (
-          <li key={month.period} className={`is-${droughtForecastBand(month)}`}>
-            <span className="nr-forecast-timeline-marker" aria-hidden="true" />
-            <small>{month.labelTh}</small>
-            <strong>
-              <i aria-hidden="true" />
-              {droughtForecastBandLabel(droughtForecastBand(month))}
-            </strong>
-            <b>{formatThaiNumber(month.riskSubdistricts)} ตำบล</b>
-          </li>
-        ))}
-      </ol>
-      <p className="nr-compact-note nr-forecast-footnote">
-        <Info size={17} aria-hidden="true" />
-        ข้อมูลนี้เป็นพยากรณ์พื้นที่เสี่ยงภัยแล้ง แยกจากข้อมูลภัยแล้งย้อนหลังที่จัดมาตรฐานแล้ว
-      </p>
-    </DashboardSection>
-  );
 }
 
 type DroughtForecastArchiveLevel = "province" | "district" | "subdistrict";
@@ -2852,21 +2646,22 @@ function DroughtForecastWorkspaceKpiStrip({
 }
 
 function DroughtForecastWorkspaceChart({
-  forecast,
   forecastHasData,
+  trendMonths,
   selectedHorizon,
   singleSubdistrict = false,
   scopeLabel,
   coverageRemark,
 }: {
-  forecast: NakhonRatchasimaThaiWaterDroughtForecast;
   forecastHasData: boolean;
+  trendMonths: DroughtForecastTrendMonth[];
   selectedHorizon: ForecastArchiveHorizon;
   singleSubdistrict?: boolean;
   scopeLabel: string;
   coverageRemark: string;
 }) {
-  const activeForecastMonth = forecast.monthly[selectedHorizon - 1] ?? forecast.monthly[0];
+  const activeForecastMonth = trendMonths[selectedHorizon - 1] ?? trendMonths[0];
+  const totalSubdistricts = Math.max(...trendMonths.map((month) => month.totalSubdistricts), 1);
 
   return (
     <section className="nr-drought-workspace-chart-card" aria-labelledby="nr-drought-workspace-chart-title">
@@ -2883,11 +2678,16 @@ function DroughtForecastWorkspaceChart({
         <DataProvenanceChip kind={forecastHasData ? "REAL" : "PENDING_SOURCE"} />
       </div>
       {forecastHasData ? (
-        <DroughtForecastTrendGraph forecast={forecast} singleSubdistrict={singleSubdistrict} activeHorizon={selectedHorizon} />
+        <DroughtForecastTrendGraph
+          months={trendMonths}
+          totalSubdistricts={totalSubdistricts}
+          singleSubdistrict={singleSubdistrict}
+          activeHorizon={selectedHorizon}
+        />
       ) : (
         <EmptyLocalEvidence />
       )}
-      <p className={`nr-compact-note${forecastHasData && !droughtForecastHasRiskSignal(forecast) ? " nr-forecast-remark" : ""}`}>
+      <p className={`nr-compact-note${forecastHasData && !droughtForecastHasRiskSignal(trendMonths) ? " nr-forecast-remark" : ""}`}>
         {forecastHasData
           ? coverageRemark
           : "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในรอบข้อมูลพยากรณ์"}
@@ -2970,17 +2770,17 @@ function DroughtForecastWorkspaceMapCard({
 }
 
 function DroughtForecastNarrativeDetail({
-  forecast,
   forecastHasData,
+  trendMonths,
   selectedHorizon,
   singleSubdistrict = false,
 }: {
-  forecast: NakhonRatchasimaThaiWaterDroughtForecast;
   forecastHasData: boolean;
+  trendMonths: DroughtForecastTrendMonth[];
   selectedHorizon: ForecastArchiveHorizon;
   singleSubdistrict?: boolean;
 }) {
-  const months = forecast.monthly;
+  const months = trendMonths;
   const active = months[selectedHorizon - 1] ?? months[0];
 
   if (!forecastHasData || months.length === 0 || !active) {
@@ -3031,12 +2831,12 @@ function DroughtForecastNarrativeDetail({
                 <span className="nr-forecast-summary-icon" aria-hidden="true">
                   <RotateCcw size={17} />
                 </span>
-                รอบข้อมูล
+                กรอบพยากรณ์
               </dt>
               <dd>
-                <strong>{formatMonth(forecast.meta.issueMonth, "th")}</strong>
+                <strong>{formatThaiNumber(months.length)} ระยะ</strong>
                 <span>
-                  {formatThaiNumber(months.length)} เดือน ถึง {ending.labelTh}
+                  T+1 ถึง {ending.labelTh}
                 </span>
               </dd>
             </div>
@@ -3058,7 +2858,7 @@ function DroughtForecastNarrativeDetail({
       </div>
       <p className="nr-compact-note nr-forecast-footnote">
         <Info size={17} aria-hidden="true" />
-        ข้อมูลนี้เป็นพยากรณ์พื้นที่เสี่ยงภัยแล้ง แยกจากข้อมูลภัยแล้งย้อนหลังที่จัดมาตรฐานแล้ว
+        ข้อมูลนี้เป็นคลังคำพยากรณ์ย้อนหลัง แยกจากข้อมูลภัยแล้งย้อนหลังที่จัดมาตรฐานแล้ว
       </p>
     </section>
   );
@@ -3069,9 +2869,6 @@ function DroughtCompactForecastWorkspace({
   title,
   description,
   scopeLabel,
-  forecast,
-  forecastHasData,
-  forecastCoverageRemark,
   singleSubdistrict = false,
   archive,
   expectedSubdistrictCodes,
@@ -3093,9 +2890,6 @@ function DroughtCompactForecastWorkspace({
   title: string;
   description: string;
   scopeLabel: string;
-  forecast: NakhonRatchasimaThaiWaterDroughtForecast;
-  forecastHasData: boolean;
-  forecastCoverageRemark: string;
   singleSubdistrict?: boolean;
   archive: NakhonRatchasimaDroughtForecastArchive;
   expectedSubdistrictCodes?: string[];
@@ -3128,6 +2922,20 @@ function DroughtCompactForecastWorkspace({
   }
 
   const summary = forecastArchiveSummaryForSelection(archive, selectedTargetMonth, selectedHorizon, expectedSubdistrictCodes);
+  const trendMonths = forecastArchiveTrendMonthsForSelection(archive, selectedTargetMonth, expectedSubdistrictCodes);
+  const forecastHasData = summary.matchedSubdistricts > 0;
+  const forecastCoverageRemark = (() => {
+    if (!forecastHasData) return "ยังไม่มีรายการพยากรณ์ภัยแล้งของพื้นที่นี้ในรอบข้อมูลพยากรณ์";
+    if (level === "subdistrict") {
+      return summary.riskSubdistricts > 0
+        ? "ตำบลนี้มีสัญญาณเสี่ยงในกรอบพยากรณ์ที่เลือก"
+        : "กราฟเป็น 0 ในกรอบที่เลือก เพราะคลังพยากรณ์ระบุว่าไม่มีสัญญาณเสี่ยงหรืออยู่นอกขอบเขตการศึกษา";
+    }
+    const coverage = `ครอบคลุม ${formatThaiNumber(summary.matchedSubdistricts)}/${formatThaiNumber(summary.totalSubdistricts)} ตำบล`;
+    return summary.riskSubdistricts > 0
+      ? `กรองคลังพยากรณ์ตามรหัสพื้นที่ ${coverage} มีพื้นที่ขาดข้อมูล ${formatThaiNumber(summary.missingSubdistricts)} ตำบล`
+      : `กราฟเป็น 0 ในกรอบที่เลือก เพราะคลังพยากรณ์ระบุว่าไม่มีสัญญาณเสี่ยงหลังกรองตามรหัสพื้นที่ (${coverage})`;
+  })();
   const selectedRecord =
     level === "subdistrict" && expectedSubdistrictCodes?.[0]
       ? summary.recordsBySubdistrict.get(expectedSubdistrictCodes[0])
@@ -3163,8 +2971,8 @@ function DroughtCompactForecastWorkspace({
 
         <div className="nr-drought-workspace-main">
           <DroughtForecastWorkspaceChart
-            forecast={forecast}
             forecastHasData={forecastHasData}
+            trendMonths={trendMonths}
             selectedHorizon={selectedHorizon}
             singleSubdistrict={singleSubdistrict}
             scopeLabel={scopeLabel}
@@ -3198,8 +3006,8 @@ function DroughtCompactForecastWorkspace({
           </summary>
           <div className="nr-drought-workspace-details-body">
             <DroughtForecastNarrativeDetail
-              forecast={forecast}
               forecastHasData={forecastHasData}
+              trendMonths={trendMonths}
               selectedHorizon={selectedHorizon}
               singleSubdistrict={singleSubdistrict}
             />
@@ -3861,7 +3669,6 @@ function ResearchProvinceDataView({
   onMapModeChange,
   onNavigate,
   research,
-  droughtForecast,
   selectedMonth,
   monthOptions,
   onMonthChange,
@@ -3874,7 +3681,6 @@ function ResearchProvinceDataView({
   onMapModeChange: (mode: LocalMapMode) => void;
   onNavigate: (path: string) => void;
   research: NakhonRatchasimaResearchPanelSummary;
-  droughtForecast: NakhonRatchasimaThaiWaterDroughtForecast;
   selectedMonth: string;
   monthOptions: AppSelectOption[];
   onMonthChange: (month: string) => void;
@@ -3893,9 +3699,6 @@ function ResearchProvinceDataView({
         title="คาดการณ์ภัยแล้ง 6 เดือน (T+1 ถึง T+6)"
         description="เลือกช่วงเวลา T+ เพื่ออ่านกราฟแนวโน้มและแผนที่พยากรณ์ในบริบทเดียวกัน"
         scopeLabel="จ.นครราชสีมา"
-        forecast={droughtForecast}
-        forecastHasData={droughtForecast.records.length > 0}
-        forecastCoverageRemark={`ข้อมูลพยากรณ์ ThaiWater ครอบคลุม ${formatThaiNumber(droughtForecast.meta.thaiWaterSubdistricts)}/${formatThaiNumber(research.meta.subdistrictCount)} ตำบล และใช้เป็นสัญญาณล่วงหน้า ไม่ใช่ประกาศภัยทางการ`}
         archive={droughtArchive}
         target={{ valid: true, level: "province", tab: activeTab }}
         selectedTargetMonth={forecastArchive.selectedMonth}
@@ -6005,7 +5808,6 @@ function ProvinceView({
 }) {
   const state = useAppState();
   const [selectedMapSubdistrictCode, setSelectedMapSubdistrictCode] = useState<string | null>(null);
-  const droughtForecast = getNakhonRatchasimaThaiWaterDroughtForecast();
   const researchSummary = getNakhonRatchasimaResearchPanelSummary();
   const provinceRecord =
     getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth) ?? getProvinceRecord(NAKHON_RATCHASIMA_ID, state.selectedMonth);
@@ -6075,7 +5877,6 @@ function ProvinceView({
           onMapModeChange={onMapModeChange}
           onNavigate={onNavigate}
           research={researchSummary}
-          droughtForecast={droughtForecast}
           selectedMonth={selectedMonth}
           monthOptions={monthOptions}
           onMonthChange={onMonthChange}
@@ -6113,10 +5914,8 @@ function DistrictView({
   const stats = summarizeResearchAreaRecords(activeRecords, district.subdistricts.length);
   const monthlySeries = researchMonthlySeriesForDistrict(district, activeResearchPeriod.period);
   const evidence = getNakhonRatchasimaEvidenceForLocation({ districtCode: district.districtCode });
-  const droughtForecast = getNakhonRatchasimaThaiWaterDroughtForecast();
   const droughtArchive = getNakhonRatchasimaDroughtForecastArchive();
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
-  const droughtArea = droughtForecastForArea({ forecast: droughtForecast, expectedSubdistrictCodes: subdistrictCodes });
   const readiness = predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes);
   const openPredictionReadinessMap = () => {
     onMapModeChange("prediction-readiness");
@@ -6136,15 +5935,6 @@ function DistrictView({
         title={`คาดการณ์ภัยแล้งของอำเภอ${district.nameTh}`}
         description="เลือก T+ ครั้งเดียวเพื่ออ่านแนวโน้มพยากรณ์และแผนที่รายตำบลของอำเภอนี้ในบริบทเดียวกัน"
         scopeLabel={`อ.${district.nameTh}`}
-        forecast={droughtArea.forecast}
-        forecastHasData={droughtArea.hasData}
-        forecastCoverageRemark={
-          droughtArea.hasData
-            ? droughtForecastHasRiskSignal(droughtArea.forecast)
-              ? `กรองข้อมูลพยากรณ์ตามรหัสอำเภอ ครอบคลุม ${formatThaiNumber(droughtArea.matchedSubdistricts)}/${formatThaiNumber(droughtArea.totalSubdistricts)} ตำบล มีพื้นที่ขาดข้อมูล ${formatThaiNumber(droughtArea.missingSubdistricts)} ตำบล`
-              : `กราฟเป็น 0 ทุกเดือน เพราะข้อมูลพยากรณ์ระบุว่าไม่เสี่ยงในช่วงพยากรณ์นี้ หลังกรองตามรหัสอำเภอ (ครอบคลุม ${formatThaiNumber(droughtArea.matchedSubdistricts)}/${formatThaiNumber(droughtArea.totalSubdistricts)} ตำบล)`
-            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของอำเภอนี้ในรอบข้อมูลพยากรณ์"
-        }
         archive={droughtArchive}
         expectedSubdistrictCodes={subdistrictCodes}
         target={{ valid: true, level: "district", district }}
@@ -6220,11 +6010,9 @@ function SubdistrictView({
     districtCode: district.districtCode,
     subdistrictCode: subdistrict.subdistrictCode,
   });
-  const droughtForecast = getNakhonRatchasimaThaiWaterDroughtForecast();
   const droughtArchive = getNakhonRatchasimaDroughtForecastArchive();
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
   const subdistrictCodes = [subdistrict.subdistrictCode];
-  const droughtArea = droughtForecastForArea({ forecast: droughtForecast, expectedSubdistrictCodes: subdistrictCodes });
   const readiness = predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes);
   const openPredictionReadinessMap = () => {
     onMapModeChange("prediction-readiness");
@@ -6245,15 +6033,6 @@ function SubdistrictView({
         title={`คาดการณ์ภัยแล้งของตำบล${subdistrict.nameTh}`}
         description="เลือก T+ ครั้งเดียวเพื่ออ่านสัญญาณพยากรณ์ของตำบลและตำแหน่งบนแผนที่ในบริบทเดียวกัน"
         scopeLabel={`ต.${subdistrict.nameTh} · อ.${district.nameTh}`}
-        forecast={droughtArea.forecast}
-        forecastHasData={droughtArea.hasData}
-        forecastCoverageRemark={
-          droughtArea.hasData
-            ? droughtForecastHasRiskSignal(droughtArea.forecast)
-              ? `กรองข้อมูลพยากรณ์ตามรหัสตำบล ตำบลนี้มีข้อมูลพยากรณ์ และมีพื้นที่ขาดข้อมูล ${formatThaiNumber(droughtArea.missingSubdistricts)} ตำบล`
-              : "กราฟเป็น 0 ทุกเดือน เพราะข้อมูลพยากรณ์ระบุว่าไม่เสี่ยงในช่วงพยากรณ์นี้ หลังกรองตามรหัสตำบล"
-            : "ยังไม่มีรายการพยากรณ์ภัยแล้งของตำบลนี้ในรอบข้อมูลพยากรณ์"
-        }
         singleSubdistrict
         archive={droughtArchive}
         expectedSubdistrictCodes={subdistrictCodes}
@@ -6531,7 +6310,7 @@ export function NakhonRatchasimaWorkspace({
   };
   const isProvinceDroughtRoute = route.level === "province" && route.tab === "drought";
   const isDroughtWorkspaceRoute = route.valid && (route.level !== "province" || route.tab === "drought");
-  const droughtPageForecast = isProvinceDroughtRoute ? getNakhonRatchasimaThaiWaterDroughtForecast() : null;
+  const droughtPageArchive = isProvinceDroughtRoute ? getNakhonRatchasimaDroughtForecastArchive() : null;
   const droughtPageResearch = isProvinceDroughtRoute ? getNakhonRatchasimaResearchPanelSummary() : null;
   const showMobileProvinceOverviewIdentity = route.valid && route.level === "province" && route.tab === "overview";
   const operationalFilterContextChips =
@@ -6579,8 +6358,8 @@ export function NakhonRatchasimaWorkspace({
 
   return (
     <div className={["page-stack", "nr-workspace", isDroughtWorkspaceRoute ? "is-drought-route" : ""].join(" ")}>
-      {isProvinceDroughtRoute && droughtPageForecast && droughtPageResearch ? (
-        <DroughtPageHeader droughtForecast={droughtPageForecast} research={droughtPageResearch} onBack={handleRouteBack} />
+      {isProvinceDroughtRoute && droughtPageArchive && droughtPageResearch ? (
+        <DroughtPageHeader archive={droughtPageArchive} research={droughtPageResearch} onBack={handleRouteBack} />
       ) : (
         <section className={["nr-route-bar", showMobileProvinceOverviewIdentity ? "is-mobile-redundant-province-route" : ""].join(" ")}>
           {routeBackTarget && (

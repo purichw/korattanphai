@@ -16,7 +16,6 @@ import nakhonRatchasimaDroughtForecastArchiveJson from "./canonical/nakhon_ratch
 import nakhonRatchasimaEvidenceRecordsJson from "./canonical/nakhon_ratchasima/evidence_records.json";
 import nakhonRatchasimaLocalSubsetJson from "./canonical/nakhon_ratchasima/local_subset.json";
 import nakhonRatchasimaMapLayersJson from "./canonical/nakhon_ratchasima/map_layers.json";
-import nakhonRatchasimaOfficialWaterSnapshotJson from "./canonical/nakhon_ratchasima/official_water_snapshot.json";
 import nakhonRatchasimaOpsmoacMonthlyReportsJson from "./canonical/nakhon_ratchasima/opsmoac_monthly_reports.json";
 import nakhonRatchasimaRainfallMonthlyHistoryJson from "./canonical/nakhon_ratchasima/rainfall_monthly_history.json";
 import nakhonRatchasimaRainfallObservations24hJson from "./canonical/nakhon_ratchasima/rainfall_observations_24h.json";
@@ -27,7 +26,6 @@ import nakhonRatchasimaResearchPanelSummaryJson from "./canonical/nakhon_ratchas
 import nakhonRatchasimaSourceMatrixJson from "./canonical/nakhon_ratchasima/source_matrix.json";
 import nakhonRatchasimaSubdistrictRainfallCoverageJson from "./canonical/nakhon_ratchasima/subdistrict_rainfall_coverage.json";
 import nakhonRatchasimaTemporalMatrixJson from "./canonical/nakhon_ratchasima/temporal_matrix.json";
-import nakhonRatchasimaThaiWaterDroughtForecastJson from "./canonical/nakhon_ratchasima/thaiwater_drought_forecast.json";
 import nationalMonthlyBackboneJson from "./canonical/national_monthly_backbone.json";
 import outcomeAnalyticsJson from "./canonical/outcome_analytics.json";
 import provinceMonthlyRiskJson from "./canonical/province_monthly_risk.json";
@@ -50,7 +48,6 @@ import type {
   NakhonRatchasimaLocalSubset,
   NakhonRatchasimaMapLayer,
   NakhonRatchasimaMatrixRow,
-  NakhonRatchasimaOfficialWaterSnapshot,
   NakhonRatchasimaOpsmoacMonthlyReports,
   NakhonRatchasimaRainfallCoverage,
   NakhonRatchasimaRainfallMonthlyHistory,
@@ -59,7 +56,6 @@ import type {
   NakhonRatchasimaRainfallStations,
   NakhonRatchasimaResearchMonthlyPanel,
   NakhonRatchasimaResearchPanelSummary,
-  NakhonRatchasimaThaiWaterDroughtForecast,
   NationalMonthlyBackbone,
   OutcomeMetric,
   ProvinceMonthRisk,
@@ -80,8 +76,6 @@ export const nakhonRatchasimaDwrEwsStationCoverage =
   nakhonRatchasimaDwrEwsStationCoverageJson as NakhonRatchasimaDwrEwsStationCoverage;
 export const nakhonRatchasimaDroughtForecastArchive =
   nakhonRatchasimaDroughtForecastArchiveJson as NakhonRatchasimaDroughtForecastArchive;
-export const nakhonRatchasimaOfficialWaterSnapshot =
-  nakhonRatchasimaOfficialWaterSnapshotJson as NakhonRatchasimaOfficialWaterSnapshot;
 export const nakhonRatchasimaOpsmoacMonthlyReports =
   nakhonRatchasimaOpsmoacMonthlyReportsJson as NakhonRatchasimaOpsmoacMonthlyReports;
 export const nakhonRatchasimaRainfallMonthlyHistory =
@@ -100,8 +94,6 @@ export const nakhonRatchasimaSubdistrictRainfallCoverage =
   nakhonRatchasimaSubdistrictRainfallCoverageJson as NakhonRatchasimaRainfallCoverage;
 export const nakhonRatchasimaSourceMatrix = nakhonRatchasimaSourceMatrixJson as Array<Record<string, string>>;
 export const nakhonRatchasimaTemporalMatrix = nakhonRatchasimaTemporalMatrixJson as Array<Record<string, string>>;
-export const nakhonRatchasimaThaiWaterDroughtForecast =
-  nakhonRatchasimaThaiWaterDroughtForecastJson as NakhonRatchasimaThaiWaterDroughtForecast;
 
 const baseLocations = (locationsJson as LocationNode[]).map((location) =>
   location.id === "TH-P29"

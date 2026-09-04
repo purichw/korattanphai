@@ -1,17 +1,16 @@
 {
   "meta": {
     "generatedAt": "2026-08-30T17:03:00+07:00",
-    "status": "THAIWATER_SNAPSHOT_AVAILABLE_NO_CONFIRMED_SUBDISTRICT_CROSSWALK",
+    "status": "NO_CONFIRMED_SUBDISTRICT_RAINFALL_OBSERVATIONS",
     "sourceIds": [
-      "SRC-HII-THAIWATER",
       "SRC-DWR-EWS"
     ],
     "unit": "mm",
     "accumulationWindow": "24h",
     "timezone": "Asia/Bangkok",
     "observationCount": 0,
-    "guardrailTh": "มี snapshot ฝน 24 ชม. จาก ThaiWater ใน official_water_snapshot.json แต่ยังไม่มี station/admin-code crosswalk ที่ยืนยันสำหรับแจกค่าลงตำบล; ห้าม fallback เป็นค่าฝนต่ำหรือปกติ",
-    "stationSpecificEndpointAuditTh": "ThaiWater rain24 คืน 104 สถานีสำหรับ province_code=30 แต่ station IDs ไม่ overlap กับ DWR EWS coverage registry 49 จุด และ payload ที่ทดสอบยังไม่มีรหัสตำบลสำหรับ join จึงยังไม่ import เป็น observations รายตำบล"
+    "guardrailTh": "ยังไม่มีค่าฝน 24 ชม. รายตำบลที่มี station/admin-code crosswalk ยืนยัน; ห้าม fallback เป็นค่าฝนต่ำหรือปกติ",
+    "stationSpecificEndpointAuditTh": "DWR EWS station coverage registry มีจุดสถานีที่ map กับตำบลได้ แต่รอบนี้ยังไม่นำเข้าค่าฝนสดรายสถานีเป็น observations รายตำบล"
   },
   "observations": [],
   "historicalWarningSamples": [

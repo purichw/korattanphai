@@ -25,14 +25,12 @@ serverless endpoint.
   subdistrict geometry, while ADM1 remains only national/context geometry.
 - Rainfall: Nakhon Ratchasima has static rainfall source-audit, DWR EWS station,
   current-observation schema, monthly-context, and 289-subdistrict coverage
-  fixtures. `official_water_snapshot.json` adds point-in-time ThaiWater
-  province/station context, but no live rainfall readings are ingested into the
-  app yet.
+  fixtures. No live rainfall readings or province water-provider snapshots are
+  ingested into the app yet.
 - Drought forecast archive: `drought_forecast_archive_rev02.json` is a packed
   source-backed T+1 through T+6 archive fixture generated from the normalized
   rev02 workbook. It is consumed by the same Nakhon workspace at province,
-  district, and subdistrict levels and remains separate from the current
-  ThaiWater drought prediction fixture.
+  district, and subdistrict levels as the public drought prediction source.
 - Deployment: Vercel static build.
 - Backend/database: no database and no mutation service in the current repo.
 
@@ -133,16 +131,10 @@ Current external-data facts:
 - `src/data/canonical/nakhon_ratchasima/rainfall_observations_24h.json`
   currently has zero current observations by design because live station-specific
   access still needs audit.
-- `src/data/canonical/nakhon_ratchasima/official_water_snapshot.json` contains
-  REAL ThaiWater province/station snapshot context. It must not be treated as a
-  direct reading for every subdistrict or as a derived agricultural risk score.
 - `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
   contains the source-backed rev02 T+1 through T+6 forecast archive. It was
   generated from `Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx` using
   `scripts/build-nr-drought-forecast-archive.py`.
-- `src/data/canonical/nakhon_ratchasima/thaiwater_drought_forecast.json`
-  contains a separate current ThaiWater drought prediction fixture for issue
-  month `2026-08`; archive refreshes must not overwrite it.
 - Canonical risk data is local JSON in `src/data/canonical/`.
 - Documentation names the original local spec/data package path:
   `/Users/point/Downloads/agri_risk_codex_single_source`.

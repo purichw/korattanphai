@@ -102,7 +102,7 @@
       "group": "Weather/Hydrology",
       "labelTh": "ปริมาณฝนและสถานี",
       "classification": "REAL station metadata + pending observations",
-      "sourceId": "SRC-DWR-EWS; SRC-HII-THAIWATER; SRC-TMD",
+      "sourceId": "SRC-DWR-EWS; SRC-TMD",
       "access": "PUBLIC_WEB_REPORT_AND_DOCUMENTED_STANDARD_NEEDS_INGEST_AUDIT",
       "geometry": "DWR station points + subdistrict proxy coverage",
       "join": "station ID + subdistrictCode; nearest-station proxy from subdistrict centroid",

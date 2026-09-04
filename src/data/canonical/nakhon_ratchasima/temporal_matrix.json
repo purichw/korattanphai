@@ -252,7 +252,7 @@
     "system_default_provenance": "REAL evidence + DERIVED local risk + RUNTIME workflow; existing province score remains synthetic until recomputed",
     "tmd_weather_status": "REAL_MONTHLY_AND_SHORT_RANGE_FORECAST_CONTEXT",
     "gistda_drought_status": "GISTDA_MONITORING/FORECAST_CAPABILITY; live Nakhon Ratchasima values not ingested",
-    "flood_hydrology_status": "REAL_DDPM/DWR/RID/HII_SOURCE_FAMILIES; partial Nakhon Ratchasima evidence",
+    "flood_hydrology_status": "REAL_DDPM/DWR/RID_SOURCE_FAMILIES; partial Nakhon Ratchasima evidence",
     "pest_disease_status": "REAL_DOAE_CURRENT_LOCAL_EVIDENCE_IN_SOENG_SANG",
     "local_evidence_status": "PARTIAL_REAL_LOCAL_EVIDENCE",
     "ui_rule": "Current operational month; show as_of_date/freshness for each evidence item.",

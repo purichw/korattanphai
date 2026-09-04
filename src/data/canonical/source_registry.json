@@ -84,27 +84,6 @@
     "limitationTh": "ห้ามระบุค่าระดับอ่างเป็นข้อมูลจริงจนกว่าจะนำเข้าจากผลิตภัณฑ์ข้อมูลจริง"
   },
   {
-    "id": "SRC-HII-THAIWATER",
-    "acronym": "HII/ThaiWater",
-    "name": "Hydro-Informatics Institute / ThaiWater integrated water context",
-    "nameTh": "สถาบันสารสนเทศทรัพยากรน้ำ / ThaiWater",
-    "owner": "Hydro-Informatics Institute",
-    "ownerTh": "สถาบันสารสนเทศทรัพยากรน้ำ",
-    "category": "hydrology",
-    "dataClass": "REAL",
-    "coverage": "Cross-agency rainfall, reservoir, river and water-situation context",
-    "coverageTh": "บริบทฝน อ่างเก็บน้ำ แม่น้ำ และสถานการณ์น้ำจากหลายหน่วยงาน",
-    "freshness": "Public reports and catalogue cadence vary",
-    "freshnessTh": "รอบรายงานและบัญชีรายการข้อมูลแตกต่างตามชุดข้อมูล",
-    "accessMode": "Public reports / reference only in this prototype",
-    "accessModeTh": "รายงานสาธารณะ / ใช้อ้างอิงในต้นแบบนี้",
-    "url": "https://www.thaiwater.net/",
-    "prototypeUse": "Integrated water evidence and corroboration layer",
-    "prototypeUseTh": "ชั้นหลักฐานน้ำแบบบูรณาการและการยืนยันบริบท",
-    "limitation": "Avoid double-counting observations also provided by originating agencies.",
-    "limitationTh": "ระวังนับข้อมูลซ้ำกับหน่วยงานต้นทาง"
-  },
-  {
     "id": "SRC-DWR-EWS",
     "acronym": "DWR EWS",
     "name": "Department of Water Resources Early Warning System",

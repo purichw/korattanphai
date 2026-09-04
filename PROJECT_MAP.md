@@ -35,12 +35,8 @@ in this repo.
   `rainfall_stations.json`, `rainfall_observations_24h.json`,
   `rainfall_monthly_history.json`, and
   `subdistrict_rainfall_coverage.json`
-- Nakhon Ratchasima official ThaiWater province snapshot:
-  `src/data/canonical/nakhon_ratchasima/official_water_snapshot.json`
 - Nakhon Ratchasima drought forecast archive:
   `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
-- Current ThaiWater drought prediction fixture:
-  `src/data/canonical/nakhon_ratchasima/thaiwater_drought_forecast.json`
 - Static ADM1 GeoJSON: `public/geodata/thailand-adm1.geojson`
 - Static regional context GeoJSON:
   `public/geodata/thailand-neighbor-context.geojson`
@@ -185,9 +181,6 @@ Production smoke checks after an authorized deploy:
 - `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`:
   packed source-backed T+1 through T+6 drought forecast archive used by
   province, district, and subdistrict drought pages.
-- `src/data/canonical/nakhon_ratchasima/thaiwater_drought_forecast.json`:
-  separate current ThaiWater drought prediction fixture; do not conflate it
-  with the archive fixture.
 - `public/geodata/thailand-adm1.geojson`: static map boundary data.
 - `public/geodata/thailand-neighbor-context.geojson`: non-interactive regional
   country orientation context from Natural Earth 1:110m Admin 0 countries.
@@ -288,13 +281,12 @@ FACT:
   subdistrict rain gauge layer. If a subdistrict uses the nearest station, the UI
   must show distance, freshness, confidence, and that it is not a direct
   subdistrict measurement.
-- `official_water_snapshot.json` may show point-in-time ThaiWater 24-hour
-  rainfall context at province/station level. `rainfall_observations_24h.json`
-  remains empty until a station-specific live ingest exists. Do not fill
-  subdistrict gaps with zero, normal, or synthetic rainfall.
+- `rainfall_observations_24h.json` remains empty until a station-specific live
+  ingest exists. Do not fill subdistrict gaps with zero, normal, or synthetic
+  rainfall.
 - The rev02 drought forecast archive is historical forecast-vintage data, not
-  observed damage and not the current ThaiWater forecast. Preserve target month,
-  issue month, and T+ horizon in UI, tooltips, tests, and docs.
+  observed damage and not a live/current external forecast. Preserve target
+  month, issue month, and T+ horizon in UI, tooltips, tests, and docs.
 - The archive uses `Source_YearMonth` as target month and
   `issueMonth = targetMonth - horizon`. Its record identity is
   `subdistrictCode + targetMonth + horizon`, so equal numeric values across T+
@@ -302,9 +294,6 @@ FACT:
 - Archive risk values are `0` no forecast risk, `1` moderate forecast risk,
   `2` high forecast risk, and blank workbook cells as out of scope. Blank cells
   are not low-risk and not join failures.
-- `thaiwater_drought_forecast.json` remains separate current ThaiWater
-  prediction context with issue month `2026-08`, forecast periods `2026-08`
-  through `2027-01`, and 1,710 records.
 - Historical local map periods from `normalized_research_monthly_panel.json` and
   `normalized_research_panel_summary.json` are intentionally cleared while a new
   dataset is being prepared. Do not restore the old `2025-12` historical map
@@ -343,8 +332,6 @@ FACT:
   low-risk UI.
 - Do not collapse rev02 archive target month, issue month, and T+ horizon into a
   single latest-risk value.
-- Do not overwrite `thaiwater_drought_forecast.json` when rebuilding the rev02
-  archive.
 - Do not create farmer alerts before publication.
 - Do not silently convert synthetic prototype data into official public-safety
   language.

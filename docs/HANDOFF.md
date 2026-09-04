@@ -62,18 +62,15 @@ Current Nakhon Ratchasima rainfall patch:
   `rainfall_source_audit.json`, `rainfall_stations.json`,
   `rainfall_observations_24h.json`, `rainfall_monthly_history.json`, and
   `subdistrict_rainfall_coverage.json`.
-- Added `official_water_snapshot.json`, a point-in-time REAL ThaiWater province
-  snapshot for rainfall, water level, reservoir, temperature, warning/storm, and
-  forecast context. It is static fixture data, not a live browser API call.
 - Added 49 REAL DWR EWS station points and a 289-subdistrict coverage matrix:
   29 direct-station subdistricts, 260 nearest-station representative records,
   and 0 no-source records in the current matrix.
 - Kept `ปริมาณฝนและสถานี` in the raw Nakhon Ratchasima layer catalogue, but the
   Korat Tan Phai product UI now hides water, flood, reservoir, weather, and
   rainfall layers until they are needed for a confirmed prediction workflow.
-- Kept `rainfall_observations_24h.json` empty by design. The ThaiWater snapshot
-  can show province/station rainfall context, but it must not be copied into
-  every subdistrict or silently converted into agricultural risk.
+- Kept `rainfall_observations_24h.json` empty by design. Do not copy unjoined
+  province/station values into every subdistrict or silently convert them into
+  agricultural risk.
 - Preserved seven historical DWR rainfall-warning samples as context only; they
   are not current rainfall readings.
 - Updated docs and tests to lock the proxy/no-data contract.
@@ -195,9 +192,6 @@ Current rev02 drought forecast archive patch:
   `normalized_research_panel_summary.json` remains cleared for the dataset
   refresh. Do not restore the old `2025-12` historical map periods unless a new
   source-backed refresh explicitly asks for it.
-- `thaiwater_drought_forecast.json` remains separate current ThaiWater
-  prediction context with issue month `2026-08`, periods `2026-08` through
-  `2027-01`, and 1,710 records. It must not be overwritten by archive work.
 - Province, district, and subdistrict drought pages now share the same archive
   module family: `DroughtForecastArchivePanel`,
   `DroughtForecastArchiveHorizonSelector`,
@@ -222,12 +216,11 @@ Current rev02 drought forecast archive patch:
 - No real delivery guarantee or acknowledgement receipt exists.
 - SEO/noindex decision is not confirmed.
 - Official data source licensing and attribution need audit before live data use.
-- ThaiWater/DWR station-specific live rainfall access still needs audit before
-  importing current 24-hour rainfall readings.
+- DWR or other approved station-specific live rainfall access still needs audit
+  before importing current 24-hour rainfall readings.
 - The rev02 drought forecast archive is static source-backed fixture data, not
   a live prediction service. Any future dataset replacement must preserve the
-  target-month/T+ identity and the ThaiWater separation unless the data model is
-  explicitly changed.
+  target-month/T+ identity unless the data model is explicitly changed.
 
 ## Known Bugs / Limitations
 

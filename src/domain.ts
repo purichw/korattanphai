@@ -11,7 +11,6 @@ import {
   nakhonRatchasimaHierarchy,
   nakhonRatchasimaLocalSubset,
   nakhonRatchasimaMapLayers,
-  nakhonRatchasimaOfficialWaterSnapshot,
   nakhonRatchasimaOpsmoacMonthlyReports,
   nakhonRatchasimaRainfallMonthlyHistory,
   nakhonRatchasimaRainfallObservations24h,
@@ -22,7 +21,6 @@ import {
   nakhonRatchasimaSourceMatrix,
   nakhonRatchasimaSubdistrictRainfallCoverage,
   nakhonRatchasimaTemporalMatrix,
-  nakhonRatchasimaThaiWaterDroughtForecast,
   nationalMonthlyBackbone,
   outcomeAnalytics,
   provinceMonthlyRisk,
@@ -44,7 +42,6 @@ import type {
   NakhonRatchasimaEvidenceRecord,
   NakhonRatchasimaMapLayer,
   NakhonRatchasimaMatrixRow,
-  NakhonRatchasimaOfficialWaterSnapshot,
   NakhonRatchasimaRainfallCoverageRecord,
   NakhonRatchasimaRainfallConfidence,
   NakhonRatchasimaResearchDistrictLatest,
@@ -53,7 +50,6 @@ import type {
   NakhonRatchasimaResearchPanelSummary,
   NakhonRatchasimaResearchSubdistrictLatest,
   NakhonRatchasimaSubdistrict,
-  NakhonRatchasimaThaiWaterDroughtForecast,
   MapLayerRecord,
   ProvinceMonthRisk,
   RiskEvent,
@@ -612,16 +608,8 @@ export function getNakhonRatchasimaMapLayers(): NakhonRatchasimaMapLayer[] {
   return nakhonRatchasimaMapLayers;
 }
 
-export function getNakhonRatchasimaOfficialWaterSnapshot(): NakhonRatchasimaOfficialWaterSnapshot {
-  return nakhonRatchasimaOfficialWaterSnapshot;
-}
-
 export function getNakhonRatchasimaDroughtForecastArchive(): NakhonRatchasimaDroughtForecastArchive {
   return nakhonRatchasimaDroughtForecastArchive;
-}
-
-export function getNakhonRatchasimaThaiWaterDroughtForecast(): NakhonRatchasimaThaiWaterDroughtForecast {
-  return nakhonRatchasimaThaiWaterDroughtForecast;
 }
 
 export function getNakhonRatchasimaSourceRows() {

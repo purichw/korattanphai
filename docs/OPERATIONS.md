@@ -46,8 +46,8 @@ Current facts:
 - No source health monitoring exists.
 - Freshness is fixture text in model/data records.
 - Nakhon Ratchasima rainfall station coverage is static fixture data.
-  `official_water_snapshot.json` is a point-in-time ThaiWater province/station
-  snapshot; no live rainfall readings are ingested into the app yet.
+  No live rainfall readings or province water-provider snapshots are ingested
+  into the app yet.
 
 Operational requirement:
 

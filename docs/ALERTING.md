@@ -76,8 +76,8 @@ needs audit:
 
 - Real source update cadence.
 - Time of last ingest per official source.
-- Station-specific live rainfall access for ThaiWater or DWR EWS before showing
-  24-hour rainfall values.
+- Station-specific live rainfall access for DWR EWS or another approved source
+  before showing 24-hour rainfall values.
 - Whether timestamps should be shown in Thai Buddhist year, Gregorian year, or
   both for official compliance.
 

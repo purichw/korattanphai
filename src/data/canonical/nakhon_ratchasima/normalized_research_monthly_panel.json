@@ -12,7 +12,6 @@
     "historicalPeriodCountBeforeClear": 127,
     "historicalPackedRowCountBeforeClear": 36703,
     "clearedAt": "2026-09-02T14:58:03+07:00",
-    "thaiWaterPredictionRetention": "UNCHANGED_SEPARATE_FIXTURE",
     "retainedPeriodBeforeFinalClear": "2025-12",
     "retainedPackedRowCountBeforeFinalClear": 289,
     "livePeriodCount": 0,
