@@ -51,6 +51,7 @@ should be treated as shared components and reused instead of duplicated.
 | --- | --- |
 | `OfficialMetricCard` | Nakhon-specific metric cards backed by `MetricCard`. |
 | `ProvinceDashboardHeading` | Province heading with source/readiness context. |
+| `ProvinceSituationCards` | Province current-state facts. The overview cockpit uses its compact rail variant so the same hazard, crop, exposed-area, confidence, and provenance semantics fit beside the map without duplicating stat cards. |
 | `DashboardSection` | Standard titled Nakhon dashboard section shell. |
 | `DashboardAccordionSection` | Compact disclosure section for source/detail content. |
 | `DataGovernanceGuardrailList` | Guardrail list explaining readiness/source caveats. |
@@ -58,9 +59,15 @@ should be treated as shared components and reused instead of duplicated.
 | `DroughtPageHeader` | Drought page identity/header. |
 | `SourceTruthNote` | Compact source-of-truth note. |
 | `ResearchStatGrid` | Local grid wrapper for research metric groups. |
-| `DroughtForecastTrendGraph` | Shared drought forecast/historical trend chart. |
+| `DroughtForecastTrendGraph` | Shared drought forecast/historical trend chart. Accepts an active T+ horizon so the archive selector can highlight the matching point without changing ThaiWater forecast semantics. |
 | `ResearchAreaForecastPanel` | District/subdistrict forecast panel. |
-| `DroughtForecastArchivePanel` | Shared historical drought forecast archive module for province, district, and subdistrict drought pages. It takes the selected target month plus T+ horizon and never fabricates missing vintage data. |
+| `DroughtCompactForecastWorkspace` | Shared compact drought forecast workspace used by province, district, and subdistrict drought surfaces. Owns the primary T+ selector, context row, forecast KPI strip, chart card, map card, and detail disclosure so every level reads the same target month + horizon state. |
+| `DroughtForecastWorkspaceContext` | Shared selected-horizon context row for target month, issue month, scope, and archive coverage. |
+| `DroughtForecastWorkspaceKpiStrip` | Shared compact KPI strip for archive status counts. Keeps no-risk, moderate, high, and missing/out-of-scope values separated and source-aware. |
+| `DroughtForecastWorkspaceChart` | Shared chart card that shows the ThaiWater 6-month trend and highlights the T+ slot selected in the archive workspace. |
+| `DroughtForecastWorkspaceMapCard` | Shared local map card for province, district, and subdistrict forecast archive views. Keeps the existing `NakhonRatchasimaLocalMap` behavior and forecast archive map filters. |
+| `DroughtForecastNarrativeDetail` | Shared disclosure content for the longer forecast summary and timeline that should not crowd the compact workspace. |
+| `DroughtForecastArchivePanel` | Shared historical drought forecast archive module for province, district, and subdistrict drought pages. It takes the selected target month plus T+ horizon, never fabricates missing vintage data, and can hide its own horizon selector when nested inside `DroughtCompactForecastWorkspace`. |
 | `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
 | `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`; keeps in-scope, no-risk, moderate-risk, high-risk, out-of-scope, and subdistrict value metrics centered and source-aware. |
 | `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. |
@@ -112,8 +119,12 @@ should be treated as shared components and reused instead of duplicated.
   not duplicate SVG map interaction logic; shared math and labels live in
   `src/mapInteraction.ts`, `src/mapLabels.ts`, and
   `src/useFullscreenTarget.ts`.
-- **Forecast archive:** use `DroughtForecastArchivePanel` above the shared
-  `NakhonRatchasimaLocalMap` on drought pages, and use
+- **Forecast workspace/archive:** use `DroughtCompactForecastWorkspace` as the
+  top drought forecast module for province, district, and subdistrict pages.
+  It owns the single primary `DroughtForecastArchiveHorizonSelector`, passes the
+  selected T+ horizon to the ThaiWater trend chart and forecast archive map, and
+  keeps secondary archive details in a disclosure with
+  `DroughtForecastArchivePanel showHorizonSelector={false}`. Use
   `DroughtForecastArchiveMapFilters` inside the map. The archive selection is
   target month + T+ horizon; changing T+ must not silently switch target month,
   and no-data combinations must stay no-data. The rev02 archive maps numeric

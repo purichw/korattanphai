@@ -35,6 +35,7 @@ import {
   getAnchoredZoomTransform,
   getSharedMapWheelAction,
   interpolateMapTransform,
+  isMapWheelEventFromInteractiveTarget,
   isMapTransformSettled,
   sharedMapButtonZoomStep,
 } from "../mapInteraction";
@@ -937,6 +938,8 @@ export function RiskMap({
   };
 
   const handleMapWheel = (event: WheelEvent) => {
+    if (isMapWheelEventFromInteractiveTarget(event.target)) return;
+
     const baseTransform = wheelTargetTransform.current ?? transformRef.current;
     const action = getSharedMapWheelAction(event, baseTransform.k, minZoom, maxZoom);
 

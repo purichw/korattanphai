@@ -23,6 +23,28 @@ export type SharedMapTransform = SharedMapPoint & {
 export const sharedMapButtonZoomStep = 0.52;
 export const sharedMapWheelSettleRatio = 0.34;
 
+const mapWheelInteractiveTargetSelector = [
+  ".app-select-backdrop",
+  ".app-select-field",
+  ".app-select-menu",
+  ".map-criteria-controls",
+  ".map-layer-picker",
+  ".map-overlay-controls",
+  ".map-preview-card",
+  ".map-tools",
+  ".nr-local-map-criteria",
+  ".nr-map-bottom-modes",
+  ".nr-map-preview-card",
+  "a",
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "[role='combobox']",
+  "[role='listbox']",
+  "[role='option']",
+].join(", ");
+
 const wheelZoomSensitivity = 0.0022;
 const gestureWheelZoomSensitivity = 0.0044;
 const wheelZoomMaxExponent = 0.22;
@@ -64,6 +86,11 @@ export function getSharedMapWheelAction(
   const k = clampNumber(Number((currentZoom * Math.exp(exponent)).toFixed(3)), minZoom, maxZoom);
 
   return { type: "zoom", k };
+}
+
+export function isMapWheelEventFromInteractiveTarget(target: EventTarget | null) {
+  if (typeof Element === "undefined" || !(target instanceof Element)) return false;
+  return Boolean(target.closest(mapWheelInteractiveTargetSelector));
 }
 
 export function getAnchoredZoomTransform<TTransform extends SharedMapTransform>(

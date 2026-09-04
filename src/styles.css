@@ -355,6 +355,26 @@ summary:focus-visible {
   padding: 22px;
 }
 
+@media (min-width: 1181px) {
+  .main-panel:has(.nr-drought-page-header) {
+    position: relative;
+    padding-top: 18px;
+  }
+
+  .main-panel:has(.nr-drought-page-header) > .topbar {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    z-index: 40;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .main-panel:has(.nr-drought-page-header) .nr-drought-page-header {
+    padding-inline-end: 300px;
+  }
+}
+
 .topbar,
 .control-band,
 .hero-panel,
@@ -3322,9 +3342,9 @@ textarea {
 
 .nr-drought-page-header {
   display: grid;
-  gap: 15px;
+  gap: 10px;
   min-width: 0;
-  padding: 6px 4px 14px;
+  padding: 2px 4px 10px;
   border-bottom: 1px dashed rgba(172, 190, 178, 0.9);
 }
 
@@ -3359,7 +3379,7 @@ textarea {
 .nr-drought-page-identity h1 {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(1.75rem, 2.4vw, 2.32rem);
+  font-size: clamp(1.64rem, 2.05vw, 2.08rem);
   font-weight: 950;
   line-height: 1.12;
   letter-spacing: 0;
@@ -3369,9 +3389,9 @@ textarea {
   max-width: 720px;
   margin: 0;
   color: var(--muted);
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   font-weight: 760;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .nr-drought-page-identity small {
@@ -3380,7 +3400,7 @@ textarea {
   gap: 6px;
   align-items: center;
   color: #6b7770;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 820;
   line-height: 1.35;
 }
@@ -3392,10 +3412,10 @@ textarea {
 .nr-drought-context-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
   margin: 0;
-  padding: 11px 0 0;
+  padding: 8px 0 0;
   border-top: 1px dashed rgba(172, 190, 178, 0.88);
   list-style: none;
 }
@@ -3406,7 +3426,7 @@ textarea {
   align-items: center;
   min-width: 0;
   color: #52645b;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 850;
   line-height: 1.35;
 }
@@ -4865,6 +4885,328 @@ textarea {
   min-width: 0;
 }
 
+.nr-overview-cockpit {
+  display: grid;
+  grid-template-columns: minmax(0, 1.58fr) minmax(360px, 0.86fr);
+  gap: 14px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.nr-overview-cockpit > *,
+.nr-overview-support-grid > * {
+  min-width: 0;
+}
+
+.nr-overview-cockpit-map {
+  display: grid;
+  min-width: 0;
+}
+
+.nr-overview-cockpit-map .nr-dashboard-map-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 100%;
+}
+
+.nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel {
+  min-height: clamp(360px, calc(100svh - 430px), 560px);
+}
+
+.nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-svg {
+  height: clamp(360px, calc(100svh - 430px), 560px);
+}
+
+.nr-overview-summary-rail {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+
+.nr-overview-sheet-handle {
+  display: none;
+}
+
+.nr-overview-summary-rail .nr-dashboard-heading {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 12px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-heading h2 {
+  font-size: clamp(1.35rem, 1.8vw, 1.62rem);
+}
+
+.nr-overview-summary-rail .nr-dashboard-heading p {
+  max-width: none;
+  font-size: 0.78rem;
+  line-height: 1.36;
+}
+
+.nr-overview-summary-rail .nr-dashboard-heading > div:first-child p:not(.eyebrow) {
+  display: none;
+}
+
+.nr-overview-summary-rail .nr-dashboard-update {
+  display: none;
+  min-height: 0;
+  padding: 8px 10px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-update strong {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  font-size: 0.8rem;
+  line-height: 1.24;
+}
+
+.nr-overview-summary-rail .nr-dashboard-update small {
+  display: none;
+}
+
+.nr-overview-summary-rail .nr-dashboard-provenance-legend {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.nr-overview-summary-rail .nr-dashboard-provenance-legend > span {
+  gap: 4px;
+  font-size: 0.66rem;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation {
+  padding: 10px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .nr-dashboard-section-heading {
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-section-heading h2 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.96rem;
+  line-height: 1.22;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .eyebrow {
+  font-size: 0.68rem;
+}
+
+.nr-overview-summary-rail .nr-inline-status {
+  min-height: 0;
+  padding: 4px 8px;
+  font-size: 0.64rem;
+  line-height: 1.2;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation-cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nr-dashboard-situation-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+.nr-dashboard-situation-list > div {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  align-content: center;
+  justify-items: center;
+  min-width: 0;
+  min-height: 78px;
+  padding: 9px 10px 20px;
+  border: 1px solid rgba(188, 205, 195, 0.86);
+  border-radius: 10px;
+  background: #fbfcfb;
+  text-align: center;
+}
+
+.nr-dashboard-situation-list > div:last-child {
+  border-bottom: 1px solid rgba(188, 205, 195, 0.86);
+}
+
+.nr-situation-list-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: rgba(62, 136, 94, 0.1);
+  color: #277a4e;
+}
+
+.nr-dashboard-situation-list .is-watch .nr-situation-list-icon {
+  background: rgba(241, 156, 22, 0.12);
+  color: #d08009;
+}
+
+.nr-dashboard-situation-list .is-good .nr-situation-list-icon {
+  background: rgba(47, 155, 95, 0.12);
+  color: #177447;
+}
+
+.nr-dashboard-situation-list .is-muted .nr-situation-list-icon {
+  background: rgba(145, 158, 150, 0.12);
+  color: var(--muted);
+}
+
+.nr-dashboard-situation-list dt {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.nr-dashboard-situation-list dd {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  min-width: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.nr-dashboard-situation-list dd strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.nr-dashboard-situation-list .is-watch dd strong {
+  color: #c87508;
+}
+
+.nr-dashboard-situation-list .is-good dd strong {
+  color: #177447;
+}
+
+.nr-dashboard-situation-list .is-muted dd strong {
+  color: var(--muted);
+}
+
+.nr-dashboard-situation-list dd small {
+  display: none;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 760;
+  line-height: 1.24;
+}
+
+.nr-dashboard-situation-list .data-provenance-chip {
+  position: absolute;
+  top: 9px;
+  right: 8px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .nr-official-metric {
+  min-height: 78px;
+  padding: 8px 26px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .nr-official-metric .metric-card-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .nr-official-metric .metric-card-label {
+  font-size: 0.68rem;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .nr-official-metric .metric-card-value {
+  font-size: 0.86rem;
+}
+
+.nr-overview-summary-rail .nr-dashboard-situation .nr-official-metric .metric-card-detail {
+  font-size: 0.66rem;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-entry {
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 10px;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-meta,
+.nr-overview-summary-rail .nr-forecast-archive-link {
+  grid-column: 1 / -1;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: stretch;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-meta div {
+  min-width: 0;
+  padding: 7px 8px;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-copy h2 {
+  font-size: 0.94rem;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-copy p:not(.eyebrow) {
+  display: none;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.72rem;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-meta dt {
+  font-size: 0.62rem;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-meta dd {
+  font-size: 0.76rem;
+}
+
+.nr-overview-summary-rail .nr-forecast-archive-link {
+  justify-self: stretch;
+}
+
+.nr-overview-support-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.nr-overview-support-grid .nr-data-readiness-section {
+  margin-top: 0;
+}
+
 .nr-drought-dashboard {
   display: grid;
   gap: 12px;
@@ -4906,6 +5248,446 @@ textarea {
 
 .nr-drought-dashboard .nr-follow-up-section .nr-research-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.operational-filters.is-drought-workspace-filter {
+  padding: 8px 10px;
+}
+
+.operational-filters.is-drought-workspace-filter .operational-filter-fields {
+  gap: 8px;
+}
+
+.operational-filters.is-drought-workspace-filter .app-select-field {
+  gap: 4px;
+}
+
+.operational-filters.is-drought-workspace-filter .app-select-label {
+  font-size: 0.72rem;
+}
+
+.operational-filters.is-drought-workspace-filter .app-select-trigger {
+  min-height: 34px;
+  padding-block: 6px;
+}
+
+.operational-filters.is-drought-workspace-filter .context-chip {
+  min-height: 44px;
+  padding-block: 6px;
+}
+
+.nr-drought-compact-workspace {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 12px;
+  border: 1px solid rgba(178, 195, 184, 0.92);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 252, 249, 0.98));
+  box-shadow: var(--shadow);
+}
+
+.nr-drought-workspace-head {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+  min-width: 0;
+  padding-inline-end: 4px;
+}
+
+.nr-drought-workspace-head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.06rem, 1.26vw, 1.28rem);
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.nr-drought-workspace-head p:not(.eyebrow) {
+  max-width: 860px;
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 760;
+  line-height: 1.32;
+}
+
+.nr-drought-workspace-body {
+  display: grid;
+  grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
+  grid-template-areas:
+    "horizon horizon"
+    "context context"
+    "map kpis"
+    "map chart"
+    "details details";
+  gap: 8px;
+  min-width: 0;
+}
+
+.nr-drought-workspace-horizon {
+  grid-area: horizon;
+  min-width: 0;
+}
+
+.nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button {
+  min-height: 42px;
+  padding: 5px 6px;
+}
+
+.nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button strong {
+  font-size: 0.8rem;
+}
+
+.nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button span {
+  font-size: 0.6rem;
+}
+
+.nr-drought-workspace-context {
+  grid-area: context;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(188, 205, 195, 0.86);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.nr-drought-workspace-context > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 7px;
+  align-content: center;
+  min-width: 0;
+  min-height: 52px;
+  padding: 7px 10px;
+  border-inline-end: 1px solid rgba(188, 205, 195, 0.72);
+}
+
+.nr-drought-workspace-context > div:last-child {
+  border-inline-end: 0;
+}
+
+.nr-drought-workspace-context-icon,
+.nr-drought-workspace-kpi-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(47, 128, 95, 0.1);
+  color: #207452;
+}
+
+.nr-drought-workspace-context-icon {
+  grid-row: span 2;
+  width: 28px;
+  height: 28px;
+}
+
+.nr-drought-workspace-context dt,
+.nr-drought-workspace-kpis dt {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+.nr-drought-workspace-context dd,
+.nr-drought-workspace-kpis dd {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+}
+
+.nr-drought-workspace-context strong,
+.nr-drought-workspace-kpis strong {
+  min-width: 0;
+  white-space: nowrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 950;
+  line-height: 1.18;
+}
+
+.nr-drought-workspace-context small,
+.nr-drought-workspace-kpis small {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 760;
+  line-height: 1.25;
+}
+
+.nr-drought-workspace-main {
+  display: contents;
+}
+
+.nr-drought-workspace-chart-card,
+.nr-drought-workspace-map-card {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  min-height: 100%;
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid rgba(178, 195, 184, 0.84);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.nr-drought-workspace-chart-card {
+  grid-area: chart;
+  align-content: start;
+}
+
+.nr-drought-workspace-map-card {
+  grid-area: map;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.nr-drought-workspace-map-card .nr-local-map-criteria.is-forecast-archive-controls {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  right: 98px;
+  max-width: min(600px, calc(100% - 116px));
+}
+
+.nr-drought-workspace-card-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.nr-drought-workspace-card-heading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 950;
+  line-height: 1.24;
+}
+
+.nr-drought-workspace-card-heading span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 760;
+  line-height: 1.28;
+}
+
+.nr-drought-workspace-chart-card .nr-forecast-line-graph {
+  min-height: 100%;
+}
+
+.nr-drought-workspace-chart-card .nr-forecast-line-svg {
+  min-height: 186px;
+}
+
+.nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-panel {
+  min-height: clamp(292px, calc(100svh - 565px), 430px);
+}
+
+.nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-svg {
+  height: clamp(292px, calc(100svh - 565px), 430px);
+}
+
+.nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-map-card .nr-map-panel {
+  min-height: clamp(270px, calc(100svh - 590px), 390px);
+}
+
+.nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-map-card .nr-map-svg {
+  height: clamp(270px, calc(100svh - 590px), 390px);
+}
+
+.nr-drought-workspace-kpis {
+  grid-area: kpis;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid rgba(188, 205, 195, 0.86);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.nr-drought-workspace-kpis > div {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 7px;
+  align-content: center;
+  min-width: 0;
+  min-height: 64px;
+  padding: 8px 25px 8px 10px;
+  border-inline-end: 1px solid rgba(188, 205, 195, 0.72);
+}
+
+.nr-drought-workspace-kpis > div:last-child {
+  border-inline-end: 0;
+}
+
+.nr-drought-workspace-kpi-icon {
+  grid-row: span 2;
+  width: 26px;
+  height: 26px;
+}
+
+.nr-drought-workspace-kpis .data-provenance-chip {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+}
+
+.nr-drought-workspace-kpis .is-good strong,
+.nr-drought-workspace-kpis .is-info strong {
+  color: #197447;
+}
+
+.nr-drought-workspace-kpis .is-watch .nr-drought-workspace-kpi-icon,
+.nr-drought-workspace-kpis .is-watch strong {
+  color: #c87508;
+}
+
+.nr-drought-workspace-kpis .is-danger .nr-drought-workspace-kpi-icon,
+.nr-drought-workspace-kpis .is-danger strong {
+  color: #bf3434;
+}
+
+.nr-drought-workspace-kpis .is-muted .nr-drought-workspace-kpi-icon,
+.nr-drought-workspace-kpis .is-muted strong {
+  color: var(--muted);
+}
+
+.nr-drought-workspace-kpis .is-watch .nr-drought-workspace-kpi-icon {
+  background: rgba(241, 156, 22, 0.12);
+}
+
+.nr-drought-workspace-kpis .is-danger .nr-drought-workspace-kpi-icon {
+  background: rgba(214, 69, 69, 0.1);
+}
+
+.nr-drought-workspace-kpis .is-muted .nr-drought-workspace-kpi-icon {
+  background: rgba(145, 158, 150, 0.12);
+}
+
+.nr-drought-workspace-details {
+  grid-area: details;
+  min-width: 0;
+}
+
+.nr-drought-workspace-details > summary {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid rgba(178, 195, 184, 0.86);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #1d654b;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  list-style: none;
+}
+
+.nr-drought-workspace-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nr-drought-workspace-details[open] > summary svg {
+  transform: rotate(45deg);
+}
+
+.nr-drought-workspace-details-body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  margin-top: 10px;
+}
+
+.nr-drought-workspace-detail-panel {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(178, 195, 184, 0.8);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.nr-drought-workspace-detail-panel h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 950;
+  line-height: 1.24;
+}
+
+.nr-drought-workspace-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.36fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.nr-drought-workspace-detail-grid .nr-forecast-summary-panel {
+  min-width: 0;
+}
+
+.nr-drought-workspace-details .nr-forecast-archive-mode-section {
+  box-shadow: none;
+}
+
+.nr-forecast-point-group.is-active .nr-drought-forecast-point {
+  filter: drop-shadow(0 0 0.35rem rgba(25, 116, 71, 0.34));
+  stroke-width: 5.5;
+}
+
+.nr-forecast-point-group.is-active .nr-drought-forecast-point-label {
+  font-size: 17px;
+}
+
+.nr-forecast-timeline li.is-active {
+  border-color: rgba(47, 125, 91, 0.72);
+  background: #eaf7ef;
+  box-shadow: inset 0 3px 0 #2f7d5b;
+}
+
+.nr-drought-secondary-grid,
+.nr-area-secondary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.56fr) minmax(320px, 0.44fr);
+  gap: 12px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.nr-drought-secondary-grid > *,
+.nr-area-secondary-grid > * {
+  min-width: 0;
+  min-height: 100%;
+}
+
+.nr-subdistrict-secondary-grid {
+  grid-template-columns: minmax(320px, 0.42fr) minmax(0, 0.58fr);
 }
 
 @media (max-width: 1360px) {
@@ -7506,16 +8288,125 @@ textarea {
   }
 
   .sidebar {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) 56px;
+    gap: 12px;
+    align-items: center;
     height: auto;
+    padding: max(12px, env(safe-area-inset-top)) 22px 12px;
+    box-shadow: 0 12px 22px rgba(12, 25, 20, 0.18);
   }
 
-  .primary-nav {
-    display: grid;
+  .brand-lockup.is-logo-only {
+    order: 2;
+    justify-self: center;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .brand-lockup.is-logo-only .brand-mark {
+    width: 68px;
+    margin: 0;
+  }
+
+  .mobile-menu-toggle {
+    order: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    min-height: 48px;
+    padding: 0;
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: #edf6f0;
+  }
+
+  .mobile-account-slot {
+    order: 3;
+    display: block;
+    justify-self: end;
+  }
+
+  .mobile-account-slot .account-trigger {
+    width: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 0;
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: #edf6f0;
+  }
+
+  .mobile-account-slot .account-trigger > svg:first-child {
+    color: #edf6f0;
+  }
+
+  .mobile-account-slot .account-trigger-copy,
+  .mobile-account-slot .account-trigger-chevron {
+    display: none;
+  }
+
+  .mobile-account-slot .account-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: block;
+    background: rgba(9, 24, 18, 0.22);
+  }
+
+  .mobile-account-slot .account-menu-popover {
+    position: fixed;
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 120;
+    width: auto;
+    max-height: min(74dvh, 600px);
+    padding: 8px max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    border-radius: 14px;
+    box-shadow:
+      0 -1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 -20px 44px rgba(12, 25, 20, 0.24);
+  }
+
+  .sidebar .primary-nav {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 22px;
+    left: 22px;
     grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    max-height: min(58dvh, 420px);
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius);
+    background: #17251f;
+    box-shadow: 0 16px 34px rgba(12, 25, 20, 0.32);
+  }
+
+  .sidebar.mobile-menu-open .primary-nav {
+    display: grid;
   }
 
   .sidebar-note {
+    display: none;
+  }
+
+  .main-panel {
+    padding: 18px 22px 22px;
+  }
+
+  .topbar {
     display: none;
   }
 
@@ -7576,6 +8467,66 @@ textarea {
 
   .nr-dashboard-situation-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nr-overview-cockpit {
+    grid-template-columns: minmax(0, 0.58fr) minmax(300px, 0.42fr);
+    gap: 12px;
+  }
+
+  .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel {
+    min-height: clamp(430px, 48svh, 610px);
+  }
+
+  .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-svg {
+    height: clamp(430px, 48svh, 610px);
+  }
+
+  .nr-overview-summary-rail {
+    gap: 10px;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-heading {
+    padding: 12px;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-heading h2 {
+    font-size: 1.34rem;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nr-overview-support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .nr-drought-workspace-head h2 {
+    font-size: 1.2rem;
+  }
+
+  .nr-drought-workspace-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  }
+
+  .nr-drought-workspace-kpis > div {
+    border-bottom: 1px solid rgba(188, 205, 195, 0.72);
+  }
+
+  .nr-drought-workspace-kpis > div:last-child {
+    border-inline-end: 1px solid rgba(188, 205, 195, 0.72);
+  }
+
+  .nr-drought-workspace-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nr-drought-secondary-grid,
+  .nr-area-secondary-grid,
+  .nr-subdistrict-secondary-grid {
+    grid-template-columns: 1fr;
   }
 
   .nr-forecast-archive-entry {
@@ -8430,6 +9381,160 @@ textarea {
     scroll-snap-align: start;
   }
 
+  .nr-overview-cockpit {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .nr-overview-cockpit-map {
+    order: 1;
+  }
+
+  .nr-overview-cockpit-map .nr-dashboard-map-card {
+    border-radius: 14px;
+  }
+
+  .nr-overview-cockpit-map .nr-dashboard-map-card .nr-dashboard-map-header {
+    display: none;
+  }
+
+  .nr-overview-summary-rail {
+    position: relative;
+    z-index: 3;
+    order: 2;
+    gap: 12px;
+    margin-top: -14px;
+    padding: 18px 12px 12px;
+    overflow: hidden;
+    border: 1px solid rgba(178, 195, 184, 0.88);
+    border-radius: 18px 18px 14px 14px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 -10px 32px rgba(31, 50, 42, 0.12);
+  }
+
+  .nr-overview-sheet-handle {
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    display: block;
+    width: 38px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(99, 120, 110, 0.34);
+    transform: translateX(-50%);
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-heading {
+    gap: 9px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-heading > div:first-child {
+    display: none;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-update {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-provenance-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 0 2px;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation .nr-dashboard-section-heading {
+    margin-bottom: 8px;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list > div {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    align-content: center;
+    justify-items: center;
+    min-height: 132px;
+    padding: 13px 12px 24px;
+    border: 1px solid rgba(188, 205, 195, 0.86);
+    border-radius: 12px;
+    background: #fbfcfb;
+    text-align: center;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list dt {
+    font-size: 0.72rem;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list dd {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list dd strong {
+    font-size: 1rem;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list dd small {
+    display: block;
+    font-size: 0.7rem;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation-list .data-provenance-chip {
+    top: 10px;
+    right: 10px;
+  }
+
+  .nr-overview-summary-rail .nr-dashboard-situation .nr-official-metric {
+    flex: initial;
+    min-height: 132px;
+    padding: 14px 28px;
+    scroll-snap-align: none;
+  }
+
+  .nr-overview-summary-rail .nr-forecast-archive-entry {
+    padding: 11px;
+    border-radius: 12px;
+  }
+
+  .nr-overview-summary-rail .nr-forecast-archive-copy p:not(.eyebrow) {
+    display: -webkit-box;
+  }
+
+  .nr-overview-support-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
   .nr-forecast-archive-entry {
     padding: 12px;
     gap: 10px;
@@ -8483,6 +9588,144 @@ textarea {
 
   .nr-drought-dashboard {
     gap: 10px;
+  }
+
+  .nr-workspace.is-drought-route > .nr-drought-dashboard,
+  .nr-workspace.is-drought-route > .nr-area-template {
+    order: 2;
+  }
+
+  .nr-workspace.is-drought-route > .operational-filters.is-drought-workspace-filter {
+    order: 3;
+  }
+
+  .nr-drought-compact-workspace {
+    gap: 10px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .nr-drought-workspace-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .nr-drought-workspace-head h2 {
+    font-size: 1.08rem;
+  }
+
+  .nr-drought-workspace-head p:not(.eyebrow) {
+    font-size: 0.76rem;
+    line-height: 1.36;
+  }
+
+  .nr-drought-workspace-body {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "horizon"
+      "context"
+      "kpis"
+      "chart"
+      "map"
+      "details";
+  }
+
+  .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    overflow: hidden;
+    scroll-snap-type: none;
+  }
+
+  .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button {
+    min-width: 0;
+    min-height: 48px;
+    padding: 6px 3px;
+  }
+
+  .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button strong {
+    font-size: 0.72rem;
+  }
+
+  .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button span {
+    font-size: 0.54rem;
+  }
+
+  .nr-drought-workspace-context {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nr-drought-workspace-context > div {
+    min-height: 54px;
+    border-inline-end: 1px solid rgba(188, 205, 195, 0.72);
+    border-bottom: 1px solid rgba(188, 205, 195, 0.72);
+  }
+
+  .nr-drought-workspace-context > div:nth-child(2n) {
+    border-inline-end: 0;
+  }
+
+  .nr-drought-workspace-context > div:nth-child(n + 3) {
+    border-top: 0;
+  }
+
+  .nr-drought-workspace-context > div:nth-child(n + 3),
+  .nr-drought-workspace-context > div:last-child {
+    border-bottom: 0;
+  }
+
+  .nr-drought-workspace-kpis {
+    grid-template-columns: repeat(5, minmax(118px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .nr-drought-workspace-kpis > div {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    min-height: 70px;
+    padding: 8px 24px 8px 10px;
+    text-align: left;
+    scroll-snap-align: start;
+  }
+
+  .nr-drought-workspace-kpi-icon {
+    grid-row: span 2;
+  }
+
+  .nr-drought-workspace-kpis dd {
+    justify-items: start;
+  }
+
+  .nr-drought-workspace-chart-card,
+  .nr-drought-workspace-map-card {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .nr-drought-workspace-card-heading {
+    align-items: start;
+  }
+
+  .nr-drought-workspace-card-heading h3 {
+    font-size: 0.92rem;
+  }
+
+  .nr-drought-workspace-chart-card .nr-forecast-line-svg {
+    min-height: 214px;
+  }
+
+  .nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-panel.has-criteria-map {
+    min-height: 0;
+  }
+
+  .nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-panel.has-criteria-map .nr-map-svg {
+    height: min(42svh, 356px);
+    min-height: 286px;
+  }
+
+  .nr-drought-workspace-details > summary {
+    width: 100%;
   }
 
   .nr-drought-dashboard .nr-dashboard-map-card .nr-map-panel {
@@ -8692,6 +9935,15 @@ textarea {
   .nr-subdistrict-map-status-row .nr-area-map-section .nr-map-panel.has-criteria-map .nr-map-svg {
     height: min(72svh, 620px);
     min-height: 548px;
+  }
+
+  .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map .nr-map-svg {
+    height: min(36svh, 332px);
+    min-height: 286px;
+  }
+
+  .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map {
+    min-height: 0;
   }
 
   .nr-map-panel.has-criteria-map .nr-map-controls {
