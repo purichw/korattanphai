@@ -11,3 +11,5 @@ artifacts/
 .vercel
 .env
 .env.local
+.env.*
+!.env.example

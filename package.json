@@ -25,6 +25,7 @@
     "test:e2e:managed": "node scripts/run-playwright.mjs --managed"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.115.0",
     "lucide-react": "^0.468.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

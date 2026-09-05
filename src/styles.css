@@ -216,6 +216,36 @@ summary:focus-visible {
   font-size: 1rem;
 }
 
+.login-password-field { position: relative; min-width: 0; }
+.login-password-field input { padding-right: 52px; }
+.login-password-toggle {
+  position: absolute;
+  right: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+}
+.login-form > .primary-button { min-height: 46px; }
+.login-form :disabled { cursor: wait; opacity: 0.65; }
+.account-menu-profile span { min-width: 0; overflow-wrap: anywhere; }
+.account-menu .account-trigger { max-width: 300px; }
+.auth-session-error {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 12px 24px;
+  background: #fff5f3;
+  color: var(--red);
+  border-bottom: 1px solid var(--line);
+}
+
 .form-error {
   padding: 9px 11px;
   border: 1px solid rgba(184, 59, 63, 0.28);
@@ -2134,13 +2164,17 @@ textarea {
   overflow-y: auto;
 }
 
-.nr-map-panel.has-preview {
+.nr-map-panel.has-preview,
+.nr-map-panel:has(.nr-local-map-select.is-open) {
   z-index: 140;
 }
 
 .nr-dashboard-section:has(.nr-map-panel.has-preview),
 .nr-dashboard-map-card:has(.nr-map-panel.has-preview),
-.nr-subdistrict-map-status-row:has(.nr-map-panel.has-preview) {
+.nr-subdistrict-map-status-row:has(.nr-map-panel.has-preview),
+.nr-dashboard-section:has(.nr-local-map-select.is-open),
+.nr-dashboard-map-card:has(.nr-local-map-select.is-open),
+.nr-subdistrict-map-status-row:has(.nr-local-map-select.is-open) {
   position: relative;
   z-index: 140;
   overflow: visible;
@@ -3862,15 +3896,13 @@ textarea {
   stroke-width: 1.4;
 }
 
-.nr-drought-forecast-threshold-label {
-  fill: #8f3d31;
-  font-size: 13px;
-  font-weight: 950;
-  text-anchor: end;
+.nr-drought-forecast-legend .nr-drought-forecast-threshold-label {
+  color: #8f3d31;
+  white-space: normal;
 }
 
-.nr-drought-forecast-threshold-label.is-start {
-  text-anchor: start;
+.nr-drought-forecast-threshold-label .is-threshold {
+  flex-shrink: 0;
 }
 
 .nr-drought-forecast-line-segment {
@@ -4335,6 +4367,8 @@ textarea {
 
 .nr-forecast-archive-horizon-tabs button {
   display: grid;
+  align-content: center;
+  justify-items: center;
   gap: 2px;
   min-width: 0;
   min-height: 48px;
@@ -5727,19 +5761,11 @@ textarea {
 }
 
 .nr-drought-workspace-details > summary {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  min-height: 38px;
-  padding: 8px 12px;
-  border: 1px solid rgba(178, 195, 184, 0.86);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.86);
-  color: #1d654b;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
   cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 900;
+  font-size: 14px;
+  text-align: center;
   list-style: none;
 }
 
@@ -5748,7 +5774,11 @@ textarea {
 }
 
 .nr-drought-workspace-details[open] > summary svg {
-  transform: rotate(45deg);
+  transform: rotate(180deg);
+}
+
+.nr-drought-workspace-details > summary svg {
+  flex-shrink: 0;
 }
 
 .nr-drought-workspace-details-body {
@@ -6817,8 +6847,12 @@ textarea {
   flex-direction: column;
   gap: 6px;
   padding: 5px;
-  border-color: rgba(158, 178, 166, 0.68);
+  border-color: transparent;
   border-radius: 10px;
+}
+
+.nr-map-controls .icon-button {
+  border-color: transparent;
 }
 
 .nr-local-map-criteria {
@@ -6852,6 +6886,10 @@ textarea {
   grid-template-columns: minmax(178px, 0.72fr) minmax(178px, 0.72fr) auto;
   right: auto;
   max-width: min(720px, calc(100% - 104px));
+}
+
+.nr-map-panel .nr-local-map-criteria:has(.app-select-field.is-open) {
+  z-index: 240;
 }
 
 .nr-local-map-select {
@@ -9038,10 +9076,6 @@ textarea {
     -webkit-overflow-scrolling: touch;
   }
 
-  .nr-map-panel.has-criteria-map .nr-local-map-criteria:has(.app-select-field.is-open) {
-    z-index: 240;
-  }
-
   .nr-map-panel.has-criteria-map .nr-local-map-criteria::after {
     content: "";
     flex: 0 0 1px;
@@ -10089,7 +10123,7 @@ textarea {
     flex-direction: row;
     gap: 0;
     padding: 4px;
-    border-color: rgba(158, 178, 166, 0.6);
+    border-color: transparent;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.9);
     box-shadow:
@@ -10111,7 +10145,7 @@ textarea {
   }
 
   .nr-map-panel.has-criteria-map .nr-map-controls .icon-button + .icon-button {
-    border-left: 1px solid rgba(178, 195, 184, 0.68);
+    border-left: 1px solid transparent;
     border-radius: 0;
   }
 

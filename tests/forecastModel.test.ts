@@ -1,13 +1,35 @@
-import { expect, it } from "vitest";
+import { act, cleanup, renderHook } from "@testing-library/react";
+import { afterEach, expect, it } from "vitest";
 import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import {
   forecastArchiveHorizonValues, forecastArchiveSummaryForSelection, forecastArchiveRiskLabel,
   forecastArchiveRecordForSubdistrict, forecastArchiveTrendMonthsForSelection,
-  pathWithForecastSelection,
+  pathWithForecastSelection, useDroughtForecastArchiveSelection,
 } from "../src/components/nakhon-ratchasima/forecastModel";
 
 const archive = archiveJson as unknown as NakhonRatchasimaDroughtForecastArchive;
+
+afterEach(() => {
+  cleanup();
+  window.history.replaceState({}, "", "/");
+});
+
+it.each([undefined, 1] as const)("shows only month/year in shared target options with fixed horizon %s", (fixedHorizon) => {
+  window.history.replaceState({}, "", "/drought?target=2025-12&horizon=4");
+  const { result } = renderHook(() => useDroughtForecastArchiveSelection(archive, fixedHorizon));
+  expect(result.current.targetMonthOptions).toEqual([...archive.targetMonths].reverse().map((month) => ({
+    value: month.period,
+    label: month.labelTh,
+    group: "เดือนเป้าหมาย",
+  })));
+
+  act(() => result.current.changeTargetMonth("2025-11"));
+  expect(result.current.selectedMonth?.period).toBe("2025-11");
+  expect(result.current.selectedHorizon).toBe(fixedHorizon ?? 4);
+  expect(new URLSearchParams(window.location.search).get("target")).toBe("2025-11");
+  expect(new URLSearchParams(window.location.search).get("horizon")).toBe(String(fixedHorizon ?? 4));
+});
 
 it("carries a forecast selection through area routes without losing other query or hash state", () => {
   expect(pathWithForecastSelection("/dan-khun-thot/t-300806?view=area#history", "2025-09", 4))

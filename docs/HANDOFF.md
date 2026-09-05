@@ -17,6 +17,45 @@ state in `localStorage`.
 
 ## Recent Changes
 
+Combined Supabase Auth and UI release preparation (2026-09-05):
+
+- The user now authorizes commit, push and production deployment of both
+  tasks on `fix/nr-map-zoom-performance`. No merge into `main` or database
+  mutation is implied. This supersedes the earlier local-only authorization.
+- Includes the shared month-only options, unclipped map dropdowns, borderless
+  map controls, compact fullscreen filters, centered horizon tabs, chart label
+  spacing, formal stat descriptions and accepted duplicate-panel removal.
+- Unit tests: 96 passed. Protected build, exposure scan, bundle budgets and
+  generated-data drift check passed; production dependency audit found zero
+  vulnerabilities. Build: `tmp-snapshots/release-combined-auth-ui`.
+- Combined protected-build E2E: 65 passed, 6 existing skips, one mobile
+  drilldown flow exceeded its 60-second test budget. The identical test/build
+  passed two isolated runs (48.1s and 25.8s), without timeout or code changes.
+  Evidence: `tmp-snapshots/release-combined-e2e` and
+  `tmp-snapshots/release-drilldown-recheck`. Full CI is still required before
+  promotion; this is not a clean single-run full-suite result.
+- Hosted real-account verification remains separate from local mock evidence.
+- Vercel inspection found both Supabase variables in Production only, not
+  Preview. Use `vercel --prod --skip-domain --yes` to prepare a candidate with
+  actual configuration, verify it, then promote without rebuilding fixtures.
+- Pre-release recovery: `dpl_DURL6bv3X7RmiPPcmCTPwVVSM127`, serving
+  `https://korattanphai.vercel.app` before this release. No rollback performed.
+
+Supabase Auth implementation details:
+
+- Email/password login now uses the Supabase SDK, not demo usernames. Shared
+  client configuration, session loading/refresh, stale-result guards, safe
+  logout errors and internal-only return paths are covered by local tests.
+- Account identity is the Supabase name/email; persona is display context only.
+- Only the retired demo-login key is cleared. Static data remains public and
+  no SQL, RLS or forecast provider is changed.
+- Exact HTTPS Supabase origin added to CSP. Missing config denies entry;
+  privileged keys fail the build. Production exposure checks remain active.
+- Browser fixtures mock Supabase only on localhost. Real credentials are now
+  required for deployment smoke; GitHub secrets are not set by this change.
+- Local mocked auth checks do not verify the user's account, RLS or providers.
+  `docs/AUTH_SETUP.md` contains the Preview checklist and SMTP recovery caveat.
+
 Compact dashboard release checkpoint (2026-09-05):
 
 - User authorized commit, push and production deployment of the Home v4 and
@@ -383,8 +422,9 @@ Current rev02 drought forecast archive patch:
 ## Open Risks
 
 - The app is not operationally safe for real emergency alerting yet.
-- No real auth, backend, database, notification provider, or live data ingestion
-  exists.
+- Supabase authentication is implemented; real-account checks and user-reported
+  backend settings remain unverified. No database data provider, notification
+  delivery or live data ingestion is implemented.
 - Vite build has a chunk-size warning due bundled canonical JSON.
 - Map fetch has a loading state but no explicit error state.
 - No real delivery guarantee or acknowledgement receipt exists.

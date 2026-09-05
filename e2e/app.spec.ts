@@ -1,6 +1,4 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
-
-const smokeUsername = "pointy";
+import { expect, test, type Locator, type Page, fillAuthForm, authTestUser } from "./fixtures";
 
 async function openPrimaryNav(page: Page) {
   const menuToggle = page.getByRole("button", { name: "เปิดเมนูหลัก" });
@@ -18,10 +16,10 @@ async function chooseSection(page: Page, name: string) {
   await nav.getByRole("button", { name, exact: true }).click();
 }
 
-async function loginAs(page: Page, username: string) {
+async function loginAs(page: Page) {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
-  await page.getByLabel("ชื่อผู้ใช้").fill(username);
+  await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
 }
@@ -244,34 +242,26 @@ async function clickSvgPathFillPoint(page: Page, locator: Locator, useTouch: boo
   }
 }
 
-test("login route accepts only the two allowed usernames without listing them", async ({ page }) => {
+test("login rejects invalid credentials and uses the authenticated identity", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
   await expect(page.getByText("Pointy")).toHaveCount(0);
   await expect(page.getByText("Somsak")).toHaveCount(0);
-
-  await page.getByLabel("ชื่อผู้ใช้").fill("someone");
+  await fillAuthForm(page, "wrong-password");
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("alert")).toContainText("ไม่พบชื่อผู้ใช้นี้");
-  await expect(page.getByText("Pointy")).toHaveCount(0);
-  await expect(page.getByText("Somsak")).toHaveCount(0);
-
-  await page.getByLabel("ชื่อผู้ใช้").fill("pointy");
+  await expect(page.getByRole("alert")).toContainText("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+  await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ เจ้าหน้าที่เกษตรจังหวัด/ })).toBeVisible();
-
+  await expect(page.getByRole("button", { name: `บัญชีผู้ใช้ ${authTestUser.user_metadata.full_name}` })).toBeVisible();
   await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
   await page.getByRole("menuitem", { name: /ออกจากระบบ/ }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByLabel("ชื่อผู้ใช้").fill("SOMSAK");
-  await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ เจ้าหน้าที่เกษตรจังหวัด/ })).toBeVisible();
+  await expect(page.getByLabel("อีเมล", { exact: true })).toHaveValue("");
 });
 
 test("Nakhon Ratchasima-only shell opens the provincial overview with nested drought nav", async ({ page }) => {
   test.setTimeout(90_000);
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
 
   await expect(page).toHaveURL((url) => url.pathname === "/");
   await expect(page).toHaveTitle(/Korat Tan Phai/);
@@ -283,7 +273,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.locator(".topbar .secondary-button")).toHaveCount(0);
   await accountTrigger.click();
   const accountMenu = page.getByRole("menu", { name: "บัญชีผู้ใช้" });
-  await expect(accountMenu).toContainText("บัญชีผู้ใช้งาน");
+  await expect(accountMenu).toContainText(authTestUser.email);
   await expect(accountMenu).toContainText("เจ้าหน้าที่เกษตรจังหวัด");
   await expect(accountMenu.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
   await expect(accountMenu).not.toContainText(".demo");
@@ -291,7 +281,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(accountMenu.getByRole("menuitem", { name: /คืนค่าข้อมูลเริ่มต้น/ })).toBeVisible();
   await expect(accountMenu.getByRole("menuitem", { name: /ออกจากระบบ/ })).toBeVisible();
   await accountMenu.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรอำเภอ/ }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้ เจ้าหน้าที่เกษตรอำเภอ/ })).toBeVisible();
+  await expect(page.locator(".account-trigger-copy").filter({ hasText: "มุมมอง: เจ้าหน้าที่เกษตรอำเภอ" }).first()).toBeAttached();
   await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
   await page.getByRole("menuitemradio", { name: /เจ้าหน้าที่เกษตรจังหวัด/ }).click();
   const overviewViewport = page.viewportSize();
@@ -379,7 +369,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(archiveMode).toContainText("142/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง120 ตำบล");
   await mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" }).click();
-  await page.getByRole("option", { name: /เป้าหมาย · ก.ย. 2568/ }).click();
+  await page.getByRole("option", { name: "ก.ย. 2568", exact: true }).click();
   await expect(archiveMode).toContainText("117/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง17 ตำบล");
   await mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" }).click();
@@ -427,7 +417,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
 });
 
 test("removed water route no longer renders the province water page", async ({ page }) => {
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
   await page.goto("/water");
 
   await expect(page.getByRole("heading", { name: "ไม่พบพื้นที่" })).toBeVisible();
@@ -439,7 +429,7 @@ test("removed water route no longer renders the province water page", async ({ p
 
 test("drought forecast archive components are shared across province, district, and subdistrict maps", async ({ page }) => {
   test.setTimeout(60_000);
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
 
   await page.goto("/drought?mapLayer=forecast-archive&horizon=1");
   const provinceWorkspace = page.locator(".nr-drought-compact-workspace.is-province").first();
@@ -477,8 +467,8 @@ test("drought forecast archive components are shared across province, district, 
 });
 
 test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async ({ page }) => {
-  await page.setViewportSize({ width: 1172, height: 960 });
-  await loginAs(page, smokeUsername);
+  await page.setViewportSize({ width: 1440, height: 960 });
+  await loginAs(page);
   await page.goto("/drought?mapLayer=forecast-archive&target=2025-12&horizon=1");
 
   const viewport = page.viewportSize();
@@ -494,6 +484,24 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
   const targetMonthMenu = page.locator(".app-select-menu").last();
   const targetMonthOptions = targetMonthMenu.locator(".app-select-options");
   await expect(targetMonthMenu).toBeVisible();
+  await expect(targetMonthOptions.getByRole("option").first()).toHaveText("ธ.ค. 2568");
+  await expect(targetMonthOptions.locator("small")).toHaveCount(0);
+  await expect(mapCard).toHaveCSS("overflow", "visible");
+  const menuLayering = await targetMonthMenu.evaluate((menu) => {
+    const card = menu.closest(".nr-drought-workspace-map-card")!;
+    const toolbar = menu.closest(".nr-local-map-criteria")!;
+    const legend = card.querySelector(".nr-map-legend")!;
+    const bounds = menu.getBoundingClientRect();
+    const cardBottom = card.getBoundingClientRect().bottom;
+    const x = bounds.left + bounds.width / 2;
+    const y = Math.min(bounds.bottom - 12, cardBottom + 18, innerHeight - 12);
+    return {
+      aboveLegend: Number(getComputedStyle(toolbar).zIndex) > Number(getComputedStyle(legend).zIndex),
+      extendsBeyondCard: y > cardBottom,
+      reachableBeyondCard: menu.contains(document.elementFromPoint(x, y)),
+    };
+  });
+  expect(menuLayering).toEqual({ aboveLegend: true, extendsBeyondCard: true, reachableBeyondCard: true });
 
   const transformBeforeDropdownWheel = await readMapTransform(localSvg, ".nr-map-transform-layer");
   const dropdownScrollBefore = await targetMonthMenu.evaluate((menu) => {
@@ -524,10 +532,14 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
   expect(transformAfterDropdownWheel.k).toBeCloseTo(transformBeforeDropdownWheel.k, 3);
   expect(transformAfterDropdownWheel.x).toBeCloseTo(transformBeforeDropdownWheel.x, 1);
   expect(transformAfterDropdownWheel.y).toBeCloseTo(transformBeforeDropdownWheel.y, 1);
+  await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
+  await expect(page).toHaveURL(/target=2025-11&horizon=1/);
+  await expect(mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" })).toContainText("พ.ย. 2568");
+  await expect(mapCard).toHaveCSS("overflow", "hidden");
 });
 
 test("custom dropdowns are app-rendered and keyboard operable", async ({ page }) => {
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
   await expect(page.locator(".nr-forecast-overview .control-band")).toBeVisible();
 
   await expect(page.locator("select")).toHaveCount(0);
@@ -551,7 +563,7 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
   await expect(menu).toBeVisible();
   await expect(menu.getByRole("option").first()).toBeVisible();
   await expect(menu).toHaveCSS("font-family", /Google Sans/);
-  await expect(menu).toContainText("เป้าหมาย · ธ.ค. 2568");
+  await expect(menu.getByRole("option", { name: "ธ.ค. 2568", exact: true })).toBeVisible();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect(month).toContainText("พ.ย. 2568");
@@ -578,7 +590,7 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
 });
 
 test.skip("national map preview, zoom, and pan keep Thailand inside the viewport", async ({ page }, testInfo) => {
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
 
   await chooseSection(page, "แผนที่");
   const mapShell = page.locator(".map-page-grid .map-shell").first();
@@ -686,7 +698,7 @@ test.skip("national map preview, zoom, and pan keep Thailand inside the viewport
 });
 
 test.skip("national map preview stays actionable and opens the supported province workspace", async ({ page }, testInfo) => {
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
 
   await chooseSection(page, "แผนที่");
   const mapShell = page.locator(".map-page-grid .map-shell").first();
@@ -717,7 +729,7 @@ test.skip("national map preview stays actionable and opens the supported provinc
 test("Nakhon Ratchasima province drill-down preserves code-based evidence and no-data wording", async ({ page }) => {
   test.setTimeout(60_000);
 
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
   await expect(page).toHaveURL((url) => url.pathname === "/");
   await expect(page.getByRole("heading", { name: "พืชที่ได้รับผลกระทบ" })).toHaveCount(0);
   await expectProvinceOverviewHeading(page);
@@ -856,7 +868,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
 test("Nakhon Ratchasima local map preview actions stay layered and depth-aware", async ({ page }, testInfo) => {
   test.setTimeout(90_000);
 
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
   await page.goto("/");
 
   const isMobile = testInfo.project.name === "mobile";
@@ -1002,7 +1014,7 @@ test("Nakhon Ratchasima local map zoom controls do not re-render per animation f
   if (testInfo.project.name === "mobile") test.skip(true, "React commit instrumentation is covered on desktop.");
 
   await installReactCommitCounter(page);
-  await loginAs(page, smokeUsername);
+  await loginAs(page);
   await page.goto("/");
 
   const localMap = page.locator(".nr-map-panel").first();

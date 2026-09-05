@@ -51,17 +51,17 @@ describe("persisted state recovery", () => {
 });
 
 describe("unavailable browser storage", () => {
-  it("keeps login and logout usable even when all storage operations throw", async () => {
+  it("retains preferences in memory when storage operations throw and clears only legacy login", async () => {
     vi.resetModules();
     const auth = await import("../src/auth");
+    const storage = await import("../src/browserStorage");
     vi.spyOn(localStorage, "getItem").mockImplementation(() => { throw new DOMException("denied", "SecurityError"); });
     vi.spyOn(localStorage, "setItem").mockImplementation(() => { throw new DOMException("full", "QuotaExceededError"); });
     vi.spyOn(localStorage, "removeItem").mockImplementation(() => { throw new DOMException("denied", "SecurityError"); });
-    expect(auth.readStoredLogin()).toBeNull();
-    expect(auth.writeStoredLogin(auth.loginUsers[0])).toBe(false);
-    expect(auth.readStoredLogin()?.id).toBe("pointy");
-    expect(auth.clearStoredLogin()).toBe(false);
-    expect(auth.readStoredLogin()).toBeNull();
+    expect(storage.readBrowserStorage("preference")).toBeNull();
+    expect(storage.writeBrowserStorage("preference", "retained")).toBe(false);
+    expect(auth.clearLegacyLogin()).toBe(false);
+    expect(storage.readBrowserStorage("preference")).toBe("retained");
   });
 });
 

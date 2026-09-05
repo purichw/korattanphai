@@ -22,7 +22,7 @@ import {
   Waves,
   X,
 } from "lucide-react";
-import { type LoginUser } from "./auth";
+import { getAccountDisplayName, type LoginUser } from "./auth";
 import { DataProvenanceChip, DataProvenanceLegend, dataProvenanceChipKindFromText } from "./components/DataProvenanceChip";
 import { NakhonRatchasimaWorkspaceSummary } from "./components/NakhonRatchasimaWorkspaceSummary";
 import { NakhonRatchasimaWorkspace } from "./components/NakhonRatchasimaWorkspace";
@@ -182,6 +182,7 @@ function AccountControl({
   onPersonaChange,
   onResetDemo,
   onLogout,
+  signingOut,
 }: {
   loginUser: LoginUser;
   persona: UserPersona;
@@ -190,14 +191,15 @@ function AccountControl({
   onPersonaChange: (personaId: string) => void;
   onResetDemo: () => void;
   onLogout: () => void;
+  signingOut: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const menuId = useId().replaceAll(":", "");
   const roleLabel = labelPersonaRole(persona.role, language);
-  const accountDisplayName = "บัญชีผู้ใช้งาน";
-  const accountLabel = `บัญชีผู้ใช้ ${roleLabel}`;
+  const accountDisplayName = getAccountDisplayName(loginUser);
+  const accountLabel = `บัญชีผู้ใช้ ${accountDisplayName}`;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -245,7 +247,7 @@ function AccountControl({
         <UserRound size={18} aria-hidden="true" />
         <span className="account-trigger-copy">
           <strong>{accountDisplayName}</strong>
-          <small>{roleLabel}</small>
+          <small>มุมมอง: {roleLabel}</small>
         </span>
         <ChevronDown className="account-trigger-chevron" size={17} aria-hidden="true" />
       </button>
@@ -267,13 +269,13 @@ function AccountControl({
               <UserRound size={18} aria-hidden="true" />
               <span>
                 <strong>{accountDisplayName}</strong>
-                <small>{roleLabel}</small>
+                <small>{loginUser.email}</small>
               </span>
             </div>
             <div className="account-menu-divider" role="presentation" />
             <div className="account-menu-section" role="presentation">
-              <span className="account-menu-section-label">บทบาทการใช้งาน</span>
-              <div className="account-role-options" role="group" aria-label="บทบาทการใช้งาน">
+              <span className="account-menu-section-label">มุมมองการแสดงผล</span>
+              <div className="account-role-options" role="group" aria-label="มุมมองการแสดงผล">
                 {accountPersonaOptions.map((user) => {
                   const optionRole = labelPersonaRole(user.role, language);
                   const isSelected = user.id === persona.id;
@@ -313,13 +315,11 @@ function AccountControl({
               type="button"
               className="account-menu-action is-danger"
               role="menuitem"
-              onClick={() => {
-                setIsOpen(false);
-                onLogout();
-              }}
+              disabled={signingOut}
+              onClick={onLogout}
             >
               <LogOut size={16} aria-hidden="true" />
-              <span>ออกจากระบบ</span>
+              <span>{signingOut ? "กำลังออกจากระบบ..." : "ออกจากระบบ"}</span>
             </button>
           </div>
         </>
@@ -331,6 +331,7 @@ function AccountControl({
 export default function AuthenticatedApp(props: {
   loginUser: LoginUser;
   onLogout: () => void;
+  signingOut: boolean;
   path: string;
   onNavigate: (path: string) => void;
 }) {
@@ -343,11 +344,13 @@ export default function AuthenticatedApp(props: {
 function AppShell({
   loginUser,
   onLogout,
+  signingOut,
   path,
   onNavigate,
 }: {
   loginUser: LoginUser;
   onLogout: () => void;
+  signingOut: boolean;
   path: string;
   onNavigate: (path: string) => void;
 }) {
@@ -405,6 +408,7 @@ function AppShell({
             onPersonaChange={(personaId) => dispatch({ type: "setPersona", personaId })}
             onResetDemo={() => dispatch({ type: "resetDemo" })}
             onLogout={onLogout}
+            signingOut={signingOut}
           />
         </div>
         <nav id="primary-navigation" className="primary-nav">
@@ -460,6 +464,7 @@ function AppShell({
               onPersonaChange={(personaId) => dispatch({ type: "setPersona", personaId })}
               onResetDemo={() => dispatch({ type: "resetDemo" })}
               onLogout={onLogout}
+              signingOut={signingOut}
             />
           </div>
         </header>

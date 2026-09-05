@@ -74,7 +74,7 @@
 .is-home-overview .nr-local-map-reset { min-height: 36px; min-width: 30px; padding: 5px; }
 .is-home-overview .nr-local-map-reset span { display: none; }
 .is-home-overview .nr-map-controls { position: absolute; top: 12px; left: 12px; right: auto; display: grid; grid-template-columns: 36px; gap: 4px; width: 36px; max-width: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
-.is-home-overview .nr-map-controls .icon-button { width: 36px; height: 36px; min-height: 36px; min-width: 36px; padding: 6px; border: 1px solid #cbdad4; border-radius: 5px; background: white; }
+.is-home-overview .nr-map-controls .icon-button { width: 36px; height: 36px; min-height: 36px; min-width: 36px; padding: 6px; border: 1px solid transparent; border-radius: 5px; background: white; }
 .is-home-overview .nr-map-panel .nr-map-legend { left: 12px; right: auto; bottom: 10px; width: auto; max-width: calc(100% - 24px); padding: 7px 10px; gap: 8px; border-radius: 8px; justify-content: center; }
 .is-home-overview .nr-map-legend > strong { display: none; }
 .is-home-overview .nr-map-panel .nr-map-legend span { font-size: 11px; }
@@ -199,7 +199,7 @@
   .is-home-overview .nr-dashboard-map-card:has(.nr-local-map-filter-status) { grid-template-rows: 110px minmax(0,1fr); }
   .is-home-overview .nr-dashboard-map-card:has(.nr-local-map-filter-status) .nr-local-map-criteria { top: -69px; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls { top: 10px; left: 10px; bottom: auto; right: auto; }
-  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid #cbdad4; border-radius: 5px; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid transparent; border-radius: 5px; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-map-legend { bottom: 7px; left: 7px; right: 7px; width: auto; max-width: none; margin: 0; padding: 6px; gap: 5px 8px; }
   .is-home-overview .nr-map-panel .nr-map-legend span { font-size: 10px; }
   .is-home-overview .nr-map-preview-card.is-touch { max-height: calc(100% - 12px); padding: 12px 10px; border-radius: 8px; }

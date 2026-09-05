@@ -14,8 +14,7 @@ import {
   MapPin,
   CalendarDays,
   Info,
-  RotateCcw,
-  Maximize2,
+  ChevronDown,
   Sprout,
 } from "lucide-react";
 import { formatThaiNumber, type LocalMapMode, formatPercent, pathForSubdistrictCode, useMediaQuery } from "./workspaceModel";
@@ -32,7 +31,6 @@ import {
   forecastArchiveRecordLabel,
   droughtForecastHasRiskSignal,
   type DroughtForecastWorkspaceTarget,
-  droughtForecastPeakSummary,
   forecastArchiveTrendMonthsForSelection,
   pathWithForecastSelection,
 } from "./forecastModel";
@@ -57,7 +55,7 @@ export function DroughtForecastTrendGraph({
   const compactChart = useMediaQuery("(max-width: 720px)");
   const width = compactChart ? 360 : 720;
   const height = compactChart ? 230 : 300;
-  const padding = { top: 28, right: compactChart ? 20 : 34, bottom: 36, left: compactChart ? 34 : 62 };
+  const padding = { top: 28, right: compactChart ? 20 : 34, bottom: 52, left: compactChart ? 34 : 62 };
   const plotWidth = width - padding.left - padding.right;
   const plotHeight = height - padding.top - padding.bottom;
   const denominator = Math.max(...months.map((month) => month.totalSubdistricts), totalSubdistricts, 1);
@@ -117,9 +115,6 @@ export function DroughtForecastTrendGraph({
           x2={width - padding.right}
           y2={thresholdY}
         />
-        <text className="nr-drought-forecast-threshold-label is-start" x={padding.left + 8} y={thresholdY + 22}>
-          {singleSubdistrict ? "เส้นอ้างอิงเมื่อพบความเสี่ยง" : `เกณฑ์ครึ่งพื้นที่ ${formatThaiNumber(threshold)} ตำบล`}
-        </text>
         {segments.map((segment) => (
           <line
             key={`${segment.from.month.period}-${segment.to.month.period}`}
@@ -139,7 +134,7 @@ export function DroughtForecastTrendGraph({
             <text className={`nr-drought-forecast-point-label is-${point.band}`} x={point.x} y={point.y - 14}>
               {formatThaiNumber(point.month.riskSubdistricts)}
             </text>
-            <text className="nr-forecast-axis-date" x={point.x} y={height - 21}>
+            <text className="nr-forecast-axis-date" x={point.x} y={height - 12}>
               {point.month.labelTh.replace(/\s+\d{4}$/, "")}
             </text>
           </g>
@@ -150,7 +145,9 @@ export function DroughtForecastTrendGraph({
         <span><i className="is-normal" />{singleSubdistrict ? "ไม่เสี่ยง" : "ไม่พบพื้นที่เสี่ยง"}</span>
         <span><i className="is-watch" />{singleSubdistrict ? "เสี่ยงแล้ง" : "มีพื้นที่เสี่ยง"}</span>
         <span><i className="is-severe" />{singleSubdistrict ? "เสี่ยงแล้ง" : "เกินครึ่งพื้นที่"}</span>
-        <span><i className="is-threshold" />เส้นอ้างอิง</span>
+        <span className="nr-drought-forecast-threshold-label"><i className="is-threshold" />
+          {singleSubdistrict ? "เส้นอ้างอิงเมื่อพบความเสี่ยง" : `เกณฑ์ครึ่งพื้นที่ ${formatThaiNumber(threshold)} ตำบล`}
+        </span>
       </figcaption>
     </figure>
   );
@@ -334,7 +331,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       id: "no-risk",
       label: "ไม่มีความเสี่ยง",
       value: `${formatThaiNumber(summary.noRiskSubdistricts)} ตำบล`,
-      detail: "ค่า forecast = 0",
+      detail: "ผลพยากรณ์: ไม่พบสัญญาณเสี่ยง",
       icon: <ShieldAlert size={17} />,
       tone: "good",
       provenance: "REAL" as DataProvenanceChipKind,
@@ -343,7 +340,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       id: "moderate",
       label: "เสี่ยงปานกลาง",
       value: `${formatThaiNumber(summary.moderateRiskSubdistricts)} ตำบล`,
-      detail: "ค่า forecast = 1",
+      detail: "ผลพยากรณ์: เสี่ยงปานกลาง",
       icon: <TrendingUp size={17} />,
       tone: "watch",
       provenance: summary.matchedSubdistricts > 0 ? "REAL" as DataProvenanceChipKind : "PENDING_SOURCE" as DataProvenanceChipKind,
@@ -352,7 +349,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       id: "high",
       label: "เสี่ยงสูง",
       value: `${formatThaiNumber(summary.highRiskSubdistricts)} ตำบล`,
-      detail: "ค่า forecast = 2",
+      detail: "ผลพยากรณ์: เสี่ยงสูง",
       icon: <AlertTriangle size={17} />,
       tone: "danger",
       provenance: summary.matchedSubdistricts > 0 ? "REAL" as DataProvenanceChipKind : "PENDING_SOURCE" as DataProvenanceChipKind,
@@ -510,101 +507,6 @@ export function DroughtForecastWorkspaceMapCard({
   );
 }
 
-export function DroughtForecastNarrativeDetail({
-  forecastHasData,
-  trendMonths,
-  selectedHorizon,
-  singleSubdistrict = false,
-}: {
-  forecastHasData: boolean;
-  trendMonths: DroughtForecastTrendMonth[];
-  selectedHorizon: ForecastArchiveHorizon;
-  singleSubdistrict?: boolean;
-}) {
-  const months = trendMonths;
-  const active = months[selectedHorizon - 1] ?? months[0];
-
-  if (!forecastHasData || months.length === 0 || !active) {
-    return (
-      <section className="nr-drought-workspace-detail-panel">
-        <h3>รายละเอียดพยากรณ์ 6 เดือน</h3>
-        <EmptyLocalEvidence />
-      </section>
-    );
-  }
-
-  const activeBand = droughtForecastBand(active);
-  const peak = droughtForecastPeakSummary(months);
-  const ending = months[months.length - 1] ?? active;
-
-  return (
-    <section className="nr-drought-workspace-detail-panel">
-      <h3>รายละเอียดพยากรณ์ 6 เดือน</h3>
-      <div className="nr-drought-workspace-detail-grid">
-        <aside className={`nr-forecast-summary-panel is-${activeBand}`} aria-label="สรุปพยากรณ์ภัยแล้ง 6 เดือน">
-          <div className="nr-forecast-summary-primary">
-            <span className="nr-forecast-summary-label">
-              <span className="nr-forecast-summary-icon" aria-hidden="true">
-                <CalendarDays size={18} />
-              </span>
-              T+{selectedHorizon} ที่เลือก
-            </span>
-            <strong>{droughtForecastBandLabel(activeBand, singleSubdistrict ? "single" : "area")}</strong>
-            <b>{formatThaiNumber(active.riskSubdistricts)} ตำบล</b>
-            <small>{active.labelTh}</small>
-          </div>
-          <dl className="nr-forecast-summary-metrics">
-            <div>
-              <dt>
-                <span className="nr-forecast-summary-icon" aria-hidden="true">
-                  <TrendingUp size={17} />
-                </span>
-                ระดับเสี่ยงสูงสุด
-              </dt>
-              <dd>
-                <strong>{formatThaiNumber(peak.riskSubdistricts)} ตำบล</strong>
-                <span>{peak.monthLabel}</span>
-                <small>{formatPercent(peak.riskPercent * 100, 1)}</small>
-              </dd>
-            </div>
-            <div>
-              <dt>
-                <span className="nr-forecast-summary-icon" aria-hidden="true">
-                  <RotateCcw size={17} />
-                </span>
-                กรอบพยากรณ์
-              </dt>
-              <dd>
-                <strong>{formatThaiNumber(months.length)} ระยะ</strong>
-                <span>
-                  T+1 ถึง {ending.labelTh}
-                </span>
-              </dd>
-            </div>
-          </dl>
-        </aside>
-        <ol className="nr-forecast-primary-strip nr-drought-forecast-month-strip nr-forecast-timeline" aria-label="พยากรณ์ภัยแล้งรายเดือน 6 เดือน">
-          {months.map((month, index) => (
-            <li key={month.period} className={`is-${droughtForecastBand(month)}${index + 1 === selectedHorizon ? " is-active" : ""}`}>
-              <span className="nr-forecast-timeline-marker" aria-hidden="true" />
-              <small>T+{index + 1} · {month.labelTh}</small>
-              <strong>
-                <i aria-hidden="true" />
-                {droughtForecastBandLabel(droughtForecastBand(month), singleSubdistrict ? "single" : "area")}
-              </strong>
-              <b>{formatThaiNumber(month.riskSubdistricts)} ตำบล</b>
-            </li>
-          ))}
-        </ol>
-      </div>
-      <p className="nr-compact-note nr-forecast-footnote">
-        <Info size={17} aria-hidden="true" />
-        ข้อมูลนี้เป็นคลังคำพยากรณ์ย้อนหลัง แยกจากข้อมูลภัยแล้งย้อนหลังที่จัดมาตรฐานแล้ว
-      </p>
-    </section>
-  );
-}
-
 export function DroughtCompactForecastWorkspace({
   readinessMap = false,
   onCloseReadinessMap,
@@ -758,17 +660,11 @@ export function DroughtCompactForecastWorkspace({
         <DroughtForecastWorkspaceKpiStrip level={level} summary={summary} selectedRecord={selectedRecord} />
 
         <details className="nr-drought-workspace-details">
-          <summary>
+          <summary className="secondary-button">
             <span>ดูรายละเอียดเพิ่มเติม</span>
-            <Maximize2 size={15} aria-hidden="true" />
+            <ChevronDown size={16} aria-hidden="true" />
           </summary>
           <div className="nr-drought-workspace-details-body">
-            <DroughtForecastNarrativeDetail
-              forecastHasData={forecastHasData}
-              trendMonths={trendMonths}
-              selectedHorizon={selectedHorizon}
-              singleSubdistrict={singleSubdistrict}
-            />
             <DroughtForecastArchivePanel
               archive={archive}
               level={level}

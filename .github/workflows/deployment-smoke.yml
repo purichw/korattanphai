@@ -27,6 +27,8 @@ jobs:
       - run: npm run smoke
         env:
           SMOKE_URL: ${{ inputs.url || github.event.deployment_status.environment_url }}
+          SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
+          SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
       - uses: actions/upload-artifact@v7
         if: always()
         with:

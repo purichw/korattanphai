@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, seedAuthSession } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("korat-tan-phai-login-user", "pointy"));
+  await seedAuthSession(page);
 });
 
 test("home information is passive and disclosures preserve context and the single map", async ({ page }) => {

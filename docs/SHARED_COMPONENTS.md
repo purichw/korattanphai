@@ -62,7 +62,7 @@ the route, filters and loading state.
 | `workspaceModel.ts` | Local map types/geometry, research selectors and display helpers. |
 | `NakhonRatchasimaLocalMap.tsx` | Map rendering, gestures, previews, wheel isolation and geometry loading. |
 | `ForecastControls.tsx` | Shared archive selectors, filters and summary metrics. |
-| `DroughtForecastWorkspace.tsx` | Shared compact forecast, chart, map and narrative sections. |
+| `DroughtForecastWorkspace.tsx` | Shared compact forecast, chart, map and archive context sections. |
 | `DroughtOperationalWorkspace.tsx` | Shared drought identity, five context/filter slots, operational disclosures and single-map readiness presentation. |
 | `src/drought-workspace.css` | Scoped compact layout for drought/district/subdistrict routes; does not restyle the root overview. |
 | `src/home-overview.css` | Home-only v4 composition, compact context, map/situation panel and expandable support. |
@@ -88,17 +88,16 @@ recovery feedback. Neither resets persisted state automatically.
 | `DroughtOperationalDisclosure` | Shared expandable operational content. Short titles and icons stay visible; historical evidence, agriculture, readiness and caveats remain reachable. |
 | `useDroughtReadinessMap` | Opens readiness on the existing forecast map instance. An explicit return button restores the forecast; changing target or primary T+ also returns to it. |
 | `ResearchStatGrid` | Local grid wrapper for research metric groups. |
-| `DroughtForecastTrendGraph` | Shared drought forecast/historical trend chart. Accepts an active T+ horizon so the archive selector can highlight the matching archive point without changing target-month semantics. |
+| `DroughtForecastTrendGraph` | Shared drought forecast/historical trend chart. Accepts an active T+ horizon so the archive selector can highlight the matching archive point without changing target-month semantics. Threshold text/value lives in the wrapping legend outside the SVG plot; only its dashed reference line stays inside the plot. |
 | `DroughtCompactForecastWorkspace` | Shared compact drought forecast workspace used by province, district, and subdistrict drought surfaces. Owns the primary T+ selector, context row, forecast KPI strip, chart card, map card, and detail disclosure so every level reads the same target month + horizon state. |
 | `DroughtForecastWorkspaceContext` | Shared target month, issue month, crop and record coverage. Scope remains in the page identity and selected summary. |
 | `DroughtForecastWorkspaceKpiStrip` | Adapter onto `MetricGrid`/`MetricCard`, not a second stat-card implementation. No-risk, moderate, high, out-of-scope and missing records stay distinct. Percentages use all expected administrative codes. Short labels/values are centered; no horizontal KPI scrolling on mobile. |
 | `DroughtForecastWorkspaceChart` | Shared chart card that shows the selected archive target month's 6-horizon trend and highlights the T+ slot selected in the archive workspace. |
 | `DroughtForecastWorkspaceMapCard` | Shared local map card for province, district, and subdistrict forecast archive views. Keeps the existing `NakhonRatchasimaLocalMap` behavior and forecast archive map filters. |
-| `DroughtForecastNarrativeDetail` | Shared disclosure content for the longer forecast summary and timeline that should not crowd the compact workspace. |
 | `DroughtForecastArchivePanel` | Shared historical drought forecast archive module for province, district, and subdistrict drought pages. It takes the selected target month plus T+ horizon, never fabricates missing vintage data, and can hide its own horizon selector when nested inside `DroughtCompactForecastWorkspace`. |
 | `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
 | `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`. Its overview variant displays high, moderate, no-risk and out-of-scope counts, plus a separate missing count when necessary; detail retains coverage and subdistrict values. |
-| `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. |
+| `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. Month options use month/year only from `forecastModel`; open map menus rise above the legend and lift their map container out of clipping until closed. Preserve dropdown wheel isolation from map zoom. |
 | `ResearchDroughtSituationPanel` | Province drought status summary. |
 | `ResearchDroughtDistrictPanel` | District ranking/status module. |
 | `ResearchSubdistrictAttentionPanel` | Subdistrict attention/follow-up list. |

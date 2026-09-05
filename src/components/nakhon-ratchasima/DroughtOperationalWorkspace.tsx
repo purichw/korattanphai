@@ -50,7 +50,7 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
     : [{ value: "", label: "ทุกตำบล" }, ...target.district.subdistricts.map((item) => ({ value: item.subdistrictCode, label: item.nameTh ?? item.name }))];
   return <section className="nr-operational-filters" aria-label="ตัวกรองข้อมูลพื้นที่นครราชสีมา">
     <AppSelect label="เป้าหมาย" ariaLabel="เดือนเป้าหมาย" icon={<CalendarDays size={20} />} value={selectedMonth}
-      compactValue options={monthOptions.map((option) => ({ ...option, triggerLabel: option.label.replace("เป้าหมาย · ", "") }))} onChange={onMonthChange} />
+      compactValue options={monthOptions} onChange={onMonthChange} />
     <div className="nr-fixed-filter"><ShieldCheck size={20} aria-hidden="true" /><span>ภัย<strong>ภัยแล้ง</strong></span></div>
     <div className="nr-fixed-filter"><Sprout size={20} aria-hidden="true" /><span>พืช<strong>ข้าว</strong></span></div>
     <AppSelect className="nr-operational-area-filter" label={isProvince ? "อำเภอ" : "ตำบล"} icon={<MapPin size={20} />}

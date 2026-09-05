@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
 import { chromium } from "@playwright/test";
+import { mockSupabase, seedAuthSession } from "../tests/fixtures/supabase.mjs";
 import { preview } from "vite";
 
 const label = process.argv[2] ?? "current";
@@ -43,10 +44,8 @@ try {
     for (let run = 0; run < 3; run += 1) {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
       if (isolateFonts) await context.route("https://fonts.googleapis.com/**", (route) => route.fulfill({ contentType: "text/css", body: "" }));
-      await context.addInitScript(() => {
-        localStorage.setItem("korat-tan-phai-login-user", "pointy");
-        if (location.pathname === "/login") localStorage.removeItem("korat-tan-phai-login-user");
-      });
+      await mockSupabase(context);
+      if (route !== "/login") await seedAuthSession(context);
       const page = await context.newPage();
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
@@ -87,7 +86,7 @@ try {
     const data = await fs.readFile(path.join(distDir, "assets", name));
     assets.push({ name, bytes: data.length, gzipBytes: gzipSync(data).length });
   }
-  const result = { label, distDir, isolateFonts, conditions: `Chromium, 390x844, CPU 4x, cold browser cache; ${mobileNetwork ? "simulated 1.6 Mbps down / 0.75 Mbps up, 150ms latency; gzip JS/CSS/JSON/GeoJSON" : "localhost network (not simulated mobile bandwidth)"}`, assets, samples };
+  const result = { label, distDir, isolateFonts, authMode: "test-only network fixture; no live Supabase latency", conditions: `Chromium, 390x844, CPU 4x, cold browser cache; ${mobileNetwork ? "simulated 1.6 Mbps down / 0.75 Mbps up, 150ms latency; gzip JS/CSS/JSON/GeoJSON" : "localhost network (not simulated mobile bandwidth)"}`, assets, samples };
   await fs.writeFile(path.join(outputDir, `korattanphai-nfr-${label}.json`), JSON.stringify(result, null, 2));
   console.log(JSON.stringify({ assets, samples: samples.map(({ route, readyMs, errors }) => ({ route, readyMs: Math.round(readyMs), errors })) }, null, 2));
 } finally {

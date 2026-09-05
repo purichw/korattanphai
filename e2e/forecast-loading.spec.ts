@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, fillAuthForm, seedAuthSession } from "./fixtures";
 
 const archiveRequest = /\/drought_forecast_archive_rev02(?:-[\w-]+)?\.json$/;
 
@@ -6,7 +6,7 @@ test("login and overview defer the archive while preserving summary and forecast
   let archiveRequests = 0;
   page.on("request", (request) => { if (archiveRequest.test(request.url())) archiveRequests += 1; });
   await page.goto("/login");
-  await page.getByLabel("ชื่อผู้ใช้").fill("pointy");
+  await fillAuthForm(page);
   expect(archiveRequests).toBe(0);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   const summary = page.locator(".nr-forecast-overview");
@@ -22,7 +22,7 @@ test("login and overview defer the archive while preserving summary and forecast
 });
 
 test("failed archive loads can retry without losing target or horizon", async ({ page }, testInfo) => {
-  await page.addInitScript(() => localStorage.setItem("korat-tan-phai-login-user", "pointy"));
+  await seedAuthSession(page);
   let attempts = 0;
   await page.route(archiveRequest, async (route) => {
     attempts += 1;
@@ -42,7 +42,7 @@ test("failed archive loads can retry without losing target or horizon", async ({
 });
 
 test("leaving a pending archive load keeps overview usable and reuses its result on return", async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("korat-tan-phai-login-user", "pointy"));
+  await seedAuthSession(page);
   let requests = 0;
   const geometryRequests: string[] = [];
   page.on("request", (request) => {
@@ -69,7 +69,7 @@ test("leaving a pending archive load keeps overview usable and reuses its result
 });
 
 test("optional map context failure does not hide the forecast or its local polygons", async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("korat-tan-phai-login-user", "pointy"));
+  await seedAuthSession(page);
   await page.route("**/geodata/thailand-adm1.geojson", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
   await page.route("**/geodata/nakhon-ratchasima-boundary.geojson", (route) => route.fulfill({ status: 503, body: "Unavailable" }));
   await page.goto("/drought?target=2025-12&horizon=1");

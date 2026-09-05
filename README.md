@@ -29,12 +29,18 @@ workspace directly.
 - Subdistrict: `/{district-slug}/{subdistrict-slug}`
 - Legacy aliases under `/nakhon-ratchasima/...` are still accepted for old links.
 
-## Demo Login
+## Login
 
-Use username `pointy` or `somsak` to enter the local prototype. Matching is
-case-insensitive. The login page does not list accepted usernames. Login is a
-frontend-only demo gate stored in `localStorage`; it is not secure
-authentication.
+Login uses Supabase Email + Password with an admin-provisioned account. Set
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the local environment
+using `.env.example` as the placeholder reference. No demo username bypass exists.
+Missing configuration denies entry with a not-ready message. Never expose a
+service-role JWT, `sb_secret` key or database password through Vite variables.
+
+The SDK owns session persistence. Persona selection changes display context,
+not account permissions. Static JSON/GeoJSON remains public; route guards do
+not protect those files. See [Auth Setup](docs/AUTH_SETUP.md) for the Preview
+checklist, test-only mocks, unverified backend prerequisites and SMTP limitations.
 
 ## Commands
 
@@ -56,7 +62,7 @@ Codex/sandbox E2E workflow:
 
 ```bash
 # terminal 1, run outside the Codex sandbox
-npm run dev:e2e
+VITE_SUPABASE_URL=https://ktp-auth-test.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_test_only npm run dev:e2e
 
 # terminal 2, run outside the Codex sandbox
 npm run test:e2e:attached

@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, fillAuthForm } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("ชื่อผู้ใช้").fill("pointy");
+  await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
   await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
 });
@@ -59,6 +59,15 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
     await expect(workspace.locator(".nr-drought-workspace-context .is-issue")).toContainText("ส.ค. 2568");
     await expect(workspace.locator(".nr-forecast-point-group.is-active")).toContainText("T+4");
+
+    const details = workspace.locator(".nr-drought-workspace-details");
+    await details.locator("summary").click();
+    await expect(details.locator(".nr-drought-workspace-detail-panel, .nr-forecast-timeline")).toHaveCount(0);
+    await expect(details.locator(".nr-forecast-archive-mode-section")).toBeVisible();
+    await expect(details).toContainText("ค่าจากการพยากรณ์ ไม่ใช่ข้อมูลความเสียหายทางการ");
+    await expect(details.locator(".nr-forecast-archive-target")).toContainText("ธ.ค. 2568");
+    await expect(details.locator(".nr-forecast-archive-target")).toContainText("T+4");
+    await details.locator("summary").click();
 
     await map.evaluate((element) => element.setAttribute("data-instance-probe", "same-map"));
     await page.locator(".nr-operational-disclosure > summary").filter({ hasText: "พื้นที่เกษตรและความพร้อมข้อมูล" }).click();

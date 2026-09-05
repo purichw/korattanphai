@@ -15,6 +15,7 @@ export default defineConfig({
   webServer: shouldStartWebServer
     ? {
         command: "npm run dev:e2e",
+        env: { VITE_SUPABASE_URL: "https://ktp-auth-test.supabase.co", VITE_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_test_only" },
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

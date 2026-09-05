@@ -9,7 +9,7 @@ starts with only `ภาพรวม`.
 
 Routes:
 
-- `/login`: frontend-only username gate.
+- `/login`: Supabase Email + Password; internal-only return paths preserve query/hash.
 - `/`: province-level Nakhon Ratchasima overview.
 - `/drought`: province-level drought context page.
 - `/{district-slug}`: district-level drill-down.

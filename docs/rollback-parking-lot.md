@@ -1,5 +1,28 @@
 # Rollback Parking Lot
 
+## 2026-09-05 15:31 +07:00 - Remove Duplicate Forecast Narrative
+
+- Request: explicitly remove the large six-horizon narrative/timeline panel
+  after reviewing its duplication of the chart and KPI strip.
+- Checkpoint: `tmp-snapshots/rollback-checkpoints/remove-forecast-narrative-2026-09-05T08-31-48-948Z/`
+  contains pre-edit owner files, working/staged diffs, status, and untracked
+  inventory. No untracked files are involved in this removal.
+- Status: intentional removal accepted by the user; no restoration pending.
+- Removed: `DroughtForecastNarrativeDetail` and its shared live call on
+  province, district, and subdistrict drought routes.
+- Preserved: chart, KPI strip, map, target/T+ selection, archive context and
+  source caveats under the existing details disclosure. Data and shared model
+  helpers are unchanged; historical styling is not part of this cleanup.
+- Restore only on an explicit new request: selectively restore the component
+  and call from the checkpoint, reconcile the shared-component docs and route
+  assertions, then verify disclosure behavior on all three scopes. Do not
+  overwrite unrelated in-progress changes with the full checkpoint patch.
+- Verification passed: 13 focused forecast unit tests and live local checks
+  for all three route scopes (province/district desktop, subdistrict mobile).
+  Chart/map/KPIs, T+ selection, archive context/caveats, and disclosure keyboard
+  toggle remain working. Snapshot: `tmp-snapshots/forecast-narrative-removed-1440.png`.
+  Full-site tests and deployment were not run for this scoped removal.
+
 ## 2026-09-04 23:08 +07:00 - Remove Retired Water-Provider Data From Web
 
 - Request: remove all retired external water-provider data from the website,

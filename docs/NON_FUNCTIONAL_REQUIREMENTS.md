@@ -4,11 +4,12 @@
 
 Current facts:
 
-- No real auth, secrets, database, or server mutations exist.
+- Supabase Email + Password auth is implemented; real-account and backend
+  settings remain unverified. No data provider or privileged secrets are added.
 - One read-only Vercel endpoint exists for production risk-fusion explanation.
 - Persona switching is not authentication.
 - Persona fixture data must not contain passwords.
-- `.env` and `.env.local` are ignored by git.
+- `.env` and `.env.*` are ignored by git except placeholder `.env.example`.
 - Production deploys use `npm run build:protected`, which disables source maps,
   obfuscates generated JavaScript assets after Vite build, and checks for
   blocked literals in `dist`.
@@ -19,9 +20,10 @@ Current facts:
 
 Requirements before operational use:
 
-- Add real authentication and authorization for operators.
+- Verify real-account authentication and server-side authorization for operators.
 - Server-enforce approval, publication, and notification permissions.
-- Keep API keys and provider credentials out of the client bundle.
+- Keep privileged keys and provider credentials out of the client bundle; only
+  the Supabase browser publishable key belongs in Vite environment variables.
 - Add append-only audit logs for operator actions.
 
 ## Privacy
@@ -53,9 +55,11 @@ Current facts:
   JSON asset, fetched only for drought/district/subdistrict views.
 - The concurrent overview update uses a generated T+1-only archive subset with
   its own cache. Full T+1 through T+6 data remains deferred to detail views.
-- Protected builds enforce a total JavaScript budget of 3,500,000 raw bytes and
-  370,000 gzip bytes with `npm run check:bundle`; the check also verifies that
-  the emitted archive exactly matches its canonical source.
+- Protected builds enforce total JavaScript of 3,500,000 raw bytes, application
+  gzip of 370,000 bytes and an additional bounded 105,000-byte gzip lazy
+  Supabase SDK chunk. The SDK loads during session checking; it is additional
+  to the static startup import budget. `npm run check:bundle` also verifies
+  that the emitted archive exactly matches its canonical source.
 - The map is an inline SVG generated from static GeoJSON.
 
 Requirements:
@@ -179,7 +183,7 @@ Current facts:
 - Storage reads, writes and logout tolerate SecurityError and quota failures
   with a visible notice and in-memory fallback for the current document.
   Reloading while storage is unavailable requires logging in again; internal
-  content navigation keeps the current document and demo login alive.
+  content navigation keeps the current document and authenticated session alive.
 - Persisted data is validated before it reaches components: malformed nested
   records use defaults while valid edits are retained. Mounting the provider
   does not silently rewrite the original snapshot. A subsequent user edit saves

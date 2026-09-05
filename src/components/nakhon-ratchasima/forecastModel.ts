@@ -162,12 +162,10 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     () =>
       [...archive.targetMonths].reverse().map((month) => ({
         value: month.period,
-        label: `เป้าหมาย · ${month.labelTh}`,
-        triggerLabel: `เป้าหมาย · ${month.labelTh}`,
+        label: month.labelTh,
         group: "เดือนเป้าหมาย",
-        description: fixedHorizon ? `เดือนเป้าหมาย · T+${fixedHorizon}` : "เดือนนี้คือเดือนเป้าหมายของแผนที่ · ครบ T+1–T+6",
       })),
-    [archive, fixedHorizon],
+    [archive],
   );
 
   const changeHorizon = (horizon: ForecastArchiveHorizon) => {

@@ -12,6 +12,10 @@ jobs:
   regression:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # Only used in the isolated build exercised by Playwright network mocks.
+      VITE_SUPABASE_URL: https://ktp-auth-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only
     steps:
       - uses: actions/checkout@v7
         with:

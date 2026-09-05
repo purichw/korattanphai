@@ -84,7 +84,8 @@ Boundary rules:
 - `src/browserStorage.ts` wraps storage errors with a document-lifetime fallback;
   `src/persistedState.ts` validates persisted fields and nested runtime records.
   `src/store.tsx` does not rewrite the snapshot merely on mount. A visible notice
-  reports invalid or unavailable storage. No real authentication was added.
+  reports invalid or unavailable preference storage. Auth token persistence is
+  separately managed by the Supabase SDK, not this wrapper.
 - `AppErrorBoundary` guards root/loading and routed content. Render retry
   remounts content without clearing storage; failed module loading retries by
   reloading the current URL because browsers cache failed dynamic imports.
@@ -115,8 +116,11 @@ FACT:
 - Backend ownership is limited to a read-only Vercel function for a public,
   sanitized risk-fusion explanation.
 - API ownership currently exists only for `GET /api/risk-fusion`.
-- Authentication is simulated by selecting personas from
-  `src/data/canonical/users.json`.
+- Supabase Email + Password authentication is managed by `src/useAuth.ts` and
+  the shared lazy client in `src/supabase.ts`. See `docs/AUTH_SETUP.md` for
+  implementation status and real-account verification prerequisites.
+- Personas from `src/data/canonical/users.json` are display context only,
+  never authorization or evidence of an admin role.
 - Delivery and alerting are simulated in local runtime state.
 
 PROPOSAL:
@@ -124,8 +128,8 @@ PROPOSAL:
 - If this becomes operational, split domains into `alerts`, `geography`,
   `sources`, `field-verification`, `advisories`, `notifications`, and
   `audit-log`.
-- Add a backend before using live data, real notifications, user accounts, or
-  admin approvals.
+- Add verified backend authorization before using live data, real notifications
+  or admin approvals.
 
 ## External Services
 
@@ -136,6 +140,7 @@ Current external services:
   intentionally self-contained because Vercel type-checks API code under a
   Node runtime that should not pull in Vite/browser JSON imports.
 - Google Fonts loads `Google Sans` from `index.html`.
+- Supabase provides email/password sessions; no Supabase data provider is used.
 - Browser fetches local static map assets from the deployed app.
 
 Current external-data facts:
@@ -226,10 +231,11 @@ needs audit:
 
 FACT:
 
-- There are no environment variables used by the app.
+- Browser auth uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - There is one read-only API route: `GET /api/risk-fusion`.
 - There is no service worker, offline cache, or push notification registration.
-- There is no database schema.
+- No database migration is implemented here; user-reported Supabase tables and
+  RLS have not been independently verified by this auth change.
 
 PROPOSAL:
 

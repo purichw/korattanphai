@@ -441,7 +441,8 @@ No-data means insufficient evidence, not normal/green/low-risk.
 Current keys:
 
 - `korat-tan-phai-demo-state-v1`
-- `korat-tan-phai-login-user`: the existing demo username, not a server session.
+- `korat-tan-phai-login-user`: retired and removed during auth initialization;
+  never used as a session. Supabase SDK owns its separate auth-token storage.
 
 Stored shape:
 

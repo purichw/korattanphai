@@ -88,7 +88,8 @@ git.
 After deploy:
 
 1. Open `https://korattanphai.vercel.app`.
-2. Log in with username `pointy`.
+2. Log in with an admin-provisioned Supabase email/password account; follow
+   `docs/AUTH_SETUP.md`. Do not use test-only fake build values for deployments.
 3. Confirm Thai-only visible UI and Korat Tan Phai / โคราชทันภัย brand title.
 4. Confirm no console errors and no failed network requests.
 5. Confirm the primary sidebar shows only `ภาพรวม`.

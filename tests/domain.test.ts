@@ -4,10 +4,6 @@ import { describe, expect, it } from "vitest";
 import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import {
-  authenticateUsername,
-  loginUsers,
-} from "../src/auth";
-import {
   advisory,
   fieldTasks,
   locations,
@@ -802,16 +798,5 @@ describe("Nakhon Ratchasima incremental research patch", () => {
 
     const offenders = checkedFiles.filter((file) => blockedPattern.test(fs.readFileSync(file, "utf8")));
     expect(offenders.map((file) => path.relative(process.cwd(), file))).toEqual([]);
-  });
-});
-
-describe("login contract", () => {
-  it("allows only Pointy and Somsak with case-insensitive usernames", () => {
-    expect(loginUsers.map((user) => user.name)).toEqual(["Pointy", "Somsak"]);
-    expect(authenticateUsername("pointy")?.name).toBe("Pointy");
-    expect(authenticateUsername("Pointy")?.name).toBe("Pointy");
-    expect(authenticateUsername("Somsak")?.name).toBe("Somsak");
-    expect(authenticateUsername("SOMSAK")?.name).toBe("Somsak");
-    expect(authenticateUsername(" someone else ")).toBeNull();
   });
 });

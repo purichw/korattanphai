@@ -9,6 +9,9 @@ if (!(local || (base.protocol === "https:" && /^korattanphai(?:-[a-z0-9-]+)?\.ve
   throw new Error("SMOKE_URL must be this project's Vercel deployment or localhost.");
 }
 const output = path.resolve(process.env.SMOKE_OUTPUT_DIR ?? "smoke-results");
+const email = process.env.SMOKE_AUTH_EMAIL?.trim();
+const password = process.env.SMOKE_AUTH_PASSWORD;
+if (!email || !password) throw new Error("Set SMOKE_AUTH_EMAIL and SMOKE_AUTH_PASSWORD securely for an admin-provisioned test account. No demo login fallback is available.");
 await fs.mkdir(output, { recursive: true });
 const report = { url: base.origin, at: new Date().toISOString(), api: local ? "skipped: Vite preview has no serverless API" : "pending", checks: [], failures: [] };
 let browser;
@@ -53,10 +56,14 @@ try {
         assert.match(headers["content-security-policy"] ?? "", /frame-ancestors 'none'/);
         assert.equal(headers["x-content-type-options"], "nosniff");
       }
-      // Existing front-end demo account; no server-side authentication or writes.
-      await page.getByLabel("ชื่อผู้ใช้").fill("pointy");
-      await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-      await page.locator(".nr-forecast-overview-summary").waitFor();
+      try {
+        await page.getByLabel("อีเมล", { exact: true }).fill(email);
+        await page.getByLabel("รหัสผ่าน", { exact: true }).fill(password);
+        await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
+        await page.locator(".nr-forecast-overview-summary").waitFor();
+      } catch {
+        throw new Error("Smoke login failed. Verify the configured test account, environment and network; credential values are not reported.");
+      }
       for (const route of ["/", "/drought?target=2025-12&horizon=1", "/dan-khun-thot?target=2025-12&horizon=4", "/dan-khun-thot/t-300806?target=2025-12&horizon=4"]) {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
@@ -83,10 +90,14 @@ try {
       }
       await Promise.all(assetChecks);
       assert.deepEqual(errors, [], `${name}: browser errors`);
+      await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
+      await page.getByRole("menuitem", { name: "ออกจากระบบ", exact: true }).click();
+      await page.getByLabel("อีเมล", { exact: true }).waitFor();
+      assert.equal(await page.getByRole("alert").count(), 0, "Logout should complete without an auth error");
     } finally { await context.close(); }
   }
 } catch (error) {
-  report.failures.push(error.message);
+  report.failures.push(error.message.replaceAll(password, "[redacted]").replaceAll(email, "[redacted]"));
   process.exitCode = 1;
 } finally {
   await browser?.close();

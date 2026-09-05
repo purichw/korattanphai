@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, seedAuthSession } from "./fixtures";
 
 async function selectArea(page: Page, name: string) {
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
@@ -10,7 +10,7 @@ async function selectArea(page: Page, name: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("korat-tan-phai-login-user", "pointy"));
+  await seedAuthSession(page);
 });
 
 test("overview paints the T+1 archive, scopes districts, and preserves forecast drilldown", async ({ page }, testInfo) => {
@@ -76,7 +76,7 @@ test("changing month updates map counts and risk filtering uses the same forecas
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
   if (await edit.isVisible()) await edit.click();
   await page.getByRole("combobox", { name: /^(เลือก)?เดือน/ }).click();
-  await page.getByRole("option", { name: /เป้าหมาย · พ.ย. 2568/ }).click();
+  await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
   const apply = page.getByRole("button", { name: "แสดงผล", exact: true });
   if (await apply.isVisible()) await apply.click();
   await expect(page.locator(".nr-forecast-overview-summary .metric-card-value"))

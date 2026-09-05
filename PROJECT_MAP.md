@@ -8,9 +8,10 @@ visible first screen is the จังหวัดนครราชสีมา 
 
 FACT: The current implementation is a Vite + React + TypeScript single-page app
 with one read-only Vercel API endpoint for production risk-fusion explanation.
-It uses canonical local JSON data and browser `localStorage`. There is no
-database, real login, real notification provider, or live GIS/weather ingestion
-in this repo.
+It uses canonical local JSON data and browser `localStorage`. Supabase Email +
+Password is implemented for authentication; real-account verification remains
+pending. No Supabase data provider, real notification delivery or live GIS/weather
+ingestion is implemented. See `docs/AUTH_SETUP.md` for backend prerequisites.
 
 ## Current State
 
@@ -210,7 +211,7 @@ the province overview surface.
 
 Routes:
 
-- `/login`: frontend-only username gate for the prototype.
+- `/login`: Supabase email/password login with an internal-only return path.
 - `/`: province-level Nakhon Ratchasima overview.
 - `/drought`: province-level drought context page.
 - `/{district-slug}`: district workspace.
@@ -263,16 +264,14 @@ flowchart LR
 
 FACT:
 
-- Login is a frontend-only demo gate in `src/auth.ts`; use username `pointy` for
-  local smoke checks.
-- The login gate stores the accepted user in
-  `localStorage: korat-tan-phai-login-user` and is not secure authentication.
-- Persona/role scope is still simulated separately by persona selection from
-  `src/data/canonical/users.json`.
-- Persona fixture data does not contain passwords; the current login gate only
-  accepts the demo usernames in `src/auth.ts`.
-- The login gate accepts only `Pointy` and `Somsak` case-insensitively and does
-  not list those usernames on `/login`.
+- Login uses the shared Supabase client and `src/useAuth.ts`. SDK-managed
+  session restoration, refresh and logout replace the retired demo gate.
+- `korat-tan-phai-login-user` is removed, not trusted. Preferences remain intact.
+- Persona selection is display context only. Neither persona nor user-editable
+  metadata grants permissions. Identity comes from the authenticated account.
+- Local E2E uses test-only network fixtures; Preview/Production smoke requires
+  a real admin-provisioned account. No credentials are committed.
+- Static JSON/GeoJSON is publicly downloadable regardless of the UI login guard.
 - Notification delivery is simulated by deterministic `DeliveryRecord` objects
   in `buildDeliveryRecords`.
 - Publication creates a farmer alert in runtime state only after approval.
@@ -389,8 +388,8 @@ npm run test:e2e:managed
 
 - FACT: The build still emits a Vite chunk-size warning for other canonical JSON.
   The forecast archive is a separate content-hashed asset loaded on demand.
-- FACT: There is no real auth, no backend, no real notification delivery, and no
-  live data ingestion.
+- FACT: Supabase auth is implemented but real-account/backend settings remain
+  unverified. There is no live data ingestion or real notification delivery.
 - FACT: The app has no explicit SEO/noindex implementation beyond the Vite HTML
   shell.
 - needs audit: Confirm whether production should be public-indexable or noindex

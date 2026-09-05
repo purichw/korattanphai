@@ -26,7 +26,7 @@ identity, acknowledgement receipt, or server audit exists.
 
 1. Operator opens `/nakhon-ratchasima` directly or from the nationwide map area
    profile.
-2. Login gate returns the operator to the requested route after username entry.
+2. Supabase login returns the operator to the requested internal route after email/password authentication.
 3. Province view shows 32 districts, 289 navigable subdistricts, local layer
    selector, source freshness, and provenance guardrails.
    The visible layer selector hides water, flood, reservoir, weather, and
@@ -121,18 +121,18 @@ Publication channel checkboxes:
 
 FACT:
 
-- The app has a frontend-only username gate in `src/auth.ts`.
-- Use username `pointy` for local and production smoke checks.
-- Accepted login state is persisted in
-  `localStorage: korat-tan-phai-login-user`.
-- Persona switching still simulates operational role and scope after login.
-- Persona selection is persisted in `localStorage`.
-- Persona fixture data does not contain passwords; the current login gate only
-  checks the demo usernames in `src/auth.ts`.
+- Supabase Email + Password replaces the retired username gate. The SDK owns
+  session restore, token refresh and persistence; `src/useAuth.ts` subscribes
+  to auth changes with cleanup and stale-result protection.
+- The old `korat-tan-phai-login-user` value is removed, never accepted as auth.
+- Login preserves internal `next` paths including query/hash, even if the
+  login page is refreshed. External return URLs are rejected.
+- Persona selection is persisted display context, not account permissions.
+- See `AUTH_SETUP.md` for test-only mocks, logout error states and Preview checks.
 
 PROPOSAL:
 
-- Real auth must be added before operational use.
+- Independently verify real-account authentication and backend settings before operational use.
 - Role-sensitive actions must move to backend authorization.
 
 ## Error / Loading / Empty States
