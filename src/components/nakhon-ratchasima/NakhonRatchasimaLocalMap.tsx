@@ -48,6 +48,7 @@ import {
   clamp,
   localMapWidth,
   localMapHeight,
+  localMapScale,
   type NakhonRatchasimaGeoFeature,
   localResearchRecordForSubdistrict,
   localMapStatusForResearchRecord,
@@ -147,6 +148,8 @@ export function NakhonRatchasimaLocalMap({
   onSelectedSubdistrictChange,
   researchCriteriaEnabled = true,
   showMonthFilter = true,
+  compactForecast = false,
+  overviewLayout = false,
 }: {
   target: NakhonRatchasimaRouteTarget;
   layer: NakhonRatchasimaMapLayer;
@@ -164,6 +167,8 @@ export function NakhonRatchasimaLocalMap({
   onSelectedSubdistrictChange?: (subdistrictCode: string | null) => void;
   researchCriteriaEnabled?: boolean;
   showMonthFilter?: boolean;
+  compactForecast?: boolean;
+  overviewLayout?: boolean;
 }) {
   const routeSelectedSubdistrictCode = target.valid && target.level === "subdistrict" ? target.subdistrict.subdistrictCode : undefined;
   const activeSelectedSubdistrictCode = externalSelectedSubdistrictCode ?? routeSelectedSubdistrictCode;
@@ -268,6 +273,7 @@ export function NakhonRatchasimaLocalMap({
   }, [activeSelectedSubdistrictCode, focusDistrictCode, geo]);
   const fitTransform = useMemo(() => {
     if (!geo || !projection) return isMobileMap ? localMobileFitTransform : localFitTransform;
+    if (compactForecast) return transformForLocalFocus(geo.features, projection, 1.25, 1, overviewLayout ? { top: 18, right: 18, bottom: 45, left: 70 } : { top: 18, right: 70, bottom: 18, left: 18 });
     return transformForLocalFocus(
       geo.features,
       projection,
@@ -275,7 +281,7 @@ export function NakhonRatchasimaLocalMap({
       isMobileMap ? localMobileFitZoom : localFitZoom,
       isMobileMap ? localMobileOverviewPadding : localDesktopOverviewPadding,
     );
-  }, [geo, isMobileMap, projection]);
+  }, [compactForecast, geo, isMobileMap, overviewLayout, projection]);
   const districtFocusZoom = isMobileMap ? localMobileDistrictFocusZoom : localDistrictFocusZoom;
   const subdistrictFocusZoom = isMobileMap ? localMobileSubdistrictFocusZoom : localSubdistrictFocusZoom;
   const districtMinimumZoom = isMobileMap ? 1.72 : 1.12;
@@ -284,6 +290,9 @@ export function NakhonRatchasimaLocalMap({
   const selectedFocusPadding = isMobileMap ? localMobileSelectedFocusPadding : localDesktopFocusPadding;
   const targetTransform = useMemo(() => {
     if (!projection) return fitTransform;
+    if (compactForecast && (activeSelectedSubdistrictCode || focusDistrictCode)) {
+      return transformForLocalFocus(focusFeatures, projection, localMaxZoom, 1, { top: 28, right: 78, bottom: 28, left: 28 });
+    }
     if (activeSelectedSubdistrictCode) {
       return transformForLocalFocus(focusFeatures, projection, subdistrictFocusZoom, subdistrictMinimumZoom, selectedFocusPadding);
     }
@@ -293,6 +302,7 @@ export function NakhonRatchasimaLocalMap({
     return fitTransform;
   }, [
     activeSelectedSubdistrictCode,
+    compactForecast,
     districtFocusZoom,
     districtFocusPadding,
     districtMinimumZoom,
@@ -625,7 +635,8 @@ export function NakhonRatchasimaLocalMap({
     const rect = canvas?.getBoundingClientRect();
     if (!rect) return { x: 16, y: 16 };
 
-    const topReserved = [".nr-local-map-criteria", ".nr-map-controls"].reduce((reserved, selector) => {
+    const topSelectors = compactForecast ? [".nr-local-map-criteria"] : [".nr-local-map-criteria", ".nr-map-controls"];
+    const topReserved = topSelectors.reduce((reserved, selector) => {
       const element = canvas?.querySelector<HTMLElement>(selector);
       if (!element) return reserved;
       const elementRect = element.getBoundingClientRect();
@@ -640,21 +651,23 @@ export function NakhonRatchasimaLocalMap({
       return Math.max(reserved, Math.min(rect.height - topReserved - 12, rect.bottom - elementRect.top + 10));
     }, 24);
 
-    const cardWidth = Math.min(344, Math.max(240, rect.width - 24));
+    const leftReserved = overviewLayout ? 58 : 12;
+    const rightReserved = compactForecast && !overviewLayout ? 52 : 12;
+    const cardWidth = Math.min(344, Math.max(compactForecast ? 180 : 240, rect.width - rightReserved - leftReserved));
     const viewportHeight = typeof window !== "undefined" ? window.innerHeight : rect.height;
     const viewportSafeHeight = Math.max(260, viewportHeight - Math.max(rect.top, 0) - 24);
-    const availableHeight = Math.max(180, rect.height - topReserved - bottomReserved);
+    const availableHeight = Math.max(compactForecast ? 1 : 180, rect.height - topReserved - bottomReserved);
     const cardHeight = Math.min(430, availableHeight, viewportSafeHeight);
     const gap = 14;
     const maxY = Math.max(topReserved, rect.height - bottomReserved - cardHeight);
     let x = point.clientX - rect.left + gap;
     let y = point.clientY - rect.top - 18;
 
-    if (x + cardWidth > rect.width - 12) x = point.clientX - rect.left - cardWidth - gap;
+    if (x + cardWidth > rect.width - rightReserved) x = point.clientX - rect.left - cardWidth - gap;
     if (y + cardHeight > rect.height - bottomReserved) y = maxY;
 
     return {
-      x: clamp(x, 12, Math.max(12, rect.width - cardWidth - 12)),
+      x: clamp(x, leftReserved, Math.max(leftReserved, rect.width - cardWidth - rightReserved)),
       y: clamp(y, topReserved, maxY),
       maxHeight: cardHeight,
       width: cardWidth,
@@ -888,11 +901,11 @@ export function NakhonRatchasimaLocalMap({
   );
 
   if (error) {
-    return <div className="nr-map-loading">ไม่สามารถโหลดขอบเขตตำบลนครราชสีมาได้</div>;
+    return <div className="nr-map-loading" role="alert"><p>ไม่สามารถโหลดขอบเขตตำบลนครราชสีมาได้</p>{overviewLayout && <div className="nr-map-recovery-actions"><button type="button" className="secondary-button" onClick={() => window.location.reload()}>ลองโหลดแผนที่ใหม่</button><button type="button" className="secondary-button" onClick={() => onNavigate("/drought")}>ดูคลังพยากรณ์ย้อนหลัง</button></div>}</div>;
   }
 
   if (!geo || !projection) {
-    return <div className="nr-map-loading">กำลังโหลดขอบเขตตำบลนครราชสีมา...</div>;
+    return <div className="nr-map-loading" role="status" aria-busy="true">กำลังโหลดขอบเขตตำบลนครราชสีมา...</div>;
   }
 
   const previewTitle = preview ? localPreviewTitleForTarget(target, preview) : "";
@@ -1103,6 +1116,7 @@ export function NakhonRatchasimaLocalMap({
   ]
     .filter(Boolean)
     .join(" ");
+  const scale = overviewLayout && projection ? localMapScale(projection, transform) : null;
 
   return (
     <div ref={canvasRef} className={mapPanelClassName}>
@@ -1506,6 +1520,11 @@ export function NakhonRatchasimaLocalMap({
             </g>
           )}
         </g>
+        {scale && <g className="nr-map-distance-scale" transform={`translate(${localMapWidth - scale.width - 26},${localMapHeight - 62})`} aria-label={`ระยะทางโดยประมาณ ${scale.distanceKm} กิโลเมตร`}>
+          <rect x="-8" y="-23" width={scale.width + 38} height="34" rx="3" fill="white" fillOpacity=".88" />
+          <path d={`M0 -3V3H${scale.width}V-3M${scale.width / 2} 0V3`} fill="none" stroke="#31584b" strokeWidth="3" />
+          <text x="0" y="-9">0</text><text x={scale.width} y="-9" textAnchor="end">{scale.distanceKm} กม.</text>
+        </g>}
       </svg>
       {preview && (
         <article

@@ -3,7 +3,6 @@ import {
   getNakhonRatchasimaMapLayers,
   getNakhonRatchasimaResearchPeriods,
   NAKHON_RATCHASIMA_LAYER_IDS,
-  getNakhonRatchasimaResearchPanelSummary,
   NAKHON_RATCHASIMA_ROUTE_BASE,
 } from "../domain";
 import { useAppState, useAppDispatch } from "../store";
@@ -14,22 +13,12 @@ import {
   buddhistYearGroupForPeriod,
   dashboardDefaultsForTab,
   type LocalMapMode,
-  pathForDistrictCode,
-  pathForSubdistrictCode,
-  districtOptionsForProvince,
-  subdistrictOptionsForRoute,
-  routeBackTargetForRoute,
-  researchLatestPeriod,
-  formatThaiNumber,
 } from "./nakhon-ratchasima/workspaceModel";
 import { formatMonth } from "../i18n";
 import { useForecastArchive } from "../useForecastArchive";
 import { preloadLocalMapGeometry } from "../data/localMapGeometry";
 import { PanelTitle } from "./nakhon-ratchasima/SharedPanels";
 import { AlertTriangle, ArrowLeft, RotateCcw } from "lucide-react";
-import { DroughtPageHeader } from "./nakhon-ratchasima/DroughtForecastWorkspace";
-import { NakhonRatchasimaBreadcrumbs, SourceFreshness } from "./nakhon-ratchasima/ResearchPanels";
-import { OperationalFilters } from "./OperationalFilters";
 import { ProvinceView } from "./nakhon-ratchasima/ProvinceView";
 import { DistrictView } from "./nakhon-ratchasima/DistrictView";
 import { SubdistrictView } from "./nakhon-ratchasima/SubdistrictView";
@@ -48,8 +37,6 @@ export function NakhonRatchasimaWorkspace({
     () => layers.filter((layer) => !hiddenLocalHydrologyLayerIds.has(layer.id)),
     [layers],
   );
-  const hasScopedDataGovernanceSection =
-    route.valid && (route.level === "district" || route.level === "subdistrict" || (route.level === "province" && route.tab === "drought"));
   const researchPeriods = useMemo(() => getNakhonRatchasimaResearchPeriods(), []);
   const [workspaceMonth, setWorkspaceMonth] = useState(() =>
     researchPeriods.includes(state.selectedMonth) ? state.selectedMonth : (researchPeriods[researchPeriods.length - 1] ?? state.selectedMonth),
@@ -108,73 +95,11 @@ export function NakhonRatchasimaWorkspace({
     setMapMode(nextDefaults.mapMode);
   }, [provinceRouteTab]);
 
-  const selectDistrictFromFilter = (districtCode: string) => {
-    const path = pathForDistrictCode(districtCode);
-    if (path) onNavigate(path);
-  };
-  const selectSubdistrictFromFilter = (subdistrictCode: string) => {
-    const path = pathForSubdistrictCode(subdistrictCode);
-    if (path) onNavigate(path);
-  };
-  const areaFilterConfig =
-    !route.valid || route.level === "subdistrict"
-      ? null
-      : route.level === "province"
-        ? {
-            label: "อำเภอ",
-            value: "",
-            options: districtOptionsForProvince(),
-            placeholder: "ทุกอำเภอ",
-            onChange: selectDistrictFromFilter,
-          }
-        : {
-            label: "ตำบล",
-            value: "",
-            options: subdistrictOptionsForRoute(route, selectedLayer, mapMode),
-            placeholder: "ทุกตำบล",
-            onChange: selectSubdistrictFromFilter,
-          };
-  const routeBackTarget = routeBackTargetForRoute(route);
-  const handleRouteBack = () => {
-    if (routeBackTarget) onNavigate(routeBackTarget.path);
-  };
-  const isProvinceDroughtRoute = route.level === "province" && route.tab === "drought";
   const isDroughtWorkspaceRoute = route.valid && (route.level !== "province" || route.tab === "drought");
   const { archive: droughtArchive, failed: archiveFailed, retry: retryArchive } = useForecastArchive(isDroughtWorkspaceRoute);
   useEffect(() => {
     if (isDroughtWorkspaceRoute) void preloadLocalMapGeometry();
   }, [isDroughtWorkspaceRoute]);
-  const droughtPageArchive = isProvinceDroughtRoute ? droughtArchive : null;
-  const droughtPageResearch = isProvinceDroughtRoute ? getNakhonRatchasimaResearchPanelSummary() : null;
-  const showMobileProvinceOverviewIdentity = route.valid && route.level === "province" && route.tab === "overview";
-  const operationalFilterContextChips =
-    route.valid && route.level === "subdistrict"
-      ? [{ label: "ตำบล", value: route.subdistrict.nameTh ?? route.subdistrict.name }]
-      : [];
-  const operationalFilterQuickFacts = (() => {
-    if (!route.valid) return [];
-    const research = getNakhonRatchasimaResearchPanelSummary();
-    const latestPeriod = researchLatestPeriod(research);
-    if (route.level === "province") {
-      return [
-        { label: "อำเภอ", value: `${formatThaiNumber(research.meta.districtCount)} อำเภอ` },
-        { label: "ตำบล", value: `${formatThaiNumber(research.meta.subdistrictCount)} ตำบล` },
-        { label: "อัปเดตล่าสุด", value: latestPeriod },
-      ];
-    }
-    if (route.level === "district") {
-      return [
-        { label: "พื้นที่", value: `${formatThaiNumber(route.district.subdistricts.length)} ตำบล` },
-        { label: "อำเภอ", value: route.district.nameTh ?? route.district.name },
-        { label: "อัปเดตล่าสุด", value: latestPeriod },
-      ];
-    }
-    return [
-      { label: "รหัสตำบล", value: route.subdistrict.subdistrictCode ?? route.subdistrict.id },
-      { label: "อำเภอ", value: route.district.nameTh ?? route.district.name },
-      { label: "อัปเดตล่าสุด", value: latestPeriod },
-    ];
-  })();
 
   if (!route.valid) {
     return (
@@ -214,45 +139,6 @@ export function NakhonRatchasimaWorkspace({
 
   return (
     <div className={["page-stack", "nr-workspace", isDroughtWorkspaceRoute ? "is-drought-route" : ""].join(" ")}>
-      {isProvinceDroughtRoute && droughtPageArchive && droughtPageResearch ? (
-        <DroughtPageHeader archive={droughtPageArchive} research={droughtPageResearch} onBack={handleRouteBack} />
-      ) : !showMobileProvinceOverviewIdentity ? (
-        <section className={["nr-route-bar", showMobileProvinceOverviewIdentity ? "is-mobile-redundant-province-route" : ""].join(" ")}>
-          {routeBackTarget && (
-            <div className="nr-route-actions">
-              <button type="button" className="secondary-button" onClick={handleRouteBack}>
-                <ArrowLeft size={16} />
-                {routeBackTarget.label}
-              </button>
-            </div>
-          )}
-          <NakhonRatchasimaBreadcrumbs target={route} onNavigate={onNavigate} />
-        </section>
-      ) : null}
-
-      {showMobileProvinceOverviewIdentity && (
-        <section className="nr-mobile-page-identity" aria-labelledby="nr-mobile-province-title">
-          <p className="eyebrow">ภาพรวมจังหวัด</p>
-          <h1 id="nr-mobile-province-title">จังหวัดนครราชสีมา</h1>
-          <p>ภาพรวมพยากรณ์ภัยแล้ง</p>
-        </section>
-      )}
-
-      {!showMobileProvinceOverviewIdentity && <OperationalFilters
-        monthOptions={route.valid ? researchMonthOptions : undefined}
-        monthValue={route.valid ? workspaceMonth : undefined}
-        onMonthChange={route.valid ? handleWorkspaceMonthChange : undefined}
-        areaLabel={areaFilterConfig?.label}
-        areaValue={areaFilterConfig?.value}
-        areaOptions={areaFilterConfig?.options}
-        areaPlaceholder={areaFilterConfig?.placeholder}
-        onAreaChange={areaFilterConfig?.onChange}
-        contextChips={operationalFilterContextChips}
-        quickFacts={operationalFilterQuickFacts}
-        ariaLabel="ตัวกรองข้อมูลพื้นที่นครราชสีมา"
-        className={isDroughtWorkspaceRoute ? "is-drought-workspace-filter" : undefined}
-      />}
-
       {route.level === "province" && (
         <ProvinceView
           droughtArchive={droughtArchive}
@@ -293,8 +179,6 @@ export function NakhonRatchasimaWorkspace({
           onMonthChange={handleWorkspaceMonthChange}
         />
       )}
-
-      {!hasScopedDataGovernanceSection && !showMobileProvinceOverviewIdentity && <SourceFreshness />}
     </div>
   );
 }

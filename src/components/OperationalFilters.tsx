@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
-import { CalendarDays, Edit3, Leaf, MapPin, ShieldAlert, X } from "lucide-react";
+import { CalendarDays, Edit3, Leaf, MapPin, ShieldAlert, TrendingUp, X } from "lucide-react";
 import type { AppSelectOption } from "./AppSelect";
 import { AppSelect } from "./AppSelect";
 import { months, provinces } from "../data/catalog";
@@ -37,6 +37,7 @@ type OperationalFiltersProps = {
   quickFacts?: FilterSummaryFact[];
   ariaLabel?: string;
   className?: string;
+  compactOverview?: boolean;
 };
 
 const scopedHazardOptions: AppSelectOption[] = [{ value: "All", label: "ภัยแล้ง" }];
@@ -74,6 +75,7 @@ export function OperationalFilters({
   quickFacts = [],
   ariaLabel = "ตัวกรองการปฏิบัติการ",
   className,
+  compactOverview = false,
 }: OperationalFiltersProps) {
   const state = useAppState();
   const dispatch = useAppDispatch();
@@ -107,7 +109,7 @@ export function OperationalFilters({
           options: areaPlaceholder ? [{ value: "", label: areaPlaceholder, disabled: true }, ...areaOptions] : areaOptions,
         }
       : null;
-  const itemCount = filterCount(Boolean(areaSelectConfig), contextChips.length);
+  const itemCount = filterCount(Boolean(areaSelectConfig), compactOverview ? 0 : contextChips.length);
   const monthLabel = labelForOption(resolvedMonthOptions, selectedMonth, formatMonth(selectedMonth, language));
   const hazardLabel = labelForOption(scopedHazardOptions, state.selectedHazard, scopedHazardOptions[0].label);
   const cropLabel = labelForOption(scopedCropOptions, state.selectedCrop, scopedCropOptions[0].label);
@@ -128,11 +130,11 @@ export function OperationalFilters({
         id: `context-${chip.label}-${chip.value}`,
         label: chip.label,
         value: chip.value,
-        icon: <MapPin size={16} />,
+        icon: compactOverview ? <TrendingUp size={16} /> : <MapPin size={16} />,
       });
     });
     return items;
-  }, [areaSelectConfig?.label, areaSummaryLabel, contextChips, cropLabel, hazardLabel, language, monthLabel]);
+  }, [areaSelectConfig?.label, areaSummaryLabel, compactOverview, contextChips, cropLabel, hazardLabel, language, monthLabel]);
 
   useEffect(() => {
     if (!isEditorOpen) return;
@@ -183,38 +185,41 @@ export function OperationalFilters({
 
   return (
     <section
-      className={["control-band", "operational-filters", `filter-count-${itemCount}`, className ?? ""].join(" ")}
+      className={["control-band", "operational-filters", `filter-count-${itemCount}`, compactOverview ? "is-overview-filter" : "", className ?? ""].join(" ")}
       aria-label={ariaLabel}
     >
       <div className="operational-filter-fields">
         <AppSelect
           label={t("month", language)}
+          icon={compactOverview ? <CalendarDays size={20} /> : undefined}
+          compactValue={compactOverview}
           value={selectedMonth}
           onChange={changeMonth}
           options={resolvedMonthOptions}
         />
-        <AppSelect
+        {compactOverview ? <div className="operational-fixed-field"><ShieldAlert size={20} aria-hidden="true" /><span>ภัย<strong>{hazardLabel}</strong></span></div> : <AppSelect
           label={t("hazard", language)}
           value={state.selectedHazard}
           onChange={(hazard) => dispatch({ type: "setHazard", hazard })}
           options={scopedHazardOptions}
-        />
-        <AppSelect
+        />}
+        {compactOverview ? <div className="operational-fixed-field"><Leaf size={20} aria-hidden="true" /><span>พืช<strong>{cropLabel}</strong></span></div> : <AppSelect
           label={t("crop", language)}
           value={state.selectedCrop}
           onChange={(crop) => dispatch({ type: "setCrop", crop })}
           options={scopedCropOptions}
-        />
+        />}
         {areaSelectConfig && (
           <AppSelect
             label={areaSelectConfig.label}
+            icon={compactOverview ? <MapPin size={20} /> : undefined}
             value={areaSelectConfig.value}
             onChange={areaSelectConfig.onChange}
             options={areaSelectConfig.options}
             menuClassName="app-select-menu-wide"
           />
         )}
-        {contextChips.map((chip) => (
+        {!compactOverview && contextChips.map((chip) => (
           <div key={`${chip.label}-${chip.value}`} className="context-chip">
             <span>{chip.label}</span>
             <strong>{chip.value}</strong>
@@ -237,11 +242,15 @@ export function OperationalFilters({
           </button>
         </div>
         <div className="operational-filter-chip-row">
-          {summaryItems.map((item) => (
+          {summaryItems.map((item) => compactOverview && !["month", "area"].includes(item.id) ? (
+            <div key={item.id} className={`operational-filter-chip is-fixed is-${item.id}`}>
+              <span aria-hidden="true">{item.icon}</span><b>{item.value}</b>
+            </div>
+          ) : (
             <button
               key={item.id}
               type="button"
-              className="operational-filter-chip"
+              className={`operational-filter-chip is-${item.id}`}
               aria-label={`แก้ไขตัวกรอง${item.label}: ${item.value}`}
               onClick={() => setIsEditorOpen(true)}
             >
@@ -294,25 +303,25 @@ export function OperationalFilters({
               </div>
               <div className="operational-filter-sheet-row">
                 <span>ภัย</span>
-                <AppSelect
+                {compactOverview ? <strong>{hazardLabel}</strong> : <AppSelect
                   ariaLabel="เลือกภัย"
                   value={state.selectedHazard}
                   onChange={(hazard) => dispatch({ type: "setHazard", hazard })}
                   options={scopedHazardOptions}
                   compactValue
                   className="operational-filter-sheet-select"
-                />
+                />}
               </div>
               <div className="operational-filter-sheet-row">
                 <span>พืช</span>
-                <AppSelect
+                {compactOverview ? <strong>{cropLabel}</strong> : <AppSelect
                   ariaLabel="เลือกพืช"
                   value={state.selectedCrop}
                   onChange={(crop) => dispatch({ type: "setCrop", crop })}
                   options={scopedCropOptions}
                   compactValue
                   className="operational-filter-sheet-select"
-                />
+                />}
               </div>
               {areaSelectConfig && (
                 <div className="operational-filter-sheet-row">

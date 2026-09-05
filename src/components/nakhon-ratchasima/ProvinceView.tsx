@@ -1,5 +1,5 @@
 import { type NakhonRatchasimaDroughtForecastArchive, type NakhonRatchasimaMapLayer, type NakhonRatchasimaResearchPanelSummary } from "../../types";
-import { type ProvinceDashboardTab, type LocalMapMode, prefersReducedMotion } from "./workspaceModel";
+import { type ProvinceDashboardTab, type LocalMapMode } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
 import { useDroughtForecastArchiveSelection } from "./forecastModel";
 import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
@@ -12,7 +12,6 @@ import {
   PredictionReadinessPanel,
 } from "./ResearchPanels";
 import { ProvinceForecastOverview } from "./ProvinceForecastOverview";
-import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
 import { useAppState } from "../../store";
 import { useState } from "react";
 import {
@@ -20,8 +19,9 @@ import {
   getProvinceRecord,
   NAKHON_RATCHASIMA_ID,
 } from "../../domain";
-import { ContentSection } from "../ContentSection";
 import { formatMonth } from "../../i18n";
+import { DroughtOperationalDisclosure, useDroughtReadinessMap } from "./DroughtOperationalWorkspace";
+import { pathWithForecastSelection } from "./forecastModel";
 
 export function ResearchProvinceDataView({
   droughtArchive,
@@ -53,10 +53,14 @@ export function ResearchProvinceDataView({
   const attentionRecords = research.droughtAttentionLatest;
   const attentionTitle = "ตำบลภัยแล้งที่ควรตรวจสอบ";
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
+  const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
+  const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon));
 
   return (
     <section className={`nr-drought-dashboard nr-research-dashboard is-${activeTab}`}>
       <DroughtCompactForecastWorkspace
+        readinessMap={readinessMap}
+        onCloseReadinessMap={closeReadinessMap}
         level="province"
         title="คาดการณ์ภัยแล้ง 6 เดือน (T+1 ถึง T+6)"
         description="เลือกช่วงเวลา T+ เพื่ออ่านกราฟแนวโน้มและแผนที่พยากรณ์ในบริบทเดียวกัน"
@@ -76,11 +80,17 @@ export function ResearchProvinceDataView({
         selectedSubdistrictCode={selectedSubdistrictCode}
         onSelectedSubdistrictChange={onSelectedSubdistrictChange}
       />
+      <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="สถานะย้อนหลังและข้อมูลรายอำเภอ">
       <section className="nr-drought-secondary-grid" aria-label="ข้อมูลปฏิบัติการประกอบการคาดการณ์">
-        <ResearchSubdistrictAttentionPanel title={attentionTitle} records={attentionRecords} onNavigate={onNavigate} />
+        <ResearchSubdistrictAttentionPanel title={attentionTitle} records={attentionRecords} onNavigate={navigateWithForecast} />
         <ResearchDroughtSituationPanel research={research} />
       </section>
-      <ResearchDroughtDistrictPanel research={research} onNavigate={onNavigate} />
+      <ResearchDroughtDistrictPanel research={research} onNavigate={navigateWithForecast} />
+      </DroughtOperationalDisclosure>
+      <DroughtOperationalDisclosure title="พื้นที่เกษตรและความพร้อมข้อมูล" description="ข้าว · หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
+        <AgricultureImpactPanel provinceRecord={getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth)} />
+        <PredictionReadinessPanel month={formatMonth(selectedMonth, "th")} onOpenMap={openReadinessMap} />
+      </DroughtOperationalDisclosure>
       <ResearchSourceLimitsPanel research={research} />
     </section>
   );
@@ -109,60 +119,14 @@ export function ProvinceView({
 }) {
   const state = useAppState();
   const [selectedMapSubdistrictCode, setSelectedMapSubdistrictCode] = useState<string | null>(null);
-  const [showReadinessMap, setShowReadinessMap] = useState(false);
   const researchSummary = getNakhonRatchasimaResearchPanelSummary();
   const provinceRecord =
     getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth) ?? getProvinceRecord(NAKHON_RATCHASIMA_ID, state.selectedMonth);
 
-  const openPredictionReadinessMap = () => {
-    setShowReadinessMap(true);
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        document.querySelector(".nr-overview-readiness-map")?.scrollIntoView({
-          block: "center",
-          behavior: prefersReducedMotion() ? "auto" : "smooth",
-        });
-      });
-    });
-  };
-
   return (
     <>
       {activeTab === "overview" ? (
-        <>
-          <ProvinceForecastOverview layer={layer} mapMode={mapMode} onMapModeChange={onMapModeChange} onNavigate={onNavigate} />
-
-          <section className="nr-overview-support-grid" aria-label="ข้อมูลเกษตรและความพร้อมข้อมูล">
-            <div>
-              <p className="nr-forecast-overview-support-note">ข้อมูลประกอบจากชุดข้อมูลเกษตรของระบบ · {provinceRecord ? formatMonth(provinceRecord.month, "th") : "ไม่ระบุเดือน"} · ตัวเลขไร่และความเชื่อมั่นเป็นคนละชุดกับพยากรณ์รายตำบล</p>
-              <AgricultureImpactPanel provinceRecord={provinceRecord} />
-            </div>
-            <ContentSection
-              className="nr-data-readiness-section"
-              eyebrow="ความพร้อมข้อมูล"
-              title="ก่อนใช้ข้อมูลเพื่อคาดการณ์หรือตัดสินใจ"
-              description="แสดงระดับความพร้อมของข้อมูลพื้นที่ และแยกสิ่งที่ยังไม่ควรตีความเป็นระดับความเสี่ยง"
-            >
-              <div className="nr-data-readiness-stack">
-                <PredictionReadinessPanel month={formatMonth(selectedMonth, "th")} onOpenMap={openPredictionReadinessMap} />
-              </div>
-            </ContentSection>
-          </section>
-          {showReadinessMap && <section className="nr-overview-readiness-map">
-            <h3>แผนที่ความพร้อมข้อมูลพื้นที่</h3>
-            <button type="button" className="secondary-button" onClick={() => setShowReadinessMap(false)}>ปิดแผนที่ความพร้อม</button>
-            <NakhonRatchasimaLocalMap
-              target={{ valid: true, level: "province", tab: "overview" }}
-              layer={layer}
-              mapMode="prediction-readiness"
-              researchCriteriaEnabled={false}
-              onNavigate={onNavigate}
-              selectedMonth={selectedMonth}
-              monthOptions={monthOptions}
-              onMonthChange={onMonthChange}
-            />
-          </section>}
-        </>
+        <ProvinceForecastOverview provinceRecord={provinceRecord} layer={layer} mapMode={mapMode} onMapModeChange={onMapModeChange} onNavigate={onNavigate} />
       ) : droughtArchive ? (
         <ResearchProvinceDataView
           droughtArchive={droughtArchive}

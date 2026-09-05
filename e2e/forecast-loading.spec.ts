@@ -34,7 +34,7 @@ test("failed archive loads can retry without losing target or horizon", async ({
   await expect(page.locator(".nr-drought-compact-workspace")).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath("archive-load-error.png"), fullPage: true });
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "บ้านเก่า", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("T+4");
   await expect(page.locator(".nr-forecast-archive-mode-section")).toContainText("2 · เสี่ยงสูง");
   await expect(page).toHaveURL(/target=2025-12&horizon=4/);

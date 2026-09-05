@@ -4,9 +4,15 @@ import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import {
   forecastArchiveHorizonValues, forecastArchiveSummaryForSelection, forecastArchiveRiskLabel,
   forecastArchiveRecordForSubdistrict, forecastArchiveTrendMonthsForSelection,
+  pathWithForecastSelection,
 } from "../src/components/nakhon-ratchasima/forecastModel";
 
 const archive = archiveJson as unknown as NakhonRatchasimaDroughtForecastArchive;
+
+it("carries a forecast selection through area routes without losing other query or hash state", () => {
+  expect(pathWithForecastSelection("/dan-khun-thot/t-300806?view=area#history", "2025-09", 4))
+    .toBe("/dan-khun-thot/t-300806?view=area&mapLayer=forecast-archive&target=2025-09&horizon=4#history");
+});
 
 it("preserves every canonical target/horizon count after extracting the forecast model", () => {
   for (const month of archive.targetMonths) for (const horizon of forecastArchiveHorizonValues) {

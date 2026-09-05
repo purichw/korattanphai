@@ -77,7 +77,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       value: `${formatThaiNumber(summary.noRiskSubdistricts)} ตำบล`,
       detail: "ค่าที่พยากรณ์ = 0",
       icon: <ShieldAlert size={18} />,
-      tone: "good",
+      tone: summary.matchedSubdistricts > 0 ? "good" : "muted",
       provenance: summary.matchedSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
     },
     {
@@ -197,6 +197,7 @@ export function DroughtForecastArchiveMapFilters({
         onClick={onReset}
         disabled={resetDisabled}
         title="ล้างเงื่อนไขแผนที่"
+        aria-label="รีเซ็ต"
       >
         <RotateCcw size={14} />
         <span>รีเซ็ต</span>

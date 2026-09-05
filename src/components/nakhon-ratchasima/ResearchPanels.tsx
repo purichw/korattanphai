@@ -53,6 +53,7 @@ import {
 } from "./workspaceModel";
 import {
   DashboardSection,
+  DashboardDetailPanel,
   ResearchStatGrid,
   PanelTitle,
   DataGovernanceGuardrailList,
@@ -115,18 +116,19 @@ export function ProvinceDashboardHeading({ research }: { research: NakhonRatchas
 }
 
 export function ResearchDroughtSituationPanel({ research }: { research: NakhonRatchasimaResearchPanelSummary }) {
+  const hasData = research.meta.normalizedRowCount > 0;
   return (
     <DashboardSection
       eyebrow="ข้อมูลภัยแล้ง"
       title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่"
       description="ใช้สถานะภัยแล้งที่จัดมาตรฐานแล้วเป็นแกนหลัก เพื่อแยกพื้นที่เฝ้าระวังออกจากพื้นที่ปกติในเดือนล่าสุด"
-      provenance="DERIVED"
+      provenance={hasData ? "DERIVED" : "PENDING_SOURCE"}
       className="nr-drought-situation-section"
     >
-      <ResearchStatGrid>
+      {hasData ? <ResearchStatGrid>
         <MetricCard label="เฝ้าระวังเดือนล่าสุด" value={`${formatThaiNumber(research.latest.droughtWatchSubdistricts)} ตำบล`} provenance="DERIVED" tone="watch" />
         <MetricCard label="ปกติเดือนล่าสุด" value={`${formatThaiNumber(research.latest.droughtNormalSubdistricts)} ตำบล`} provenance="DERIVED" tone="good" />
-      </ResearchStatGrid>
+      </ResearchStatGrid> : <EmptyLocalEvidence />}
     </DashboardSection>
   );
 }
@@ -155,6 +157,7 @@ export function ResearchDroughtDistrictPanel({
       provenance="DERIVED"
       className="nr-follow-up-section"
     >
+      {districts.length === 0 && <EmptyLocalEvidence />}
       <div className="nr-research-list">
         {districts.map((record) => {
           const status = districtResearchRiskStatus(record);
@@ -194,6 +197,7 @@ export function ResearchSubdistrictAttentionPanel({
           </button>
         ))}
       </div>
+      {records.length === 0 && <EmptyLocalEvidence />}
       <p className="provenance-note">เปิดพื้นที่เพื่อดูลำดับชั้นพื้นที่ จังหวัดนครราชสีมา → อำเภอ → ตำบล</p>
     </section>
   );
@@ -892,6 +896,9 @@ export function ProvinceForecastArchiveEntryCard() {
 export function ProvinceDashboardMapCard({
   target,
   showMonthFilter,
+  compactOverview = false,
+  readinessMode = false,
+  onCloseReadiness,
   activeTab,
   layer,
   mapMode,
@@ -909,6 +916,9 @@ export function ProvinceDashboardMapCard({
 }: {
   target?: NakhonRatchasimaRouteTarget;
   showMonthFilter?: boolean;
+  compactOverview?: boolean;
+  readinessMode?: boolean;
+  onCloseReadiness?: () => void;
   activeTab: ProvinceDashboardTab;
   layer: NakhonRatchasimaMapLayer;
   mapMode: LocalMapMode;
@@ -927,8 +937,8 @@ export function ProvinceDashboardMapCard({
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
   const mapMonthLabel = localResearchPeriodLabel(activeResearchPeriod);
-  const hasForecastArchive = Boolean(forecastArchiveMonth && forecastArchive);
-  const title = hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
+  const hasForecastArchive = Boolean(forecastArchiveMonth && forecastArchive && !readinessMode);
+  const title = readinessMode ? "แผนที่ความพร้อมข้อมูลพื้นที่" : hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     hasForecastArchive && forecastArchiveMonth
       ? `เดือนเป้าหมาย ${forecastArchiveMonth.labelTh} · T+${forecastArchiveHorizon ?? 1} จากรอบข้อมูล ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
@@ -946,21 +956,25 @@ export function ProvinceDashboardMapCard({
         <div>
           <p className="eyebrow">แผนที่</p>
           <h2>{title}</h2>
-          <span>{helper}</span>
+          <span>{readinessMode ? "ความพร้อมข้อมูล ไม่ใช่ระดับความรุนแรงของภัย" : helper}</span>
         </div>
+        {readinessMode && <button type="button" className="secondary-button nr-return-forecast" onClick={onCloseReadiness}>กลับแผนที่พยากรณ์</button>}
       </div>
       <NakhonRatchasimaLocalMap
         target={target ?? { valid: true, level: "province", tab: activeTab }}
         showMonthFilter={showMonthFilter}
+        compactForecast={compactOverview}
+        overviewLayout={compactOverview}
+        researchCriteriaEnabled={!readinessMode}
         layer={layer}
-        mapMode={mapMode}
+        mapMode={readinessMode ? "prediction-readiness" : mapMode}
         onMapModeChange={onMapModeChange}
         onNavigate={onNavigate}
         selectedMonth={selectedMonth}
         monthOptions={monthOptions}
         onMonthChange={onMonthChange}
-        forecastArchive={forecastArchive}
-        forecastArchiveMonth={forecastArchiveMonth}
+        forecastArchive={readinessMode ? undefined : forecastArchive}
+        forecastArchiveMonth={readinessMode ? undefined : forecastArchiveMonth}
         forecastArchiveHorizon={forecastArchiveHorizon}
         forecastArchiveIssueMonth={forecastArchiveIssueMonth}
         selectedSubdistrictCode={selectedSubdistrictCode}
@@ -973,29 +987,29 @@ export function ProvinceDashboardMapCard({
 export function AgricultureVisibilityPanel({
   facts,
   provenance,
+  compact = false,
+  context,
 }: {
   facts: AgriculturalVisibilityFact[];
   provenance: DataProvenanceChipKind;
+  compact?: boolean;
+  context?: ReactNode;
 }) {
+  const metrics = <MetricGrid className="nr-agri-impact-summary" variant="segmented" ariaLabel="พื้นที่เกษตรที่นำมาประเมิน">
+    {facts.map((fact) => <MetricCard key={fact.id} className="nr-agri-impact-cell" label={fact.label} value={fact.value} detail={fact.detail} icon={fact.icon} tone={fact.tone ?? "default"} />)}
+  </MetricGrid>;
+  if (compact) return <DashboardDetailPanel className="nr-home-agriculture" provenance={provenance} title="พื้นที่เกษตรที่นำมาประเมิน" icon={<Leaf size={20} />} preview={metrics}>
+    {context}
+    <p>พื้นที่ในขอบเขตประเมินและพื้นที่เสี่ยงสูงเป็นข้อมูลเกษตรระดับจังหวัด ไม่ใช่ตัวเลขเสียหายทางการ และไม่ใช่ผลรวมจากแผนที่พยากรณ์รายตำบล</p>
+    <p>ยังไม่มีรายละเอียดไร่และความเชื่อมั่นรายอำเภอในชุดข้อมูลนี้</p>
+  </DashboardDetailPanel>;
   return (
     <section className="nr-dashboard-module nr-agri-impact-module">
       <div className="nr-module-title-row">
         <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่นำมาประเมิน" />
         <DataProvenanceChip kind={provenance} />
       </div>
-      <MetricGrid className="nr-agri-impact-summary" variant="segmented" ariaLabel="พื้นที่เกษตรที่นำมาประเมิน">
-        {facts.map((fact) => (
-          <MetricCard
-            key={fact.id}
-            className="nr-agri-impact-cell"
-            label={fact.label}
-            value={fact.value}
-            detail={fact.detail}
-            icon={fact.icon}
-            tone={fact.tone ?? "default"}
-          />
-        ))}
-      </MetricGrid>
+      {metrics}
       <p className="nr-compact-note nr-agri-impact-disclaimer">
         <Info size={15} aria-hidden="true" />
         ไม่ใช่ตัวเลขเสียหายทางการ
@@ -1004,7 +1018,7 @@ export function AgricultureVisibilityPanel({
   );
 }
 
-export function AgricultureImpactPanel({ provinceRecord }: { provinceRecord: ProvinceMonthRisk | undefined }) {
+export function AgricultureImpactPanel({ provinceRecord, compact = false }: { provinceRecord: ProvinceMonthRisk | undefined; compact?: boolean }) {
   if (!provinceRecord) {
     return (
       <section className="nr-dashboard-module nr-agri-impact-module">
@@ -1019,6 +1033,8 @@ export function AgricultureImpactPanel({ provinceRecord }: { provinceRecord: Pro
 
   return (
     <AgricultureVisibilityPanel
+      compact={compact}
+      context={<p>ข้อมูลเกษตรระดับจังหวัด · {formatMonth(provinceRecord.month, "th")} · ความเชื่อมั่นของข้อมูล {labelConfidence(provinceRecord.confidence, "th")}</p>}
       provenance={dataProvenanceChipKindFromText(provinceRecord.provenance)}
       facts={[
         {
@@ -1115,10 +1131,12 @@ export function PredictionReadinessPanel({
   month,
   onOpenMap,
   readiness = predictionReadinessSummary(),
+  compact = false,
 }: {
   month: string;
   onOpenMap: () => void;
   readiness?: PredictionReadinessSummary;
+  compact?: boolean;
 }) {
   const readyPercentLabel = formatPercent(readiness.readyPercent, 1);
   const clampedReadyPercent = clamp(readiness.readyPercent, 0, 100);
@@ -1148,6 +1166,18 @@ export function PredictionReadinessPanel({
       tone: "watch",
     },
   ];
+
+  if (compact) return <DashboardDetailPanel className="nr-home-readiness" provenance="DERIVED" title="ความพร้อมข้อมูล" icon={<Gauge size={20} />} preview={
+    <div className="nr-home-readiness-headline">
+      <div className="nr-readiness-gauge" style={{ "--ready-progress": `${clampedReadyPercent}%` } as CSSProperties} aria-hidden="true"><strong>{formatThaiNumber(readiness.readySubdistricts)}</strong><span>จาก {formatThaiNumber(readiness.totalSubdistricts)}</span></div>
+      <div><span>ข้อมูลพร้อมระดับพื้นที่</span><strong>{formatThaiNumber(readiness.readySubdistricts)} / {formatThaiNumber(readiness.totalSubdistricts)} ตำบล</strong><small>ความพร้อมข้อมูล ไม่ใช่ระดับภัย</small></div>
+    </div>
+  }>
+    <dl className="nr-readiness-breakdown-list">{breakdownItems.map((item) => <div key={item.id} className={`is-${item.tone}`}><dt><i aria-hidden="true" />{item.label}</dt><dd>{formatThaiNumber(item.count)} ตำบล</dd></div>)}</dl>
+    <p>{readiness.readiestLevelLabel} · ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด · บริบทข้อมูล {month}</p>
+    <p>รายการเหล่านี้เป็นสถานะความพร้อมของข้อมูลและหลักฐานคนละประเภท ไม่ใช่ระดับภัยที่เกิดแล้ว</p>
+    <button type="button" className="secondary-button nr-readiness-map-action" onClick={onOpenMap}><MapIcon size={18} aria-hidden="true" />ดูความพร้อมบนแผนที่</button>
+  </DashboardDetailPanel>;
 
   return (
     <section className="nr-panel nr-prediction-readiness" aria-label="สถานะข้อมูลสำหรับคาดการณ์">

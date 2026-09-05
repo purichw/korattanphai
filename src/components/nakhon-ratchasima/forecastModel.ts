@@ -129,6 +129,14 @@ export function writeForecastArchiveLocation(month: NakhonRatchasimaDroughtForec
   window.history.replaceState(null, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
 }
 
+export function pathWithForecastSelection(path: string, period: string, horizon: ForecastArchiveHorizon) {
+  const url = new URL(path, "https://workspace.invalid");
+  url.searchParams.set("mapLayer", "forecast-archive");
+  url.searchParams.set("target", period);
+  url.searchParams.set("horizon", String(horizon));
+  return `${url.pathname}?${url.searchParams.toString()}${url.hash}`;
+}
+
 export function forecastArchiveIssueMonthForSelection(
   month: NakhonRatchasimaDroughtForecastArchiveTargetMonth,
   horizon: ForecastArchiveHorizon,

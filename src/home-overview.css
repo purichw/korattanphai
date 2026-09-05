@@ -1,0 +1,226 @@
+/* Home v4 shares primitives with the archive; only its composition is scoped. */
+.is-home-overview { --shadow: 0 2px 8px rgb(26 49 41 / 4%); --radius: 8px; background: #edf3f1; }
+.is-home-overview .main-panel { padding: 18px 22px; position: relative; }
+.is-home-overview .content-area { margin-top: 0; }
+.is-home-overview .nr-workspace, .nr-forecast-overview { gap: 12px; }
+.is-home-overview .nr-forecast-overview-heading { min-height: 76px; align-items: end; }
+.nr-forecast-overview-heading h1 { margin: 3px 0; font-size: 30px; line-height: 1.25; }
+.nr-forecast-overview-heading .eyebrow { margin: 0; font-size: 14px; color: var(--muted); }
+.nr-forecast-overview-heading > div > p:last-child { font-size: 12px; margin: 0; }
+.is-home-overview .nr-forecast-overview-heading > p { margin: 0 0 5px; font-size: 11px; }
+.is-home-overview .nr-forecast-overview-context { margin: -4px 0 0; gap: 4px 12px; font-size: 11px; }
+.is-overview-filter.control-band { margin: 0; padding: 8px; border: 1px solid #dce5e2; border-radius: 8px; box-shadow: none; }
+.is-overview-filter .operational-filter-fields { gap: 10px; align-items: stretch; }
+.is-overview-filter .operational-filter-fields > .app-select-field { row-gap: 0; }
+.is-overview-filter .operational-filter-fields > .app-select-field,
+.operational-fixed-field { min-width: 0; min-height: 46px; padding: 4px 10px; border: 1px solid #d5e1dd; border-radius: 6px; background: white; display: grid; grid-template-columns: 22px minmax(0,1fr); column-gap: 8px; align-content: center; }
+.is-overview-filter .operational-filter-fields .app-select-label { grid-column: 2; margin: 0; padding: 0; position: static; font-size: 11px; text-align: center; }
+.is-overview-filter .operational-filter-fields .app-select-icon { position: static; grid-column: 1; grid-row: 1 / 3; align-self: center; color: #08724f; }
+.is-overview-filter .operational-filter-fields .app-select-trigger { grid-column: 2; min-height: 24px; padding: 0 20px; border: 0; background: transparent; box-shadow: none; font-size: 14px; }
+.is-overview-filter .operational-filter-fields .app-select-value { white-space: normal; line-height: 1.35; }
+.operational-fixed-field { align-items: center; color: #08724f; }
+.operational-fixed-field > span { display: grid; font-size: 11px; color: var(--muted); text-align: center; }
+.operational-fixed-field strong { font-size: 14px; color: var(--ink); }
+.is-home-overview .app-select-option-copy > span { text-align: center; }
+.is-home-overview .app-select-option-copy > small { text-align: left; }
+.nr-home-situation.metric-grid { grid-template-columns: 1.2fr .7fr 1fr 1fr; margin: 0; padding: 10px 0; border: 0; border-block: 1px solid #d8e3df; border-radius: 0; background: white; }
+.nr-home-situation .metric-card { min-height: 64px; padding: 4px 16px; background: transparent; border: 0; border-radius: 0; grid-template-columns: 42px minmax(0,1fr); column-gap: 10px; justify-items: center; align-content: center; }
+.nr-home-situation .metric-card + .metric-card { border-left: 1px solid #dfe7e4; }
+.nr-home-situation .metric-card-icon { grid-row: 1 / 3; grid-column: 1; width: 42px; height: 42px; border-radius: 50%; color: #08724f; background: #e9f4ef; }
+.nr-home-situation .metric-card-label, .nr-home-situation .metric-card-value { grid-column: 2; justify-self: stretch; text-align: center; }
+.nr-forecast-overview .nr-home-situation .metric-card-label { font-size: 12px; line-height: 1.45; }
+.nr-forecast-overview .nr-home-situation .metric-card-value { font-size: 21px; line-height: 1.4; }
+.nr-home-situation .is-watch .metric-card-value { color: #ba6c00; }
+.nr-home-situation .is-watch .metric-card-icon { color: #d47c00; background: #fff0d5; }
+.is-home-overview .nr-forecast-overview-grid { position: relative; grid-template-columns: minmax(0,1.63fr) minmax(330px,1fr); grid-template-rows: auto minmax(0,1fr); gap: 0 12px; align-items: stretch; }
+.is-home-overview .nr-forecast-overview-summary { padding: 14px 16px 0; background: white; border-radius: 8px 8px 0 0; }
+.is-home-overview .nr-forecast-overview-summary-heading h3 { font-size: 16px; }
+.is-home-overview .nr-forecast-overview-summary-heading p { margin: 4px 0 10px; }
+.is-home-overview .nr-forecast-overview-summary .metric-card { min-height: 76px; padding: 8px 12px; grid-template-columns: 36px minmax(0,1fr); column-gap: 6px; justify-items: center; align-content: center; }
+.is-home-overview .nr-forecast-overview-summary .metric-card-icon { grid-column: 1; grid-row: 1 / 3; width: 36px; height: 36px; border-radius: 50%; }
+.is-home-overview .nr-forecast-overview-summary .metric-card-label,
+.is-home-overview .nr-forecast-overview-summary .metric-card-value { grid-column: 2; text-align: center; justify-self: stretch; }
+.is-home-overview .nr-forecast-overview-summary .metric-card-value { font-size: 22px; }
+.is-home-overview .nr-forecast-overview-summary .is-danger .metric-card-icon { background: #ffe4e7; color: #ed3046; }
+.is-home-overview .nr-forecast-overview-summary .is-watch .metric-card-icon { background: #fff0d7; color: #a27115; }
+.is-home-overview .nr-forecast-overview-summary .is-good .metric-card-icon { background: #e7f3ee; color: #0b7958; }
+.is-home-overview .nr-forecast-overview-summary .is-muted .metric-card-icon { background: #eaf0ef; color: #3a5c54; }
+.is-home-overview .nr-forecast-overview-scope-note { display: none; }
+.is-home-overview .nr-forecast-overview-attention { padding: 6px 16px 12px; background: white; border-radius: 0 0 8px 8px; }
+.nr-home-attention-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.nr-home-attention-heading h3 { font-size: 15px; }
+.nr-home-text-action { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 4px 0; color: #086785; background: none; border: 0; white-space: nowrap; font-size: 12px; }
+.nr-home-text-action[aria-expanded=true] svg { transform: rotate(180deg); }
+.is-home-overview .nr-forecast-overview-attention > p { margin: 1px 0 4px; font-size: 11px; }
+.is-home-overview .nr-forecast-overview-attention > .nr-home-list-context { display: none; }
+.is-home-overview .nr-forecast-overview-attention ul { max-height: 168px; overflow-y: auto; overscroll-behavior: contain; }
+.is-home-overview .nr-forecast-overview-attention li a { min-height: 54px; padding: 6px 0; gap: 10px; }
+.nr-home-rank { display: grid; place-items: center; flex: 0 0 26px; height: 26px; background: #e53c4e; color: white; border-radius: 50%; font-size: 14px; }
+.nr-home-area-name { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.is-home-overview .nr-forecast-overview-attention li strong { font-size: 14px; }
+.is-home-overview .nr-forecast-overview-attention .status-pill { background: transparent; color: #d8283f; padding: 0; font-size: 12px; white-space: nowrap; }
+.is-home-overview .nr-forecast-overview-details { position: absolute; top: 31px; right: 16px; width: auto; min-height: 32px; padding: 4px 0; margin: 0; font-size: 11px; color: #086785; border: 0; background: none; }
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 472px; min-height: 0; position: relative; border: 1px solid #dce5e2; border-radius: 8px; box-shadow: none; grid-template-rows: 66px minmax(0,1fr); overflow: visible; }
+.is-home-overview .nr-dashboard-map-header { display: grid; grid-row: 1; align-content: start; align-items: start; padding: 10px 14px; background: white; border: 0; }
+.is-home-overview .nr-dashboard-map-header > div { max-width: calc(100% - 246px); }
+.is-home-overview .nr-dashboard-map-header .eyebrow { display: none; }
+.is-home-overview .nr-dashboard-map-header h2 { font-size: 16px; margin: 0; line-height: 1.4; }
+.is-home-overview .nr-dashboard-map-header span { font-size: 11px; line-height: 1.4; }
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel { grid-row: 2; height: 100%; min-height: 0; border-radius: 0 0 8px 8px; overflow: visible; }
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-svg { width: 100%; height: 100%; min-height: 0; border-radius: 0 0 8px 8px; }
+.is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { display: grid; position: absolute; top: -54px; right: 12px; left: auto; bottom: auto; width: 238px; max-width: calc(100% - 24px); grid-template-columns: minmax(0,1fr) 30px; gap: 5px; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.is-home-overview .nr-local-map-select { min-width: 0; }
+.is-home-overview .nr-local-map-select .app-select-trigger { min-height: 38px; height: auto; padding: 7px 22px; font-size: 12px; border-radius: 6px; }
+.is-home-overview .nr-local-map-reset { min-height: 36px; min-width: 30px; padding: 5px; }
+.is-home-overview .nr-local-map-reset span { display: none; }
+.is-home-overview .nr-map-controls { position: absolute; top: 12px; left: 12px; right: auto; display: grid; grid-template-columns: 36px; gap: 4px; width: 36px; max-width: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.is-home-overview .nr-map-controls .icon-button { width: 36px; height: 36px; min-height: 36px; min-width: 36px; padding: 6px; border: 1px solid #cbdad4; border-radius: 5px; background: white; }
+.is-home-overview .nr-map-panel .nr-map-legend { left: 12px; right: auto; bottom: 10px; width: auto; max-width: calc(100% - 24px); padding: 7px 10px; gap: 8px; border-radius: 8px; justify-content: center; }
+.is-home-overview .nr-map-legend > strong { display: none; }
+.is-home-overview .nr-map-panel .nr-map-legend span { font-size: 11px; }
+.is-home-overview .nr-map-panel .nr-map-legend i { width: 11px; height: 11px; }
+.is-home-overview .nr-map-preview-card dl { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.nr-map-distance-scale { pointer-events: none; font-size: 12px; fill: #31584b; }
+.nr-map-recovery-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.is-home-overview .nr-dashboard-map-card:has(.nr-return-forecast) { grid-template-rows: 66px minmax(0,1fr); }
+.is-home-overview .nr-return-forecast { position: absolute; right: 12px; top: 13px; min-height: 38px; font-size: 12px; }
+.is-home-overview .nr-map-panel:fullscreen { height: 100dvh !important; border-radius: 0; }
+.is-home-overview .nr-map-panel:fullscreen .nr-local-map-criteria { top: 12px; }
+.is-home-overview .nr-map-panel:fullscreen .nr-map-svg { height: 100%; }
+.nr-home-support { display: grid; grid-template-columns: 1.35fr 1fr .85fr; gap: 12px; align-items: start; }
+.nr-home-support > * { min-width: 0; }
+.nr-detail-panel { position: relative; min-width: 0; border-block: 1px solid #d8e3df; background: white; padding: 10px 12px; }
+.nr-detail-panel > .data-provenance-chip { position: absolute; top: 18px; right: 38px; }
+.nr-detail-panel h3 { margin: 0 0 10px; }
+.nr-detail-panel h3 button { width: 100%; min-height: 30px; display: flex; gap: 10px; align-items: center; padding: 0; border: 0; background: none; text-align: left; color: var(--ink); font-size: 16px; }
+.nr-detail-panel h3 button > span:nth-child(2) { flex: 1; padding-right: 14px; }
+.nr-detail-panel h3 button[aria-expanded=true] > svg { transform: rotate(180deg); }
+.nr-detail-panel .panel-icon { color: #08724f; background: #e9f4ef; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; }
+.nr-detail-panel-body { position: relative; font-size: 12px; line-height: 1.6; padding-top: 10px; }
+.nr-detail-panel-body[hidden] { display: none; }
+.nr-detail-panel-body p { margin: 8px 0; }
+.nr-home-agriculture .nr-agri-impact-summary { grid-template-columns: repeat(4,minmax(0,1fr)); border: 0; border-radius: 0; }
+.nr-home-agriculture .metric-card { min-height: 102px; padding: 8px 5px; display: grid; grid-template-columns: minmax(0,1fr); align-content: center; justify-items: center; text-align: center; border-radius: 0; }
+.nr-home-agriculture .metric-card-icon { display: none; }
+.nr-home-agriculture .metric-card-label, .nr-home-agriculture .metric-card-value { grid-column: 1; justify-self: stretch; text-align: center; }
+.nr-home-agriculture .metric-card-label { font-size: 11px; line-height: 1.45; }
+.nr-home-agriculture .metric-card-value { font-size: 17px; line-height: 1.5; white-space: normal; }
+.nr-home-readiness-headline { display: flex; gap: 12px; align-items: center; min-height: 102px; }
+.nr-home-readiness .nr-readiness-gauge { flex: 0 0 92px; width: 92px; height: 92px; }
+.nr-home-readiness-headline > div:last-child { min-width: 0; display: grid; gap: 3px; font-size: 12px; }
+.nr-home-readiness-headline > div:last-child > strong { font-size: 18px; }
+.nr-home-readiness-headline small { color: var(--muted); font-size: 11px; }
+.nr-home-readiness .nr-readiness-breakdown-list { border: 0; }
+.nr-home-readiness .nr-readiness-breakdown-list > div { padding: 7px 0; }
+.nr-home-archive { background: white; border-block: 1px solid #d8e3df; padding: 10px 12px; }
+.nr-home-archive h3 { display: flex; align-items: center; gap: 10px; min-height: 30px; margin: 0 0 10px; font-size: 16px; }
+.nr-home-archive h3 svg { color: #08724f; }
+.nr-home-archive a { display: flex; align-items: center; gap: 12px; padding: 14px; min-height: 102px; background: #e8f4ee; color: #165d49; text-decoration: none; }
+.nr-home-archive a > span { display: grid; gap: 4px; flex: 1; min-width: 0; font-size: 14px; }
+.nr-home-archive a small { color: #4a6861; }
+.nr-home-footer { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; align-items: start; }
+.nr-home-footer .nr-forecast-overview-support-note { margin: 0; padding: 8px 0; font-size: 11px; }
+.nr-home-footer .nr-forecast-overview-source { border: 0; padding: 0; }
+.nr-home-footer .nr-forecast-overview-source summary { min-height: 32px; display: flex; gap: 6px; align-items: center; color: #4e6660; list-style: none; }
+.nr-home-footer details[open] { grid-column: 1 / -1; border-top: 1px solid #d8e3df; }
+.nr-home-footer summary::-webkit-details-marker { display: none; }
+@media (min-width: 1181px) {
+  .is-home-overview { grid-template-columns: 208px minmax(0,1fr); }
+  .is-home-overview > .sidebar { width: 208px; padding: 20px 12px; }
+  .is-home-overview .brand-mark.is-sidebar-logo { width: 164px; }
+  .is-home-overview .topbar { position: absolute; top: 14px; right: 22px; min-height: 0; padding: 0; z-index: 40; }
+  .is-home-overview .nr-forecast-overview-heading > p { margin-top: 54px; }
+}
+@media (min-width: 721px) and (max-width: 1180px) {
+  .is-home-overview .main-panel { padding: 14px 16px; }
+  .is-home-overview .topbar { min-height: 0; padding: 0; position: absolute; right: 16px; top: 14px; }
+  .is-home-overview .nr-forecast-overview-heading { padding-top: 0; }
+  .is-home-overview .nr-forecast-overview-heading > p { max-width: 240px; padding-top: 50px; line-height: 1.4; }
+  .is-home-overview .nr-forecast-overview-grid { grid-template-columns: minmax(0,1.3fr) minmax(285px,1fr); }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 490px; grid-template-rows: 106px minmax(0,1fr); }
+  .is-home-overview .nr-dashboard-map-header > div { max-width: none; }
+  .is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { top: -44px; right: 10px; width: calc(100% - 20px); }
+  .nr-home-situation .metric-card { padding: 5px 8px; column-gap: 5px; grid-template-columns: 28px minmax(0,1fr); }
+  .nr-home-situation .metric-card-icon { width: 28px; height: 28px; }
+  .nr-forecast-overview .nr-home-situation .metric-card-value { font-size: 17px; }
+  .nr-home-situation .metric-card-label { font-size: 11px; }
+  .is-home-overview .nr-forecast-overview-summary, .is-home-overview .nr-forecast-overview-attention { padding-inline: 10px; }
+  .is-home-overview .nr-forecast-overview-details { position: static; width: 100%; margin-top: 6px; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card { grid-template-columns: 26px minmax(0,1fr); padding: 8px 4px; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card-icon { width: 26px; height: 26px; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card-label { font-size: 12px; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card-value { font-size: 19px; }
+  .nr-home-support { grid-template-columns: 1.25fr 1fr; }
+  .nr-home-archive { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; }
+  .nr-home-archive h3 { margin: 0; }
+  .nr-home-archive a { min-height: 56px; flex: 1; padding: 8px 12px; }
+  .is-home-overview .nr-return-forecast { top: 62px; }
+}
+@media (max-width: 720px) {
+  .is-home-overview .main-panel { padding: 14px; }
+  .is-home-overview .brand-mark.is-sidebar-logo { width: 68px; height: 60px; }
+  .is-home-overview .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+  .is-home-overview .nr-forecast-overview-heading.nr-dashboard-heading { display: grid; gap: 6px; min-height: 0; }
+  .nr-forecast-overview-heading h1 { font-size: 26px; }
+  .nr-forecast-overview-heading .eyebrow, .nr-forecast-overview-heading > div > p:last-child { font-size: 13px; }
+  .is-home-overview .nr-forecast-overview-heading > p { padding: 0; margin: 0; font-size: 11px; }
+  .is-home-overview .nr-forecast-overview-heading .nr-forecast-overview-context { font-size: 11px; display: grid; gap: 1px; }
+  .is-overview-filter.control-band.operational-filters { padding: 10px; border-radius: 8px; }
+  .is-overview-filter .operational-filter-chip-row { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 6px; }
+  .is-overview-filter .operational-filter-chip { grid-column: span 2; min-height: 44px; padding: 5px; gap: 5px; border-radius: 6px; font-size: 12px; }
+  .is-overview-filter .operational-filter-chip.is-month { grid-column: span 4; }
+  .is-overview-filter .operational-filter-chip.is-hazard { grid-column: span 2; }
+  .is-overview-filter .operational-filter-chip.is-fixed { cursor: default; }
+  .is-overview-filter .operational-filter-chip b { white-space: normal; line-height: 1.35; text-align: center; }
+  .is-overview-filter .operational-filter-mobile-summary { gap: 7px; }
+  .is-overview-filter .operational-filter-summary-head strong { font-size: 15px; }
+  .is-overview-filter .operational-filter-edit { min-height: 32px; padding: 4px 8px; border-radius: 6px; }
+  .nr-home-situation { display: none; }
+  .is-home-overview .nr-forecast-overview-grid { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto auto; grid-template-areas: "summary" "map" "attention"; gap: 10px; }
+  .is-home-overview .nr-forecast-overview-summary { padding: 0; background: none; border: 0; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card { min-height: 82px; padding: 8px; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card-value { font-size: 21px; }
+  .is-home-overview .nr-forecast-overview-summary .metric-card-label { font-size: 12px; }
+  .is-home-overview .nr-forecast-overview-summary-heading h3 { font-size: 16px; }
+  .is-home-overview .nr-forecast-overview-summary-heading p { margin: 2px 0 7px; }
+  .is-home-overview .nr-forecast-overview-scope-note { display: none; }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 366px; grid-template-rows: 88px minmax(0,1fr); }
+  .is-home-overview .nr-dashboard-map-header { padding: 10px; }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card .nr-dashboard-map-header { display: grid; }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map .nr-map-svg { height: 100%; min-height: 0; }
+  .is-home-overview .nr-dashboard-map-header > div { max-width: none; }
+  .is-home-overview .nr-dashboard-map-header h2 { font-size: 15px; }
+  .is-home-overview .nr-dashboard-map-header span { display: none; }
+  .is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { top: -47px; left: 10px; right: 10px; width: auto; max-width: none; padding: 0; border: 0; grid-template-columns: minmax(0,1fr) 36px; }
+  .is-home-overview .nr-local-map-select .app-select-trigger { min-height: 38px; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-select .app-select-trigger { min-height: 38px; border-radius: 6px; padding: 6px 24px; box-shadow: none; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-reset { display: inline-flex; align-items: center; justify-content: center; width: 36px; min-height: 38px; padding: 6px; border-radius: 6px; box-shadow: none; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-filter-status { grid-column: 1 / -1; min-height: 18px; padding: 0; margin: 0; font-size: 10px; }
+  .is-home-overview .nr-dashboard-map-card:has(.nr-local-map-filter-status) { grid-template-rows: 110px minmax(0,1fr); }
+  .is-home-overview .nr-dashboard-map-card:has(.nr-local-map-filter-status) .nr-local-map-criteria { top: -69px; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls { top: 10px; left: 10px; bottom: auto; right: auto; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid #cbdad4; border-radius: 5px; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-legend { bottom: 7px; left: 7px; right: 7px; width: auto; max-width: none; margin: 0; padding: 6px; gap: 5px 8px; }
+  .is-home-overview .nr-map-panel .nr-map-legend span { font-size: 10px; }
+  .is-home-overview .nr-map-preview-card.is-touch { max-height: calc(100% - 12px); padding: 12px 10px; border-radius: 8px; }
+  .is-home-overview .nr-map-preview-card.is-touch dl { max-height: none; min-height: 0; }
+  .is-home-overview .nr-return-forecast { top: 43px; right: 10px; left: 10px; }
+  .is-home-overview .nr-forecast-overview-attention { padding: 10px; border-radius: 0; border-block: 1px solid #d8e3df; }
+  .is-home-overview .nr-forecast-overview-attention ul { max-height: 180px; }
+  .is-home-overview .nr-forecast-overview-attention li a { min-height: 58px; }
+  .is-home-overview .nr-forecast-overview-details { position: static; width: 100%; min-height: 40px; margin-top: 8px; padding: 5px 8px; border: 1px solid #d1ddd8; border-radius: 6px; }
+  .is-home-overview .nr-forecast-overview-attention > .nr-home-list-context { display: block; }
+  .nr-home-support { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .nr-home-agriculture .metric-card { min-height: 86px; }
+  .nr-home-agriculture .metric-card-label { font-size: 10px; }
+  .nr-home-agriculture .metric-card-value { font-size: 15px; }
+  .nr-home-readiness-headline { min-height: 90px; }
+  .nr-home-archive { display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
+  .nr-home-archive h3 { font-size: 13px; margin: 0; }
+  .nr-home-archive h3 svg { display: none; }
+  .nr-home-archive a { flex: 1; min-height: 50px; padding: 8px; gap: 8px; }
+  .nr-home-archive a > svg:first-child { display: none; }
+  .nr-home-archive a > span { font-size: 12px; }
+  .nr-home-footer { grid-template-columns: minmax(0,1fr); gap: 0; }
+  .nr-home-footer .nr-forecast-overview-support-note { font-size: 10px; padding: 0; }
+}

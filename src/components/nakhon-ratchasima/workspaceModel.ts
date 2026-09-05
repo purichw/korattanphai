@@ -695,6 +695,16 @@ export function createProjection(features: NakhonRatchasimaGeoFeature[]): Projec
   };
 }
 
+export function localMapScale(projection: Projection, transform: LocalMapTransform) {
+  const unitsPerDegree = projection.x(1) - projection.x(0);
+  const centerY = (localMapHeight / 2 - transform.y) / transform.k;
+  const latitude = (projection.y(0) - centerY) / (projection.y(0) - projection.y(1));
+  // Approximate east-west distance at the visible center of this local projection.
+  const kmPerUnit = (111.32 * Math.cos(latitude * Math.PI / 180)) / (unitsPerDegree * transform.k);
+  const distanceKm = [1, 2, 5, 10, 20, 25, 50, 100].filter((km) => km / kmPerUnit <= 130).at(-1) ?? 1;
+  return { distanceKm, width: distanceKm / kmPerUnit };
+}
+
 export function pathForGeometry(geometry: NakhonRatchasimaGeoFeature["geometry"], projection: Projection) {
   const ringPath = (ring: number[][]) =>
     ring

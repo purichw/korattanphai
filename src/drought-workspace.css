@@ -1,0 +1,228 @@
+/* Forecast routes share one compact surface; the province overview is unchanged. */
+.is-operational-drought {
+  --shadow: 0 2px 8px rgb(26 49 41 / 4%);
+  --radius: 8px;
+  background: #f3f6f7;
+}
+.is-operational-drought .main-panel { padding: 20px 22px; }
+.is-operational-drought .content-area { margin-top: 0; }
+.is-drought-route, .is-drought-route .nr-area-template, .is-drought-route .nr-drought-dashboard { gap: 10px; }
+.is-drought-route .nr-operational-header { display: grid; gap: 3px; padding: 0; background: none; border: 0; box-shadow: none; }
+.nr-operational-header h1 { margin: 3px 0 0; font-size: 32px; line-height: 1.2; }
+.nr-operational-header h1 span { font-size: 24px; }
+.nr-operational-header p { margin: 0; font-size: 14px; line-height: 1.5; }
+.nr-operational-header small { color: var(--muted); font-size: 12px; line-height: 1.5; }
+.nr-operational-header .nr-page-back-link { justify-self: start; padding: 0; min-height: 28px; font-size: 13px; }
+.nr-operational-filters { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; padding: 0; min-width: 0; }
+.nr-operational-filters > * { min-width: 0; }
+.nr-operational-filters .app-select-field, .nr-fixed-filter { min-height: 58px; padding: 6px 10px; border: 1px solid #d9e3e7; border-radius: 8px; background: #fff; }
+.nr-operational-filters .app-select-field { display: grid; grid-template-columns: 22px minmax(0,1fr); gap: 1px 6px; align-content: center; }
+.nr-operational-filters .app-select-label { position: static; grid-column: 2; padding: 0; margin: 0; background: none; text-align: center; font-size: 12px; line-height: 1.3; }
+.nr-operational-filters .app-select-icon { position: static; grid-row: 1 / 3; align-self: center; color: #008143; }
+.nr-operational-filters .app-select-trigger { grid-column: 2; min-height: 28px; padding: 0 20px; border: 0; background: none; box-shadow: none; font-size: 15px; }
+.nr-operational-filters .app-select-trigger > svg { right: 0; }
+.nr-operational-filters .app-select-value { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35; }
+.nr-fixed-filter { display: grid; grid-template-columns: 22px minmax(0,1fr); align-items: center; gap: 6px; }
+.nr-fixed-filter > svg { color: #008143; }
+.nr-fixed-filter span { text-align: center; font-size: 12px; color: var(--muted); }
+.nr-fixed-filter strong { display: block; color: var(--ink); font-size: 15px; line-height: 1.5; }
+.is-drought-route .app-select-option-copy > span { text-align: center; }
+.is-drought-route .app-select-option-copy > small { text-align: left; }
+.is-drought-route .nr-drought-compact-workspace { padding: 10px 0 0; gap: 10px; border: 0; border-top: 1px solid #dce5e7; border-radius: 0; background: none; box-shadow: none; overflow: visible; }
+.is-drought-route .nr-drought-workspace-head h2 { font-size: 18px; line-height: 1.4; }
+.is-drought-route .nr-drought-workspace-head .eyebrow,
+.is-drought-route .nr-drought-workspace-head p:not(.eyebrow) { display: none; }
+.is-drought-route .nr-drought-workspace-body {
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  grid-template-areas: "horizon context" "map chart" "kpis kpis" "details details";
+  gap: 10px;
+}
+.is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs { height: 100%; border-radius: 8px; }
+.is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button { min-height: 62px; padding: 7px 3px; }
+.is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 16px; }
+.is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs span { font-size: 11px; line-height: 1.35; white-space: normal; }
+.is-drought-route .nr-drought-workspace-context { border-color: #d9e3e7; border-radius: 8px; background: #fff; }
+.is-drought-route .nr-drought-workspace-context > div { grid-template-columns: minmax(0,1fr); padding: 6px 4px; gap: 2px; min-height: 62px; text-align: center; }
+.is-drought-route .nr-drought-workspace-context-icon { display: none; }
+.is-drought-route .nr-drought-workspace-context dt { font-size: 11px; line-height: 1.4; }
+.is-drought-route .nr-drought-workspace-context strong { font-size: 14px; line-height: 1.4; white-space: normal; color: #086794; }
+.is-drought-route .nr-drought-workspace-context small { display: none; }
+.is-drought-route .nr-drought-workspace-context .is-crop { order: 4; }
+.is-drought-route .nr-drought-workspace-context .is-crop strong { color: #008143; }
+.is-drought-route .nr-drought-workspace-chart-card,
+.is-drought-route .nr-drought-workspace-map-card { min-height: 0; height: 330px; padding: 10px; gap: 6px; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-chart-card { grid-template-rows: auto minmax(0,1fr) auto; }
+.is-drought-route .nr-drought-workspace-card-heading { min-height: 0; margin: 0; padding: 0; }
+.is-drought-route .nr-drought-workspace-map-card .nr-dashboard-map-header { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 6px; border: 0; background: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-dashboard-map-header .data-provenance-chip { margin: 0; }
+.is-drought-route .nr-drought-workspace-card-heading h3 { font-size: 14px; line-height: 1.4; }
+.is-drought-route .nr-drought-workspace-card-heading .eyebrow,
+.is-drought-route .nr-drought-workspace-card-heading > div > span { display: none; }
+.is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-graph { min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; display: grid; grid-template-rows: minmax(0,1fr) auto; }
+.is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-svg { width: 100%; height: 100%; min-height: 0; }
+.is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-legend { gap: 6px 12px; font-size: 11px; padding: 0; }
+.is-drought-route .nr-drought-workspace-chart-card .nr-compact-note { margin: 0; font-size: 11px; line-height: 1.45; font-weight: 500; }
+.is-drought-route .nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-panel { display: grid; grid-template-rows: auto minmax(0,1fr) auto; min-height: 0; height: 100%; overflow: visible; border-radius: 0; box-shadow: none; }
+.is-drought-route .nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-panel .nr-map-svg { grid-row: 2; width: 100%; height: 100%; min-height: 0; border-radius: 0; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-criteria.is-forecast-archive-controls { position: relative; inset: auto; grid-row: 1; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 32px; gap: 6px; width: 100%; max-width: none; margin: 0; padding: 0 0 6px; border: 0; border-radius: 0; box-shadow: none; background: #fff; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-select { min-width: 0; }
+.is-drought-route .nr-drought-workspace-map-card .app-select-trigger { min-height: 34px; height: auto; font-size: 12px; padding: 4px 22px; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset { min-width: 32px; min-height: 34px; padding: 6px; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset span { display: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-controls { position: absolute; top: 48px; right: 6px; left: auto; bottom: auto; display: grid; grid-template-columns: 32px; gap: 4px; width: 32px; max-width: none; padding: 0; overflow: visible; background: none; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 5px; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-legend { position: static; grid-row: 3; display: flex; flex-wrap: wrap; justify-content: center; width: 100%; max-width: none; margin: 0; padding: 6px 2px 0; gap: 5px 10px; border: 0; border-radius: 0; background: #fff; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-legend > strong { display: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-legend span { font-size: 10px; line-height: 1.4; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-legend i { width: 10px; height: 10px; }
+.is-drought-route .nr-drought-workspace-map-card:has(.nr-return-forecast) { grid-template-rows: auto auto minmax(0,1fr); }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-panel:fullscreen { height: 100svh; padding: 12px; background: #eef3f1; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-preview-card { padding: 10px; gap: 6px; border-radius: 8px; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-preview-card:not(.is-touch) dl { min-height: 0; max-height: none; margin: 0; overscroll-behavior: contain; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-preview-card .map-preview-action { margin-top: 4px; }
+.is-drought-route .nr-drought-workspace-kpis { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; overflow: visible; border: 0; border-radius: 0; background: none; }
+.is-drought-route .nr-drought-workspace-kpis:has(.is-missing) { grid-template-columns: repeat(6,minmax(0,1fr)); }
+.is-drought-route .nr-drought-workspace-kpis > div { grid-template-columns: 28px minmax(0,1fr); padding: 10px 12px; min-height: 72px; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; text-align: center; justify-items: center; gap: 3px 6px; }
+.is-drought-route .nr-drought-workspace-kpis dt { font-size: 12px; line-height: 1.4; }
+.is-drought-route .nr-drought-workspace-kpis strong { font-size: 18px; line-height: 1.3; white-space: normal; }
+.is-drought-route .nr-drought-workspace-kpis small { font-size: 11px; line-height: 1.4; font-weight: 500; }
+.is-drought-route .nr-drought-workspace-kpis .data-provenance-chip { display: none; }
+.is-drought-route .nr-drought-workspace-kpis .is-info strong { color: #086794; }
+.is-drought-route .nr-drought-workspace-kpis .is-watch strong { color: #b86100; }
+.is-drought-route .nr-drought-workspace-kpis .is-danger strong { color: #d32630; }
+.is-drought-route .nr-drought-workspace-kpis .is-watch .metric-card-icon { color: #b86100; background: #fff4e1; }
+.is-drought-route .nr-drought-workspace-kpis .is-danger .metric-card-icon { color: #d32630; background: #fff0f1; }
+.is-drought-route .nr-drought-workspace-kpis .is-info .metric-card-icon { color: #086794; background: #eaf5fb; }
+.is-drought-route .nr-drought-workspace-details { border: 0; padding: 0; background: none; }
+.is-drought-route .nr-drought-workspace-details > summary { min-height: 28px; padding: 2px 0; font-size: 12px; }
+.nr-operational-forecast-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+.nr-operational-forecast-summary { display: flex; gap: 10px; align-items: center; padding: 12px; background: #f0f8f3; border: 1px solid #d4e8dc; border-radius: 8px; }
+.nr-operational-forecast-summary > svg { color: #008143; flex-shrink: 0; }
+.nr-operational-forecast-summary > div { flex: 1; text-align: center; }
+.nr-operational-forecast-summary h3 { margin: 0; font-size: 14px; line-height: 1.4; }
+.nr-operational-forecast-summary strong { display: block; margin: 3px 0; font-size: 18px; color: #116b43; }
+.nr-operational-forecast-summary small { display: block; font-size: 12px; color: var(--muted); }
+.nr-operational-forecast-summary.has-risk { background: #fff8ec; border-color: #ecd8b5; }
+.nr-operational-forecast-summary.has-risk strong, .nr-operational-forecast-summary.has-risk > svg { color: #a35d00; }
+.nr-operational-forecast-summary.has-no-data { background: #f6f8f8; border-color: #dce5e7; }
+.nr-operational-forecast-summary.has-no-data strong, .nr-operational-forecast-summary.has-no-data > svg { color: var(--muted); }
+.nr-operational-disclosure { min-width: 0; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; }
+.nr-operational-disclosure > summary { display: flex; align-items: center; gap: 12px; min-height: 70px; padding: 12px 14px; cursor: pointer; list-style: none; }
+.nr-operational-disclosure > summary::-webkit-details-marker { display: none; }
+.nr-operational-disclosure > summary > svg:first-child { flex-shrink: 0; color: #168154; }
+.nr-operational-disclosure > summary > span { min-width: 0; flex: 1; }
+.nr-operational-disclosure > summary strong { display: block; font-size: 14px; line-height: 1.45; }
+.nr-operational-disclosure > summary small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.nr-operational-disclosure > summary > svg:last-child { flex-shrink: 0; }
+.nr-operational-disclosure[open] > summary > svg:last-child { transform: rotate(90deg); }
+.nr-operational-disclosure > summary:focus-visible { outline: 3px solid #2a8a66; outline-offset: 2px; border-radius: 8px; }
+.nr-operational-disclosure-body { padding: 0 14px 14px; display: grid; gap: 12px; }
+.nr-operational-disclosure-body .nr-panel,
+.nr-operational-disclosure-body .nr-area-heading { border: 0; border-radius: 0; box-shadow: none; }
+.nr-operational-attention-list { padding: 0; margin: 0; max-height: 320px; overflow: auto; overscroll-behavior: contain; list-style: none; }
+.nr-operational-attention-list button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #e6ecee; background: none; text-align: left; font-size: 13px; }
+.nr-operational-attention-list strong { flex-shrink: 0; }
+.nr-operational-guidance { background: #fff9f0; border-color: #efdfbf; }
+.nr-operational-guidance li, .nr-operational-guidance p { font-size: 13px; line-height: 1.6; }
+.is-drought-route .nr-data-transparency { padding: 0; border-color: #dce5e7; box-shadow: none; }
+.is-drought-route .nr-data-transparency-heading { display: none; }
+.is-drought-route .nr-data-transparency-rows { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.is-drought-route .nr-data-transparency-row > summary { min-height: 68px; padding: 12px 14px; }
+.is-drought-route .nr-data-transparency-row > summary strong { font-size: 14px; }
+.is-drought-route .nr-data-transparency-row > summary small { font-size: 11px; font-weight: 500; }
+.is-drought-route .nr-data-transparency-row[open] { grid-column: 1 / -1; }
+.is-drought-route .metric-card-label, .is-drought-route .metric-card-value { text-align: center; }
+.is-drought-route .metric-card-detail { text-align: left; }
+.is-drought-route .nr-drought-workspace-kpis .metric-card > .metric-card-icon { grid-column: 1; grid-row: 1 / 4; width: 28px; height: 28px; margin: 0; }
+.is-drought-route .nr-drought-workspace-kpis .metric-card > :is(.metric-card-label,.metric-card-value,.metric-card-detail) { grid-column: 2; justify-self: stretch; text-align: center; }
+.is-drought-route .nr-drought-workspace-kpis .metric-card > .metric-card-label { font-size: 12px; line-height: 1.4; }
+.is-drought-route .nr-drought-workspace-kpis .metric-card > .metric-card-value { font-size: 18px; line-height: 1.3; }
+@media (min-width: 1181px) {
+  .app-shell.is-operational-drought { grid-template-columns: 208px minmax(0,1fr); }
+  .is-operational-drought .sidebar { padding-inline: 14px; }
+  .is-operational-drought .brand-mark.is-sidebar-logo { width: 162px; height: 152px; }
+  .is-drought-route .nr-operational-header { gap: 2px; }
+  .nr-operational-header .nr-page-back-link { min-height: 24px; }
+  .is-drought-route .nr-drought-dashboard, .is-drought-route .nr-area-template { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); }
+  .is-drought-route .nr-drought-dashboard > *, .is-drought-route .nr-area-template > * { grid-column: 1 / -1; }
+  .is-drought-route .nr-operational-forecast-actions { display: contents; }
+  .is-drought-route .nr-operational-forecast-summary,
+  .is-drought-route .nr-operational-disclosure { grid-column: span 1; min-height: 116px; }
+  .is-drought-route .nr-operational-disclosure[open] { grid-column: 1 / -1; }
+  .is-drought-route .nr-operational-forecast-summary { padding: 12px 10px; gap: 6px; }
+  .is-drought-route .nr-operational-forecast-summary strong { font-size: 16px; }
+  .is-drought-route .nr-operational-disclosure > summary { height: 100%; align-items: flex-start; padding: 14px 10px; gap: 8px; }
+  .is-drought-route .nr-operational-disclosure[open] > summary { height: auto; }
+  .is-drought-route .nr-operational-disclosure > summary > svg:last-child { align-self: center; width: 14px; }
+}
+@media (min-width: 721px) and (max-width: 1180px) {
+  .is-operational-drought .main-panel { padding: 16px; }
+  .nr-operational-header h1 { font-size: 28px; }
+  .is-drought-route .nr-drought-workspace-body { grid-template-areas: "horizon horizon" "context context" "map chart" "kpis kpis" "details details"; }
+  .is-drought-route .nr-drought-workspace-context > div { min-height: 52px; }
+  .is-drought-route .nr-drought-workspace-kpis > div { grid-template-columns: minmax(0,1fr); padding: 8px; }
+  .is-drought-route .nr-drought-workspace-kpi-icon { display: none; }
+  .is-drought-route .nr-drought-workspace-kpis .metric-card > .metric-card-icon { display: none; }
+  .is-drought-route .nr-drought-workspace-kpis .metric-card > :is(.metric-card-label,.metric-card-value,.metric-card-detail) { grid-column: 1; }
+  .is-drought-route .nr-drought-workspace-kpis strong { font-size: 16px; }
+}
+@media (min-width: 721px) and (max-width: 900px) {
+  .is-drought-route .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "chart" "map" "details"; grid-template-columns: minmax(0,1fr); }
+  .is-drought-route .nr-drought-workspace-map-card { height: 400px; }
+  .is-drought-route .nr-drought-workspace-chart-card { height: 310px; }
+}
+@media (max-width: 720px) {
+  .is-operational-drought .main-panel { padding: 12px 14px 24px; }
+  .is-operational-drought .sidebar { min-height: 76px; padding-top: max(6px,env(safe-area-inset-top)); padding-bottom: 6px; }
+  .is-operational-drought .brand-mark.is-sidebar-logo { width: 84px; height: 64px; }
+  .is-operational-drought .brand-mark.is-sidebar-logo img { width: 84px; height: 64px; object-fit: contain; }
+  .nr-operational-header h1 { font-size: 28px; }
+  .nr-operational-header h1 span { font-size: 22px; }
+  .nr-operational-header p { font-size: 13px; line-height: 1.5; }
+  .nr-operational-header small { font-size: 11px; }
+  .nr-operational-filters { grid-template-columns: repeat(6,minmax(0,1fr)); gap: 8px; padding: 4px 0; }
+  .nr-operational-filters > * { grid-column: span 2; }
+  .nr-operational-filters .nr-operational-area-filter,
+  .nr-operational-filters .nr-operational-horizon-filter { grid-column: span 3; }
+  .nr-operational-filters .app-select-field, .nr-fixed-filter { padding: 6px; min-height: 58px; }
+  .nr-operational-filters .app-select-field { grid-template-columns: minmax(0,1fr); }
+  .nr-operational-filters .app-select-icon { display: none; }
+  .nr-operational-filters .app-select-label, .nr-operational-filters .app-select-trigger { grid-column: 1; }
+  .nr-operational-filters .app-select-label { font-size: 11px; }
+  .nr-operational-filters .app-select-trigger { font-size: 13px; padding: 0 15px 0 0; }
+  .nr-fixed-filter { grid-template-columns: 18px minmax(0,1fr); gap: 3px; }
+  .nr-fixed-filter > svg { width: 18px; }
+  .nr-fixed-filter strong { font-size: 14px; }
+  .is-drought-route .nr-drought-workspace-head h2 { font-size: 16px; }
+  .is-drought-route .nr-drought-workspace-body { grid-template-columns: minmax(0,1fr); grid-template-areas: "horizon" "context" "kpis" "chart" "map" "details"; gap: 8px; }
+  .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs { grid-template-columns: repeat(6,minmax(0,1fr)); width: 100%; overflow: visible; }
+  .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button { min-height: 60px; padding: 6px 2px; }
+  .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 14px; }
+  .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs span { font-size: 10px; }
+  .is-drought-route .nr-drought-workspace-context { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .is-drought-route .nr-drought-workspace-context > div { min-height: 54px; }
+  .is-drought-route .nr-drought-workspace-context .is-coverage { display: none; }
+  .is-drought-route .nr-drought-workspace-context strong { font-size: 13px; }
+  .is-drought-route .nr-drought-workspace-kpis,
+  .is-drought-route .nr-drought-workspace-kpis:has(.is-missing) { grid-template-columns: repeat(2,minmax(0,1fr)); overflow: visible; gap: 6px; }
+  .is-drought-route .nr-drought-workspace-kpis > div { min-height: 68px; padding: 8px; }
+  .is-drought-route .nr-drought-workspace-kpis .is-coverage { grid-column: 1 / -1; order: 10; min-height: 56px; grid-template-columns: 28px minmax(0,1fr); }
+  .is-drought-route .nr-drought-workspace-kpis strong { font-size: 17px; }
+  .is-drought-route .nr-drought-workspace-kpis dt { font-size: 11px; }
+  .is-drought-route .nr-drought-workspace-kpis small { font-size: 10px; }
+  .is-drought-route .nr-drought-workspace-chart-card { height: 270px; padding: 8px; }
+  .is-drought-route .nr-drought-workspace-map-card { height: 350px; padding: 8px; }
+  .is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-legend { font-size: 10px; }
+  .is-drought-route .nr-drought-workspace-chart-card .nr-compact-note { font-size: 10px; }
+  .is-drought-route .nr-drought-workspace-card-heading h3 { font-size: 13px; }
+  .is-drought-route .nr-drought-workspace-map-card .nr-map-controls { grid-template-columns: 36px; width: 36px; gap: 4px; top: 48px; }
+  .is-drought-route .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 36px; height: 36px; }
+  .is-drought-route .nr-drought-workspace-map-card .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid #d4dfda; border-radius: 5px; background: white; }
+  .is-drought-route .nr-drought-workspace-map-card .app-select-trigger { min-height: 38px; }
+  .is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-preview-card.is-touch { max-height: calc(100% - 24px); padding: 14px 10px 10px; border-radius: 8px; }
+  .is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-preview-card.is-touch dl { min-height: 0; max-height: none; overscroll-behavior: contain; }
+  .nr-operational-forecast-actions { grid-template-columns: minmax(0,1fr); }
+  .nr-operational-disclosure > summary { padding: 12px; min-height: 72px; }
+  .nr-operational-attention-list button { flex-wrap: wrap; gap: 4px; }
+  .is-drought-route .nr-data-transparency-rows { grid-template-columns: minmax(0,1fr); }
+}

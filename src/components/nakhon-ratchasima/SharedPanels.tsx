@@ -9,8 +9,8 @@ import {
   factRows,
   translateLimitation,
 } from "./workspaceModel";
-import { AlertTriangle } from "lucide-react";
-import { type ReactNode } from "react";
+import { AlertTriangle, ChevronDown } from "lucide-react";
+import { useId, useState, type ReactNode } from "react";
 import { MetricCard } from "../PageSummary";
 
 export function EvidenceCard({ record, inherited = false }: { record: NakhonRatchasimaEvidenceRecord; inherited?: boolean }) {
@@ -154,6 +154,26 @@ export function DashboardAccordionSection({
       </details>
     </section>
   );
+}
+
+export function DashboardDetailPanel({ title, icon, preview, children, provenance, className = "" }: {
+  title: string;
+  icon: ReactNode;
+  preview: ReactNode;
+  children: ReactNode;
+  className?: string;
+  provenance?: DataProvenanceChipKind;
+}) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  return <section className={`nr-detail-panel ${className}`}>
+    {provenance && <DataProvenanceChip kind={provenance} />}
+    <h3><button type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)}>
+      <span className="panel-icon" aria-hidden="true">{icon}</span><span>{title}</span><ChevronDown size={18} aria-hidden="true" />
+    </button></h3>
+    <div className="nr-detail-panel-preview">{preview}</div>
+    <div id={id} className="nr-detail-panel-body" hidden={!open}>{children}</div>
+  </section>;
 }
 
 export const dataGovernanceGuardrailItems = [

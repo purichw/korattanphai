@@ -17,6 +17,103 @@ state in `localStorage`.
 
 ## Recent Changes
 
+Compact dashboard release checkpoint (2026-09-05):
+
+- User authorized commit, push and production deployment of the Home v4 and
+  shared compact drought/district/subdistrict work described below. Publish
+  branch: `fix/nr-map-zoom-performance`; no merge into `main` is implied.
+- Final release build: `tmp-snapshots/release-compact-20260905-build`.
+  TypeScript, protected assets, exposure and bundle-budget checks passed.
+  Its index and JS/CSS/JSON assets are byte-identical to the Home v4 build
+  already inspected across desktop, tablet and mobile. Canonical source data,
+  generated archive data and GeoJSON have no changes in this release.
+- Final full protected-build E2E:56 passed,6 configured skips,0 failures in1.5m.
+  Output: `tmp-snapshots/release-compact-20260905-e2e`. This supersedes the
+  earlier combined-run evidence below. Unit/data evidence:63 passed on the
+  same source/dependencies. Existing large-chunk warning remains non-fatal.
+- Production target: `https://korattanphai.vercel.app`. After publication, run
+  the read-only smoke harness with output at
+  `smoke-results/release-compact-20260905`; local build results alone are not
+  evidence that the production alias has been updated.
+- Pre-release production recovery deployment: `dpl_Ddjv9NnwyRsXoUFFhuAHvDAfmVrs`
+  (`https://korattanphai-o2ajhjjmi-purichwc-1517s-projects.vercel.app`, Ready
+  before this release). Previous source: `2117253ce3a49c8bb2805c93f83d89190c0db1f6`.
+  Recovery would promote that deployment and rerun production smoke; no
+  rollback is requested or performed. Earlier parked water/history removals
+  remain intentional and unchanged.
+- Real Safari and new network benchmarks are outside this release pass.
+
+Home Overview v4 (2026-09-05, local; not pushed/deployed):
+
+- `/` now follows the supplied v4 interaction documents and three image
+  references: compact filters, a passive situation strip, aligned map/risk panel,
+  three high-risk area links, agriculture/readiness disclosures and archive link.
+  Mobile shows counts before the map, then area links and expandable details.
+- Reuses `OperationalFilters`/`AppSelect`, `MetricGrid`/`MetricCard`, the existing
+  agriculture/readiness panels and the shared SVG map. New `DashboardDetailPanel`
+  separates its explicit disclosure button from passive preview statistics.
+  Opt-in Home variants leave drought/district/subdistrict defaults intact.
+- Short stats/dropdown values remain centered; long descriptions remain left
+  aligned. All high-risk areas are reachable in-place, with context-preserving
+  drilldown. Readiness switches the same map instance and has a return action.
+- Real T+1 archive target/issue dates, risk semantics, provenance and no-data
+  behavior are preserved. No live timestamp, district rai, model confidence or
+  ThaiWater data was invented/restored. Agriculture has separate province-wide
+  scope and provenance. The Home loader still avoids the full forecast archive.
+- Unit/data tests:63 passed. Full protected-build E2E:53 passed,3 failed,6 skips;
+  obsolete filter assertions and a test hydration race were corrected. Final
+  focused protected-build rerun:25 passed,1 skip. All56 active scenarios passed
+  across the full run and focused rerun, not one final full-suite execution.
+- Final build: `tmp-snapshots/home-v4-verified-build`. TypeScript, exposure,
+  bundle/reference checks and canonical archive identity passed. Startup107,787
+  gzip bytes; the existing large-chunk warning remains.
+- Screenshots/metrics: `tmp-snapshots/home-v4-accepted-3eatug`. Desktop, reference
+  tablet, both tablet orientations and mobile have no horizontal overflow, with
+  fonts/logo loaded and no page errors or HTTP4xx/5xx responses. Fullscreen and
+  disclosure states were also checked. Desktop height1476 ->1002px; mobile
+  height2399 ->1799px, through disclosure rather than information removal.
+- See `HOME_OVERVIEW_PARITY.md` for reference identities, measured landmarks,
+  visual exceptions, comparison provenance and exact verification scope. Real
+  Safari, production and new network benchmarks were intentionally not run.
+
+Compact drought operational workspace (2026-09-05, local; not pushed/deployed):
+
+- `/drought`, district and subdistrict routes share one compact forecast
+  composition, header, real forecast filters and expandable operational details.
+  The retired historical-month filter is no longer the primary page filter.
+- Short stat labels/values and dropdown values center. Main statistics reuse
+  `MetricGrid`/`MetricCard`; all dropdowns reuse `AppSelect`. Mobile shows every
+  risk count without horizontal scrolling, then coverage, chart and map.
+- Desktop map/chart align, with full-width statistics below. Sources, limitations,
+  agriculture, historical evidence and readiness remain accessible. Empty
+  historical data is unavailable, not a reassuring zero-count state.
+- Area navigation now carries target/horizon. Readiness switches the existing
+  map instance and provides a return action. Compact camera fitting respects the
+  global maximum zoom and keeps the selected subdistrict inside the viewport.
+- Canonical forecast/geodata bytes and root T+1 overview behavior are unchanged.
+  No ThaiWater or invented low-risk data was restored. Reference decisions and
+  visual exceptions: `DROUGHT_WORKSPACE_PARITY.md`.
+- Verification: 60 unit/data tests passed. The full protected-build E2E run
+  passed 48 scenarios, failed one compact-map popup containment scenario and
+  retained five existing skips. After fixing popup bounds, the final targeted
+  run passed all 10 scenarios (popup actions, shared compact routes and dropdown
+  wheel isolation). All 49 active scenarios therefore passed across the full
+  run and focused rerun, not in one final full-suite run.
+- Final protected build passed TypeScript, exposure, bundle/reference checks and
+  canonical archive byte identity. Output: `tmp-snapshots/drought-parity-closeout-build`.
+  Startup is 107,905 gzip bytes; the existing large-chunk warning remains.
+- Current screenshots and `metrics.json`:
+  `tmp-snapshots/drought-parity-accepted-wLeXFO`. All nine captures loaded the
+  font, had no horizontal page overflow, and measured centered KPI labels/values.
+  Capture recorded no page errors or HTTP 4xx/5xx responses. Fullscreen entered
+  and exited successfully with a visible 1,002px-high SVG.
+- At 1586x992 the province page is 1,022px tall (previously 1,684px); at 390x844
+  it is 2,096px (previously 2,885px). District/subdistrict mobile heights fell
+  from 6,438/4,846px to 2,077/2,137px through disclosure, not data removal.
+- Chromium desktop/mobile and both tablet orientations were checked. Real
+  Safari, production and a new network benchmark were intentionally skipped.
+  Earlier deployment checkpoints below do not mean this local UI was deployed.
+
 Combined release checkpoint (2026-09-05):
 
 - The user authorized committing, pushing and deploying all work from both

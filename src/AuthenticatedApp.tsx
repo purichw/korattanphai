@@ -363,18 +363,19 @@ function AppShell({
   const nakhonRoute = appRoute.kind === "nakhon-ratchasima" ? appRoute.target : null;
   const provinceRoute = appRoute.kind === "province-workspace" ? appRoute.target : null;
   const isDroughtSubNavActive = Boolean(
-    nakhonRoute?.valid && nakhonRoute.level === "province" && nakhonRoute.tab === "drought",
+    nakhonRoute?.valid && (nakhonRoute.level !== "province" || nakhonRoute.tab === "drought"),
   );
+  const isHomeOverview = Boolean(nakhonRoute?.valid && nakhonRoute.level === "province" && nakhonRoute.tab === "overview");
 
   const sectionLabel = (section: AppSection) => t(section, language);
 
   return (
-    <div className="app-shell" lang={language}>
+    <div className={`app-shell${isDroughtSubNavActive ? " is-operational-drought" : ""}${isHomeOverview ? " is-home-overview" : ""}`} lang={language}>
       <aside className={isMobileMenuOpen ? "sidebar mobile-menu-open" : "sidebar"} aria-label="เมนูหลัก">
         <div className="brand-lockup is-logo-only">
           <div className="brand-mark is-sidebar-logo">
             <picture>
-              <source media="(max-width: 720px)" srcSet="/brand/korat-tan-phai-emblem.webp" />
+              <source media="(max-width: 720px)" srcSet={isDroughtSubNavActive || isHomeOverview ? "/brand/korat-tan-phai-sidebar-logo.webp" : "/brand/korat-tan-phai-emblem.webp"} />
               <img
                 src="/brand/korat-tan-phai-sidebar-logo.webp"
                 width="640"

@@ -5,7 +5,6 @@ import {
   summarizeResearchAreaRecords,
   researchMonthlySeriesForSubdistrict,
   predictionReadinessSummaryForSubdistrictCodes,
-  prefersReducedMotion,
   localResearchPeriodLabel,
 } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
@@ -23,6 +22,7 @@ import {
 } from "./ResearchPanels";
 import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
 import { ContentSection } from "../ContentSection";
+import { DroughtOperationalDisclosure, useDroughtReadinessMap } from "./DroughtOperationalWorkspace";
 
 export function SubdistrictView({
   droughtArchive,
@@ -59,21 +59,13 @@ export function SubdistrictView({
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
   const subdistrictCodes = [subdistrict.subdistrictCode];
   const readiness = predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes);
-  const openPredictionReadinessMap = () => {
-    onMapModeChange("prediction-readiness");
-    window.requestAnimationFrame(() => {
-      document.querySelector(".nr-subdistrict-map-status-row .nr-area-map-section, .nr-area-map-section")?.scrollIntoView({
-        block: "center",
-        behavior: prefersReducedMotion() ? "auto" : "smooth",
-      });
-    });
-  };
+  const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
 
   return (
     <div className="nr-area-template is-subdistrict">
-      <ResearchAreaHeading district={district} subdistrict={subdistrict} activePeriod={activeResearchPeriod} stats={stats} />
-
       <DroughtCompactForecastWorkspace
+        readinessMap={readinessMap}
+        onCloseReadinessMap={closeReadinessMap}
         level="subdistrict"
         title={`คาดการณ์ภัยแล้งของตำบล${subdistrict.nameTh}`}
         description="เลือก T+ ครั้งเดียวเพื่ออ่านสัญญาณพยากรณ์ของตำบลและตำแหน่งบนแผนที่ในบริบทเดียวกัน"
@@ -94,6 +86,8 @@ export function SubdistrictView({
         onMonthChange={forecastArchive.changeTargetMonth ?? onMonthChange}
       />
 
+      <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="โปรไฟล์ตำบล สถานะรายเดือน และช่องว่างข้อมูล">
+      <ResearchAreaHeading district={district} subdistrict={subdistrict} activePeriod={activeResearchPeriod} stats={stats} />
       <section className="nr-area-secondary-grid nr-subdistrict-secondary-grid" aria-label="ข้อมูลปฏิบัติการประกอบการคาดการณ์">
         <aside className="nr-subdistrict-rail" aria-label="โปรไฟล์และช่องว่างข้อมูลตำบล">
           <ResearchSubdistrictProfilePanel district={district} subdistrict={subdistrict} record={researchRecord} />
@@ -107,6 +101,8 @@ export function SubdistrictView({
         />
       </section>
       <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของตำบล" series={monthlySeries} isSubdistrict />
+      </DroughtOperationalDisclosure>
+      <DroughtOperationalDisclosure title="พื้นที่เกษตรและความพร้อมข้อมูล" description="ข้าว · หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
       <ResearchAreaAgricultureImpactPanel
         district={district}
         subdistrict={subdistrict}
@@ -122,9 +118,10 @@ export function SubdistrictView({
         <PredictionReadinessPanel
           month={localResearchPeriodLabel(activeResearchPeriod)}
           readiness={readiness}
-          onOpenMap={openPredictionReadinessMap}
+          onOpenMap={openReadinessMap}
         />
       </ContentSection>
+      </DroughtOperationalDisclosure>
       <ResearchAreaSourceLimitsPanel
         district={district}
         subdistrict={subdistrict}
