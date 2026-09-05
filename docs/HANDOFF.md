@@ -17,13 +17,15 @@ state in `localStorage`.
 
 ## Recent Changes
 
-Combined UI cleanup release checkpoint (2026-09-05):
+Combined UI cleanup production release (2026-09-05):
 
 - User authorized push/deploy of completed work from both tasks, with care not
   to mix in the active Supabase migration. The migration owner confirmed no
   remote database mutations or runtime data-provider changes at this checkpoint.
-  New migration files remain untracked and outside this release. Forecast data
-  still loads the static canonical archive; existing Supabase Auth is unchanged.
+  Migration files and subsequent runtime wiring remain local and outside this
+  release. Forecast data still loads the static canonical archive; existing
+  Supabase Auth is unchanged. No SQL/imports or remote settings were changed
+  by this release.
 - Includes district back navigation to `/drought` with target/T+ preserved,
   removal of the subdistrict-count chart only at subdistrict level, removal of
   source/limitations footer disclosures across all four page types, and the
@@ -35,15 +37,45 @@ Combined UI cleanup release checkpoint (2026-09-05):
   drilldown cases still expected the removed subdistrict chart text. Their
   assertions now verify out-of-scope versus no-risk KPIs, and both desktop and
   mobile passed the focused rerun without runtime changes.
-- Evidence: `tmp-snapshots/release-ui-cleanup-build`,
+- Runtime commit: `089c0abca4b4e84d07e3a8392f9718346d9d4921`, pushed to
+  `fix/nr-map-zoom-performance`; no merge into `main`. The full CI run for this
+  exact commit passed 102 unit tests, protected build, exposure/bundle checks,
+  generated-data drift and all 66 active E2E cases (6 existing skips):
+  `https://github.com/purichw/korattanphai/actions/runs/33963294020`.
+- Built from the clean detached checkout
+  `tmp-snapshots/release-ui-cleanup-source`, with actual Vercel Production
+  configuration and `--prod --skip-domain`. Candidate
+  `dpl_4SnrKbuepdKwJw7ZEZkAuzSUwgL3`
+  (`https://korattanphai-qox5qsvrz-purichwc-1517s-projects.vercel.app`) passed
+  login-page, API, geometry and security-header checks before promotion.
+  Vercel inspection confirms `https://korattanphai.vercel.app` now serves this
+  Ready deployment; the browser loads `/assets/index-5c5e263482.js`.
+- Production verification used an existing real authenticated Chrome session:
+  home, province drought, two districts and a subdistrict load 289 polygons;
+  source/limitations panels and synthetic agriculture numbers are absent.
+  District back returns to `/drought`, subdistrict back returns to its district,
+  and target `2025-12` / T+4 survive both actions. The subdistrict chart is
+  absent and its map spans the full 1188px body; province/district charts remain.
+  At the observed 1440x694 viewport, no horizontal overflow or broken visible
+  images were found; browser warning/error logs were empty. Screenshots were
+  inspected in the release task.
+- Hosted routes, hashed JS/CSS, both forecast JSON assets, GeoJSON and API
+  returned HTTP 200 with expected content types and cache policies; CSP and
+  nosniff passed. Fresh credential login/logout and authenticated candidate
+  smoke were not rerun: credentials were unavailable and Auth is unchanged.
+  The browser viewport override did not take effect, so hosted mobile is not
+  claimed; responsive coverage is the exact-commit desktop/mobile CI suite.
+  Real Safari and Supabase database authorization checks are outside this UI
+  release.
+- Local evidence: `tmp-snapshots/release-ui-cleanup-build`,
   `tmp-snapshots/release-ui-cleanup-e2e`, and
-  `tmp-snapshots/release-ui-cleanup-drilldown`. Hosted release/CI verification
-  is pending and must not be inferred from these local checks.
+  `tmp-snapshots/release-ui-cleanup-drilldown`.
 - Recovery deployment captured before release: `dpl_BBDCsEEYmYdLAGnZRbBk2mEYsrS9`
   (`https://korattanphai-9anrsjid7-purichwc-1517s-projects.vercel.app`).
-  Deploy the committed release from an isolated checkout, not the live checkout
-  where new migration files are being prepared. Do not apply SQL/imports or
-  change Supabase settings as part of this UI release.
+  No rollback performed. Keep the isolated checkout pinned; the primary working
+  tree now contains the other task's in-progress Supabase provider/bookmark
+  implementation. Do not deploy that working tree or change Production data
+  flags until the separate migration approval and release gate are complete.
 
 Combined Supabase Auth and UI production release (2026-09-05):
 
