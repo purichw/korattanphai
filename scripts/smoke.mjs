@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { chromium } from "@playwright/test";
+import { isDeepStrictEqual } from "node:util";
+import { buildForecastOverviewArchive } from "./generate-forecast-summary.mjs";
 
 const base = new URL(process.env.SMOKE_URL ?? "https://korattanphai.vercel.app");
 const local = ["localhost", "127.0.0.1"].includes(base.hostname);
@@ -9,6 +11,8 @@ if (!(local || (base.protocol === "https:" && /^korattanphai(?:-[a-z0-9-]+)?\.ve
   throw new Error("SMOKE_URL must be this project's Vercel deployment or localhost.");
 }
 const output = path.resolve(process.env.SMOKE_OUTPUT_DIR ?? "smoke-results");
+const databaseMode = process.env.SMOKE_DATA_BACKEND === "supabase";
+const expectedArchive = databaseMode ? JSON.parse(await fs.readFile(new URL("../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json", import.meta.url), "utf8")) : null;
 const email = process.env.SMOKE_AUTH_EMAIL?.trim();
 const password = process.env.SMOKE_AUTH_PASSWORD;
 if (!email || !password) throw new Error("Set SMOKE_AUTH_EMAIL and SMOKE_AUTH_PASSWORD securely for an admin-provisioned test account. No demo login fallback is available.");
@@ -45,13 +49,25 @@ try {
     page.setDefaultTimeout(30_000);
     const errors = [];
     const assetChecks = [];
+    const rpcChecks = [];
+    const rpcHorizons = new Set();
     page.on("pageerror", (error) => errors.push(error.message));
     page.on("requestfailed", (request) => {
       if (new URL(request.url()).origin === base.origin && request.failure()?.errorText !== "net::ERR_ABORTED") errors.push(`Request failed: ${new URL(request.url()).pathname}`);
     });
     page.on("response", (response) => {
       const url = new URL(response.url());
+      if (databaseMode && url.origin === "https://dihchjflzhcekywarhxd.supabase.co" && url.pathname === "/rest/v1/rpc/ktp_load_forecast_archive") {
+        rpcChecks.push((async () => {
+          assert.equal(response.status(), 200, "Forecast RPC status");
+          const horizon = response.request().postDataJSON().p_horizon_count;
+          const expected = horizon === 1 ? buildForecastOverviewArchive(expectedArchive) : expectedArchive;
+          assert.ok(isDeepStrictEqual(await response.json(), expected), "Rendered app RPC differs from source archive");
+          rpcHorizons.add(horizon);
+        })().catch(error => errors.push(error.message)));
+      }
       if (url.origin !== base.origin) return;
+      if (databaseMode && /\/(drought_forecast_archive_rev02|forecast-overview-t1).*\.json$/.test(url.pathname)) errors.push("Unexpected static archive fallback");
       if (response.status() >= 400) errors.push(`HTTP ${response.status()}: ${url.pathname}`);
       if (/^\/assets\/.*\.(js|css|json)$/.test(url.pathname)) assetChecks.push((async () => {
         const headers = await response.allHeaders();
@@ -79,6 +95,16 @@ try {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
         assert.equal(await page.locator(".nr-map-shape").count(), 289, `${name}: polygon count`);
+        if (databaseMode) {
+          const target = new URL(page.url()).searchParams.get("target");
+          const horizon = Number(new URL(page.url()).searchParams.get("horizon"));
+          const actual = await page.locator(".nr-map-shape").evaluateAll(nodes => nodes.map(node => ({
+            code: node.getAttribute("data-nr-subdistrict-code"),
+            risk: node.classList.contains("is-forecast-high") ? 2 : node.classList.contains("is-forecast-moderate") ? 1
+              : node.classList.contains("is-forecast-no-risk") ? 0 : node.classList.contains("is-forecast-out-of-scope") ? null : "missing",
+          })));
+          assert.ok(actual.every(({ code, risk }) => risk === expectedArchive.packedRiskByTargetMonth[target]?.[code]?.[horizon - 1]), `${name}: all map colors match source`);
+        }
         if (route === "/") {
           const summary = page.locator(".nr-forecast-overview-summary");
           await summary.waitFor();
@@ -98,6 +124,20 @@ try {
         assert.deepEqual(brokenImages, [], `${name}: visible images`);
         if (route.startsWith("/drought")) await page.screenshot({ path: path.join(output, `${name}-drought.png`), fullPage: true });
         report.checks.push({ viewport: name, route, polygons: 289 });
+      }
+      if (databaseMode) {
+        await page.getByRole("button", { name: "รายการที่บันทึก", exact: true }).click();
+        const dialog = page.getByRole("dialog");
+        await dialog.waitFor();
+        await dialog.getByText("กำลังโหลดรายการ...", { exact: true }).waitFor({ state: "hidden" });
+        assert.equal(await dialog.getByRole("alert").count(), 0, "Saved workspace read");
+        await dialog.getByRole("tab", { name: "ตัวกรองที่บันทึก", exact: true }).click();
+        if (process.env.SMOKE_SAVED_FILTER_NAME) await dialog.getByRole("button", { name: new RegExp(`^${process.env.SMOKE_SAVED_FILTER_NAME.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} `) }).waitFor();
+        await page.screenshot({ path: path.join(output, `${name}-saved-filters.png`), fullPage: true });
+        await dialog.getByRole("button", { name: "ปิดรายการที่บันทึก" }).click();
+        await Promise.all(rpcChecks);
+        assert.ok(rpcHorizons.has(1) && rpcHorizons.has(6), "App must load both authenticated database projections");
+        report.checks.push({ viewport: name, databaseProjectionsMatch: true, savedWorkspaceRead: true, staticFallback: false });
       }
       await Promise.all(assetChecks);
       assert.deepEqual(errors, [], `${name}: browser errors`);

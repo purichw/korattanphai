@@ -49,7 +49,24 @@ try {
     await db.exec(buildMonthSql(archive, archive.targetMonths[0].period));
     await db.exec(buildDraftSql(archive));
     assertArchiveAudit((await db.query(archiveAuditSql())).rows[0], expected);
+  });
+  await check('target-month publication preserves legacy guards and published immutability', async () => {
+    await assert.rejects(db.exec(publishArchiveSql(expected)), /Each origin/);
+    await db.exec('rollback');
+    await db.exec(await fs.readFile('supabase/migrations/20260905124000_target_month_archive_publication.sql', 'utf8'));
+    const publish = "update ktp_forecast_datasets set status='published',published_at=now()";
+    for (const [change, message] of [
+      ["update ktp_forecast_runs set source_year_month=null where horizon=1", /preserve every source month/],
+      ["delete from ktp_forecast_values where horizon=6; delete from ktp_forecast_runs where horizon=6", /Each target month/],
+      ["delete from ktp_forecast_values where subdistrict_code='300806' and horizon=6", /Every run requires/],
+      ["update ktp_forecast_datasets set source_time_role=null", /Each origin/],
+    ]) {
+      await assert.rejects(db.exec(`begin; ${change}; ${publish}; commit;`), message);
+      await db.exec('rollback');
+    }
     await db.exec(publishArchiveSql(expected));
+    await assert.rejects(db.exec('update ktp_forecast_values set risk_level=risk_level'), /Published dataset is immutable/);
+    await assert.rejects(db.exec('update ktp_forecast_datasets set status=status'), /Published dataset is immutable/);
   });
   await check('authenticated full/T+1 RPC exactly matches canonical projections', async () => {
     for (const [horizon, projection] of [[6,archive],[1,buildForecastOverviewArchive(archive)]]) {
