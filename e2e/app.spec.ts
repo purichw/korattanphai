@@ -794,7 +794,8 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   const subdistrictFilters = page.locator(".nr-operational-filters");
-  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(3);
+  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(4);
+  await expect(subdistrictFilters.getByRole("combobox", { name: /^สถานะชลประทาน/ })).toContainText("ทุกสถานะ");
   await expect(subdistrictFilters.getByRole("combobox", { name: /^ตำบล/ })).toContainText("อุดมทรัพย์");
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();
   await expect(page).toHaveURL(/\/wang-nam-khiao\?mapLayer=forecast-archive&target=2025-12&horizon=1$/);
