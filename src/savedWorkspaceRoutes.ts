@@ -1,6 +1,7 @@
 import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaPath, resolveAppRoute } from './domain';
 import { isSavedSelection, savedRiskCriteria, type SavedForecastSelection, type SavedRiskCriterion } from './data/savedWorkspaces';
 import { FORECAST_DATASET_ID } from './data/supabaseForecastArchive';
+import { normalizeIrrigationCriterion } from './irrigation';
 
 export function savedAreaInfo(code: string): { label: string; path: string } | null {
   if (code === '30') return { label: 'จังหวัดนครราชสีมา', path: '/drought' };
@@ -21,10 +22,12 @@ export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'se
     : target.level === 'district' ? target.district.districtCode : overview ? params.get('district') || '30' : '30';
   if (!savedAreaInfo(code)) return null;
   const risk = params.get('mapRisk') ?? 'all';
+  const irrigation = normalizeIrrigationCriterion(params.get('irrigation'));
   const selection: SavedForecastSelection = {
     view_name: overview ? 'overview' : 'drought', area_code: code, dataset_id: FORECAST_DATASET_ID,
     target_period: `${params.get('target') ?? ''}-01`, horizon: overview ? 1 : Number(params.get('horizon') ?? '1'),
     risk_criterion: savedRiskCriteria.includes(risk as SavedRiskCriterion) ? risk as SavedRiskCriterion : 'all',
+    ...(irrigation === 'all' ? {} : { irrigation_criterion: irrigation }),
   };
   return isSavedSelection(selection) ? selection : null;
 }
@@ -35,6 +38,7 @@ export function savedFilterPath(selection: SavedForecastSelection): string | nul
   if (!area) return null;
   const params = new URLSearchParams({ mapLayer: 'forecast-archive', target: selection.target_period.slice(0, 7), horizon: String(selection.horizon) });
   if (selection.risk_criterion !== 'all') params.set('mapRisk', selection.risk_criterion);
+  if (selection.irrigation_criterion && selection.irrigation_criterion !== 'all') params.set('irrigation', selection.irrigation_criterion);
   if (selection.view_name === 'overview' && selection.area_code !== '30') params.set('district', selection.area_code);
   return `${selection.view_name === 'overview' ? '/' : area.path}?${params.toString()}`;
 }

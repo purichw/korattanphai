@@ -1,5 +1,6 @@
 import { type NakhonRatchasimaDroughtForecastArchive, type NakhonRatchasimaMapLayer, type NakhonRatchasimaResearchPanelSummary } from "../../types";
-import { type ProvinceDashboardTab, type LocalMapMode } from "./workspaceModel";
+import { type ProvinceDashboardTab, type LocalMapMode, predictionReadinessSummaryForSubdistrictCodes } from "./workspaceModel";
+import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import { type AppSelectOption } from "../AppSelect";
 import { useDroughtForecastArchiveSelection } from "./forecastModel";
 import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
@@ -52,10 +53,11 @@ export function ResearchProvinceDataView({
   const attentionRecords = research.droughtAttentionLatest;
   const attentionTitle = "ตำบลภัยแล้งที่ควรตรวจสอบ";
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
+  const filteredCodes = forecastSubdistrictCodesForIrrigation(droughtArchive, forecastArchive.selectedIrrigation);
   const provinceRecord = getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth);
   const hasAgriculture = provinceRecord && dataProvenanceChipKindFromText(provinceRecord.provenance) === "REAL";
   const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
-  const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon));
+  const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon, forecastArchive.selectedIrrigation));
 
   return (
     <section className={`nr-drought-dashboard nr-research-dashboard is-${activeTab}`}>
@@ -70,6 +72,7 @@ export function ResearchProvinceDataView({
         target={{ valid: true, level: "province", tab: activeTab }}
         selectedTargetMonth={forecastArchive.selectedMonth}
         selectedHorizon={forecastArchive.selectedHorizon}
+        irrigation={{ value: forecastArchive.selectedIrrigation, onChange: forecastArchive.changeIrrigation }}
         onHorizonChange={forecastArchive.changeHorizon}
         layer={layer}
         mapMode={mapMode}
@@ -90,7 +93,7 @@ export function ResearchProvinceDataView({
       </DroughtOperationalDisclosure>}
       <DroughtOperationalDisclosure title={hasAgriculture ? "พื้นที่เกษตรและความพร้อมข้อมูล" : "ความพร้อมข้อมูลพื้นที่"} description="หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
         <AgricultureImpactPanel provinceRecord={provinceRecord} />
-        <PredictionReadinessPanel onOpenMap={openReadinessMap} />
+        {filteredCodes.length > 0 && <PredictionReadinessPanel readiness={predictionReadinessSummaryForSubdistrictCodes(filteredCodes)} onOpenMap={openReadinessMap} />}
       </DroughtOperationalDisclosure>
     </section>
   );

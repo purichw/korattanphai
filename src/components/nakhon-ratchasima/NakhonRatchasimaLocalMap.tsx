@@ -131,8 +131,10 @@ import {
 import { DroughtForecastArchiveMapFilters } from "./ForecastControls";
 import { formatMonth } from "../../i18n";
 import { MapPreviewFooter } from "../MapPreviewFooter";
+import { irrigationLabels, irrigationStatusFromSource } from "../../irrigation";
 
 export function NakhonRatchasimaLocalMap({
+  filteredSubdistrictCodes,
   target,
   layer,
   mapMode,
@@ -152,6 +154,7 @@ export function NakhonRatchasimaLocalMap({
   compactForecast = false,
   overviewLayout = false,
 }: {
+  filteredSubdistrictCodes?: string[];
   target: NakhonRatchasimaRouteTarget;
   layer: NakhonRatchasimaMapLayer;
   mapMode: LocalMapMode;
@@ -326,7 +329,8 @@ export function NakhonRatchasimaLocalMap({
   const provinceMapTab = target.valid && target.level === "province" ? target.tab : null;
   const useForecastArchiveMap = Boolean(forecastArchive && forecastArchiveMonth && forecastArchiveHorizon);
   const useResearchCriteriaMap = researchCriteriaEnabled && !useForecastArchiveMap && target.valid && layerUsesResearchCriteriaMap(layer.id, provinceMapTab);
-  const useFilterCriteriaMap = useResearchCriteriaMap || useForecastArchiveMap;
+  const filteredCodes = useMemo(() => filteredSubdistrictCodes === undefined ? null : new Set(filteredSubdistrictCodes), [filteredSubdistrictCodes]);
+  const useFilterCriteriaMap = useResearchCriteriaMap || useForecastArchiveMap || filteredCodes !== null;
   const criteriaDefaults = useMemo(() => defaultLocalMapCriteria(provinceMapTab, layer.id), [layer.id, provinceMapTab]);
   const criteriaFromLocation = () => {
     const risk = new URLSearchParams(window.location.search).get("mapRisk");
@@ -632,11 +636,11 @@ export function NakhonRatchasimaLocalMap({
       : useResearchCriteriaMap
       ? localMapStatusForResearchRecord(researchRecord, criteria.viewMode)
       : statusForSubdistrict(row, layer.id, mapMode);
-    const matchesCriteria = useForecastArchiveMap
+    const matchesCriteria = (!filteredCodes || filteredCodes.has(subdistrictCode)) && (useForecastArchiveMap
       ? forecastArchiveRecordMatchesCriteria(forecastRecord, criteria.risk)
       : useResearchCriteriaMap
         ? localResearchRecordMatchesCriteria(researchRecord, criteria)
-        : true;
+        : true);
     const path = district && subdistrict ? getNakhonRatchasimaPath(district, subdistrict) : NAKHON_RATCHASIMA_ROUTE_BASE;
     const districtPath = district ? getNakhonRatchasimaPath(district) : NAKHON_RATCHASIMA_ROUTE_BASE;
 
@@ -859,7 +863,7 @@ export function NakhonRatchasimaLocalMap({
   };
 
   useEffect(() => {
-    if (!selectedCode || selectedCode === routeSelectedSubdistrictCode) return;
+    if (!selectedCode || (selectedCode === routeSelectedSubdistrictCode && (!filteredCodes || filteredCodes.has(selectedCode)))) return;
     const feature = geo?.features.find((item) => item.properties.Admin_code === selectedCode);
     if (feature && featureModel(feature).matchesCriteria) return;
     setSelectedCode(null);
@@ -868,6 +872,7 @@ export function NakhonRatchasimaLocalMap({
   }, [
     activeResearchPeriod.period,
     criteria,
+    filteredCodes,
     forecastArchive,
     forecastArchiveHorizon,
     forecastArchiveMonth,
@@ -891,6 +896,7 @@ export function NakhonRatchasimaLocalMap({
     [
       activeResearchPeriod.period,
       criteria,
+      filteredCodes,
       forecastArchive,
       forecastArchiveHorizon,
       forecastArchiveMonth,
@@ -902,6 +908,12 @@ export function NakhonRatchasimaLocalMap({
       useResearchCriteriaMap,
     ],
   );
+  useEffect(() => {
+    if (preview && filteredCodes && !filteredCodes.has(preview.subdistrictCode)) {
+      setPreview(null);
+      previewMode.current = null;
+    }
+  }, [filteredCodes, preview]);
   const provinceContextPaths = useMemo(
     () =>
       projection
@@ -944,9 +956,9 @@ export function NakhonRatchasimaLocalMap({
   );
   const criteriaMatchedCount = focusedFeatureModels.filter((model) => model.matchesCriteria).length;
   const focusAreaCount = focusedFeatureModels.length;
-  const criteriaNarrowed = useForecastArchiveMap
+  const criteriaNarrowed = filteredCodes !== null || (useForecastArchiveMap
     ? criteria.risk !== criteriaDefaults.risk
-    : criteria.study !== criteriaDefaults.study || criteria.risk !== criteriaDefaults.risk;
+    : criteria.study !== criteriaDefaults.study || criteria.risk !== criteriaDefaults.risk);
   const criteriaStatusText =
     useFilterCriteriaMap && criteriaNarrowed
       ? criteriaMatchedCount > 0
@@ -1585,6 +1597,12 @@ export function NakhonRatchasimaLocalMap({
                   )}{" "}
                   · T+{forecastArchiveHorizon ?? 1}
                 </dd>
+              </div>
+            )}
+            {useForecastArchiveMap && (
+              <div>
+                <dt>สถานะชลประทาน</dt>
+                <dd>{irrigationLabels[irrigationStatusFromSource(forecastArchive?.locations.find((location) => location.subdistrictCode === preview.subdistrictCode)?.irrigationStatus)]}</dd>
               </div>
             )}
             {useForecastArchiveMap && (

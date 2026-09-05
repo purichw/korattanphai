@@ -13,7 +13,7 @@
 .nr-operational-header p { margin: 0; font-size: 14px; line-height: 1.5; }
 .nr-operational-header small { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .nr-operational-header .nr-page-back-link { justify-self: start; padding: 0; min-height: 28px; font-size: 13px; }
-.nr-operational-filters { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; padding: 0; min-width: 0; }
+.nr-operational-filters { display: grid; grid-template-columns: 1fr .7fr .7fr 1fr .9fr 1.5fr; gap: 10px; padding: 0; min-width: 0; }
 .nr-operational-filters > * { min-width: 0; }
 .nr-operational-filters .app-select-field, .nr-fixed-filter { min-height: 58px; padding: 6px 10px; border: 1px solid #d9e3e7; border-radius: 8px; background: #fff; }
 .nr-operational-filters .app-select-field { display: grid; grid-template-columns: 22px minmax(0,1fr); gap: 1px 6px; align-content: center; }
@@ -41,7 +41,7 @@
   grid-template-areas: "horizon context" "map chart" "kpis kpis" "details details";
   gap: 10px;
 }
-.is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-body {
+.is-drought-route .nr-drought-compact-workspace:is(.is-subdistrict,.is-empty-scope) .nr-drought-workspace-body {
   grid-template-areas: "horizon context" "kpis kpis" "map map";
 }
 .is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-context { grid-template-columns: repeat(3,minmax(0,1fr)); }
@@ -74,10 +74,16 @@
 .is-drought-route .nr-drought-compact-workspace .nr-drought-workspace-map-card .nr-map-panel .nr-map-svg { grid-row: 2; width: 100%; height: 100%; min-height: 0; border-radius: 0; }
 .is-drought-route .nr-drought-workspace-map-card .nr-local-map-criteria.is-forecast-archive-controls { position: relative; inset: auto; grid-row: 1; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 32px; gap: 6px; width: 100%; max-width: none; margin: 0; padding: 0 0 6px; border: 0; border-radius: 0; box-shadow: none; background: #fff; }
 .is-drought-route .nr-drought-workspace-map-card .nr-local-map-select { min-width: 0; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-criteria.is-forecast-archive-controls { display: grid; overflow: visible; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-criteria::after { display: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-filter-status { grid-column: 1 / -1; min-height: 0; margin: 0; padding: 0; border-radius: 0; background: none; white-space: normal; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-select .app-select-trigger { width: 100%; min-width: 0; border-radius: 6px; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset { display: inline-flex; width: 32px; min-width: 0; border-radius: 6px; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset:disabled { display: inline-flex; }
 .is-drought-route .nr-drought-workspace-map-card .app-select-trigger { min-height: 34px; height: auto; font-size: 12px; padding: 4px 22px; }
 .is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset { min-width: 32px; min-height: 34px; padding: 6px; }
 .is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset span { display: none; }
-.is-drought-route .nr-drought-workspace-map-card .nr-map-controls { position: absolute; top: 48px; right: 6px; left: auto; bottom: auto; display: grid; grid-template-columns: 32px; gap: 4px; width: 32px; max-width: none; padding: 0; overflow: visible; background: none; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-controls { position: absolute; grid-row: 2; top: 6px; right: 6px; left: auto; bottom: auto; display: grid; grid-template-columns: 32px; gap: 4px; width: 32px; max-width: none; padding: 0; overflow: visible; background: none; box-shadow: none; }
 .is-drought-route .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 5px; }
 .is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-legend { position: static; grid-row: 3; display: flex; flex-wrap: wrap; justify-content: center; width: 100%; max-width: none; margin: 0; padding: 6px 2px 0; gap: 5px 10px; border: 0; border-radius: 0; background: #fff; box-shadow: none; }
 .is-drought-route .nr-drought-workspace-map-card .nr-map-legend > strong { display: none; }
@@ -174,10 +180,11 @@
   .is-drought-route .nr-operational-disclosure > summary > svg:last-child { align-self: center; width: 14px; }
 }
 @media (min-width: 721px) and (max-width: 1180px) {
+  .nr-operational-filters { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .is-operational-drought .main-panel { padding: 16px; }
   .nr-operational-header h1 { font-size: 28px; }
   .is-drought-route .nr-drought-workspace-body { grid-template-areas: "horizon horizon" "context context" "map chart" "kpis kpis" "details details"; }
-  .is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-body { grid-template-areas: "horizon horizon" "context context" "kpis kpis" "map map"; }
+  .is-drought-route .nr-drought-compact-workspace:is(.is-subdistrict,.is-empty-scope) .nr-drought-workspace-body { grid-template-areas: "horizon horizon" "context context" "kpis kpis" "map map"; }
   .is-drought-route .nr-drought-workspace-context > div { min-height: 52px; }
   .is-drought-route .nr-drought-workspace-kpis > div { grid-template-columns: minmax(0,1fr); padding: 8px; }
   .is-drought-route .nr-drought-workspace-kpi-icon { display: none; }
@@ -187,7 +194,7 @@
 }
 @media (min-width: 721px) and (max-width: 900px) {
   .is-drought-route .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "chart" "map" "details"; grid-template-columns: minmax(0,1fr); }
-  .is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "map" "details"; }
+  .is-drought-route .nr-drought-compact-workspace:is(.is-subdistrict,.is-empty-scope) .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "map" "details"; }
   .is-drought-route .nr-drought-workspace-map-card { height: 400px; }
   .is-drought-route .nr-drought-workspace-chart-card { height: 310px; }
 }
@@ -201,7 +208,7 @@
   .nr-operational-header p { font-size: 13px; line-height: 1.5; }
   .nr-operational-header small { font-size: 11px; }
   .nr-operational-filters { grid-template-columns: repeat(6,minmax(0,1fr)); gap: 8px; padding: 4px 0; }
-  .nr-operational-filters > * { grid-column: span 2; }
+  .nr-operational-filters > * { grid-column: span 3; }
   .nr-operational-filters .nr-operational-area-filter,
   .nr-operational-filters .nr-operational-horizon-filter { grid-column: span 3; }
   .nr-operational-filters .app-select-field, .nr-fixed-filter { padding: 6px; min-height: 58px; }
@@ -215,7 +222,7 @@
   .nr-fixed-filter strong { font-size: 14px; }
   .is-drought-route .nr-drought-workspace-head h2 { font-size: 16px; }
   .is-drought-route .nr-drought-workspace-body { grid-template-columns: minmax(0,1fr); grid-template-areas: "horizon" "context" "kpis" "chart" "map" "details"; gap: 8px; }
-  .is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "map" "details"; }
+  .is-drought-route .nr-drought-compact-workspace:is(.is-subdistrict,.is-empty-scope) .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "map" "details"; }
   .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs { grid-template-columns: repeat(6,minmax(0,1fr)); width: 100%; overflow: visible; }
   .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button { min-height: 60px; padding: 6px 2px; }
   .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 14px; }
@@ -236,7 +243,7 @@
   .is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-legend { font-size: 10px; }
   .is-drought-route .nr-drought-workspace-chart-card .nr-compact-note { font-size: 10px; }
   .is-drought-route .nr-drought-workspace-card-heading h3 { font-size: 13px; }
-  .is-drought-route .nr-drought-workspace-map-card .nr-map-controls { grid-template-columns: 36px; width: 36px; gap: 4px; top: 48px; }
+  .is-drought-route .nr-drought-workspace-map-card .nr-map-controls { grid-template-columns: 36px; width: 36px; gap: 4px; top: 6px; }
   .is-drought-route .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 36px; height: 36px; }
   .is-drought-route .nr-drought-workspace-map-card .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid transparent; border-radius: 5px; background: white; }
   .is-drought-route .nr-drought-workspace-map-card .app-select-trigger { min-height: 38px; }

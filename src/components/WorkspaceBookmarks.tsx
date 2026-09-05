@@ -4,6 +4,7 @@ import { useDatabaseWorkspace } from '../DatabaseWorkspaceProvider';
 import { savedWorkspaceError, type FollowedArea, type SavedFilter, type SavedForecastSelection } from '../data/savedWorkspaces';
 import { readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../savedWorkspaceRoutes';
 import { formatMonth } from '../i18n';
+import { irrigationLabels } from '../irrigation';
 import '../saved-workspaces.css';
 
 export function WorkspaceBookmarks({ onNavigate }: { onNavigate: (path: string) => void }) {
@@ -76,7 +77,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
     return { id: item.area_code, label: info?.label ?? item.area_code, path: info?.path ?? null, detail: '' };
   }) : filters.map((item) => ({
     id: item.id, label: item.name, path: savedFilterPath(item),
-    detail: `${savedAreaInfo(item.area_code)?.label ?? item.area_code} · ${formatMonth(item.target_period.slice(0,7), 'th')} · T+${item.horizon}`,
+    detail: `${savedAreaInfo(item.area_code)?.label ?? item.area_code} · ${formatMonth(item.target_period.slice(0,7), 'th')} · T+${item.horizon} · ${irrigationLabels[item.irrigation_criterion ?? 'all']}`,
   }));
   return <dialog ref={dialog} className="nr-saved-dialog" aria-labelledby={`${id}-title`} onCancel={onClose} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <div className="nr-saved-dialog-body">
@@ -100,7 +101,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
           <label htmlFor={`${id}-name`}>ชื่อตัวกรอง</label>
           <div><input id={`${id}-name`} value={name} onChange={(event) => setName(event.target.value)} maxLength={80} required disabled={busy} />
             <button type="submit" className="primary-button" disabled={busy || !name.trim()}><Plus size={17} />บันทึก</button></div>
-          <small>{area.label} · {formatMonth(selection.target_period.slice(0,7), 'th')} · T+{selection.horizon}</small>
+          <small>{area.label} · {formatMonth(selection.target_period.slice(0,7), 'th')} · T+{selection.horizon} · {irrigationLabels[selection.irrigation_criterion ?? 'all']}</small>
         </form> : <p className="empty-note">รอข้อมูลพยากรณ์พร้อมก่อนบันทึกตัวกรอง</p>}
         {error && <div role="alert" className="nr-saved-error"><span>{error}</span><button type="button" className="secondary-button" disabled={busy} onClick={() => void perform()}><RotateCcw size={16} />ลองใหม่</button></div>}
         <p role="status" className="nr-saved-status">{busy ? 'กำลังโหลดรายการ...' : message}</p>

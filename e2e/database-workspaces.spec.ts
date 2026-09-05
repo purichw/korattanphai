@@ -39,7 +39,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
     return route.abort();
   });
   await seedAuthSession(page);
-  await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high');
+  await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high&irrigation=unknown');
   await expect(page.getByRole('heading', { name: /ภัยแล้ง.*บ้านเก่า/ }).first()).toBeVisible();
   await expect(page.locator('.nr-drought-workspace-kpis .metric-card')).toHaveCount(1);
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
@@ -50,7 +50,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await page.getByLabel('ชื่อตัวกรอง', { exact: true }).fill('บ้านเก่า พยากรณ์ T+4');
   await page.getByRole('button', { name: 'บันทึก', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('status')).toContainText('บันทึกตัวกรองแล้ว');
-  expect(filters[0]).toMatchObject({ target_period: '2025-12-01', horizon: 4, area_code: '300806', risk_criterion: 'forecast-high' });
+  expect(filters[0]).toMatchObject({ target_period: '2025-12-01', horizon: 4, area_code: '300806', risk_criterion: 'forecast-high', irrigation_criterion: 'unknown' });
   await mkdir('tmp-snapshots/database-workspaces', { recursive: true });
   await page.screenshot({ path: `tmp-snapshots/database-workspaces/${testInfo.project.name}-saved-filter.png` });
   await page.getByRole('button', { name: 'ปิดรายการที่บันทึก' }).click();
@@ -61,6 +61,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page).toHaveURL(/target=2025-12&horizon=4&mapRisk=forecast-high/);
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
   await page.reload();
+  await expect(page.locator('.nr-operational-filters .nr-irrigation-filter')).toContainText('ยังไม่มีข้อมูลชลประทาน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.goto('/');

@@ -9,6 +9,7 @@ import { useState, useMemo } from "react";
 import { type AppSelectOption } from "../AppSelect";
 import { type LocalMapStatus, type LocalRiskCriterion } from "./workspaceModel";
 import { type NakhonRatchasimaRouteTarget } from "../../domain";
+import { normalizeIrrigationCriterion, type IrrigationCriterion } from "../../irrigation";
 
 export type DroughtForecastBand = "unavailable" | "normal" | "watch" | "severe";
 
@@ -136,11 +137,13 @@ export function writeForecastArchiveLocation(month: NakhonRatchasimaDroughtForec
   window.history.replaceState(null, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
 }
 
-export function pathWithForecastSelection(path: string, period: string, horizon: ForecastArchiveHorizon) {
+export function pathWithForecastSelection(path: string, period: string, horizon: ForecastArchiveHorizon, irrigation: IrrigationCriterion = "all") {
   const url = new URL(path, "https://workspace.invalid");
   url.searchParams.set("mapLayer", "forecast-archive");
   url.searchParams.set("target", period);
   url.searchParams.set("horizon", String(horizon));
+  if (irrigation === "all") url.searchParams.delete("irrigation");
+  else url.searchParams.set("irrigation", irrigation);
   return `${url.pathname}?${url.searchParams.toString()}${url.hash}`;
 }
 
@@ -156,6 +159,9 @@ export function forecastArchiveIssueMonthForSelection(
 }
 
 export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDroughtForecastArchive, fixedHorizon?: ForecastArchiveHorizon) {
+  const [selectedIrrigation, setSelectedIrrigation] = useState(() => normalizeIrrigationCriterion(
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("irrigation"),
+  ));
   const [selection, setSelection] = useState(() => {
     const initial = readForecastArchiveInitialSelection(archive);
     return { ...initial, selectedHorizon: fixedHorizon ?? initial.selectedHorizon };
@@ -189,6 +195,14 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     writeForecastArchiveLocation(month, selectedHorizon);
   };
 
+  const changeIrrigation = (criterion: IrrigationCriterion) => {
+    setSelectedIrrigation(criterion);
+    const url = new URL(window.location.href);
+    if (criterion === "all") url.searchParams.delete("irrigation");
+    else url.searchParams.set("irrigation", criterion);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  };
+
   return {
     selectedHorizon,
     selectedMonth,
@@ -196,6 +210,8 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     targetMonthOptions,
     changeHorizon,
     changeTargetMonth,
+    selectedIrrigation,
+    changeIrrigation,
   };
 }
 

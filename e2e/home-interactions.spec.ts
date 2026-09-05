@@ -80,7 +80,7 @@ test("home mobile filter sheet restores focus and keeps fixed context passive", 
   await edit.click();
   const sheet = page.getByRole("dialog", { name: "ตัวกรองข้อมูล", exact: true });
   await expect(sheet).toBeVisible();
-  await expect(sheet.getByRole("combobox")).toHaveCount(2);
+  await expect(sheet.getByRole("combobox")).toHaveCount(3);
   await expect(sheet).toContainText("ภัยแล้ง");
   await expect(sheet).toContainText("T+1");
   await page.keyboard.press("Escape");

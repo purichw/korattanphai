@@ -897,6 +897,7 @@ export function ProvinceForecastArchiveEntryCard() {
 }
 
 export function ProvinceDashboardMapCard({
+  filteredSubdistrictCodes,
   target,
   showMonthFilter,
   compactOverview = false,
@@ -917,6 +918,7 @@ export function ProvinceDashboardMapCard({
   selectedSubdistrictCode,
   onSelectedSubdistrictChange,
 }: {
+  filteredSubdistrictCodes?: string[];
   target?: NakhonRatchasimaRouteTarget;
   showMonthFilter?: boolean;
   compactOverview?: boolean;
@@ -964,6 +966,7 @@ export function ProvinceDashboardMapCard({
         {readinessMode && <button type="button" className="secondary-button nr-return-forecast" onClick={onCloseReadiness}>กลับแผนที่พยากรณ์</button>}
       </div>
       <NakhonRatchasimaLocalMap
+        filteredSubdistrictCodes={filteredSubdistrictCodes}
         target={target ?? { valid: true, level: "province", tab: activeTab }}
         showMonthFilter={showMonthFilter}
         compactForecast={compactOverview}

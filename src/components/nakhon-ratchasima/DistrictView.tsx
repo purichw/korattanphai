@@ -23,6 +23,7 @@ import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
 import { ContentSection } from "../ContentSection";
 import { DroughtOperationalDisclosure, useDroughtReadinessMap } from "./DroughtOperationalWorkspace";
 import { pathWithForecastSelection } from "./forecastModel";
+import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 
 export function DistrictView({
   droughtArchive,
@@ -47,14 +48,14 @@ export function DistrictView({
 }) {
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
+  const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
   const subdistrictCodes = district.subdistricts.map((subdistrict) => subdistrict.subdistrictCode);
   const activeRecords = researchRecordsForSubdistrictCodes(subdistrictCodes, activeResearchPeriod.period);
   const stats = summarizeResearchAreaRecords(activeRecords, district.subdistricts.length);
   const monthlySeries = researchMonthlySeriesForDistrict(district, activeResearchPeriod.period);
-  const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
-  const readiness = predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes);
+  const readiness = predictionReadinessSummaryForSubdistrictCodes(forecastSubdistrictCodesForIrrigation(droughtArchive, forecastArchive.selectedIrrigation, subdistrictCodes));
   const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
-  const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon));
+  const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon, forecastArchive.selectedIrrigation));
 
   return (
     <div className="nr-area-template is-district">
@@ -70,6 +71,7 @@ export function DistrictView({
         target={{ valid: true, level: "district", district }}
         selectedTargetMonth={forecastArchive.selectedMonth}
         selectedHorizon={forecastArchive.selectedHorizon}
+        irrigation={{ value: forecastArchive.selectedIrrigation, onChange: forecastArchive.changeIrrigation }}
         onHorizonChange={forecastArchive.changeHorizon}
         layer={layer}
         mapMode={mapMode}
@@ -90,7 +92,7 @@ export function DistrictView({
         <ResearchAreaSubdistrictsPanel district={district} period={activeResearchPeriod.period} onNavigate={navigateWithForecast} />
       </section>
       </DroughtOperationalDisclosure>}
-      <DroughtOperationalDisclosure title="ความพร้อมข้อมูลพื้นที่" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
+      {readiness.totalSubdistricts > 0 && <DroughtOperationalDisclosure title="ความพร้อมข้อมูลพื้นที่" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
       <ResearchAreaAgricultureImpactPanel district={district} stats={stats} activePeriod={activeResearchPeriod} />
       <ContentSection
         className="nr-data-readiness-section"
@@ -103,7 +105,7 @@ export function DistrictView({
           onOpenMap={openReadinessMap}
         />
       </ContentSection>
-      </DroughtOperationalDisclosure>
+      </DroughtOperationalDisclosure>}
     </div>
   );
 }

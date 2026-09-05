@@ -9,6 +9,7 @@ import {
 import { type AppSelectOption } from "../AppSelect";
 import { getNakhonRatchasimaResearchPanelSummary, getNakhonRatchasimaResearchSubdistrictMonth } from "../../domain";
 import { useDroughtForecastArchiveSelection } from "./forecastModel";
+import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import {
   ResearchAreaHeading,
   ResearchSubdistrictProfilePanel,
@@ -52,7 +53,7 @@ export function SubdistrictView({
   const monthlySeries = researchMonthlySeriesForSubdistrict(subdistrict.subdistrictCode, activeResearchPeriod.period);
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
   const subdistrictCodes = [subdistrict.subdistrictCode];
-  const readiness = predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes);
+  const readiness = predictionReadinessSummaryForSubdistrictCodes(forecastSubdistrictCodesForIrrigation(droughtArchive, forecastArchive.selectedIrrigation, subdistrictCodes));
   const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
 
   return (
@@ -70,6 +71,7 @@ export function SubdistrictView({
         target={{ valid: true, level: "subdistrict", district, subdistrict }}
         selectedTargetMonth={forecastArchive.selectedMonth}
         selectedHorizon={forecastArchive.selectedHorizon}
+        irrigation={{ value: forecastArchive.selectedIrrigation, onChange: forecastArchive.changeIrrigation }}
         onHorizonChange={forecastArchive.changeHorizon}
         layer={layer}
         mapMode={mapMode}
@@ -96,7 +98,7 @@ export function SubdistrictView({
       </section>
       <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของตำบล" series={monthlySeries} isSubdistrict />
       </DroughtOperationalDisclosure>}
-      <DroughtOperationalDisclosure title="ความพร้อมข้อมูลของตำบล" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
+      {readiness.totalSubdistricts > 0 && <DroughtOperationalDisclosure title="ความพร้อมข้อมูลของตำบล" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
       <ResearchAreaAgricultureImpactPanel
         district={district}
         subdistrict={subdistrict}
@@ -115,7 +117,7 @@ export function SubdistrictView({
           onOpenMap={openReadinessMap}
         />
       </ContentSection>
-      </DroughtOperationalDisclosure>
+      </DroughtOperationalDisclosure>}
     </div>
   );
 }

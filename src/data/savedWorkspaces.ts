@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { FORECAST_DATASET_ID } from './supabaseForecastArchive';
+import { irrigationCriteria, type IrrigationCriterion } from '../irrigation';
 
 export const savedRiskCriteria = ['all', 'forecast-no-risk', 'forecast-moderate', 'forecast-high', 'forecast-out-of-scope', 'forecast-missing'] as const;
 export type SavedRiskCriterion = typeof savedRiskCriteria[number];
@@ -10,6 +11,7 @@ export type SavedForecastSelection = {
   target_period: string;
   horizon: number;
   risk_criterion: SavedRiskCriterion;
+  irrigation_criterion?: IrrigationCriterion;
 };
 export type FollowedArea = { user_id: string; area_code: string; created_at: string };
 export type SavedFilter = SavedForecastSelection & { id: string; user_id: string; name: string; created_at: string };
@@ -18,6 +20,7 @@ export function isSavedSelection(value: SavedForecastSelection): boolean {
   return value.dataset_id === FORECAST_DATASET_ID && /^30([0-9]{2}){0,2}$/.test(value.area_code) &&
     /^\d{4}-(0[1-9]|1[0-2])-01$/.test(value.target_period) && value.target_period >= '2015-06-01' && value.target_period <= '2025-12-01' &&
     Number.isInteger(value.horizon) && value.horizon >= 1 && value.horizon <= 6 && savedRiskCriteria.includes(value.risk_criterion) &&
+    (value.irrigation_criterion === undefined || irrigationCriteria.includes(value.irrigation_criterion)) &&
     (value.view_name === 'drought' || (value.view_name === 'overview' && value.horizon === 1 && value.area_code.length <= 4));
 }
 

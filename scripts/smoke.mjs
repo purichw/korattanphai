@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import { isDeepStrictEqual } from "node:util";
 import { buildForecastOverviewArchive } from "./generate-forecast-summary.mjs";
 
@@ -151,6 +151,31 @@ try {
         report.checks.push({ viewport: name, route, polygons: 289 });
       }
       if (databaseMode) {
+        for (const [criterion, status] of [["irrigated", "Irrigation"], ["rainfed", "RainFed"], ["unknown", "Collecting"]]) {
+          const route = `${criterion === "unknown" ? "/" : "/drought"}?target=2025-12&horizon=1&irrigation=${criterion}`;
+          await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
+          await page.locator(".nr-irrigation-scope").waitFor();
+          const codes = expectedArchive.locations.filter(location => location.irrigationStatus === status).map(location => location.subdistrictCode).sort();
+          const shapes = page.locator(".nr-map-shape:not(.is-criteria-filtered)");
+          await expect(shapes).toHaveCount(codes.length);
+          assert.deepEqual(await shapes.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-nr-subdistrict-code")).sort()), codes, `${name}: ${criterion} matches source locations`);
+          const high = codes.filter(code => expectedArchive.packedRiskByTargetMonth["2025-12"][code][0] === 2).length;
+          const highCard = criterion === "unknown"
+            ? page.locator(".nr-forecast-overview-summary .metric-card").filter({ hasText: "เสี่ยงสูง" })
+            : page.locator(".nr-drought-workspace-kpis .is-high");
+          await expect(highCard).toContainText(`${high} ตำบล`);
+          assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `${name}: irrigation overflow`);
+          await page.screenshot({ path: path.join(output, `${name}-irrigation-${criterion}.png`), fullPage: true });
+          report.checks.push({ viewport: name, irrigation: criterion, matched: codes.length, highRisk: high, sourceMatch: true });
+        }
+        await page.goto(new URL("/dan-khun-thot/t-300803?target=2025-12&horizon=4&irrigation=irrigated", base).href, { waitUntil: "domcontentloaded" });
+        await page.locator(".nr-irrigation-empty").waitFor();
+        await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
+        await expect(page.locator(".nr-drought-workspace-kpis .metric-card, .nr-drought-workspace-chart-card")).toHaveCount(0);
+        await page.getByRole("button", { name: "แสดงทุกสถานะชลประทาน", exact: true }).click();
+        await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
+        assert.equal(new URL(page.url()).searchParams.has("irrigation"), false);
+        report.checks.push({ viewport: name, irrigationEmptyReset: true });
         await page.getByRole("button", { name: "รายการที่บันทึก", exact: true }).click();
         const dialog = page.getByRole("dialog");
         await dialog.waitFor();

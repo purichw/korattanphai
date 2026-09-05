@@ -168,6 +168,7 @@
   .is-overview-filter .operational-filter-chip-row { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 6px; }
   .is-overview-filter .operational-filter-chip { grid-column: span 2; min-height: 44px; padding: 5px; gap: 5px; border-radius: 6px; font-size: 12px; }
   .is-overview-filter .operational-filter-chip.is-month { grid-column: span 4; }
+  .is-overview-filter .operational-filter-chip.is-irrigation { grid-column: span 4; }
   .is-overview-filter .operational-filter-chip.is-hazard { grid-column: span 2; }
   .is-overview-filter .operational-filter-chip.is-fixed { cursor: default; }
   .is-overview-filter .operational-filter-chip b { white-space: normal; line-height: 1.35; text-align: center; }

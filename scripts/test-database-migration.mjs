@@ -101,10 +101,21 @@ try {
   await check('saved filters validate forecast keys and prevent cross-account access', async () => {
     const insert = "insert into ktp_saved_filters(name,view_name,area_code,dataset_id,target_period,horizon,risk_criterion) values ($1,'drought','300806',$2,'2025-12-01',$3,'forecast-high') returning id";
     const row = await asUser(a, async (tx) => (await tx.query(insert, ['พื้นที่ทดสอบ',forecastImport.datasetId,4])).rows[0]);
+    await db.exec(await fs.readFile('supabase/migrations/20260906010000_saved_filter_irrigation.sql', 'utf8'));
+    await asUser(a, async (tx) => {
+      assert.equal((await tx.query('select irrigation_criterion from ktp_saved_filters where id=$1', [row.id])).rows[0].irrigation_criterion, 'all');
+      for (const criterion of ['irrigated', 'rainfed', 'unknown', 'all']) {
+        const result = await tx.query('update ktp_saved_filters set irrigation_criterion=$1 where id=$2 returning irrigation_criterion', [criterion,row.id]);
+        assert.equal(result.rows[0].irrigation_criterion, criterion);
+      }
+    });
+    await assert.rejects(asUser(a, (tx) => tx.exec("update ktp_saved_filters set irrigation_criterion='Collecting'")), /check constraint/);
+    await assert.rejects(asUser(a, (tx) => tx.exec('update ktp_saved_filters set irrigation_criterion=null')), /not-null constraint/);
     await asUser(b, async (tx) => {
       assert.equal((await tx.query('select * from ktp_saved_filters')).rows.length, 0);
       assert.equal((await tx.query('delete from ktp_saved_filters where id=$1 returning *', [row.id])).rows.length, 0);
       assert.equal((await tx.query("update ktp_saved_filters set name='changed' where id=$1 returning *", [row.id])).rows.length, 0);
+      assert.equal((await tx.query("update ktp_saved_filters set irrigation_criterion='rainfed' where id=$1 returning *", [row.id])).rows.length, 0);
     });
     await assert.rejects(asUser(a, (tx) => tx.query('update ktp_saved_filters set user_id=$1 where id=$2', [b,row.id])), /row-level security/);
     await assert.rejects(asUser(a, (tx) => tx.query(insert, ['invalid',forecastImport.datasetId,7])), /check constraint/);

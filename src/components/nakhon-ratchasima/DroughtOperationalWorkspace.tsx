@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, ShieldCheck, Sprout, TrendingUp } from "lucide-react";
 import { AppSelect, type AppSelectOption } from "../AppSelect";
+import { IrrigationStatusSelect, type IrrigationFilter } from "../IrrigationStatusSelect";
 import { type DroughtForecastWorkspaceTarget, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
 import { districtOptionsForProvince, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
 
@@ -35,7 +36,7 @@ export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
   </header>;
 }
 
-export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, onMonthChange, selectedHorizon, onHorizonChange, onNavigate }: {
+export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, onMonthChange, selectedHorizon, onHorizonChange, onNavigate, irrigation }: {
   target: DroughtForecastWorkspaceTarget;
   selectedMonth: string;
   monthOptions: AppSelectOption[];
@@ -43,6 +44,7 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
   selectedHorizon: ForecastArchiveHorizon;
   onHorizonChange: (horizon: ForecastArchiveHorizon) => void;
   onNavigate: (path: string) => void;
+  irrigation: IrrigationFilter;
 }) {
   const isProvince = target.level === "province";
   const areaOptions: AppSelectOption[] = isProvince
@@ -62,6 +64,7 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
     <AppSelect className="nr-operational-horizon-filter" label="ระยะพยากรณ์" icon={<TrendingUp size={20} />} value={String(selectedHorizon)}
       options={forecastArchiveHorizonValues.map((horizon) => ({ value: String(horizon), label: `T+${horizon}` }))}
       onChange={(value) => onHorizonChange(Number(value) as ForecastArchiveHorizon)} />
+    <IrrigationStatusSelect {...irrigation} />
   </section>;
 }
 
