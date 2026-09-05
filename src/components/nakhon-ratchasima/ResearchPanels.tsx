@@ -1019,17 +1019,7 @@ export function AgricultureVisibilityPanel({
 }
 
 export function AgricultureImpactPanel({ provinceRecord, compact = false }: { provinceRecord: ProvinceMonthRisk | undefined; compact?: boolean }) {
-  if (!provinceRecord) {
-    return (
-      <section className="nr-dashboard-module nr-agri-impact-module">
-        <div className="nr-module-title-row">
-          <PanelTitle icon={<Leaf size={18} />} title="พื้นที่เกษตรที่นำมาประเมิน" />
-          <DataProvenanceChip kind="PENDING_SOURCE" />
-        </div>
-        <EmptyLocalEvidence />
-      </section>
-    );
-  }
+  if (!provinceRecord || dataProvenanceChipKindFromText(provinceRecord.provenance) !== "REAL") return null;
 
   return (
     <AgricultureVisibilityPanel
@@ -1133,7 +1123,7 @@ export function PredictionReadinessPanel({
   readiness = predictionReadinessSummary(),
   compact = false,
 }: {
-  month: string;
+  month?: string;
   onOpenMap: () => void;
   readiness?: PredictionReadinessSummary;
   compact?: boolean;
@@ -1174,7 +1164,7 @@ export function PredictionReadinessPanel({
     </div>
   }>
     <dl className="nr-readiness-breakdown-list">{breakdownItems.map((item) => <div key={item.id} className={`is-${item.tone}`}><dt><i aria-hidden="true" />{item.label}</dt><dd>{formatThaiNumber(item.count)} ตำบล</dd></div>)}</dl>
-    <p>{readiness.readiestLevelLabel} · ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด · บริบทข้อมูล {month}</p>
+    <p>{readiness.readiestLevelLabel} · ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด{month && ` · บริบทข้อมูล ${month}`}</p>
     <p>รายการเหล่านี้เป็นสถานะความพร้อมของข้อมูลและหลักฐานคนละประเภท ไม่ใช่ระดับภัยที่เกิดแล้ว</p>
     <button type="button" className="secondary-button nr-readiness-map-action" onClick={onOpenMap}><MapIcon size={18} aria-hidden="true" />ดูความพร้อมบนแผนที่</button>
   </DashboardDetailPanel>;
@@ -1207,7 +1197,7 @@ export function PredictionReadinessPanel({
             <span>ระดับที่พร้อมที่สุด</span>
             <strong>{readiness.readiestLevelLabel}</strong>
             <small>
-              รอบข้อมูล {month} · ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด
+              {month && `รอบข้อมูล ${month} · `}ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด
             </small>
             <div className="nr-readiness-progress" aria-label={`พร้อมคาดการณ์ระดับพื้นที่ ${readyPercentLabel}`}>
               <i style={{ width: `${clampedReadyPercent}%` }} />

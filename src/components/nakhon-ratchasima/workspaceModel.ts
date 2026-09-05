@@ -12,6 +12,7 @@ import {
   getNakhonRatchasimaMatrixRowsForDistrict,
   getNakhonRatchasimaDistrictByCode,
   getNakhonRatchasimaPath,
+  getNakhonRatchasimaProvinceTabPath,
   getNakhonRatchasimaMatrixRowBySubdistrictCode,
   formatRai,
   getNakhonRatchasimaSourceRows,
@@ -1521,7 +1522,7 @@ export function routeBackTargetForRoute(route: NakhonRatchasimaRouteTarget) {
     return null;
   }
   if (route.level === "district") {
-    return { label: "กลับจังหวัด", path: NAKHON_RATCHASIMA_ROUTE_BASE };
+    return { label: "กลับจังหวัด", path: getNakhonRatchasimaProvinceTabPath("drought") };
   }
   return { label: "กลับอำเภอ", path: getNakhonRatchasimaPath(route.district) };
 }

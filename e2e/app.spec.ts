@@ -734,7 +734,8 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("heading", { name: "พืชที่ได้รับผลกระทบ" })).toHaveCount(0);
   await expectProvinceOverviewHeading(page);
   await expect(page.locator(".data-provenance-chip.is-real:visible").first()).toBeVisible();
-  await expect(page.locator(".data-provenance-chip.is-synthetic:visible").first()).toBeVisible();
+  await expect(page.locator(".nr-forecast-overview .metric-card .data-provenance-chip.is-synthetic")).toHaveCount(0);
+  await expect(page.locator(".nr-home-agriculture")).toHaveCount(0);
   await expect(page.locator(".data-provenance-chip.is-derived:visible").first()).toBeVisible();
   await expect(page.locator(".nr-forecast-overview .data-provenance-chip.is-proxy")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
@@ -747,9 +748,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
   await expectLocalProvinceBoundary(page, localSvg);
   await expect(localMap.locator(".map-overlay-controls").getByTitle("ขยายแผนที่")).toBeVisible();
-  const guardrail = page.locator(".nr-forecast-overview-source");
-  await guardrail.locator("summary").click();
-  await expect(guardrail).toContainText("ไม่ใช่รายงานสถานการณ์จริงหรือประกาศภัยทางการ");
+  await expect(page.locator(".nr-forecast-overview-source")).toHaveCount(0);
 
   const nakhonRatchasimaFilters = page.locator(".nr-forecast-overview .control-band").first();
   const usesMobileFilterSheet = await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" }).isVisible();
@@ -809,7 +808,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await expect(page.locator(".nr-operational-filters").getByRole("combobox", { name: /^ตำบล/ })).toContainText("ทุกตำบล");
   await page.getByRole("button", { name: "กลับจังหวัด" }).click();
-  await expect(page).toHaveURL((url) => url.pathname === "/");
+  await expect(page).toHaveURL((url) => url.pathname === "/drought");
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
@@ -838,7 +837,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับจังหวัด" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await page.getByRole("button", { name: "กลับจังหวัด" }).click();
-  await expect(page).toHaveURL((url) => url.pathname === "/");
+  await expect(page).toHaveURL((url) => url.pathname === "/drought");
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
 
@@ -852,9 +851,10 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await page.locator(".nr-operational-disclosure").filter({ has: page.locator("summary", { hasText: "สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" }) }).locator("summary").first().click();
   await expect(page.getByText("พื้นที่นี้ยังไม่มีหลักฐานเชิงลึกระดับท้องถิ่นในรอบข้อมูลนี้").first()).toBeVisible();
   await expect(page.getByText("ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ").first()).toBeVisible();
-  await expect(
-    page.getByText("กราฟเป็น 0 ในกรอบที่เลือก เพราะคลังพยากรณ์ระบุว่าไม่มีสัญญาณเสี่ยงหรืออยู่นอกขอบเขตการศึกษา"),
-  ).toBeVisible();
+  await expect(page.locator(".nr-drought-workspace-chart-card")).toHaveCount(0);
+  await expect(page.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toContainText("1 ตำบล");
+  await expect(page.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toContainText("ไม่ใช่ไม่มีความเสี่ยง");
+  await expect(page.locator(".nr-drought-workspace-kpis .is-no-risk")).toContainText("0 ตำบล");
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.locator(".nr-subdistrict-gap-section")).toContainText("รายการที่ยังไม่มี");
 

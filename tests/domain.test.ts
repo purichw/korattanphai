@@ -71,16 +71,17 @@ import {
 const nakhonRatchasimaDroughtForecastArchive = archiveJson as NakhonRatchasimaDroughtForecastArchive;
 
 describe("canonical data integrity", () => {
-  it("keeps nationwide province-month coverage intact", () => {
+  it("preserves legacy coverage outside Korat without synthetic Korat records", () => {
     expect(provinces).toHaveLength(77);
     expect(months).toHaveLength(22);
     expect(months[0]).toBe("2025-01");
     expect(months.at(-1)).toBe("2026-10");
-    expect(provinceMonthlyRisk).toHaveLength(1694);
+    expect(provinceMonthlyRisk).toHaveLength(1672);
 
     for (const month of months) {
       const records = provinceMonthlyRisk.filter((record) => record.month === month);
-      expect(records).toHaveLength(77);
+      expect(records).toHaveLength(76);
+      expect(records.some((record) => record.provinceId === NAKHON_RATCHASIMA_ID)).toBe(false);
     }
   });
 
@@ -392,8 +393,7 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     ).toBe(true);
 
     const nakhonRatchasimaMonthly = provinceMonthlyRisk.filter((record) => record.provinceId === NAKHON_RATCHASIMA_ID);
-    expect(nakhonRatchasimaMonthly).toHaveLength(22);
-    expect(nakhonRatchasimaMonthly.every((record) => record.provenance.toLowerCase().includes("synthetic"))).toBe(true);
+    expect(nakhonRatchasimaMonthly).toHaveLength(0);
   });
 
   it("keeps expanded Nakhon Ratchasima province research coverage source-backed without fabricating local observations", () => {

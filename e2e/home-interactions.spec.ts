@@ -4,7 +4,7 @@ test.beforeEach(async ({ page }) => {
   await seedAuthSession(page);
 });
 
-test("home information is passive and disclosures preserve context and the single map", async ({ page }) => {
+test("home information is passive and disclosures preserve context and the single map", async ({ page }, testInfo) => {
   await page.goto("/");
   const summary = page.locator(".nr-forecast-overview-summary");
   await expect(summary).toContainText("142/289 ตำบล");
@@ -20,14 +20,9 @@ test("home information is passive and disclosures preserve context and the singl
   await attention.getByRole("button", { name: "ย่อรายการ" }).click();
   await expect(attention.locator("li")).toHaveCount(3);
 
-  const agriculture = page.locator(".nr-home-agriculture");
-  await expect(agriculture.locator(".nr-detail-panel-body")).toBeHidden();
-  await expect(agriculture.locator(".metric-card-value")).toHaveText(["ข้าว", "67,347 ไร่", "8,081 ไร่", "ปานกลาง"]);
-  await agriculture.getByRole("button", { name: "พื้นที่เกษตรที่นำมาประเมิน", exact: true }).click();
-  await expect(agriculture.locator(".nr-detail-panel-body")).toContainText("ไม่ใช่ตัวเลขเสียหายทางการ");
-  expect(page.url()).toBe(beforeURL);
-  await agriculture.getByRole("button", { name: "พื้นที่เกษตรที่นำมาประเมิน", exact: true }).click();
-  await expect(agriculture.locator(".nr-detail-panel-body")).toBeHidden();
+  await expect(page.locator(".nr-home-agriculture")).toHaveCount(0);
+  await expect(page.locator(".nr-home-situation .metric-card-label")).toHaveText(["ผลพยากรณ์ภัยแล้ง", "พืชที่ประเมิน"]);
+  await expect(page.getByText(/67,347|8,081|พื้นที่ประเมินทั้งจังหวัด|ความเชื่อมั่นข้อมูลเกษตร/)).toHaveCount(0);
 
   const map = page.locator(".nr-map-svg");
   await map.evaluate((element) => element.setAttribute("data-same-map", "home"));
@@ -43,9 +38,13 @@ test("home information is passive and disclosures preserve context and the singl
   await expect(page.locator(".nr-map-panel")).toHaveClass(/has-forecast-archive-map/);
   await expect(map).toHaveAttribute("data-same-map", "home");
   await expect(summary.locator(".metric-card-value")).toHaveText(["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"]);
-  await page.locator(".nr-forecast-overview-source summary").click();
-  await expect(page.locator(".nr-forecast-overview-source")).toContainText("ไม่ใช่รายงานสถานการณ์จริง");
+  await expect(page.locator(".nr-data-transparency, .nr-forecast-overview-source")).toHaveCount(0);
+  await expect(page.getByText(/^(แหล่งข้อมูลและความสด|ข้อจำกัดสำคัญ|แหล่งข้อมูลและข้อจำกัด)$/)).toHaveCount(0);
   expect(page.url()).toBe(beforeURL);
+  await readiness.getByRole("button", { name: "ความพร้อมข้อมูล", exact: true }).click();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.screenshot({ path: testInfo.outputPath("home-without-source-panels.png"), fullPage: true, scale: "css" });
 });
 
 test("home layout retains centered stats and usable map geometry at every breakpoint", async ({ page }, testInfo) => {

@@ -1,5 +1,34 @@
 # Rollback Parking Lot
 
+## 2026-09-05 - Remove Synthetic Korat Metrics, Preserve Components
+
+- Request: delete the synthetic numbers and remove their UI, keeping the
+  component design hidden for future source-backed data.
+- Checkpoint: Git branch `checkpoint/nr-synthetic-metrics-removal-20260905`
+  at `4139250f8a94f3be079d0d7ba170fac5ee1597f3`. The worktree was clean before
+  this change; no untracked files or database state are involved.
+- Status: intentionally hidden, accepted by the user; no restoration pending.
+- Removed: 22 TH-P29 synthetic monthly records from
+  `src/data/canonical/province_monthly_risk.json`, and their agriculture/rai/
+  confidence metrics from Home and the province drought disclosure.
+- Retained: `AgricultureImpactPanel`, `AgricultureVisibilityPanel`, shared
+  MetricCard/MetricGrid design, their CSS, and the source-backed rendering path.
+  Missing or non-REAL agriculture records now render nothing, not zero.
+- Untouched: Excel rev02 canonical archive, generated T+1 projection, all
+  forecast values, administrative geography, readiness evidence, and unrelated
+  legacy records for other provinces.
+- Restore only on an explicit future request with verified source-backed
+  agriculture data and its reference period; do not restore synthetic records
+  from the checkpoint into public UI. Verify source guard, component rendering,
+  responsive layouts, and unchanged archive counts.
+- Verification: 50 focused unit/data tests, TypeScript/Vite build, and 8
+  desktop/mobile E2E scenarios passed (Home and all three drought scopes).
+  Canonical archive and both generated projections/summaries match the
+  checkpoint byte-for-byte. Screenshot checks found no horizontal overflow or
+  page errors; readiness navigation and all four Home forecast counts remain
+  intact. Evidence: `tmp-snapshots/no-synthetic-metrics/`.
+  Unrelated concurrent navigation/chart edits were preserved. No push/deploy.
+
 ## 2026-09-05 15:31 +07:00 - Remove Duplicate Forecast Narrative
 
 - Request: explicitly remove the large six-horizon narrative/timeline panel

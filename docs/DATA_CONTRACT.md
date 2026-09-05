@@ -112,7 +112,9 @@ Current facts:
 - Provinces: 77.
 - Months: 22.
 - Month range: `2025-01` through `2026-10`.
-- Province-month records: 1,694.
+- Legacy province-month records: 1,672 across the other 76 provinces. The 22
+  synthetic Nakhon Ratchasima rows were removed on 2026-09-05; do not restore
+  them to fill empty agriculture metrics.
 - Seeded deeper locations: 14.
 - Nakhon Ratchasima canonical province: `TH-P29`.
 - Nakhon Ratchasima admin province code: `30`.
@@ -252,8 +254,12 @@ UI contract:
 - The overview starts at the latest available target month and fixes T+1.
   Changing district scope updates map focus, counts and high-risk links.
   Counts use canonical subdistrict codes, with null/out-of-scope and missing
-  records kept separate. Agricultural rai and confidence remain supplemental
-  data with their own reference month, not outputs from the forecast archive.
+  records kept separate. Synthetic agricultural rai and confidence have been
+  removed from the Korat source records and hidden from Home/drought UI. Their
+  shared component and styling remain available for source-backed data only;
+  missing data must not render as zero or an empty replacement card. Readiness
+  remains separate from forecast severity and model accuracy, and must not use
+  the removed agriculture rows as its reference date.
 
 Latest validated target month in the archive:
 

@@ -628,14 +628,16 @@ export function DroughtCompactForecastWorkspace({
         />
 
         <div className="nr-drought-workspace-main">
-          <DroughtForecastWorkspaceChart
-            forecastHasData={forecastHasData}
-            trendMonths={trendMonths}
-            selectedHorizon={selectedHorizon}
-            singleSubdistrict={singleSubdistrict}
-            scopeLabel={scopeLabel}
-            coverageRemark={forecastCoverageRemark}
-          />
+          {level !== "subdistrict" && (
+            <DroughtForecastWorkspaceChart
+              forecastHasData={forecastHasData}
+              trendMonths={trendMonths}
+              selectedHorizon={selectedHorizon}
+              singleSubdistrict={singleSubdistrict}
+              scopeLabel={scopeLabel}
+              coverageRemark={forecastCoverageRemark}
+            />
+          )}
           <DroughtForecastWorkspaceMapCard
             readinessMap={readinessMap}
             onCloseReadinessMap={onCloseReadinessMap}

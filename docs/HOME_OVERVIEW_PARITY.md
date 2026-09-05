@@ -33,6 +33,13 @@ e860b0b57674ef9b50a4722f71149c217087ee2e3c758a791733d7bb167b5a1f
 
 ## Component / Decision Ledger
 
+2026-09-05 follow-up: the user requested deletion of synthetic Korat agriculture
+records and hiding their metrics/panels while retaining component design.
+The situation strip now shows forecast status and crop only, and the support
+row contains readiness and archive navigation. Agriculture markup and CSS remain
+available behind a REAL-only source gate; earlier agriculture screenshots below
+are historical evidence, not the current accepted visible data contract.
+
 | Surface | Decision / Ownership | Verification |
 | --- | --- | --- |
 | Shell / identity | Adopt compact reference proportions, retain existing logo, Google Sans, account and navigation | Desktop/tablet/mobile captures, menu and account checks |
@@ -43,7 +50,7 @@ e860b0b57674ef9b50a4722f71149c217087ee2e3c758a791733d7bb167b5a1f
 | Agriculture | Existing MetricGrid facts with optional expandable details | Values/provenance unchanged, no false district breakdown |
 | Readiness | Existing calculation/gauge with headline and expandable breakdown/map action | Readiness never interpreted as severity, same map with explicit return |
 | Archive | Compact real link to `/drought`; scoped detail link retains selected target/T+1 | Navigation and archive lazy loading |
-| Sources / limitations | In-place disclosure, no new policy/contact destination invented | Reachable keyboard and mobile |
+| Sources / limitations | Footer disclosure removed by user request across all pages | Inline provenance and forecast caveats remain |
 
 Visual anchor measurements from image 1 (approximate image pixels): sidebar213;
 main x238; filter y111/h65; situation y190/h87; map+panel y291/h463;

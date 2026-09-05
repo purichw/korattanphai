@@ -17,6 +17,34 @@ state in `localStorage`.
 
 ## Recent Changes
 
+Combined UI cleanup release checkpoint (2026-09-05):
+
+- User authorized push/deploy of completed work from both tasks, with care not
+  to mix in the active Supabase migration. The migration owner confirmed no
+  remote database mutations or runtime data-provider changes at this checkpoint.
+  New migration files remain untracked and outside this release. Forecast data
+  still loads the static canonical archive; existing Supabase Auth is unchanged.
+- Includes district back navigation to `/drought` with target/T+ preserved,
+  removal of the subdistrict-count chart only at subdistrict level, removal of
+  source/limitations footer disclosures across all four page types, and the
+  other task's accepted removal of synthetic Korat agriculture values while
+  retaining their component design behind a REAL-only data gate.
+- Local verification: 102 unit tests, normal/protected build, exposure and
+  bundle-budget checks passed. Canonical archive and generated projections have
+  no diff. The full built E2E run passed 64 tests with 6 existing skips; two
+  drilldown cases still expected the removed subdistrict chart text. Their
+  assertions now verify out-of-scope versus no-risk KPIs, and both desktop and
+  mobile passed the focused rerun without runtime changes.
+- Evidence: `tmp-snapshots/release-ui-cleanup-build`,
+  `tmp-snapshots/release-ui-cleanup-e2e`, and
+  `tmp-snapshots/release-ui-cleanup-drilldown`. Hosted release/CI verification
+  is pending and must not be inferred from these local checks.
+- Recovery deployment captured before release: `dpl_BBDCsEEYmYdLAGnZRbBk2mEYsrS9`
+  (`https://korattanphai-9anrsjid7-purichwc-1517s-projects.vercel.app`).
+  Deploy the committed release from an isolated checkout, not the live checkout
+  where new migration files are being prepared. Do not apply SQL/imports or
+  change Supabase settings as part of this UI release.
+
 Combined Supabase Auth and UI production release (2026-09-05):
 
 - Runtime commit: `15275fd2c0393fa8e50b933aafa0da1da44265be`, pushed to

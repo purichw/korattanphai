@@ -5,10 +5,10 @@ import type { NakhonRatchasimaDroughtForecastArchive, NakhonRatchasimaMapLayer, 
 import { useForecastArchive } from "../../useForecastArchive";
 import { formatMonth, labelConfidence } from "../../i18n";
 import { OperationalFilters } from "../OperationalFilters";
-import { DataProvenanceChip } from "../DataProvenanceChip";
+import { DataProvenanceChip, dataProvenanceChipKindFromText } from "../DataProvenanceChip";
 import { DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
 import { AgricultureImpactPanel, PredictionReadinessPanel, ProvinceDashboardMapCard } from "./ResearchPanels";
-import { MetricGrid } from "../PageSummary";
+import { MetricGrid, type SummaryMetric } from "../PageSummary";
 import { forecastArchiveSummaryForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection, writeForecastArchiveLocation } from "./forecastModel";
 import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, predictionReadinessSummaryForSubdistrictCodes, prefersReducedMotion, type LocalMapMode } from "./workspaceModel";
 
@@ -81,6 +81,12 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
     setReadinessMode(false);
   };
   const hasRisk = summary.highRiskSubdistricts + summary.moderateRiskSubdistricts > 0;
+  const hasAgriculture = provinceRecord && dataProvenanceChipKindFromText(provinceRecord.provenance) === "REAL";
+  // Keep the agriculture design available, but never fill it with prototype data.
+  const agricultureMetrics: SummaryMetric[] = hasAgriculture ? [
+    { label: "พื้นที่ประเมินทั้งจังหวัด", value: `${formatRai(provinceRecord.agriculturalAreaExposedRai)} ไร่`, icon: <Gauge size={24} /> },
+    { label: "ความเชื่อมั่นข้อมูลเกษตร", value: labelConfidence(provinceRecord.confidence, "th"), icon: <ShieldAlert size={24} />, tone: provinceRecord.confidence === "High" ? "good" : provinceRecord.confidence === "Medium" ? "watch" : "muted" },
+  ] : [];
 
   return (
     <section className="nr-forecast-overview" aria-label="ภาพรวมพยากรณ์ภัยแล้ง">
@@ -104,11 +110,10 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         contextChips={[{ label: "ระยะพยากรณ์", value: "T+1" }]}
         ariaLabel="ตัวกรองภาพรวมพยากรณ์"
       />
-      <MetricGrid className="nr-home-situation" variant="segmented" ariaLabel="สถานการณ์ในภาพรวม" metrics={[
+      <MetricGrid className={`nr-home-situation${hasAgriculture ? "" : " is-forecast-only"}`} variant="segmented" ariaLabel="สถานการณ์ในภาพรวม" metrics={[
         { label: "ผลพยากรณ์ภัยแล้ง", value: summary.inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์" : hasRisk ? "พบพื้นที่เสี่ยง" : "ไม่พบสัญญาณเสี่ยง", icon: <AlertTriangle size={24} />, tone: summary.inScopeSubdistricts === 0 ? "muted" : hasRisk ? "watch" : "good" },
         { label: "พืชที่ประเมิน", value: "ข้าว", icon: <Leaf size={24} /> },
-        { label: "พื้นที่ประเมินทั้งจังหวัด", value: provinceRecord ? `${formatRai(provinceRecord.agriculturalAreaExposedRai)} ไร่` : "ยังไม่มีข้อมูล", icon: <Gauge size={24} /> },
-        { label: "ความเชื่อมั่นข้อมูลเกษตร", value: provinceRecord ? labelConfidence(provinceRecord.confidence, "th") : "ยังไม่มีข้อมูล", icon: <ShieldAlert size={24} />, tone: provinceRecord?.confidence === "High" ? "good" : provinceRecord?.confidence === "Medium" ? "watch" : "muted" },
+        ...agricultureMetrics,
       ]} />
       <div className="nr-forecast-overview-grid">
         <div className="nr-forecast-overview-map nr-overview-cockpit-map">
@@ -165,9 +170,9 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
           </a>
         </section>
       </div>
-      <section className="nr-home-support" aria-label="ข้อมูลเกษตรและความพร้อมข้อมูล">
+      <section className={`nr-home-support${hasAgriculture ? "" : " is-forecast-only"}`} aria-label={hasAgriculture ? "ข้อมูลเกษตรและความพร้อมข้อมูล" : "ความพร้อมข้อมูลและคลังพยากรณ์"}>
         <AgricultureImpactPanel provinceRecord={provinceRecord} compact />
-        <PredictionReadinessPanel compact readiness={readiness} month={provinceRecord ? formatMonth(provinceRecord.month, "th") : "ไม่ระบุเดือน"} onOpenMap={() => {
+        <PredictionReadinessPanel compact readiness={readiness} onOpenMap={() => {
           setReadinessMode(true);
           setSelectedSubdistrictCode(null);
           window.requestAnimationFrame(() => document.querySelector(".nr-forecast-overview-map")?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" }));
@@ -175,15 +180,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         <section className="nr-home-archive"><h3><MapIcon size={22} aria-hidden="true" />คลังพยากรณ์ย้อนหลัง</h3><a href={withForecast("/drought")}><MapIcon size={30} aria-hidden="true" /><span><strong>ดูสถานการณ์ย้อนหลัง</strong><small>T+1 ถึง T+6</small></span><ArrowRight size={20} /></a></section>
       </section>
       <footer className="nr-home-footer">
-      <p className="nr-forecast-overview-support-note">ข้อมูลเกษตรระดับจังหวัด · {provinceRecord ? formatMonth(provinceRecord.month, "th") : "ยังไม่มีข้อมูล"} · ตัวเลขไร่และความเชื่อมั่นเป็นคนละชุดกับพยากรณ์รายตำบล</p>
-      <details className="nr-forecast-overview-source">
-        <summary>แหล่งข้อมูลและข้อจำกัด<ChevronDown size={16} aria-hidden="true" /></summary>
-        <p>คลังพยากรณ์ภัยแล้ง rev02 · เดือนเป้าหมาย {formatMonth(archive.meta.targetMonthStart, "th")} ถึง {formatMonth(archive.meta.targetMonthEnd, "th")}</p>
-        <p>ผลพยากรณ์ย้อนหลังจากแบบจำลอง ไม่ใช่รายงานสถานการณ์จริงหรือประกาศภัยทางการ</p>
-        <p>แหล่งข้อมูล: {archive.meta.sourceWorkbook}</p>
-        <p>นอกขอบเขตการศึกษา คือช่องว่างในชุดพยากรณ์ ไม่ใช่ไม่มีความเสี่ยง ส่วนข้อมูลที่เชื่อมไม่พบจะแสดงแยกเป็นไม่มีข้อมูล</p>
-        <p>เกษตรและความพร้อมข้อมูลเป็นข้อมูลประกอบของระบบ ต้องตรวจสอบหลักฐานในพื้นที่ก่อนตัดสินใจ ไม่ใช่ตัวเลขเสียหายหรือความเชื่อมั่นของแบบจำลองพยากรณ์</p>
-      </details>
+      <p className="nr-forecast-overview-support-note">{hasAgriculture ? `ข้อมูลเกษตรระดับจังหวัด · ${formatMonth(provinceRecord.month, "th")} · ตัวเลขไร่และความเชื่อมั่นเป็นคนละชุดกับพยากรณ์รายตำบล` : "ความพร้อมข้อมูลเป็นข้อมูลประกอบ ไม่ใช่ความแม่นยำของแบบจำลองพยากรณ์"}</p>
       </footer>
     </section>
   );

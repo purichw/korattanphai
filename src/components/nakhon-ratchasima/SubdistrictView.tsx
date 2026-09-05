@@ -8,7 +8,7 @@ import {
   localResearchPeriodLabel,
 } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
-import { getNakhonRatchasimaResearchPanelSummary, getNakhonRatchasimaResearchSubdistrictMonth, getNakhonRatchasimaEvidenceForLocation } from "../../domain";
+import { getNakhonRatchasimaResearchPanelSummary, getNakhonRatchasimaResearchSubdistrictMonth } from "../../domain";
 import { useDroughtForecastArchiveSelection } from "./forecastModel";
 import {
   ResearchAreaHeading,
@@ -18,7 +18,6 @@ import {
   ResearchAreaDroughtHistoryPanel,
   ResearchAreaAgricultureImpactPanel,
   PredictionReadinessPanel,
-  ResearchAreaSourceLimitsPanel,
 } from "./ResearchPanels";
 import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
 import { ContentSection } from "../ContentSection";
@@ -52,10 +51,6 @@ export function SubdistrictView({
   const researchRecord = getNakhonRatchasimaResearchSubdistrictMonth(subdistrict.subdistrictCode, activeResearchPeriod.period);
   const stats = summarizeResearchAreaRecords(researchRecord ? [researchRecord] : [], 1);
   const monthlySeries = researchMonthlySeriesForSubdistrict(subdistrict.subdistrictCode, activeResearchPeriod.period);
-  const evidence = getNakhonRatchasimaEvidenceForLocation({
-    districtCode: district.districtCode,
-    subdistrictCode: subdistrict.subdistrictCode,
-  });
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
   const subdistrictCodes = [subdistrict.subdistrictCode];
   const readiness = predictionReadinessSummaryForSubdistrictCodes(subdistrictCodes);
@@ -122,13 +117,6 @@ export function SubdistrictView({
         />
       </ContentSection>
       </DroughtOperationalDisclosure>
-      <ResearchAreaSourceLimitsPanel
-        district={district}
-        subdistrict={subdistrict}
-        stats={stats}
-        directRecords={evidence.direct}
-        inheritedRecords={evidence.inherited}
-      />
     </div>
   );
 }

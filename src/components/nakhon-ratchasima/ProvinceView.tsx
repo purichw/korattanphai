@@ -7,7 +7,6 @@ import {
   ResearchSubdistrictAttentionPanel,
   ResearchDroughtSituationPanel,
   ResearchDroughtDistrictPanel,
-  ResearchSourceLimitsPanel,
   AgricultureImpactPanel,
   PredictionReadinessPanel,
 } from "./ResearchPanels";
@@ -19,9 +18,9 @@ import {
   getProvinceRecord,
   NAKHON_RATCHASIMA_ID,
 } from "../../domain";
-import { formatMonth } from "../../i18n";
 import { DroughtOperationalDisclosure, useDroughtReadinessMap } from "./DroughtOperationalWorkspace";
 import { pathWithForecastSelection } from "./forecastModel";
+import { dataProvenanceChipKindFromText } from "../DataProvenanceChip";
 
 export function ResearchProvinceDataView({
   droughtArchive,
@@ -53,6 +52,8 @@ export function ResearchProvinceDataView({
   const attentionRecords = research.droughtAttentionLatest;
   const attentionTitle = "ตำบลภัยแล้งที่ควรตรวจสอบ";
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
+  const provinceRecord = getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth);
+  const hasAgriculture = provinceRecord && dataProvenanceChipKindFromText(provinceRecord.provenance) === "REAL";
   const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
   const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon));
 
@@ -87,11 +88,10 @@ export function ResearchProvinceDataView({
       </section>
       <ResearchDroughtDistrictPanel research={research} onNavigate={navigateWithForecast} />
       </DroughtOperationalDisclosure>
-      <DroughtOperationalDisclosure title="พื้นที่เกษตรและความพร้อมข้อมูล" description="ข้าว · หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
-        <AgricultureImpactPanel provinceRecord={getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth)} />
-        <PredictionReadinessPanel month={formatMonth(selectedMonth, "th")} onOpenMap={openReadinessMap} />
+      <DroughtOperationalDisclosure title={hasAgriculture ? "พื้นที่เกษตรและความพร้อมข้อมูล" : "ความพร้อมข้อมูลพื้นที่"} description="หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
+        <AgricultureImpactPanel provinceRecord={provinceRecord} />
+        <PredictionReadinessPanel onOpenMap={openReadinessMap} />
       </DroughtOperationalDisclosure>
-      <ResearchSourceLimitsPanel research={research} />
     </section>
   );
 }
