@@ -7,6 +7,7 @@ export default defineConfig({
     port: 5173,
   },
   build: {
+    outDir: process.env.BUILD_OUT_DIR ?? "dist",
     sourcemap: false,
     minify: "oxc",
     cssMinify: true,

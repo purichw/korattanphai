@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useReducer } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef } from "react";
+import { readBrowserStorage, reportStorageIssue, writeBrowserStorage } from "./browserStorage";
+import { decodePersistedState } from "./persistedState";
 import { advisory, fieldTasks, users } from "./data/catalog";
 import {
   buildDeliveryRecords,
@@ -253,24 +255,13 @@ export function appReducer(state: AppState, action: Action): AppState {
   }
 }
 
-function loadInitialState(): AppState {
+export function loadInitialState(): AppState {
   if (typeof window === "undefined") return createInitialState();
-  try {
-    const persisted = window.localStorage.getItem(STORAGE_KEY);
-    if (!persisted) return createInitialState();
-    const parsed = JSON.parse(persisted) as AppState;
-    return {
-      ...createInitialState(),
-      ...parsed,
-      language: "th",
-      selectedHazard: "All",
-      selectedCrop: "All",
-      mapLayer: normalizeMapLayerId(parsed.mapLayer),
-      runtime: { ...createInitialRuntimeState(), ...parsed.runtime },
-    };
-  } catch {
-    return createInitialState();
-  }
+  const { state, invalid } = decodePersistedState(readBrowserStorage(STORAGE_KEY), createInitialState());
+  if (invalid) reportStorageIssue("invalid");
+  if (!users.some((user) => user.id === state.personaId)) state.personaId = "u-province";
+  state.mapLayer = normalizeMapLayerId(state.mapLayer);
+  return state;
 }
 
 const AppStateContext = createContext<AppState | null>(null);
@@ -278,9 +269,14 @@ const AppDispatchContext = createContext<React.Dispatch<Action> | null>(null);
 
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, undefined, loadInitialState);
+  const lastPersistedState = useRef(state);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // Preserve the original snapshot on mount, including malformed data for recovery.
+    if (lastPersistedState.current === state) return;
+    lastPersistedState.current = state;
+    const { toast: _toast, ...persisted } = state;
+    writeBrowserStorage(STORAGE_KEY, JSON.stringify(persisted));
   }, [state]);
 
   const memoState = useMemo(() => state, [state]);

@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
+import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import {
   authenticateUsername,
   loginUsers,
@@ -13,7 +15,6 @@ import {
   months,
   nakhonRatchasimaDistrictSubdistrictMatrix,
   nakhonRatchasimaDwrEwsStationCoverage,
-  nakhonRatchasimaDroughtForecastArchive,
   nakhonRatchasimaEvidenceRecords,
   nakhonRatchasimaHierarchy,
   nakhonRatchasimaMapLayers,
@@ -42,7 +43,6 @@ import {
   getLocationById,
   getNakhonRatchasimaDistrictBySlug,
   getNakhonRatchasimaDistricts,
-  getNakhonRatchasimaDroughtForecastArchive,
   getNakhonRatchasimaEvidenceForLocation,
   getNakhonRatchasimaLocalSubsetForSubdistrict,
   getNakhonRatchasimaMatrixRowBySubdistrictCode,
@@ -71,6 +71,8 @@ import {
   summarizeNakhonRatchasimaPredictionReadiness,
   summarizeNakhonRatchasimaRainfallCoverage,
 } from "../src/domain";
+
+const nakhonRatchasimaDroughtForecastArchive = archiveJson as NakhonRatchasimaDroughtForecastArchive;
 
 describe("canonical data integrity", () => {
   it("keeps nationwide province-month coverage intact", () => {
@@ -428,7 +430,7 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     const research = getNakhonRatchasimaResearchPanelSummary();
     const meta = research.meta as typeof research.meta & { historicalDataStatus?: string };
     const periods = getNakhonRatchasimaResearchPeriods();
-    const archive = getNakhonRatchasimaDroughtForecastArchive();
+    const archive = nakhonRatchasimaDroughtForecastArchive;
 
     expect(meta.historicalDataStatus).toBe("CLEARED_FOR_DATASET_REFRESH_EMPTY");
     expect(research.meta.periodStart).toBe("");
@@ -448,8 +450,7 @@ describe("Nakhon Ratchasima incremental research patch", () => {
   });
 
   it("integrates the rev02 drought forecast archive without collapsing T+ vintages", () => {
-    const archive = getNakhonRatchasimaDroughtForecastArchive();
-    expect(archive).toBe(nakhonRatchasimaDroughtForecastArchive);
+    const archive = nakhonRatchasimaDroughtForecastArchive;
     expect(archive.meta).toMatchObject({
       sourceOfTruth: "normalized_rev02_forecast_archive_workbook",
       sourceWorkbookOriginal: "Drought_T1-6_rev02.xlsx",

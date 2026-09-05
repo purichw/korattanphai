@@ -38,7 +38,8 @@ serverless endpoint.
 
 ```mermaid
 flowchart TD
-  Browser["Browser"] --> App["React app"]
+  Browser["Browser"] --> Login["App: lightweight login"]
+  Login -->|lazy import| App["AuthenticatedApp"]
   App --> Store["AppStateProvider + reducer"]
   Store --> Local["localStorage demo state"]
   App --> Domain["domain selectors"]
@@ -61,9 +62,32 @@ Boundary rules:
 - `src/data/canonical/*.json` is read-only source fixture data.
 - `src/data/catalog.ts` casts JSON into typed application records and derives
   catalog lists.
+- `src/data/forecastArchive.ts` loads the forecast archive from a content-hashed
+  JSON asset only for drought, district, and subdistrict views. It shares pending
+  requests, caches validated results in memory, and permits retry after failure.
+- `src/useForecastArchive.ts` owns the loading lifecycle. The workspace passes
+  the loaded archive into its existing forecast components; the overview uses
+  a generated T+1-only archive projection instead of loading all six horizons.
+  The overview projection has a separate loader cache and reuses the same map,
+  canonical-code joins and summary functions as the full archive.
+- `src/data/localMapGeometry.ts` shares pending/parsed local geometry requests.
+  Forecast routes prefetch geometry alongside the archive to avoid serial
+  loading. Optional context failures do not block the subdistrict geometry.
 - `src/domain.ts` owns deterministic joins and derived summaries.
 - `src/store.tsx` owns UI state, workflow transitions, and local persistence.
-- `src/App.tsx` owns visible surfaces and form controls.
+- `src/App.tsx` owns lightweight login and browser history. It lazily imports
+  `src/AuthenticatedApp.tsx` after login so canonical data is not in login startup.
+  Deep-link query parameters and hashes survive login redirects.
+- `src/AuthenticatedApp.tsx` owns the authenticated shell and remaining app
+  surfaces. Ordinary internal content links use client navigation; modified
+  clicks, downloads and external links retain browser behavior.
+- `src/browserStorage.ts` wraps storage errors with a document-lifetime fallback;
+  `src/persistedState.ts` validates persisted fields and nested runtime records.
+  `src/store.tsx` does not rewrite the snapshot merely on mount. A visible notice
+  reports invalid or unavailable storage. No real authentication was added.
+- `AppErrorBoundary` guards root/loading and routed content. Render retry
+  remounts content without clearing storage; failed module loading retries by
+  reloading the current URL because browsers cache failed dynamic imports.
 - `src/components/RiskMap.tsx` owns map rendering, province selection, bounded
   zoom/pan, regional-country underlay rendering, and GeoJSON joins.
 - `src/components/ProvinceWorkspacePlaceholder.tsx` owns route-backed
@@ -71,13 +95,15 @@ Boundary rules:
   drill-down data. It provides containers only and must not fabricate local
   evidence.
 - `src/components/NakhonRatchasimaWorkspace.tsx` owns the Nakhon Ratchasima
-  province/district/subdistrict drill-down UI. It consumes domain helpers and
-  must not join evidence by route slug or display no-data as normal risk.
+  route composition, filters and loading state. View implementations now live
+  under `src/components/nakhon-ratchasima/`, separately from the local map and
+  forecast model. The extraction preserves existing calculations and markup.
+  Never join evidence by route slug or display no-data as normal risk.
 - Rainfall helper ownership lives in `src/domain.ts`. Components consume
   `getNakhonRatchasimaRainfall*` selectors and must keep direct-station coverage
   separate from nearest-station representative context.
-- Drought forecast archive helpers live in `src/domain.ts` and
-  `src/components/NakhonRatchasimaWorkspace.tsx`. They must preserve target
+- Drought forecast archive calculations live in
+  `src/components/nakhon-ratchasima/forecastModel.ts`. They must preserve target
   month, issue month, and T+ horizon instead of reducing the archive to a single
   latest-risk value.
 
@@ -149,6 +175,10 @@ needs audit:
 ## Data Flow
 
 1. Vite bundles imported canonical JSON from `src/data/catalog.ts`.
+   The drought forecast archive is excluded from this catalog: Vite emits its
+   canonical JSON as a separate asset via `?url`. The overview summary is
+   regenerated from that same source before dev/build by
+   `scripts/generate-forecast-summary.mjs`.
 2. Domain helpers in `src/domain.ts` compute records, summaries, workflow state,
    joins, delivery records, and map-related values.
 3. In production, `RisksSection` fetches the risk-fusion explanation from

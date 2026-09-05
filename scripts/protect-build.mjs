@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import JavaScriptObfuscator from "javascript-obfuscator";
 
-const distDir = path.resolve(process.cwd(), "dist");
+const distDir = path.resolve(process.env.BUILD_OUT_DIR ?? "dist");
 const assetsDir = path.join(distDir, "assets");
 
 const obfuscatorOptions = {
@@ -16,13 +16,17 @@ const obfuscatorOptions = {
   identifierNamesGenerator: "hexadecimal",
   numbersToExpressions: false,
   renameGlobals: false,
+  // Keep chunk URLs literal so the post-build asset rename can update every reference.
+  reservedStrings: ["\\.js$"],
   seed: 8272026,
   selfDefending: false,
   simplify: true,
   splitStrings: false,
   stringArray: true,
   stringArrayCallsTransform: false,
-  stringArrayEncoding: ["base64"],
+  // Data strings must not pay a runtime decoding/rotation cost before rendering.
+  stringArrayEncoding: [],
+  stringArrayRotate: false,
   stringArrayThreshold: 0.22,
   target: "browser",
   transformObjectKeys: false,

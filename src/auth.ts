@@ -1,3 +1,5 @@
+import { readBrowserStorage, writeBrowserStorage } from "./browserStorage";
+
 export type LoginUser = {
   id: "pointy" | "somsak";
   name: "Pointy" | "Somsak";
@@ -18,7 +20,7 @@ export function authenticateUsername(value: string): LoginUser | null {
 export function readStoredLogin(): LoginUser | null {
   if (typeof window === "undefined") return null;
   try {
-    const stored = window.localStorage.getItem(LOGIN_STORAGE_KEY);
+    const stored = readBrowserStorage(LOGIN_STORAGE_KEY);
     if (!stored) return null;
     return authenticateUsername(stored);
   } catch {
@@ -27,9 +29,9 @@ export function readStoredLogin(): LoginUser | null {
 }
 
 export function writeStoredLogin(user: LoginUser) {
-  window.localStorage.setItem(LOGIN_STORAGE_KEY, user.name);
+  return writeBrowserStorage(LOGIN_STORAGE_KEY, user.name);
 }
 
 export function clearStoredLogin() {
-  window.localStorage.removeItem(LOGIN_STORAGE_KEY);
+  return writeBrowserStorage(LOGIN_STORAGE_KEY, null);
 }

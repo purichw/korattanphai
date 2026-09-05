@@ -12,7 +12,6 @@ import mapLayerCatalogJson from "./canonical/map_layer_catalog.json";
 import nakhonRatchasimaAdminHierarchyJson from "./canonical/nakhon_ratchasima/admin_hierarchy.json";
 import nakhonRatchasimaDistrictSubdistrictMatrixJson from "./canonical/nakhon_ratchasima/district_subdistrict_matrix.json";
 import nakhonRatchasimaDwrEwsStationCoverageJson from "./canonical/nakhon_ratchasima/dwr_ews_station_coverage.json";
-import nakhonRatchasimaDroughtForecastArchiveJson from "./canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
 import nakhonRatchasimaEvidenceRecordsJson from "./canonical/nakhon_ratchasima/evidence_records.json";
 import nakhonRatchasimaLocalSubsetJson from "./canonical/nakhon_ratchasima/local_subset.json";
 import nakhonRatchasimaMapLayersJson from "./canonical/nakhon_ratchasima/map_layers.json";
@@ -41,7 +40,6 @@ import type {
   LocationNode,
   MapLayerRecord,
   NakhonRatchasimaDwrEwsStationCoverage,
-  NakhonRatchasimaDroughtForecastArchive,
   ModelRegistryRecord,
   NakhonRatchasimaEvidenceRecord,
   NakhonRatchasimaHierarchy,
@@ -74,8 +72,6 @@ export const nakhonRatchasimaDistrictSubdistrictMatrix =
   nakhonRatchasimaDistrictSubdistrictMatrixJson as NakhonRatchasimaMatrixRow[];
 export const nakhonRatchasimaDwrEwsStationCoverage =
   nakhonRatchasimaDwrEwsStationCoverageJson as NakhonRatchasimaDwrEwsStationCoverage;
-export const nakhonRatchasimaDroughtForecastArchive =
-  nakhonRatchasimaDroughtForecastArchiveJson as NakhonRatchasimaDroughtForecastArchive;
 export const nakhonRatchasimaOpsmoacMonthlyReports =
   nakhonRatchasimaOpsmoacMonthlyReportsJson as NakhonRatchasimaOpsmoacMonthlyReports;
 export const nakhonRatchasimaRainfallMonthlyHistory =

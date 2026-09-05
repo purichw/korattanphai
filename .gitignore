@@ -3,7 +3,9 @@ dist
 coverage
 test-results
 playwright-report
+smoke-results
 tmp-snapshots
+artifacts/
 *.tsbuildinfo
 .DS_Store
 .vercel

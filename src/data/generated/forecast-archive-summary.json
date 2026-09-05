@@ -1,0 +1,11 @@
+{
+  "leadMonth": {
+    "period": "2025-12",
+    "labelTh": "ธ.ค. 2568"
+  },
+  "summary": {
+    "totalSubdistricts": 289,
+    "inScopeSubdistricts": 142,
+    "riskSubdistricts": 142
+  }
+}

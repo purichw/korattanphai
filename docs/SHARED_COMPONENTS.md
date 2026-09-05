@@ -42,16 +42,39 @@ Helper exports:
 
 ## Local Shared Primitives
 
-`src/components/NakhonRatchasimaWorkspace.tsx` intentionally contains many
-Nakhon-specific primitives that are reused across province, district, and
-subdistrict routes. They are not exported today, but inside that file they
-should be treated as shared components and reused instead of duplicated.
+The workspace loads the full archive on demand with `useForecastArchive` and
+passes it to the existing province/district/subdistrict forecast views. Pending
+and failed loads use one shared workspace state with overview navigation and
+retry. The province overview fetches `forecast-overview-t1.json`, a generated
+T+1-only projection of every target month. It uses the same loader, map and
+summary functions with a separate cache; it must not fetch the full archive.
+Forecast components retain the existing
+target-month/T+ selection and risk semantics once data is ready.
+
+Nakhon-specific primitives now live in `src/components/nakhon-ratchasima/`.
+They are exported for reuse across province, district, and subdistrict routes;
+do not duplicate them in view files. `NakhonRatchasimaWorkspace.tsx` only composes
+the route, filters and loading state.
+
+| Owner | Responsibility |
+| --- | --- |
+| `forecastModel.ts` | Target/T selection, archive records, counts and trend calculations. |
+| `workspaceModel.ts` | Local map types/geometry, research selectors and display helpers. |
+| `NakhonRatchasimaLocalMap.tsx` | Map rendering, gestures, previews, wheel isolation and geometry loading. |
+| `ForecastControls.tsx` | Shared archive selectors, filters and summary metrics. |
+| `DroughtForecastWorkspace.tsx` | Shared compact forecast, chart, map and narrative sections. |
+| `SharedPanels.tsx`, `ResearchPanels.tsx` | Reused local sections and research/evidence panels. |
+| `ProvinceView.tsx`, `DistrictView.tsx`, `SubdistrictView.tsx` | Level-specific composition, retaining the same shared forecast workspace. |
+
+`src/components/AppErrorBoundary.tsx` and `StorageNotice.tsx` provide application
+recovery feedback. Neither resets persisted state automatically.
 
 | Primitive | Use For |
 | --- | --- |
 | `OfficialMetricCard` | Nakhon-specific metric cards backed by `MetricCard`. |
 | `ProvinceDashboardHeading` | Province heading with source/readiness context. |
-| `ProvinceSituationCards` | Province current-state facts. The overview cockpit uses its compact rail variant so the same hazard, crop, exposed-area, confidence, and provenance semantics fit beside the map without duplicating stat cards. |
+| `ProvinceSituationCards` | Legacy province current-state facts; not used as forecast evidence in the overview. |
+| `ProvinceForecastOverview` | Overview map, four risk counts and up to three high-risk subdistrict links. Defaults to latest available target + T+1. District scope filters both map and counts; drilldowns preserve target/horizon and selected area. Mobile order is context, counts, map, area links. |
 | `DashboardSection` | Standard titled Nakhon dashboard section shell. |
 | `DashboardAccordionSection` | Compact disclosure section for source/detail content. |
 | `DataGovernanceGuardrailList` | Guardrail list explaining readiness/source caveats. |
@@ -67,7 +90,7 @@ should be treated as shared components and reused instead of duplicated.
 | `DroughtForecastNarrativeDetail` | Shared disclosure content for the longer forecast summary and timeline that should not crowd the compact workspace. |
 | `DroughtForecastArchivePanel` | Shared historical drought forecast archive module for province, district, and subdistrict drought pages. It takes the selected target month plus T+ horizon, never fabricates missing vintage data, and can hide its own horizon selector when nested inside `DroughtCompactForecastWorkspace`. |
 | `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
-| `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`; keeps in-scope, no-risk, moderate-risk, high-risk, out-of-scope, and subdistrict value metrics centered and source-aware. |
+| `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`. Its overview variant displays high, moderate, no-risk and out-of-scope counts, plus a separate missing count when necessary; detail retains coverage and subdistrict values. |
 | `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. |
 | `ResearchDroughtSituationPanel` | Province drought status summary. |
 | `ResearchDroughtDistrictPanel` | District ranking/status module. |
@@ -83,7 +106,7 @@ should be treated as shared components and reused instead of duplicated.
 | `ResearchSubdistrictProfilePanel` | Subdistrict profile/context module. |
 | `ResearchSubdistrictDataGapPanel` | Subdistrict data-gap module. |
 | `ResearchAreaSourceLimitsPanel` | Area-specific source limits/disclosure. |
-| `ProvinceDashboardMapCard` | Province dashboard map surface. |
+| `ProvinceDashboardMapCard` | Province dashboard map surface; accepts an optional scoped target so the overview can focus a district without leaving the page. |
 | `AgricultureVisibilityPanel` | Agriculture facts/KPI panel. |
 | `AgricultureImpactPanel` | Province agriculture impact panel. |
 | `ResearchAreaAgricultureImpactPanel` | District/subdistrict agriculture facts panel. |

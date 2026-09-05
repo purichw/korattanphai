@@ -6,7 +6,6 @@ import {
   locations,
   mapLayerCatalog,
   nakhonRatchasimaDistrictSubdistrictMatrix,
-  nakhonRatchasimaDroughtForecastArchive,
   nakhonRatchasimaEvidenceRecords,
   nakhonRatchasimaHierarchy,
   nakhonRatchasimaLocalSubset,
@@ -37,7 +36,6 @@ import type {
   FieldTask,
   LayerAvailability,
   LocationNode,
-  NakhonRatchasimaDroughtForecastArchive,
   NakhonRatchasimaDistrict,
   NakhonRatchasimaEvidenceRecord,
   NakhonRatchasimaMapLayer,
@@ -606,10 +604,6 @@ export function summarizeNakhonRatchasimaProvince() {
 
 export function getNakhonRatchasimaMapLayers(): NakhonRatchasimaMapLayer[] {
   return nakhonRatchasimaMapLayers;
-}
-
-export function getNakhonRatchasimaDroughtForecastArchive(): NakhonRatchasimaDroughtForecastArchive {
-  return nakhonRatchasimaDroughtForecastArchive;
 }
 
 export function getNakhonRatchasimaSourceRows() {

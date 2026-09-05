@@ -624,7 +624,7 @@ export interface NakhonRatchasimaDroughtForecastArchive {
     duplicateSourceRowsRemoved: number;
     sourceIdCount: number;
     targetMonthCount: number;
-    horizonCount: 6;
+    horizonCount: 1 | 6;
     forecastVintageCount: number;
     sourceVintageKeyCount: number;
     forecastVintageIdentity: string;

@@ -27,6 +27,8 @@ in this repo.
 - Shared metric components: `src/components/PageSummary.tsx`
 - Shared map preview footer: `src/components/MapPreviewFooter.tsx`
 - Canonical data imports: `src/data/catalog.ts`
+- On-demand forecast archive: `src/data/forecastArchive.ts` and
+  `src/useForecastArchive.ts`; the overview uses a generated summary.
 - Canonical JSON package copy: `src/data/canonical/`
 - Nakhon Ratchasima local research/data patch:
   `src/data/canonical/nakhon_ratchasima/`
@@ -152,7 +154,11 @@ Production smoke checks after an authorized deploy:
 - `scripts/run-playwright.mjs`: guarded Playwright launcher with attached and
   managed server modes.
 - `src/main.tsx`: React root mount.
-- `src/App.tsx`: app shell, navigation, sections, forms, alerts, farmer view.
+- `src/App.tsx`: lightweight login, URL history, and lazy dashboard loading.
+- `src/AuthenticatedApp.tsx`: app shell, navigation, sections, forms, alerts,
+  farmer view, and content error boundary.
+- `src/browserStorage.ts`, `src/persistedState.ts`: safe storage access and
+  validation/recovery of persisted demo state.
 - `src/styles.css`: design tokens, layout, responsive rules, typography.
 - `src/types.ts`: TypeScript models for canonical and runtime data.
 - `src/store.tsx`: reducer, persistence, local demo workflow state.
@@ -161,7 +167,13 @@ Production smoke checks after an authorized deploy:
   English-coded fixture values.
 - `src/components/RiskMap.tsx`: interactive Thailand ADM1 SVG map.
 - `src/components/NakhonRatchasimaWorkspace.tsx`: province -> district ->
-  subdistrict drill-down for Nakhon Ratchasima using admin-code joins.
+  subdistrict route composition and loading state.
+- `src/components/nakhon-ratchasima/`: extracted local map, forecast model,
+  forecast controls/workspace, shared panels, and province/district/subdistrict
+  views. Continue using admin-code joins and existing shared UI components.
+- `.github/workflows/quality.yml`: unit, protected-build, bundle and built E2E gates.
+- `.github/workflows/deployment-smoke.yml`, `scripts/smoke.mjs`: read-only deployed
+  smoke checks. Runbook: `docs/PRODUCTION_SMOKE.md`.
 - `src/components/AppSelect.tsx`: shared centered dropdown/listbox component.
 - `src/components/PageSummary.tsx`: shared `PageSummary`, `MetricCard`, and
   `MetricGrid` components.
@@ -232,7 +244,8 @@ The Farmer persona only sees the simplified farmer alert experience.
 flowchart LR
   A["src/data/canonical/*.json"] --> B["src/data/catalog.ts"]
   B --> C["src/domain.ts selectors"]
-  C --> D["src/App.tsx sections"]
+  C --> D["src/AuthenticatedApp.tsx sections"]
+  Login["src/App.tsx login"] -->|lazy import after login| D
   C --> E["src/components/RiskMap.tsx"]
   D --> F["src/store.tsx reducer"]
   F --> G["localStorage: korat-tan-phai-demo-state-v1"]
@@ -374,8 +387,8 @@ npm run test:e2e:managed
 
 ## Known Risks / Stale Notes
 
-- FACT: The build emits a Vite chunk-size warning because the full canonical JSON
-  bundle is imported into the client.
+- FACT: The build still emits a Vite chunk-size warning for other canonical JSON.
+  The forecast archive is a separate content-hashed asset loaded on demand.
 - FACT: There is no real auth, no backend, no real notification delivery, and no
   live data ingestion.
 - FACT: The app has no explicit SEO/noindex implementation beyond the Vite HTML

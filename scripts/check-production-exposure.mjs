@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const distDir = path.resolve(process.cwd(), "dist");
+const distDir = path.resolve(process.env.BUILD_OUT_DIR ?? "dist");
 const blockedPatterns = [
   { label: "source map reference", pattern: /sourceMappingURL/ },
   { label: "source path", pattern: /src\/data\/canonical|src\/domain|src\/store/ },

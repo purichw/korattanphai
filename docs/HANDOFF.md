@@ -17,6 +17,83 @@ state in `localStorage`.
 
 ## Recent Changes
 
+Combined release checkpoint (2026-09-05):
+
+- The user authorized committing, pushing and deploying all work from both
+  concurrent Korat tasks on `fix/nr-map-zoom-performance`.
+- Province overview now displays the latest archived T+1 forecast, with month
+  and district filters, scoped counts, high-risk area links and context-preserving
+  drilldown. The shared forecast workspace remains available at province,
+  district and subdistrict levels. This is archived prediction, not live data.
+- The lightweight overview asset is generated from the unchanged canonical
+  archive; the full T+1-T+6 archive loads only on detail routes. The release also
+  includes the reliability, code-splitting, shared-component and CI work below.
+- Release checks: 57 unit/data tests passed; protected build, exposure and
+  bundle checks passed. All 39 active desktop/mobile E2E scenarios passed across
+  the full run and focused reruns; five existing configured skips remain.
+- One map test was corrected after trace evidence showed that deselection
+  succeeded but camera movement opened a different hover preview under a
+  stationary pointer. The test now checks selection removal, then moves the
+  pointer outside the map before checking preview dismissal. It passed twice
+  per viewport; product behavior was not changed for this correction.
+- Verification artifact: `tmp-snapshots/release-combined-20260905`. Screenshots,
+  traces and temporary builds are ignored, not release source files.
+- Pre-release recovery deployment: `dpl_4uc1a42qX3rgxBSeJ2xAZm2TdBoi`, associated
+  with the previously published work through `440b707`. Production publication
+  and post-deploy smoke follow this checkpoint; these local checks alone do not
+  prove deployment. Run `npm run smoke` against the published alias for evidence.
+
+Non-functional follow-up (2026-09-05, local work; not deployed by this task):
+
+- Added root/content error boundaries, storage-unavailable notices, in-document
+  fallback storage and validation of persisted runtime records. Initial provider
+  mount no longer rewrites a saved snapshot; toasts are not saved.
+- Login is now a lightweight entry with a lazy `AuthenticatedApp` chunk.
+  Login redirects retain query/hash, and ordinary internal content links retain
+  the current document so blocked storage does not end the demo session.
+- Extracted the large Nakhon workspace into `components/nakhon-ratchasima/`:
+  archive calculations, map, forecast controls/workspace, shared research panels,
+  and province/district/subdistrict views. The root is now route composition.
+- Added startup and total-JS budgets plus static chunk-reference validation.
+  `BUILD_OUT_DIR` supports isolated verification artifacts during concurrent work.
+- Added GitHub quality/deployment-smoke workflows and a read-only smoke harness.
+  Runbook: `PRODUCTION_SMOKE.md`. Workflows are not active until pushed; repository
+  protections and Vercel deployment blocking are separate configuration.
+- The concurrent T+1 overview changes were retained. Regression expectations for
+  its primary map, area selection and context-carrying drilldown were updated;
+  forecast counts and canonical archive bytes remain independently checked.
+- Verification: 57 unit/data tests passed. All 37 active desktop/mobile E2E
+  scenarios passed across the full run and targeted reruns after fixes; the five
+  pre-existing skips remain. SVG click tests now wait for the camera to settle,
+  and wheel zoom targets a hit-tested background instead of a hover preview.
+- Protected build, exposure checks and bundle/reference checks passed in
+  `tmp-snapshots/nfr-final2-20260905`. Read-only smoke also passed against the
+  existing production deployment; that does not deploy these local changes.
+
+Non-functional archive loading pass (2026-09-05, local work after `440b707`):
+
+- Removed the full forecast archive from the synchronous catalog/domain import
+  chain. `src/data/forecastArchive.ts` now fetches a content-hashed JSON asset
+  on drought/district/subdistrict routes; login and overview do not fetch it.
+- The overview summary is generated from the canonical archive before dev/build.
+  Archive source bytes, counts, risk values, and target/T+ semantics are unchanged.
+- Added loading/failure/retry handling that preserves the deep-link selection,
+  a shared archive request/cache, and local geometry prefetch/cache to load map
+  assets alongside the archive and reuse parsed geometry across navigation.
+- Profiling caught startup work added by the obfuscator's base64 decoding and
+  string-array rotation. Both options are now disabled; identifier obfuscation,
+  string tables, source-map exclusion, and blocked-literal checks remain active.
+- `npm run check:bundle` guards JS size and verifies emitted archive bytes.
+  `npm run test:e2e:built` tests the current `dist`; `npm run measure:load -- label`
+  records repeatable local measurements. See `NON_FUNCTIONAL_REQUIREMENTS.md`.
+- No production deployment is part of this pass.
+- Final local checks: 43 unit/data tests passed; protected build, exposure and
+  bundle checks passed; built desktop/mobile E2E passed 25 tests with 5 existing
+  configured skips (legacy national-map checks and mobile frame-count check).
+  The suite covers unchanged forecast counts, deep links, month/horizon controls,
+  drill-down, keyboard/dropdown wheel isolation, map previews/zoom, retry,
+  navigation during loading, geometry reuse and optional-context failures.
+
 Recent completed work before this docs pass:
 
 - Thai localization expanded across the app.

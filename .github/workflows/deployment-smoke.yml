@@ -1,0 +1,35 @@
+name: Deployment Smoke
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Korattanphai production or preview URL
+        required: true
+        default: https://korattanphai.vercel.app
+permissions:
+  contents: read
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && (github.event.deployment.environment == 'Production' || github.event.deployment.environment == 'production'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run smoke
+        env:
+          SMOKE_URL: ${{ inputs.url || github.event.deployment_status.environment_url }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: deployment-smoke
+          path: smoke-results/
+          retention-days: 7
