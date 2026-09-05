@@ -27,9 +27,15 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test
+      - run: npm run test:database
       - run: npm run build:protected
       - run: git diff --exit-code -- src/data/generated/
       - run: npm run test:e2e:built
+      - run: npm run test:e2e:database
+      - run: npm run build:protected
+        env:
+          VITE_DATA_BACKEND: supabase
+          BUILD_OUT_DIR: tmp-snapshots/ci-database-build
       - uses: actions/upload-artifact@v7
         if: failure()
         with:

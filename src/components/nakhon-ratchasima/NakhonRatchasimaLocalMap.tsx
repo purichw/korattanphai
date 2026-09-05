@@ -75,6 +75,7 @@ import {
   localResearchPeriodLabel,
   researchLatestPeriod,
   forecastArchiveLegendStatuses,
+  forecastArchiveRiskCriterionOptions,
   localMapLegendStatusesForView,
   legendStatusesForContext,
   compactCoverageLabel,
@@ -327,7 +328,19 @@ export function NakhonRatchasimaLocalMap({
   const useResearchCriteriaMap = researchCriteriaEnabled && !useForecastArchiveMap && target.valid && layerUsesResearchCriteriaMap(layer.id, provinceMapTab);
   const useFilterCriteriaMap = useResearchCriteriaMap || useForecastArchiveMap;
   const criteriaDefaults = useMemo(() => defaultLocalMapCriteria(provinceMapTab, layer.id), [layer.id, provinceMapTab]);
-  const [criteria, setCriteria] = useState<LocalMapCriteria>(criteriaDefaults);
+  const criteriaFromLocation = () => {
+    const risk = new URLSearchParams(window.location.search).get("mapRisk");
+    return useForecastArchiveMap && forecastArchiveRiskCriterionOptions.some((option) => option.value === risk)
+      ? { ...criteriaDefaults, risk: risk as LocalMapCriteria["risk"] } : criteriaDefaults;
+  };
+  const [criteria, setCriteria] = useState<LocalMapCriteria>(criteriaFromLocation);
+  const changeForecastRisk = (risk: LocalMapCriteria["risk"]) => {
+    setCriteria((current) => ({ ...current, risk }));
+    const url = new URL(window.location.href);
+    if (risk === "all") url.searchParams.delete("mapRisk");
+    else url.searchParams.set("mapRisk", risk);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  };
   const criteriaActive = !localCriteriaEqual(criteria, criteriaDefaults);
   const researchSummary = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, researchSummary);
@@ -380,8 +393,8 @@ export function NakhonRatchasimaLocalMap({
   };
 
   useEffect(() => {
-    setCriteria(criteriaDefaults);
-  }, [criteriaDefaults]);
+    setCriteria(criteriaFromLocation());
+  }, [criteriaDefaults, useForecastArchiveMap]);
 
   useLayoutEffect(() => {
     writeTransformAttribute(transformRef.current);
@@ -1146,8 +1159,8 @@ export function NakhonRatchasimaLocalMap({
           monthOptions={monthOptions}
           onMonthChange={onMonthChange}
           riskCriterion={criteria.risk}
-          onRiskCriterionChange={(risk) => setCriteria((current) => ({ ...current, risk }))}
-          onReset={() => setCriteria(criteriaDefaults)}
+          onRiskCriterionChange={changeForecastRisk}
+          onReset={() => changeForecastRisk(criteriaDefaults.risk)}
           resetDisabled={!criteriaActive}
           statusText={criteriaStatusText}
           compactValue={isMobileMap}

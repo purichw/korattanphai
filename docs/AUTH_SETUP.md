@@ -2,6 +2,12 @@
 
 ## Scope And Status
 
+Local follow-up: `VITE_DATA_BACKEND=supabase` enables the migration provider
+and owner-only saved workspaces described in `SUPABASE_DATA_MIGRATION.md`.
+Remote schema is applied; import/publication/cutover have separate gates. The
+historical auth release below did not migrate data. New database-mode builds
+omit raw archive assets, but older public deployment URLs are not revoked.
+
 The frontend now uses `@supabase/supabase-js` for email/password login, initial
 session restoration, refresh, auth-change events and local-scope logout. This
 has passed local mock verification and real-account candidate/production smoke

@@ -2,8 +2,11 @@
 
 ## Persistence Model
 
-FACT: There is no database. Current data sources are static JSON files and
-browser `localStorage`.
+Production currently reads static JSON and uses Supabase Auth. The existing
+six Supabase tables were audited on 2026-09-05. The additive schema migration
+is applied; the archive import/publication and runtime cutover have separate
+gates. The opt-in provider adds owner-only followed areas/saved filters. See
+`SUPABASE_DATA_MIGRATION.md` for current status and source lineage.
 
 Static source files:
 
@@ -46,7 +49,10 @@ drought forecast archive, which is loaded on demand by `src/data/forecastArchive
 
 ## Database Collections / Tables / Documents
 
-FACT: None exist.
+Existing audited tables: `ktp_districts`, `ktp_subdistricts`,
+`ktp_forecast_datasets`, `ktp_forecast_runs`, `ktp_forecast_values`,
+`ktp_research_crosswalk`. The additive local migration introduces
+`ktp_followed_areas` and `ktp_saved_filters`; these are applied remotely with RLS.
 
 PROPOSAL for a future backend:
 
@@ -188,6 +194,13 @@ normal. A source pathway may reduce “unknown source coverage” without reduci
 “unknown local hazard/impact.”
 
 ## Nakhon Ratchasima Drought Forecast Archive
+
+The local Supabase provider reconstructs the same full/T+1 archive shapes from
+normalized rows, without a static fallback. Source_YearMonth is preserved
+verbatim; the normalized workbook leaves issue-vs-target role unconfirmed.
+The current target-month interpretation is a product convention, not a newly
+verified source claim. The database explicitly records this distinction.
+Only the approved original/normalized/canonical SHA-256 set is importable.
 
 FACT: `drought_forecast_archive_rev02.json` is the source-backed T+1 through
 T+6 drought forecast archive built from
@@ -443,6 +456,11 @@ Do not fabricate local values for unseeded Nakhon Ratchasima subdistricts.
 No-data means insufficient evidence, not normal/green/low-risk.
 
 ## Local Storage / Session / Cache Keys
+
+Followed areas/saved filters in the opt-in database provider are owner-scoped
+Supabase rows, never imported from the legacy demo key below. Their memory
+and archive caches are disposed on account changes/logout. Failed saves do not
+fall back to browser persistence or claim success.
 
 Current keys:
 

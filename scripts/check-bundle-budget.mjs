@@ -51,8 +51,17 @@ if (!jsBytes || jsBytes > 3_500_000 || jsGzipBytes - authGzipBytes > 370_000) {
 }
 console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; application: ${jsGzipBytes - authGzipBytes} gzip bytes.`);
 const archiveAsset = assets.find((name) => /^drought_forecast_archive_rev02-[\w-]+\.json$/.test(name));
-if (!archiveAsset) throw new Error("Missing separate, content-hashed forecast archive asset.");
-const source = await fs.readFile("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json");
-const emitted = await fs.readFile(path.join(assetsDir, archiveAsset));
-if (!emitted.equals(source)) throw new Error("Emitted forecast archive differs from canonical source.");
-console.log(`[bundle-budget] OK: JavaScript ${jsBytes} bytes / ${jsGzipBytes} gzip bytes; separate archive matches canonical bytes.`);
+let databaseBuild = false;
+try { databaseBuild = JSON.parse(await fs.readFile(path.join(distDir, "data-backend.json"), "utf8")).backend === "supabase"; }
+catch (error) { if (error.code !== "ENOENT") throw error; }
+if (databaseBuild) {
+  if (archiveAsset || assets.some((name) => /^forecast-overview-t1-.*\.json$/.test(name))) throw new Error("Database build must not expose static forecast archives.");
+  console.log("[bundle-budget] Database provider: no static forecast archive assets emitted.");
+} else {
+  if (!archiveAsset) throw new Error("Missing separate, content-hashed forecast archive asset.");
+  const source = await fs.readFile("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json");
+  const emitted = await fs.readFile(path.join(assetsDir, archiveAsset));
+  if (!emitted.equals(source)) throw new Error("Emitted forecast archive differs from canonical source.");
+  console.log("[bundle-budget] Static provider: archive matches canonical bytes.");
+}
+console.log(`[bundle-budget] OK: JavaScript ${jsBytes} bytes / ${jsGzipBytes} gzip bytes.`);

@@ -1,5 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
+import { DatabaseWorkspaceProvider } from "./DatabaseWorkspaceProvider";
+import { WorkspaceBookmarks } from "./components/WorkspaceBookmarks";
 import {
   AlertTriangle,
   BarChart3,
@@ -333,12 +335,16 @@ export default function AuthenticatedApp(props: {
   onLogout: () => void;
   signingOut: boolean;
   path: string;
+  navigationKey?: string;
   onNavigate: (path: string) => void;
 }) {
   useEffect(() => {
     if (isWorkspaceAppRoute(props.path)) window.scrollTo(0, 0);
   }, [props.path]);
-  return <AppStateProvider><AppShell {...props} /></AppStateProvider>;
+  const app = <AppStateProvider><AppShell {...props} /></AppStateProvider>;
+  return import.meta.env.VITE_DATA_BACKEND === "supabase"
+    ? <DatabaseWorkspaceProvider key={props.loginUser.id} userId={props.loginUser.id}>{app}</DatabaseWorkspaceProvider>
+    : app;
 }
 
 function AppShell({
@@ -346,12 +352,14 @@ function AppShell({
   onLogout,
   signingOut,
   path,
+  navigationKey,
   onNavigate,
 }: {
   loginUser: LoginUser;
   onLogout: () => void;
   signingOut: boolean;
   path: string;
+  navigationKey?: string;
   onNavigate: (path: string) => void;
 }) {
   const state = useAppState();
@@ -400,6 +408,7 @@ function AppShell({
           {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div className="mobile-account-slot">
+          <WorkspaceBookmarks onNavigate={onNavigate} />
           <AccountControl
             compact
             loginUser={loginUser}
@@ -457,6 +466,7 @@ function AppShell({
             <h1 className="sr-only">{t("brand", language)}</h1>
           </div>
           <div className="topbar-actions">
+            <WorkspaceBookmarks onNavigate={onNavigate} />
             <AccountControl
               loginUser={loginUser}
               persona={persona}
@@ -499,7 +509,7 @@ function AppShell({
         }}>
           <AppErrorBoundary resetKey={`${path}:${state.section}:${state.personaId}`}>
           {nakhonRoute ? (
-            <NakhonRatchasimaWorkspace route={nakhonRoute} onNavigate={onNavigate} />
+            <NakhonRatchasimaWorkspace key={navigationKey ?? path} route={nakhonRoute} onNavigate={onNavigate} />
           ) : provinceRoute ? (
             <ProvinceWorkspacePlaceholder route={provinceRoute} onNavigate={onNavigate} />
           ) : persona.role === "Farmer" ? (

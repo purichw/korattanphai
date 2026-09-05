@@ -113,7 +113,7 @@ export function App() {
       {auth.signOutError && <div className="auth-session-error" role="alert">{auth.signOutError}</div>}
       <Suspense fallback={<main className="app-recovery" lang="th" role="status">กำลังเปิดโคราชทันภัย...</main>}>
         <AuthenticatedApp key={auth.user.id} loginUser={auth.user} onLogout={() => { void handleLogout(); }}
-          signingOut={auth.signingOut} path={path} onNavigate={navigate} />
+          signingOut={auth.signingOut} path={path} navigationKey={location} onNavigate={navigate} />
       </Suspense>
     </>;
   } else content = <LoginFrame><p role="status">กำลังตรวจสอบการเข้าสู่ระบบ...</p></LoginFrame>;

@@ -9,6 +9,14 @@ this document in the same change whenever a shared component contract changes.
 
 ## Public Shared Components
 
+Database migration (local, not enabled in production): `WorkspaceBookmarks` is
+the shared account-toolbar control on desktop/mobile for followed areas and
+saved filters across all Korat routes. It renders only within
+`DatabaseWorkspaceProvider` (`VITE_DATA_BACKEND=supabase`). Loading, errors,
+confirmed removal, keyboard tabs and navigation use one implementation. It
+must receive the raw app navigation callback, not a forecast wrapper that
+overwrites a saved target/horizon. See `SUPABASE_DATA_MIGRATION.md`.
+
 These components are exported from `src/components/` and may be reused across
 files.
 

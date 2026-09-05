@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { forecastArchiveLoader, forecastOverviewLoader } from "./data/forecastArchive";
+import { useDatabaseWorkspace } from "./DatabaseWorkspaceProvider";
 
 export function useForecastArchive(enabled: boolean, source: "full" | "overview" = "full") {
-  const loader = source === "overview" ? forecastOverviewLoader : forecastArchiveLoader;
+  const database = useDatabaseWorkspace();
+  if (import.meta.env.VITE_DATA_BACKEND === "supabase" && !database) throw new Error("Database workspace provider unavailable");
+  const loader = database ? database[source] : source === "overview" ? forecastOverviewLoader : forecastArchiveLoader;
   const [archive, setArchive] = useState(loader.getCached);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
