@@ -911,18 +911,17 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
 
     const scrollBefore = await page.evaluate(() => window.scrollY);
     await page.mouse.wheel(0, 40);
-    await page.waitForTimeout(220);
+    await expect.poll(async () => (await readMapTransform(localSvg, ".nr-map-transform-layer")).k)
+      .toBeLessThan(preWheelZoomTransform.k - 0.08);
     const wheelZoomOutTransform = await readMapTransform(localSvg, ".nr-map-transform-layer");
     const scrollAfter = await page.evaluate(() => window.scrollY);
-    expect(wheelZoomOutTransform.k).toBeLessThan(preWheelZoomTransform.k - 0.08);
     expect(scrollAfter).toBe(scrollBefore);
 
     await page.keyboard.down("Control");
     await page.mouse.wheel(0, -40);
     await page.keyboard.up("Control");
-    await page.waitForTimeout(220);
-    const wheelZoomTransform = await readMapTransform(localSvg, ".nr-map-transform-layer");
-    expect(wheelZoomTransform.k).toBeGreaterThan(wheelZoomOutTransform.k + 0.12);
+    await expect.poll(async () => (await readMapTransform(localSvg, ".nr-map-transform-layer")).k)
+      .toBeGreaterThan(wheelZoomOutTransform.k + 0.12);
   }
 
   await localMap.getByTitle("ขยายแผนที่").click();
