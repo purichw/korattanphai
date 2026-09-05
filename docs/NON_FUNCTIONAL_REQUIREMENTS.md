@@ -4,8 +4,9 @@
 
 Current facts:
 
-- Supabase Email + Password auth is implemented; real-account and backend
-  settings remain unverified. No data provider or privileged secrets are added.
+- Supabase Email + Password passed real-account production smoke on 2026-09-05;
+  self-signup is disabled. Database/RLS remain unaudited. No data provider or
+  privileged secrets are added.
 - One read-only Vercel endpoint exists for production risk-fusion explanation.
 - Persona switching is not authentication.
 - Persona fixture data must not contain passwords.

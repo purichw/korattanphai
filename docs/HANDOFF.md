@@ -17,7 +17,38 @@ state in `localStorage`.
 
 ## Recent Changes
 
-Combined Supabase Auth and UI release preparation (2026-09-05):
+Combined Supabase Auth and UI production release (2026-09-05):
+
+- Runtime commit: `15275fd2c0393fa8e50b933aafa0da1da44265be`, pushed to
+  `fix/nr-map-zoom-performance`. Production was promoted to
+  `dpl_BBDCsEEYmYdLAGnZRbBk2mEYsrS9` and verified through
+  `https://korattanphai.vercel.app`; no merge into `main` was performed.
+- Full CI for this runtime passed: 96 unit tests, protected build, exposure,
+  bundle budgets, generated-data drift and 66 E2E tests with 6 existing skips.
+  Run: `https://github.com/purichw/korattanphai/actions/runs/33957336832`.
+- Real-account smoke passed on the protected candidate and then the public
+  production alias: login/logout, refresh/navigation, four routes at desktop
+  1440x960 and mobile 390x844, 289 polygons, forecast counts/context, API,
+  asset/cache/security headers, visible images and no horizontal overflow.
+  Evidence: `smoke-results/combined-auth-ui-candidate` and
+  `smoke-results/combined-auth-ui-production`; both reports have zero failures.
+- Vercel's Production URL variable incorrectly held the Supabase dashboard
+  URL. Corrected only `VITE_SUPABASE_URL` to the project's HTTPS API origin;
+  the existing publishable key was valid and unchanged. The first candidate
+  build rejected the invalid URL before publishing; the retry passed.
+- The user disabled self-signup. Read-only Auth settings verification returned
+  `disable_signup: true` and email provider enabled. No tables, RLS, data,
+  accounts or passwords were modified by the release.
+- Protected-candidate smoke now accepts an authorized, host-scoped Vercel
+  session in memory, with input validation, redirect rejection and redaction.
+  It does not bypass Supabase login or persist either session/credentials.
+  The follow-up changes only this harness and release documentation, not the
+  runtime artifact already promoted. Two negative input-guard checks passed.
+- Real Safari, SMTP/recovery and database/RLS authorization audits are outside
+  this release. GitHub smoke-account secrets remain unconfigured; the real
+  deployment smoke was run locally with session-only credentials.
+
+Pre-release evidence and scope:
 
 - The user now authorizes commit, push and production deployment of both
   tasks on `fix/nr-map-zoom-performance`. No merge into `main` or database
@@ -32,8 +63,8 @@ Combined Supabase Auth and UI release preparation (2026-09-05):
   drilldown flow exceeded its 60-second test budget. The identical test/build
   passed two isolated runs (48.1s and 25.8s), without timeout or code changes.
   Evidence: `tmp-snapshots/release-combined-e2e` and
-  `tmp-snapshots/release-drilldown-recheck`. Full CI is still required before
-  promotion; this is not a clean single-run full-suite result.
+  `tmp-snapshots/release-drilldown-recheck`. This local run was not clean;
+  the later complete CI run above passed all 66 active scenarios.
 - Hosted real-account verification remains separate from local mock evidence.
 - Vercel inspection found both Supabase variables in Production only, not
   Preview. Use `vercel --prod --skip-domain --yes` to prepare a candidate with
@@ -422,9 +453,9 @@ Current rev02 drought forecast archive patch:
 ## Open Risks
 
 - The app is not operationally safe for real emergency alerting yet.
-- Supabase authentication is implemented; real-account checks and user-reported
-  backend settings remain unverified. No database data provider, notification
-  delivery or live data ingestion is implemented.
+- Supabase real-account login/logout and closed self-signup are verified.
+  User-reported tables/RLS remain unaudited. No database data provider,
+  notification delivery or live data ingestion is implemented.
 - Vite build has a chunk-size warning due bundled canonical JSON.
 - Map fetch has a loading state but no explicit error state.
 - No real delivery guarantee or acknowledgement receipt exists.

@@ -4,17 +4,19 @@
 
 The frontend now uses `@supabase/supabase-js` for email/password login, initial
 session restoration, refresh, auth-change events and local-scope logout. This
-has passed local mock verification. The user has now authorized a combined
-UI/auth release; real-account verification and production promotion must be
-recorded separately from those local checks in `docs/HANDOFF.md`.
+has passed local mock verification and real-account candidate/production smoke
+on 2026-09-05. Runtime commit `15275fd` is deployed; exact evidence and recovery
+deployment are recorded separately from local checks in `docs/HANDOFF.md`.
 
 The user reports that project `dihchjflzhcekywarhxd` has six `ktp_` tables, RLS,
 area seeds, an Auto Confirm first user, and Production/Preview Vercel variables.
 Release inspection with `vercel env ls` on 2026-09-05 found the two frontend
 Supabase variables in Production only; Preview variables were not present.
-Those backend settings and that account have **not** been inspected or tested
-by this change. Self-signup should be disabled in Supabase. The frontend has
-no signup control, but hiding that control does not disable the signup API.
+The Production URL was corrected from a dashboard link to the API origin;
+the key was unchanged. A real account passed login/logout on desktop/mobile.
+The user disabled self-signup; a read-only settings check confirmed it and the
+enabled email provider. Tables, RLS and area seeds remain **unaudited**.
+The frontend has no signup control, but hiding it alone does not disable the API.
 
 No SQL, tables, RLS, anonymous grants, forecast provider, Excel import or data
 migration is changed. No forecasts are read from Supabase. The first account

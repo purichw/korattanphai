@@ -15,6 +15,12 @@ deployments. Preview deployment protection must allow the runner; an access
 denial is a failure, not evidence that the application passed. Do not disable
 protection or add production credentials to source files to make the test pass.
 
+For a protected candidate, the runner may receive `SMOKE_VERCEL_COOKIE` from
+an authorized Vercel CLI session. Keep its `_vercel_jwt` value in process memory
+only, never a file or CI artifact. The harness scopes it to the target host,
+rejects localhost use and API redirects, and redacts it from failure reports.
+This authenticates the runner to Vercel; Supabase login is still tested normally.
+
 ## Run
 
 ```bash

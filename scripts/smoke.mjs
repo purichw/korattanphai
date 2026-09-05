@@ -12,12 +12,19 @@ const output = path.resolve(process.env.SMOKE_OUTPUT_DIR ?? "smoke-results");
 const email = process.env.SMOKE_AUTH_EMAIL?.trim();
 const password = process.env.SMOKE_AUTH_PASSWORD;
 if (!email || !password) throw new Error("Set SMOKE_AUTH_EMAIL and SMOKE_AUTH_PASSWORD securely for an admin-provisioned test account. No demo login fallback is available.");
+const protectionCookie = process.env.SMOKE_VERCEL_COOKIE?.trim();
+if (protectionCookie && (local || !/^[A-Za-z0-9_.-]+$/.test(protectionCookie))) {
+  throw new Error("SMOKE_VERCEL_COOKIE must be an authorized Vercel session for this deployment, never a localhost fixture.");
+}
 await fs.mkdir(output, { recursive: true });
 const report = { url: base.origin, at: new Date().toISOString(), api: local ? "skipped: Vite preview has no serverless API" : "pending", checks: [], failures: [] };
 let browser;
 try {
   if (!local) {
-    const response = await fetch(new URL("/api/risk-fusion?eventId=ARE-2026-0825-NE", base), { signal: AbortSignal.timeout(30_000) });
+    const response = await fetch(new URL("/api/risk-fusion?eventId=ARE-2026-0825-NE", base), {
+      signal: AbortSignal.timeout(30_000), redirect: "error",
+      headers: protectionCookie ? { Cookie: `_vercel_jwt=${protectionCookie}` } : undefined,
+    });
     assert.equal(response.status, 200, "API status");
     assert.match(response.headers.get("content-type") ?? "", /application\/json/);
     assert.match(response.headers.get("cache-control") ?? "", /no-store/);
@@ -30,6 +37,10 @@ try {
   browser = await chromium.launch();
   for (const [name, viewport] of Object.entries({ desktop: { width: 1440, height: 960 }, mobile: { width: 390, height: 844 } })) {
     const context = await browser.newContext({ viewport, reducedMotion: "reduce" });
+    if (protectionCookie) await context.addCookies([{
+      name: "_vercel_jwt", value: protectionCookie, domain: base.hostname,
+      path: "/", secure: true, httpOnly: true, sameSite: "Lax",
+    }]);
     const page = await context.newPage();
     page.setDefaultTimeout(30_000);
     const errors = [];
@@ -97,7 +108,9 @@ try {
     } finally { await context.close(); }
   }
 } catch (error) {
-  report.failures.push(error.message.replaceAll(password, "[redacted]").replaceAll(email, "[redacted]"));
+  let message = error.message;
+  for (const secret of [password, email, protectionCookie].filter(Boolean)) message = message.replaceAll(secret, "[redacted]");
+  report.failures.push(message);
   process.exitCode = 1;
 } finally {
   await browser?.close();

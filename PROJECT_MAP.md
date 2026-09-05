@@ -9,8 +9,8 @@ visible first screen is the จังหวัดนครราชสีมา 
 FACT: The current implementation is a Vite + React + TypeScript single-page app
 with one read-only Vercel API endpoint for production risk-fusion explanation.
 It uses canonical local JSON data and browser `localStorage`. Supabase Email +
-Password is implemented for authentication; real-account verification remains
-pending. No Supabase data provider, real notification delivery or live GIS/weather
+Password authentication passed real-account production smoke on 2026-09-05.
+Database/RLS remain unaudited. No Supabase data provider, real notification delivery or live GIS/weather
 ingestion is implemented. See `docs/AUTH_SETUP.md` for backend prerequisites.
 
 ## Current State
@@ -388,8 +388,9 @@ npm run test:e2e:managed
 
 - FACT: The build still emits a Vite chunk-size warning for other canonical JSON.
   The forecast archive is a separate content-hashed asset loaded on demand.
-- FACT: Supabase auth is implemented but real-account/backend settings remain
-  unverified. There is no live data ingestion or real notification delivery.
+- FACT: Supabase auth passed real-account production smoke and self-signup is
+  disabled; database/RLS remain unaudited. There is no live data ingestion or
+  real notification delivery.
 - FACT: The app has no explicit SEO/noindex implementation beyond the Vite HTML
   shell.
 - needs audit: Confirm whether production should be public-indexable or noindex
