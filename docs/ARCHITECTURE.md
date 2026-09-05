@@ -8,7 +8,8 @@ serverless endpoint.
 - Framework: Vite + React + TypeScript.
 - Rendering: client-side React mounted from `src/main.tsx`.
 - State: reducer/context in `src/store.tsx`.
-- Persistence: browser `localStorage`.
+- Persistence: Supabase for archive/followed areas/saved filters when enabled;
+  browser `localStorage` for remaining preferences/demo workflows only.
 - Data: static JSON imported through `src/data/catalog.ts`, including the
   canonical source registry and map layer catalogue.
 - API: `api/risk-fusion.ts` returns a sanitized risk-fusion explanation in
@@ -32,7 +33,9 @@ serverless endpoint.
   rev02 workbook. It is consumed by the same Nakhon workspace at province,
   district, and subdistrict levels as the public drought prediction source.
 - Deployment: Vercel static build.
-- Backend/database: no database and no mutation service in the current repo.
+- Backend/database: Supabase Auth, immutable published forecast tables and
+  owner-only saved workspaces. See `SUPABASE_DATA_MIGRATION.md`; unrelated
+  operational domains have not been migrated.
 
 ## Runtime Boundaries
 
@@ -73,6 +76,13 @@ Boundary rules:
 - `src/data/localMapGeometry.ts` shares pending/parsed local geometry requests.
   Forecast routes prefetch geometry alongside the archive to avoid serial
   loading. Optional context failures do not block the subdistrict geometry.
+- `DatabaseWorkspaceProvider` owns per-Auth-user archive caches and saved-row
+  clients in database mode. Its security-invoker RPC reconstructs the canonical
+  full/T+1 projections. Static archive loaders/assets are replaced at build time;
+  network errors do not fall back to JSON. Logout/account changes clear caches.
+- `WorkspaceBookmarks` is shared by desktop/mobile account toolbars. Structured
+  selections preserve area, target, T+, dataset and map risk. Only restoring a
+  saved item remounts the route workspace; normal filter dialogs remain open.
 - `src/domain.ts` owns deterministic joins and derived summaries.
 - `src/store.tsx` owns UI state, workflow transitions, and local persistence.
 - `src/App.tsx` owns lightweight login and browser history. It lazily imports
@@ -140,7 +150,8 @@ Current external services:
   intentionally self-contained because Vercel type-checks API code under a
   Node runtime that should not pull in Vite/browser JSON imports.
 - Google Fonts loads `Google Sans` from `index.html`.
-- Supabase provides email/password sessions; no Supabase data provider is used.
+- Supabase provides email/password sessions and the opt-in archive/saved
+  workspace provider. Browser access obeys RLS; no privileged key ships.
 - Browser fetches local static map assets from the deployed app.
 
 Current external-data facts:
@@ -181,7 +192,8 @@ needs audit:
 
 1. Vite bundles imported canonical JSON from `src/data/catalog.ts`.
    The drought forecast archive is excluded from this catalog: Vite emits its
-   canonical JSON as a separate asset via `?url`. The overview summary is
+   canonical JSON as a separate asset via `?url` in static mode only. Database
+   mode reads authenticated RPCs and excludes both raw archive assets. The overview summary is
    regenerated from that same source before dev/build by
    `scripts/generate-forecast-summary.mjs`.
 2. Domain helpers in `src/domain.ts` compute records, summaries, workflow state,
@@ -234,8 +246,9 @@ FACT:
 - Browser auth uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - There is one read-only API route: `GET /api/risk-fusion`.
 - There is no service worker, offline cache, or push notification registration.
-- No database migration is implemented here; user-reported Supabase tables and
-  RLS have not been independently verified by this auth change.
+- Two additive SQL migrations, a pinned-source importer, isolated PostgreSQL
+  tests and real API verification cover the archive and personal workspaces.
+  Production release evidence lives separately in `HANDOFF.md`.
 
 PROPOSAL:
 

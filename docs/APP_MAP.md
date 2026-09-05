@@ -39,6 +39,11 @@ Primary user-facing surface:
 Inherited nationwide/workflow components remain in source for later extraction
 or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
 
+Database mode adds a shared bookmark control in the desktop/mobile account
+toolbar, not a new route. Its modal lists followed areas and saved filters for
+the authenticated user. Restoring an item preserves target, horizon, area and
+map risk, including restoration on the same pathname.
+
 ## Admin / Internal Routes
 
 FACT: There are no protected admin routes. Admin/operator roles are simulated

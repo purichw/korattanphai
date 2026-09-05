@@ -2,11 +2,11 @@
 
 ## Persistence Model
 
-Production currently reads static JSON and uses Supabase Auth. The existing
-six Supabase tables were audited on 2026-09-05. The additive schema migration
-is applied; the archive import/publication and runtime cutover have separate
-gates. The opt-in provider adds owner-only followed areas/saved filters. See
-`SUPABASE_DATA_MIGRATION.md` for current status and source lineage.
+Supabase Auth supplies identity. `VITE_DATA_BACKEND=supabase` selects the
+authenticated, immutable published archive and owner-only saved workspaces;
+default `static` remains available for isolated regression/recovery builds.
+Both migrations and verified archive publication are complete. Deployment
+status is in `HANDOFF.md`; see `SUPABASE_DATA_MIGRATION.md` for lineage.
 
 Static source files:
 
@@ -210,7 +210,7 @@ workspace surfaces.
 
 Loading contract:
 
-- Keep the canonical archive unchanged. `?url` emits a content-hashed JSON asset
+- Keep the canonical archive unchanged. In static mode, `?url` emits a content-hashed JSON asset
   whose bytes are checked against the canonical file by `npm run check:bundle`.
 - Login and province overview do not fetch the full archive. The overview map
   fetches `src/data/generated/forecast-overview-t1.json`, the T+1-only projection
@@ -226,6 +226,10 @@ Loading contract:
   risk states. Retry preserves the requested target month and T+ horizon.
 - Failed requests are not cached; leaving a loading view cannot update the
   departed view. The shared request can finish for subsequent navigation.
+- Database mode obtains the same full/T+1 shapes from the security-invoker
+  `ktp_load_forecast_archive` RPC. Both raw archive assets are excluded from new
+  builds. Errors show retry without a static fallback; account changes/logout
+  dispose caches. Geometry and unrelated context remain static.
 
 Source and mapping contract:
 
@@ -486,7 +490,10 @@ Migration rule:
 
 ## API Payloads
 
-FACT: There are no network API payloads except fetching the static GeoJSON file.
+Runtime APIs include Supabase Auth, the authenticated archive RPC and
+owner-scoped `ktp_followed_areas` / `ktp_saved_filters` PostgREST operations.
+Archive tables are not writable by browser roles. Supabase never supplies
+external predictions: published data comes only from the pinned Excel lineage.
 
 Static fetch:
 

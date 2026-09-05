@@ -21,6 +21,16 @@ only, never a file or CI artifact. The harness scopes it to the target host,
 rejects localhost use and API redirects, and redacts it from failure reports.
 This authenticates the runner to Vercel; Supabase login is still tested normally.
 
+For database releases, set `SMOKE_DATA_BACKEND=supabase`. The harness compares
+both actual app RPC projections to canonical source, checks the risk class of
+every map polygon on all four routes, rejects static archive fallback and reads
+the saved-workspace modal. `SMOKE_SAVED_FILTER_NAME` optionally verifies a known
+saved record across fresh login sessions; the harness itself does not create
+or delete personal records. It captures saved-filter desktop/mobile screenshots.
+Run `scripts/verify-database-archive.mjs` separately with the real public Vite
+configuration and smoke credentials for complete API/source and anonymous-access
+verification. Both scripts redact credentials and keep sessions in memory.
+
 ## Run
 
 ```bash

@@ -2,9 +2,10 @@
 
 ## Current State
 
-FACT: The repo contains the Nakhon Ratchasima-only subset of the frontend-only
-public flood, drought, and water-risk alert prototype. The site brand is Korat
-Tan Phai / โคราชทันภัย.
+FACT: The repo contains the Nakhon Ratchasima-only drought and water-risk
+dashboard. Supabase provides Auth, the verified Excel forecast archive and
+per-account followed areas/saved filters. The site brand is Korat Tan Phai /
+โคราชทันภัย.
 
 - Repo: `/Users/point/korattanphai`
 - Production: `https://korattanphai.vercel.app`
@@ -12,10 +13,80 @@ Tan Phai / โคราชทันภัย.
 - Source snapshot: copied from Kaset Tan Phai commit
   `0f16794bb57d5dec93b7c6312de7d9362bb97013`.
 
-The app is Thai-only for visible product UI, responsive, and stores runtime demo
-state in `localStorage`.
+The app is Thai-only for visible product UI and responsive. Remaining demo
+workflow state/preferences still use `localStorage`; they are not part of the
+scoped database migration. Recent changes below are chronological checkpoints;
+the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
+
+Scoped archive and saved-workspace migration (2026-09-05):
+
+- User authorized migration of only the approved Excel/normalized forecast
+  archive and personal followed areas/saved filters, plus push/deploy and
+  before/after data verification. No external data ingestion, ThaiWater,
+  synthetic agriculture metrics, roles or notification workflows were added.
+- Remote migrations `20260905110000` and `20260905124000` are applied, with
+  matching migration history. The latter preserves publication/immutability
+  guards while supporting the archive's explicit target-month convention;
+  origin-based datasets retain their original six-horizon guard. Workbook time
+  role remains unconfirmed, not retroactively asserted to be authoritative.
+- Published version `drought-rev02-9b299cefc704` contains 220,218 source cells,
+  762 runs, 127 target months and 289 locations. Counts are unchanged: 44,474
+  no-risk, 27,670 moderate, 22,830 high and 125,244 explicit null/out-of-scope.
+  Source workbook, normalized workbook, canonical JSON and generated projection
+  hashes match the pinned inputs. Ordered remote prediction SHA-256:
+  `9352f69f7e86d1e8c549b03bc0b2e96ad1a46c7f3ef1ffa3bd09afd79175d01b`.
+  Import/publication evidence:
+  `tmp-snapshots/archive-migration-eH6Tjy/verification.json`.
+- Real authenticated API verification deep-compares both complete T+1 and
+  T+1-T+6 RPC projections with source, confirms exactly one approved published
+  dataset and denies anonymous reads. Archive tables deny browser writes;
+  personal rows use owner-only RLS. Read-only real role/claim checks verified
+  owner reads and cross-owner isolation. Evidence:
+  `smoke-results/database-integrity/report.json`.
+- Shared desktop/mobile bookmarks save area, target, horizon, dataset and map
+  risk; restore works on the same pathname. Two smoke-account records remain:
+  followed area Ban Kao (`300806`) and filter
+  `ทดสอบ migration บ้านเก่า T+4`. They are personal records, not forecast data.
+- Initial full CI rejected a URL-keyed workspace remount that closed the mobile
+  filter sheet on keyboard selection. Runtime `ff01bd9f45f0c6e558620d904cd7e6dba853eba7`
+  limits remounting to explicit saved-item restoration; the existing failing
+  E2E test is unchanged and passed four focused desktop/mobile repetitions.
+  Unit tests: 217 passed. Isolated PostgreSQL contract tests: 10 passed.
+  Database-mode UI tests: four passed. Both static/database protected builds,
+  exposure scans, bundle budgets and unchanged generated data passed locally.
+- Runtime is pushed to `fix/nr-map-zoom-performance`, without merging `main`.
+  Final full CI passed in 7m24s: unit/database tests, both UI suites, protected
+  static/database builds, exposure/bundle checks and generated-data drift.
+  Run: `https://github.com/purichw/korattanphai/actions/runs/33966743592`.
+  Candidate `dpl_yzioYF6cfvDjBN7dNkY4Rg3EyjHX`
+  (`https://korattanphai-lo1hs1kpa-purichwc-1517s-projects.vercel.app`) uses actual
+  Production configuration and `VITE_DATA_BACKEND=supabase`. New database builds
+  exclude both raw forecast assets and never fall back to static predictions.
+- Candidate real-account smoke passed all four routes at 1440x960 and 390x844,
+  with complete actual RPC/source comparisons and all 289 rendered map risk
+  classes checked per route, saved-filter reads across fresh logins, no static
+  fallback, login/logout, assets/API/security headers and no horizontal overflow.
+  Evidence: `smoke-results/database-candidate-final/report.json`; screenshots
+  were inspected. Hosted mobile keyboard selection keeps the filter sheet open;
+  restoring the saved filter applies Dec-2025/T+4/high-risk correctly.
+- After CI and candidate smoke passed, the candidate was promoted without
+  rebuilding. Vercel inspection confirms `https://korattanphai.vercel.app`
+  serves `dpl_yzioYF6cfvDjBN7dNkY4Rg3EyjHX`; `/data-backend.json` reports
+  `supabase`. Production smoke then passed the same four routes at both sizes,
+  actual full/T+1 RPC equality, all map risk classes, saved-record reads,
+  login/logout, assets/API/cache/security headers and no browser errors or
+  horizontal overflow. Evidence: `smoke-results/database-production/report.json`
+  (zero failures), with inspected desktop/mobile screenshots. Production is
+  complete; only the following documentation commit is newer than the artifact.
+- Recovery: promote prior static-provider deployment
+  `dpl_4SnrKbuepdKwJw7ZEZkAuzSUwgL3`
+  (`https://korattanphai-qox5qsvrz-purichwc-1517s-projects.vercel.app`) and rerun
+  smoke. Leave additive schema, immutable archive and personal records intact.
+  No rollback performed. Older public archive asset URLs are not revoked.
+  Real Safari, load/latency SLOs and unrelated operational-domain migrations
+  are outside this release.
 
 Combined UI cleanup production release (2026-09-05):
 

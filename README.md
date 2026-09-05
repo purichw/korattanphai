@@ -38,8 +38,11 @@ Missing configuration denies entry with a not-ready message. Never expose a
 service-role JWT, `sb_secret` key or database password through Vite variables.
 
 The SDK owns session persistence. Persona selection changes display context,
-not account permissions. Static JSON/GeoJSON remains public; route guards do
-not protect those files. See [Auth Setup](docs/AUTH_SETUP.md) for the Preview
+not account permissions. `VITE_DATA_BACKEND=supabase` reads the verified Excel
+archive through authenticated RLS and saves personal areas/filters per account.
+New database builds omit raw archive assets; other static JSON/GeoJSON and old
+deployment assets remain public. See [Data Migration](docs/SUPABASE_DATA_MIGRATION.md)
+for source integrity and [Auth Setup](docs/AUTH_SETUP.md) for the Preview
 checklist, test-only mocks, unverified backend prerequisites and SMTP limitations.
 
 ## Commands

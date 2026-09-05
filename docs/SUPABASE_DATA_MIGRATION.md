@@ -101,9 +101,11 @@ their original static assets; this change does not revoke old deployment URLs.
 `WorkspaceBookmarks` is composed once per visible desktop/mobile account
 toolbar, using the existing shared buttons and compact modal. Saving records
 target, T+, area, dataset and map risk. `mapRisk` now round-trips through URLs;
-explicit navigation remounts only the route workspace, preserving provider
+restoring a saved item remounts only the route workspace, preserving provider
 caches while applying a saved selection even on the same route. Ordinary
-in-place dropdown changes do not remount the workspace.
+navigation/dropdown changes keep their existing lifecycle. Full CI caught and
+rejected a broader URL-keyed remount that closed the mobile filter sheet;
+the corrected implementation uses a saved-selection-only version counter.
 
 ```bash
 npm run test:database
@@ -139,10 +141,37 @@ The first import stopped before inserting predictions when this distinction
 was detected; the corrected importer resumes without overwriting any values.
 It batches twelve independently transactional months per CLI request.
 
-At this source checkpoint, the approved dataset is being imported as a draft.
-Production still uses the previous static-provider deployment. Publication,
-real API verification and deployment remain separate gates, not implied by a
-successful migration. `scripts/verify-database-archive.mjs` authenticates with
-session-only smoke credentials and compares both complete RPC projections to
-canonical data, confirms the only published source, and denies anonymous reads.
-It records no credentials and never changes predictions or personal records.
+Migration `20260905124000` preserves the existing publication/immutability
+triggers and adds a target-month branch for the explicitly marked archive.
+Origin-based datasets retain the original six-horizons-per-origin requirement.
+Target-month archives require six horizons per target, verbatim source months,
+289 crosswalks and 289 explicit rows per run. Negative tests reject missing
+source months, horizons and rows, and reject edits after publication. No guard
+was disabled, no forecast was invented, and no existing value was changed.
+
+The approved dataset is published. Remote ordered prediction SHA-256 is
+`9352f69f7e86d1e8c549b03bc0b2e96ad1a46c7f3ef1ffa3bd09afd79175d01b`;
+all 220,218 cells, 762 runs, 289 locations and zero temporal errors match source.
+Evidence: `tmp-snapshots/archive-migration-eH6Tjy/verification.json`.
+
+`scripts/verify-database-archive.mjs` passed using a real admin-provisioned Auth
+account: both complete RPC projections deep-equal canonical source, exactly one
+published dataset has the pinned source hashes, and anonymous archive/personal
+reads are denied. One observed request took 1,176ms for T+1 and 1,814ms for all
+horizons; these are smoke observations, not a latency SLO. Evidence:
+`smoke-results/database-integrity/report.json`. The script records no credentials
+and never changes predictions or personal records.
+
+Hosted candidate checks verified all 289 map statuses against source on Home
+Dec-2025 T+1, province Dec-2025 T+6 and district Jun-2015 T+2. Ban Kao Dec-2025
+T+4 is high-risk, as in the workbook. The smoke account saved Ban Kao and a named
+test filter, reloaded, and restored Dec-2025/T+4/high-risk on mobile. These two
+personal test records remain in that account; they are not prediction data.
+Read-only role/claim simulation against those real rows verified owner reads
+and cross-owner isolation; no real second account was created.
+
+The release smoke harness supports `SMOKE_DATA_BACKEND=supabase`. It compares
+actual app RPC responses and all 289 rendered map classes on every tested route,
+rejects static fallback, checks saved-workspace reads and captures both viewport
+sizes. Optional `SMOKE_SAVED_FILTER_NAME` verifies a known record across fresh
+login sessions. Production promotion status is recorded in `HANDOFF.md`.

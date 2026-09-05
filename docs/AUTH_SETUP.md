@@ -2,9 +2,10 @@
 
 ## Scope And Status
 
-Local follow-up: `VITE_DATA_BACKEND=supabase` enables the migration provider
+Data follow-up: `VITE_DATA_BACKEND=supabase` enables the migration provider
 and owner-only saved workspaces described in `SUPABASE_DATA_MIGRATION.md`.
-Remote schema is applied; import/publication/cutover have separate gates. The
+Remote schema and verified archive publication are complete; see HANDOFF for
+production promotion. The
 historical auth release below did not migrate data. New database-mode builds
 omit raw archive assets, but older public deployment URLs are not revoked.
 
@@ -21,12 +22,14 @@ Supabase variables in Production only; Preview variables were not present.
 The Production URL was corrected from a dashboard link to the API origin;
 the key was unchanged. A real account passed login/logout on desktop/mobile.
 The user disabled self-signup; a read-only settings check confirmed it and the
-enabled email provider. Tables, RLS and area seeds remain **unaudited**.
+enabled email provider. Tables, RLS and area seeds have since been audited by
+the migration task; its evidence and scope are in `SUPABASE_DATA_MIGRATION.md`.
 The frontend has no signup control, but hiding it alone does not disable the API.
 
-No SQL, tables, RLS, anonymous grants, forecast provider, Excel import or data
-migration is changed. No forecasts are read from Supabase. The first account
-does not automatically become an administrator.
+The original auth-only release did not change SQL or forecasts. The later
+database provider reads the verified published archive through RLS and stores
+personal records per Auth UUID. The first account does not automatically become
+an administrator; personas still do not grant privileges.
 
 ## Configuration
 

@@ -275,7 +275,10 @@ FACT:
 - Notification delivery is simulated by deterministic `DeliveryRecord` objects
   in `buildDeliveryRecords`.
 - Publication creates a farmer alert in runtime state only after approval.
-- There is no migration system or production data mutation path in this repo.
+- The scoped Supabase migration covers only the verified Excel/normalized
+  forecast archive and owner-only followed areas/saved filters. Runtime uses
+  `VITE_DATA_BACKEND=supabase`; no privileged write key is shipped. See
+  `docs/SUPABASE_DATA_MIGRATION.md` for integrity and release evidence.
 
 ## Important Product Decisions
 
@@ -389,7 +392,8 @@ npm run test:e2e:managed
 - FACT: The build still emits a Vite chunk-size warning for other canonical JSON.
   The forecast archive is a separate content-hashed asset loaded on demand.
 - FACT: Supabase auth passed real-account production smoke and self-signup is
-  disabled; database/RLS remain unaudited. There is no live data ingestion or
+  disabled. Archive and personal-workspace RLS are audited separately in the
+  migration notes. There is no live external data ingestion or
   real notification delivery.
 - FACT: The app has no explicit SEO/noindex implementation beyond the Vite HTML
   shell.
