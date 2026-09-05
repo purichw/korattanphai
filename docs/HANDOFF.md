@@ -20,6 +20,47 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Site-wide semantic UX production release (2026-09-05):
+
+- Runtime `7d3bbfb2cd3f033287741b9b453c2b4f82b438da` is pushed to
+  `fix/nr-map-zoom-performance`, without merging `main`. F01-F10 below are live.
+- Exact-commit Quality Gate passed in 7m18s: 126 unit tests across 14 source
+  files, 10 isolated database checks, 68 built browser tests (10 conditional
+  skips), four separate database UI tests, both protected builds, exposure and
+  bundle budgets, and unchanged generated data. CI:
+  `https://github.com/purichw/korattanphai/actions/runs/33970845966`.
+  The earlier local count of 228 also included 102 old tests from the ignored
+  `tmp-snapshots/release-ui-cleanup-source` checkout; 126 is the release suite.
+- Deployment `dpl_ALcUSdWNLxzaUKFp8ULLAR1mRA9L`
+  (`https://korattanphai-10nrwwd3u-purichwc-1517s-projects.vercel.app`) was built
+  from the clean runtime checkout using Production configuration. Candidate
+  smoke passed before promotion; the same artifact was promoted without a
+  rebuild. Inspection of `https://korattanphai.vercel.app` confirms this Ready
+  deployment, `/assets/index-931658f70c.js` and backend `supabase`.
+- Real-account candidate and production smoke passed all five routes at
+  1440x960 and 390x844: Home, province, district, single high-risk tambon and
+  all-null district. Both actual RPC projections exactly match canonical data;
+  all 289 polygon risk classes match per route. Login/logout, saved-filter
+  reads (including the prior test record), API, assets, cache/security headers,
+  single full-width status, absent duplicate/demo panels, neutral unavailable
+  graph and no horizontal overflow passed. Reports:
+  `smoke-results/semantic-candidate/report.json` and
+  `smoke-results/semantic-production/report.json` (zero failures).
+- Fresh read-only API verification confirms one approved published dataset,
+  source/normalized/canonical hashes, 220,218 unchanged cells and anonymous
+  access denied. Ordered digest remains
+  `9352f69f7e86d1e8c549b03bc0b2e96ad1a46c7f3ef1ffa3bd09afd79175d01b`.
+  Evidence: `smoke-results/database-integrity/report.json` at 14:05 UTC.
+  No database writes, imports, schema changes or external prediction sources.
+- Production screenshots under `smoke-results/semantic-production/` were
+  inspected. Additional in-app production checks confirmed one readiness
+  status, no count gauge, map-mode roundtrip preserving T+4, and empty browser
+  warning/error logs. Physical Safari and load/SLO testing were not run.
+- Recovery: promote prior `dpl_yzioYF6cfvDjBN7dNkY4Rg3EyjHX` and rerun smoke;
+  leave database data and configuration intact. No rollback was needed.
+- Concurrent irrigation-filter work remains local and is not in this artifact.
+  Only a documentation closeout commit follows the deployed runtime.
+
 Site-wide semantic UX repair (2026-09-05, local/unreleased):
 
 - Implemented F01-F10 from `SITEWIDE_SEMANTIC_AUDIT_2026-09-05.md`: unavailable

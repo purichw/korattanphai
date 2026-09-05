@@ -1,7 +1,7 @@
 # Site-Wide Semantic UX Audit
 
-Date: 2026-09-05. Original audit below; local implementation closeout follows.
-The fixes are not pushed or deployed. Database records are unchanged.
+Date: 2026-09-05. Original audit below; local and production closeouts follow.
+F01-F10 are deployed as runtime `7d3bbfb`. Database records are unchanged.
 
 ## Scope And Evidence
 
@@ -244,7 +244,7 @@ bypass or real authorization roles; do not conflate this UX issue with security.
 3. Production-only cleanup: F10 and secondary copy. Retain auth/RLS boundaries,
    bookmark behavior, administrative navigation and the requested hidden designs.
 
-No fixes were applied or published. No full regression suite, migration/import,
+At the original audit checkpoint, no fixes were applied or published. No full regression suite, migration/import,
 load benchmark, real Safari run or new database security audit was run: this
 pass targets product semantics. Existing migration integrity evidence is not
 being presented as new verification of every UI statement.
@@ -309,3 +309,48 @@ F01-F10 implemented on 2026-09-05, after approval to adjust the site:
 Not run: new migration/import, full remote integrity scan, security/RLS audit,
 physical mobile/Safari QA, protected release builds, CI, push or deploy.
 Production remains unchanged. Local database preview: http://127.0.0.1:5176.
+
+## Production Release Closeout
+
+The local-only statements above describe the earlier checkpoints. After the
+user explicitly requested push/deploy, F01-F10 were released on 2026-09-05:
+
+- Runtime commit: `7d3bbfb2cd3f033287741b9b453c2b4f82b438da`, pushed to
+  `fix/nr-map-zoom-performance`; no merge into `main`.
+- Exact-commit CI passed in 7m18s: 126 unit tests / 14 source test files,
+  10 isolated database checks, 68 built E2E passes / 10 conditional skips,
+  four separate database UI passes, protected static and database builds,
+  exposure scans, bundle budgets and no generated-data drift.
+  `https://github.com/purichw/korattanphai/actions/runs/33970845966`.
+  The local 228 total included 102 old tests discovered inside the ignored
+  release checkout; it is not 228 unique tests for the deployed source.
+- Candidate `dpl_ALcUSdWNLxzaUKFp8ULLAR1mRA9L` used real Production Supabase
+  configuration and passed authenticated desktop/mobile smoke before promotion.
+  It was promoted without rebuilding; `https://korattanphai.vercel.app` now
+  resolves to this Ready artifact, with entry `/assets/index-931658f70c.js` and
+  `/data-backend.json` reporting `supabase`.
+- Candidate and production smoke cover five routes at 1440x960 and 390x844:
+  Home, province, district, high-risk single tambon, and all-null district.
+  Both RPC payloads deep-match canonical projections, including all 220,218
+  source cells; every rendered map polygon's risk class matches the selected
+  source value. Single-tambon status, no false zero-risk graph, absent duplicate
+  panels, fixed-target copy, account actions, saved-filter reads, login/logout,
+  API/assets/hosting headers and overflow checks passed with zero failures.
+  Reports: `smoke-results/semantic-candidate/report.json` and
+  `smoke-results/semantic-production/report.json`.
+- Separate read-only remote verification at 14:05 UTC checked the sole approved
+  published dataset, source/normalized/canonical hashes, exact T+1/full RPCs and
+  denied anonymous reads. Counts and digest match the migration baseline:
+  `smoke-results/database-integrity/report.json`. No application data were
+  written, imported or migrated, and no external predictions were introduced.
+- Inspected full-page production evidence:
+  `smoke-results/semantic-production/desktop-overview.png` and
+  `smoke-results/semantic-production/mobile-subdistrict.png`.
+  In-app production verification also confirmed single-area readiness with no
+  count gauge, one map switching back to the same T+4/high-risk selection, no
+  page overflow, and no browser warnings/errors.
+- Recovery: promote prior deployment `dpl_yzioYF6cfvDjBN7dNkY4Rg3EyjHX` and rerun
+  smoke, without changing Supabase. No rollback performed. Physical Safari,
+  load/SLO checks and a new full remote authorization audit were not run.
+- Concurrent irrigation-filter changes are deliberately outside this release;
+  the closeout commit contains documentation only.
