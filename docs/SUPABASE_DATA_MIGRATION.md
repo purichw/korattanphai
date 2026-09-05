@@ -81,7 +81,10 @@ anonymous client. Browser clients never receive a service key or DB password.
   code. Generated FK columns reject unknown areas. Opening a followed area
   selects that area with the page's latest available archive month.
 - `ktp_saved_filters`: explicit name, view, area, dataset ID, target, horizon,
-  risk status. Foreign keys require a real vintage. Overview only permits T+1
+  risk status and irrigation criterion. Migration `20260906010000` adds the
+  latter with default `all` and allowed values `all`, `irrigated`, `rainfed`,
+  `unknown`; see `IRRIGATION_FILTER.md`. Foreign keys require a real vintage.
+  Overview only permits T+1
   and province/district scope. Drought/rice are fixed product context.
 - RLS uses `auth.uid() = user_id` for all read/write operations. UUIDs are not
   derived from the display persona or mutable user metadata.

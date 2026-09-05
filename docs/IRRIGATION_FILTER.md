@@ -61,8 +61,8 @@ The dry run contained only `20260906010000`; remote migration history now
 matches. Read-only SQL confirms the non-null `all` default, all four constrained
 keys, the existing saved record backfilled to `all`, enabled owner RLS and
 220,218 unchanged forecast cells. No archive import, publication, Auth or
-environment changes were made. Hosted release evidence is recorded separately
-below once the exact candidate and production artifact pass.
+environment changes were made. Hosted release evidence is recorded below and
+in `HANDOFF.md`.
 
 Recovery: promote the previous good frontend deployment and leave this additive
 column intact. Old clients omit it and retain the `all` default; rollback does
@@ -92,3 +92,28 @@ localhost-only and do not provide evidence of a remote migration being applied.
 - Canonical archive and generated data have no diff. At this local checkpoint,
   broader whole-site E2E, real Safari, remote SQL and production irrigation
   checks were not run. The authorized release follows this checkpoint.
+
+## Hosted Release
+
+Runtime `bd3edcd` was built as `dpl_Eo1sitfh7j4nBT6AJvagFg1VJn9j` using
+Production configuration. Test-only `7d0b69d` corrects an old dropdown-count
+assertion and verifies the irrigation default; it changes no runtime, build,
+smoke or archive files. Quality Gate `33972914037` passed with 136 unit tests,
+10 database checks, 74 built E2E passes (10 conditional skips), four database
+UI passes and both protected builds.
+
+Real-account candidate and production smoke passed the five base routes and all
+irrigation groups on desktop/mobile, with exact source codes and risk counts. The same
+artifact was promoted to `https://korattanphai.vercel.app`; alias inspection
+confirms the deployment above, entry `index-0e9ee1ef70.js` and Supabase backend.
+Reports are `smoke-results/irrigation-candidate/report.json` and
+`smoke-results/irrigation-production/report.json`, both with zero failures.
+Production desktop/mobile screenshots were visually inspected. An authenticated
+explicit PostgREST
+`select('irrigation_criterion')` returned HTTP 200 and the one existing record's
+`all` value, confirming that the API recognizes the new column.
+
+The archive verifier passed after the migration: full and T+1 projections,
+220,218 cells and the pinned prediction digest are unchanged, with anonymous
+reads denied. No real saved record was created, updated or deleted; save/restore
+writes are covered by isolated database and mocked browser tests.

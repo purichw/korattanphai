@@ -20,6 +20,49 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Irrigation status filter production release (2026-09-05):
+
+- Runtime `bd3edcd96e1acc34ad8fd0201886cb8aae41635a` and test-only follow-up
+  `7d0b69dca2c4c76c8690120b3bf50c6e30d3fc69` are pushed to
+  `fix/nr-map-zoom-performance`, without merging `main`. Shared filters cover
+  Home, province, district and subdistrict views; source counts are 20 irrigated,
+  97 rain-fed and 172 unknown. Unknown irrigation is not missing forecast data.
+- Migration `20260906010000` was applied after a dry run containing only that
+  additive migration. History matches, the existing saved record defaults to
+  `all`, and owner RLS remains enabled. No forecast import/publication or Auth,
+  environment, policy or prediction changes were made.
+- Quality Gate `33972914037` passed: 136 unit tests, 10 isolated database
+  checks, 74 built browser tests (10 conditional skips), four database UI tests,
+  both protected builds, exposure/bundle checks and no generated-data drift.
+  The first run found an outdated three-dropdown assertion; the test-only
+  follow-up checks four dropdowns and the new default. Its focused desktop and
+  mobile regression also passed against the matching static-provider build.
+- Deployment `dpl_Eo1sitfh7j4nBT6AJvagFg1VJn9j`
+  (`https://korattanphai-g1471zzi1-purichwc-1517s-projects.vercel.app`) was
+  built from the clean runtime commit with Production configuration. The
+  follow-up changes only `e2e/app.spec.ts`; runtime, build configuration, smoke
+  harness and source archive are identical. Candidate smoke passed and the
+  same artifact was promoted without rebuilding. The production alias confirms
+  this Ready deployment, `/assets/index-0e9ee1ef70.js` and backend `supabase`.
+- Real-account candidate and production smoke passed five base routes plus all
+  three irrigation groups and empty/reset behavior at 1440x960 and 390x844, including
+  both exact source RPC projections, map codes/counts, login/logout, existing
+  saved-filter reads, API/assets/headers and no overflow/static fallback.
+  Evidence: `smoke-results/irrigation-candidate/report.json` and
+  `smoke-results/irrigation-production/report.json`, both with zero failures.
+  Desktop/mobile production screenshots were inspected with no observed
+  toolbar, map-control or page overflow. An authenticated explicit
+  `select('irrigation_criterion')` from PostgREST returned HTTP 200 with the
+  existing record set to `all`, confirming the refreshed API schema.
+- Read-only archive verification at 14:39 UTC confirms 220,218 unchanged cells,
+  the pinned published version, both exact projections, anonymous access denied
+  and digest `9352f69f7e86d1e8c549b03bc0b2e96ad1a46c7f3ef1ffa3bd09afd79175d01b`.
+  Evidence: `smoke-results/database-integrity/report.json`.
+- Recovery: promote `dpl_ALcUSdWNLxzaUKFp8ULLAR1mRA9L` and rerun smoke. Leave
+  the additive column and personal records intact; old clients use `all`.
+  No live personal-record writes, physical Safari or load/SLO tests are part
+  of this release. See `IRRIGATION_FILTER.md` for the source and UI contracts.
+
 Site-wide semantic UX production release (2026-09-05):
 
 - Runtime `7d3bbfb2cd3f033287741b9b453c2b4f82b438da` is pushed to
