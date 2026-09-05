@@ -18,9 +18,16 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(filters.getByRole("combobox")).toHaveCount(3);
     await expect(filters.locator(".nr-fixed-filter")).toHaveText(["ภัยภัยแล้ง", "พืชข้าว"]);
     await expect(workspace.locator(".nr-drought-workspace-context .is-crop")).toContainText("ข้าว");
-    await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage")).toContainText("100%");
-    await expect(workspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toBeVisible();
-    await expect(page.locator(".nr-operational-forecast-summary")).toHaveClass(/has-risk/);
+    if (scope === "subdistrict") {
+      await expect(workspace.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(1);
+      await expect(workspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
+      await expect(page.locator(".nr-operational-forecast-summary, .nr-operational-attention-list")).toHaveCount(0);
+    } else {
+      await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage")).toContainText(scope === "province" ? "142/289" : "6/16");
+      await expect(workspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toBeVisible();
+      await expect(page.locator(".nr-operational-forecast-summary")).toHaveClass(/has-risk/);
+    }
+    await expect(page.getByText("สถานการณ์ภัยแล้งตามข้อมูลพื้นที่", { exact: true })).toHaveCount(0);
     const chart = workspace.locator(".nr-drought-workspace-chart-card");
     await expect(chart).toHaveCount(scope === "subdistrict" ? 0 : 1);
     const map = workspace.locator(".nr-map-svg");
@@ -40,6 +47,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       return { filter: box(".nr-operational-filters"), horizon: box(".nr-drought-workspace-horizon"),
         chart: document.querySelector(".nr-drought-workspace-chart-card")?.getBoundingClientRect().toJSON(),
         body: box(".nr-drought-workspace-body"), map: box(".nr-drought-workspace-map-card"), kpis: box(".nr-drought-workspace-kpis"),
+        firstKpi: box(".nr-drought-workspace-kpis .metric-card"),
         gridAreas: getComputedStyle(document.querySelector(".nr-drought-workspace-body")!).gridTemplateAreas,
         statsOverflow: kpis.scrollWidth > kpis.clientWidth + 1,
         pageOverflow: document.documentElement.scrollWidth > innerWidth,
@@ -55,11 +63,8 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     if (scope === "subdistrict") {
       expect(geometry.gridAreas).not.toContain("chart");
       expect(geometry.map.width).toBeCloseTo(geometry.body.width, 0);
-      if (page.viewportSize()!.width > 900) {
-        expect(geometry.kpis.top).toBeGreaterThan(geometry.map.bottom);
-      } else {
-        expect(geometry.kpis.bottom).toBeLessThan(geometry.map.top);
-      }
+      expect(geometry.firstKpi.width).toBeCloseTo(geometry.kpis.width, 0);
+      expect(geometry.kpis.bottom).toBeLessThan(geometry.map.top);
     } else if (page.viewportSize()!.width > 1180) {
       expect(geometry.chart.top).toBe(geometry.map.top);
       expect(geometry.chart.height).toBe(geometry.map.height);
@@ -77,19 +82,13 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       await expect(workspace.locator(".nr-forecast-point-group.is-active")).toContainText("T+4");
     }
 
-    const details = workspace.locator(".nr-drought-workspace-details");
-    await details.locator("summary").click();
-    await expect(details.locator(".nr-drought-workspace-detail-panel, .nr-forecast-timeline")).toHaveCount(0);
-    await expect(details.locator(".nr-forecast-archive-mode-section")).toBeVisible();
-    await expect(details).toContainText("ค่าจากการพยากรณ์ ไม่ใช่ข้อมูลความเสียหายทางการ");
-    await expect(details.locator(".nr-forecast-archive-target")).toContainText("ธ.ค. 2568");
-    await expect(details.locator(".nr-forecast-archive-target")).toContainText("T+4");
-    await details.locator("summary").click();
+    await expect(workspace.locator(".nr-drought-workspace-details, .nr-forecast-archive-mode-section")).toHaveCount(0);
 
     await map.evaluate((element) => element.setAttribute("data-instance-probe", "same-map"));
-    await page.locator(".nr-operational-disclosure > summary").filter({ hasText: /พื้นที่เกษตรและความพร้อมข้อมูล|ความพร้อมข้อมูลพื้นที่/ }).click();
+    await page.locator(".nr-operational-disclosure > summary").filter({ hasText: /ความพร้อมข้อมูลพื้นที่|ความพร้อมข้อมูลของตำบล/ }).click();
     await expect(page.getByText(/67,347|8,081|พื้นที่ประเมินทั้งจังหวัด|ความเชื่อมั่นข้อมูลเกษตร/)).toHaveCount(0);
-    if (scope === "province") await expect(page.locator(".nr-agri-impact-module")).toHaveCount(0);
+    await expect(page.locator(".nr-agri-impact-module")).toHaveCount(0);
+    if (scope === "subdistrict") await expect(page.locator(".nr-readiness-gauge, .nr-readiness-breakdown-list")).toHaveCount(0);
     await page.getByRole("button", { name: "ดูความพร้อมบนแผนที่" }).click();
     await expect(workspace.getByRole("heading", { name: "แผนที่ความพร้อมข้อมูลพื้นที่" })).toBeVisible();
     await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(0);
@@ -101,13 +100,32 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
     if (scope === "subdistrict") {
       await expect(chart).toHaveCount(0);
-      await page.locator(".nr-operational-disclosure > summary").filter({ hasText: /พื้นที่เกษตรและความพร้อมข้อมูล|ความพร้อมข้อมูลพื้นที่/ }).click();
+      await page.locator(".nr-operational-disclosure > summary").filter({ hasText: /ความพร้อมข้อมูลของตำบล/ }).click();
       await page.evaluate(() => window.scrollTo(0, 0));
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
       await page.screenshot({ path: testInfo.outputPath("subdistrict-without-count-trend.png"), fullPage: true, scale: "css" });
     }
   });
 }
+
+test("all-null districts and tambons remain unavailable, never a green zero forecast", async ({ page }, testInfo) => {
+  await page.goto("/ban-lueam?target=2025-12&horizon=1");
+  const workspace = page.locator(".nr-drought-compact-workspace");
+  await expect(workspace.locator(".nr-forecast-unavailable")).toContainText("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
+  await expect(workspace.locator(".nr-drought-forecast-point")).toHaveCount(0);
+  await expect(workspace.locator(".is-coverage").last()).toContainText("0/4 ตำบล");
+  await expect(workspace.locator(".nr-drought-workspace-kpis .is-no-risk")).toHaveClass(/is-muted/);
+  await expect(page.locator(".nr-operational-forecast-summary")).toContainText("ไม่มีค่าพยากรณ์ในรอบนี้");
+  await expect(page.locator(".nr-operational-attention-list")).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath("all-null-district.png"), fullPage: true, scale: "css" });
+  await page.goto("/mueang-nakhon-ratchasima/t-300101?target=2025-12&horizon=1");
+  await expect(workspace.locator(".nr-drought-workspace-kpis")).toContainText("นอกขอบเขตการศึกษา");
+  await expect(workspace.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(1);
+  await expect(page.locator(".nr-operational-attention-list, .nr-operational-forecast-summary")).toHaveCount(0);
+  await expect(page.locator(".nr-map-shape")).toHaveCount(289);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath("single-out-of-scope.png"), fullPage: true, scale: "css" });
+});
 
 test("area navigation retains the selected vintage and offers sibling subdistricts", async ({ page }, testInfo) => {
   await page.goto("/drought?target=2025-09&horizon=4");

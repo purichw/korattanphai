@@ -51,7 +51,7 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   await firstArea.click();
   await expect(page).toHaveURL(new RegExp(href!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"));
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
-  await expect(page.locator(".nr-forecast-archive-mode-section")).toContainText("2 · เสี่ยงสูง");
+  await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   expect(errors).toEqual([]);
 });
 

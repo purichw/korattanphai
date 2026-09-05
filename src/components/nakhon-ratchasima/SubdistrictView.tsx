@@ -5,7 +5,6 @@ import {
   summarizeResearchAreaRecords,
   researchMonthlySeriesForSubdistrict,
   predictionReadinessSummaryForSubdistrictCodes,
-  localResearchPeriodLabel,
 } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
 import { getNakhonRatchasimaResearchPanelSummary, getNakhonRatchasimaResearchSubdistrictMonth } from "../../domain";
@@ -81,7 +80,7 @@ export function SubdistrictView({
         onMonthChange={forecastArchive.changeTargetMonth ?? onMonthChange}
       />
 
-      <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="โปรไฟล์ตำบล สถานะรายเดือน และช่องว่างข้อมูล">
+      {stats.recordCount > 0 && <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="โปรไฟล์ตำบล สถานะรายเดือน และช่องว่างข้อมูล">
       <ResearchAreaHeading district={district} subdistrict={subdistrict} activePeriod={activeResearchPeriod} stats={stats} />
       <section className="nr-area-secondary-grid nr-subdistrict-secondary-grid" aria-label="ข้อมูลปฏิบัติการประกอบการคาดการณ์">
         <aside className="nr-subdistrict-rail" aria-label="โปรไฟล์และช่องว่างข้อมูลตำบล">
@@ -96,8 +95,8 @@ export function SubdistrictView({
         />
       </section>
       <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของตำบล" series={monthlySeries} isSubdistrict />
-      </DroughtOperationalDisclosure>
-      <DroughtOperationalDisclosure title="พื้นที่เกษตรและความพร้อมข้อมูล" description="ข้าว · หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
+      </DroughtOperationalDisclosure>}
+      <DroughtOperationalDisclosure title="ความพร้อมข้อมูลของตำบล" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
       <ResearchAreaAgricultureImpactPanel
         district={district}
         subdistrict={subdistrict}
@@ -111,7 +110,7 @@ export function SubdistrictView({
         description="แสดงระดับความพร้อมของข้อมูลตำบล โดยแยกจากระดับความรุนแรงของภัย"
       >
         <PredictionReadinessPanel
-          month={localResearchPeriodLabel(activeResearchPeriod)}
+          scope="single"
           readiness={readiness}
           onOpenMap={openReadinessMap}
         />

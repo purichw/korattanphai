@@ -32,7 +32,8 @@ test("legacy demo login cannot bypass auth; password visibility, keyboard submit
   const menu = page.getByRole("menu", { name: "บัญชีผู้ใช้" });
   await expect(menu).toContainText(authTestEmail);
   await expect(menu).toContainText(authTestUser.user_metadata.full_name);
-  await expect(menu.getByRole("group", { name: "มุมมองการแสดงผล" })).toBeVisible();
+  await expect(menu.getByRole("group", { name: "มุมมองการแสดงผล" })).toHaveCount(0);
+  await expect(menu.getByRole("menuitem", { name: "คืนค่าข้อมูลเริ่มต้น" })).toHaveCount(0);
   await page.getByRole("menuitem", { name: "ออกจากระบบ", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.locator(".app-shell")).toHaveCount(0);

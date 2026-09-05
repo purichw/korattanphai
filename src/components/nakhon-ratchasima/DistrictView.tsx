@@ -6,7 +6,6 @@ import {
   summarizeResearchAreaRecords,
   researchMonthlySeriesForDistrict,
   predictionReadinessSummaryForSubdistrictCodes,
-  localResearchPeriodLabel,
 } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
 import { getNakhonRatchasimaResearchPanelSummary } from "../../domain";
@@ -64,7 +63,7 @@ export function DistrictView({
         onCloseReadinessMap={closeReadinessMap}
         level="district"
         title={`คาดการณ์ภัยแล้งของอำเภอ${district.nameTh}`}
-        description="เลือก T+ ครั้งเดียวเพื่ออ่านแนวโน้มพยากรณ์และแผนที่รายตำบลของอำเภอนี้ในบริบทเดียวกัน"
+        description="เปรียบเทียบระยะพยากรณ์ของเดือนเป้าหมายเดียวกันและแผนที่รายตำบลของอำเภอนี้"
         scopeLabel={`อ.${district.nameTh}`}
         archive={droughtArchive}
         expectedSubdistrictCodes={subdistrictCodes}
@@ -80,7 +79,7 @@ export function DistrictView({
         monthOptions={forecastArchive.targetMonthOptions.length > 0 ? forecastArchive.targetMonthOptions : monthOptions}
         onMonthChange={forecastArchive.changeTargetMonth ?? onMonthChange}
       />
-      <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="สถานะรายเดือน ประวัติ และตำบลในอำเภอ">
+      {stats.recordCount > 0 && <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="สถานะรายเดือน ประวัติ และตำบลในอำเภอ">
       <ResearchAreaHeading district={district} activePeriod={activeResearchPeriod} stats={stats} />
       <section className="nr-area-secondary-grid" aria-label="ข้อมูลปฏิบัติการประกอบการคาดการณ์">
         <ResearchAreaAttentionPanel district={district} period={activeResearchPeriod.period} onNavigate={navigateWithForecast} />
@@ -90,8 +89,8 @@ export function DistrictView({
         <ResearchAreaDroughtHistoryPanel title="สถานะภัยแล้งรายเดือนของอำเภอ" series={monthlySeries} />
         <ResearchAreaSubdistrictsPanel district={district} period={activeResearchPeriod.period} onNavigate={navigateWithForecast} />
       </section>
-      </DroughtOperationalDisclosure>
-      <DroughtOperationalDisclosure title="พื้นที่เกษตรและความพร้อมข้อมูล" description="ข้าว · หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
+      </DroughtOperationalDisclosure>}
+      <DroughtOperationalDisclosure title="ความพร้อมข้อมูลพื้นที่" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
       <ResearchAreaAgricultureImpactPanel district={district} stats={stats} activePeriod={activeResearchPeriod} />
       <ContentSection
         className="nr-data-readiness-section"
@@ -100,7 +99,6 @@ export function DistrictView({
         description="แสดงระดับความพร้อมของข้อมูลพื้นที่ โดยแยกจากระดับความรุนแรงของภัย"
       >
         <PredictionReadinessPanel
-          month={localResearchPeriodLabel(activeResearchPeriod)}
           readiness={readiness}
           onOpenMap={openReadinessMap}
         />

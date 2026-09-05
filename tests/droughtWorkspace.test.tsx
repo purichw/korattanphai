@@ -2,10 +2,11 @@ import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
-import { getNakhonRatchasimaResearchPanelSummary } from "../src/domain";
-import { forecastArchiveSummaryForSelection, forecastArchiveTrendMonthsForSelection } from "../src/components/nakhon-ratchasima/forecastModel";
-import { DroughtForecastTrendGraph, DroughtForecastWorkspaceKpiStrip } from "../src/components/nakhon-ratchasima/DroughtForecastWorkspace";
-import { ResearchDroughtSituationPanel } from "../src/components/nakhon-ratchasima/ResearchPanels";
+import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaResearchPanelSummary } from "../src/domain";
+import { droughtForecastBand, droughtForecastBandLabel, forecastArchiveSummaryForSelection, forecastArchiveTrendMonthsForSelection } from "../src/components/nakhon-ratchasima/forecastModel";
+import { DroughtForecastTrendGraph, DroughtForecastWorkspaceKpiStrip, DroughtForecastWorkspaceChart } from "../src/components/nakhon-ratchasima/DroughtForecastWorkspace";
+import { PredictionReadinessPanel, ResearchDroughtSituationPanel, ResearchAreaHeading, ResearchAreaSituationPanel, ResearchSubdistrictDataGapPanel, ResearchAreaAgricultureImpactPanel, ResearchAreaAttentionPanel } from "../src/components/nakhon-ratchasima/ResearchPanels";
+import { localResearchPeriodForSelectedMonth, predictionReadinessSummaryForSubdistrictCodes, summarizeResearchAreaRecords } from "../src/components/nakhon-ratchasima/workspaceModel";
 import { DroughtForecastArchiveSummaryMetrics } from "../src/components/nakhon-ratchasima/ForecastControls";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -20,7 +21,7 @@ it.each(["province", "district", "subdistrict"])("keeps the %s threshold label o
   const total = months[0].totalSubdistricts;
   const threshold = Math.round(total * 0.5);
   const { container } = render(<DroughtForecastTrendGraph months={months} totalSubdistricts={total} singleSubdistrict={level === "subdistrict"} />);
-  const label = screen.getByText(level === "subdistrict" ? "เส้นอ้างอิงเมื่อพบความเสี่ยง" : `เกณฑ์ครึ่งพื้นที่ ${threshold} ตำบล`);
+  const label = screen.getByText(level === "subdistrict" ? "เส้นอ้างอิงเมื่อพบความเสี่ยง" : `เส้นอ้างอิงครึ่งจำนวนตำบล (${threshold} ตำบลขึ้นไป)`);
   expect(label.closest("figcaption")).not.toBeNull();
   expect(label.closest("svg")).toBeNull();
   const line = container.querySelector(".nr-drought-forecast-graph-threshold")!;
@@ -52,13 +53,95 @@ it("renders missing and out-of-scope as separate shared stat cards", () => {
     const card = within(stats).getByText(label).closest(".metric-card")!;
     expect(within(card as HTMLElement).getByText("1 ตำบล")).toBeInTheDocument();
   }
-  expect(within(stats).getByText("67% มีรายการพยากรณ์")).toBeInTheDocument();
+  expect(within(stats).getByText("33% ของจำนวนตำบลทั้งหมด")).toBeInTheDocument();
+});
+
+it("preserves coverage at every archive horizon, including all-null scopes", () => {
+  for (const month of archive.targetMonths) {
+    for (const district of new Set(archive.locations.map((item) => item.districtCode))) {
+      const codes = archive.locations.filter((item) => item.districtCode === district).map((item) => item.subdistrictCode);
+      for (const point of forecastArchiveTrendMonthsForSelection(archive, month, codes)) {
+        expect(point.inScopeSubdistricts + point.outOfScopeSubdistricts + point.missingSubdistricts).toBe(codes.length);
+        expect(droughtForecastBand(point) === "unavailable").toBe(point.inScopeSubdistricts === 0);
+        expect(point.riskSubdistricts + point.normalSubdistricts).toBe(point.inScopeSubdistricts);
+      }
+    }
+  }
+});
+
+it("does not draw an all-null scope as a green zero series", () => {
+  const month = archive.targetMonths.find((item) => item.period === "2025-12")!;
+  const months = forecastArchiveTrendMonthsForSelection(archive, month, ["300101"]);
+  const { container } = render(<DroughtForecastWorkspaceChart trendMonths={months} selectedHorizon={1} scopeLabel="ต.ในเมือง" coverageRemark="นอกขอบเขต 1 ตำบล" />);
+  expect(screen.getByRole("status")).toHaveTextContent("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
+  expect(container.querySelector(".nr-drought-forecast-point")).toBeNull();
+});
+
+it("does not connect or fill across unavailable horizons", () => {
+  vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+  const month = archive.targetMonths.find((item) => item.period === "2025-12")!;
+  const fixture = { ...archive, packedRiskByTargetMonth: { [month.period]: { "300806": [0, null, 1, 2, 0, 0] } } } as NakhonRatchasimaDroughtForecastArchive;
+  const months = forecastArchiveTrendMonthsForSelection(fixture, month, ["300806"]);
+  const { container } = render(<DroughtForecastTrendGraph months={months} totalSubdistricts={1} />);
+  expect(container.querySelectorAll(".nr-drought-forecast-point")).toHaveLength(5);
+  expect(container.querySelectorAll(".nr-drought-forecast-line-segment")).toHaveLength(3);
+  expect(container.querySelectorAll(".nr-drought-forecast-graph-area")).toHaveLength(3);
+  expect(container.querySelectorAll(".nr-drought-forecast-point.is-normal")).toHaveLength(3);
+  expect(screen.getByText("ไม่มีค่า")).toBeInTheDocument();
+  expect(container.textContent).not.toContain("T+1 · T+1");
+});
+
+it("labels exactly half as at least half of tambon count, not land area", () => {
+  const month = archive.targetMonths.find((item) => item.period === "2025-12")!;
+  const codes = archive.locations.filter((item) => item.districtSlug === "khon-buri").map((item) => item.subdistrictCode);
+  const point = forecastArchiveTrendMonthsForSelection(archive, month, codes)[0];
+  expect(point.riskSubdistricts).toBe(6);
+  expect(point.totalSubdistricts).toBe(12);
+  expect(droughtForecastBandLabel(droughtForecastBand(point))).toBe("เสี่ยงตั้งแต่ครึ่งหนึ่งของจำนวนตำบล");
+});
+
+it.each([0, 1, 2, null, undefined])("shows one status, not population counts, for a tambon with risk %s", (risk) => {
+  const month = archive.targetMonths.find((item) => item.period === "2025-12")!;
+  const fixture = { ...archive, packedRiskByTargetMonth: { [month.period]: risk === undefined ? {} : { "300806": [risk, risk, risk, risk, risk, risk] } } } as NakhonRatchasimaDroughtForecastArchive;
+  const summary = forecastArchiveSummaryForSelection(fixture, month, 1, ["300806"]);
+  const { container } = render(<DroughtForecastWorkspaceKpiStrip level="subdistrict" summary={summary} selectedRecord={summary.recordsBySubdistrict.get("300806")} />);
+  expect(container.querySelectorAll(".metric-card")).toHaveLength(1);
+  expect(container.textContent).not.toMatch(/1\/1|0 ตำบล|100%/);
+  if (risk === null || risk === undefined) expect(container.querySelector(".metric-card")).toHaveClass("is-muted");
+});
+
+it("attaches the readiness percentage to the ready category and uses a single-area status", () => {
+  const codes = archive.locations.filter((item) => item.districtCode === "3008").map((item) => item.subdistrictCode);
+  const readiness = predictionReadinessSummaryForSubdistrictCodes(codes);
+  const { rerender, container } = render(<PredictionReadinessPanel readiness={readiness} onOpenMap={() => {}} compact />);
+  expect(container.textContent).toContain("พร้อมระดับพื้นที่ 0% ของจำนวนตำบลทั้งหมด");
+  expect(container.textContent).not.toContain("มีข้อมูลตั้งต้น · ประมาณ 0%");
+  expect(container.textContent).toContain("ไม่ใช่ความครบถ้วนหรือความแม่นยำของคลังพยากรณ์ Excel");
+  rerender(<PredictionReadinessPanel readiness={predictionReadinessSummaryForSubdistrictCodes(["300806"])} onOpenMap={() => {}} scope="single" />);
+  expect(container.querySelector(".nr-readiness-gauge, .nr-readiness-breakdown-list")).toBeNull();
+  expect(screen.getByRole("group", { name: "สถานะหลักฐานของตำบล" })).toBeInTheDocument();
 });
 
 it("does not show an empty historical dataset as normal conditions", () => {
   render(<ResearchDroughtSituationPanel research={getNakhonRatchasimaResearchPanelSummary()} />);
   expect(screen.queryByText("ปกติเดือนล่าสุด")).not.toBeInTheDocument();
   expect(screen.getByText(/ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ/)).toBeInTheDocument();
+});
+
+it("keeps unavailable quality checks neutral and hides empty area designs", () => {
+  const district = getNakhonRatchasimaDistrictByCode("3008")!;
+  const stats = summarizeResearchAreaRecords([], district.subdistricts.length);
+  const activePeriod = localResearchPeriodForSelectedMonth("2025-12", getNakhonRatchasimaResearchPanelSummary());
+  const { container } = render(<>
+    <ResearchAreaHeading district={district} stats={stats} activePeriod={activePeriod} />
+    <ResearchAreaSituationPanel district={district} stats={stats} activePeriod={activePeriod} />
+    <ResearchSubdistrictDataGapPanel stats={stats} activePeriod={activePeriod} />
+    <ResearchAreaAgricultureImpactPanel district={district} stats={stats} activePeriod={activePeriod} />
+    <ResearchAreaAttentionPanel district={district} period={activePeriod.period} onNavigate={() => {}} />
+  </>);
+  for (const value of screen.getAllByText("ยังตรวจสอบไม่ได้")) expect(value.closest(".metric-card")).toHaveClass("is-muted");
+  expect(container.textContent).not.toContain("ครอบคลุมทุกพื้นที่");
+  expect(container.querySelector(".nr-agri-impact-module, .nr-area-watchlist-section")).toBeNull();
 });
 
 it("does not color an unmatched overview forecast as no risk", () => {

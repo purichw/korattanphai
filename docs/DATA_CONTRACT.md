@@ -195,6 +195,27 @@ normal. A source pathway may reduce “unknown source coverage” without reduci
 
 ## Nakhon Ratchasima Drought Forecast Archive
 
+### Display Semantics (2026-09-05)
+
+- User-facing coverage is `(no risk + moderate + high) / expected tambons`.
+  Matched rows, including explicit null, measure import completeness only.
+- Six chart slots compare T+1-T+6 for one fixed target month. They are not a
+  six-calendar-month time series. Reference months are calculated under the
+  existing product convention; workbook time role remains unconfirmed.
+- Each chart slot retains in-scope, explicit out-of-scope and missing counts.
+  An all-unavailable slot must not become a green zero. Do not connect/fill
+  across unavailable slots; a fully unavailable series has no risk graph.
+- The aggregate chart reference uses half of the administrative tambon count,
+  rounded up for integer counts. Exactly half is included. It is not land area,
+  an Excel risk class, an official warning threshold or a severity assessment.
+- Single-tambon UI reports the record status directly, without population
+  counts or a link back to the same tambon. Null and missing remain distinct.
+- Readiness is derived from supporting evidence/source capability metadata,
+  not Excel completeness or accuracy. Its percentage describes the ready
+  category only; single-tambon readiness uses a categorical status.
+- Empty historical research/area-fact designs remain gated in source. This
+  change does not add observations, restore removed data or change the archive.
+
 The local Supabase provider reconstructs the same full/T+1 archive shapes from
 normalized rows, without a static fallback. Source_YearMonth is preserved
 verbatim; the normalized workbook leaves issue-vs-target role unconfirmed.

@@ -91,7 +91,7 @@ try {
       } catch {
         throw new Error("Smoke login failed. Verify the configured test account, environment and network; credential values are not reported.");
       }
-      for (const route of ["/", "/drought?target=2025-12&horizon=1", "/dan-khun-thot?target=2025-12&horizon=4", "/dan-khun-thot/t-300806?target=2025-12&horizon=4"]) {
+      for (const route of ["/", "/drought?target=2025-12&horizon=1", "/dan-khun-thot?target=2025-12&horizon=4", "/dan-khun-thot/t-300806?target=2025-12&horizon=4", "/ban-lueam?target=2025-12&horizon=1"]) {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
         assert.equal(await page.locator(".nr-map-shape").count(), 289, `${name}: polygon count`);
@@ -116,6 +116,31 @@ try {
         if (route.includes("target=")) {
           await page.locator(".nr-drought-compact-workspace").waitFor();
           assert.match(await page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).innerText(), route.includes("horizon=4") ? /T\+4/ : /T\+1/);
+          assert.equal(await page.locator(".nr-drought-workspace-details, .nr-forecast-archive-mode-section, .nr-agri-impact-module").count(), 0, `${name}: duplicate or unsupported panels`);
+        }
+        if (route.startsWith("/drought")) {
+          assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /142\/289/);
+          assert.match(await page.locator(".nr-forecast-target-note").innerText(), /ไม่ใช่แนวโน้มรายเดือน/);
+        }
+        if (route.includes("/t-300806")) {
+          const kpis = page.locator(".nr-drought-workspace-kpis");
+          assert.equal(await kpis.locator(".metric-card").count(), 1, `${name}: single tambon status`);
+          assert.equal(await kpis.locator(".metric-card-value").innerText(), "เสี่ยงสูง");
+          assert.equal(await page.locator(".nr-drought-workspace-chart-card, .nr-operational-forecast-summary, .nr-operational-attention-list").count(), 0, `${name}: no population summary or self-links`);
+          const frame = await kpis.boundingBox();
+          const card = await kpis.locator(".metric-card").boundingBox();
+          const map = await page.locator(".nr-drought-workspace-map-card").boundingBox();
+          assert.ok(frame && card && map && Math.abs(card.width - frame.width) < 1 && frame.y + frame.height < map.y, `${name}: single status fills row above map`);
+          await page.screenshot({ path: path.join(output, `${name}-subdistrict.png`), fullPage: true });
+        }
+        if (route.startsWith("/ban-lueam")) {
+          await page.locator(".nr-forecast-unavailable").waitFor();
+          assert.match(await page.locator(".nr-forecast-unavailable").innerText(), /ไม่มีค่าพยากรณ์ให้เปรียบเทียบ/);
+          assert.equal(await page.locator(".nr-drought-forecast-point").count(), 0, `${name}: null forecasts are not zero`);
+          assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /0\/4 ตำบล/);
+          assert.match(await page.locator(".nr-drought-workspace-kpis .is-no-risk").getAttribute("class"), /is-muted/);
+          assert.equal(await page.locator(".nr-operational-attention-list").count(), 0);
+          await page.screenshot({ path: path.join(output, `${name}-unavailable-district.png`), fullPage: true });
         }
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
         assert.equal(overflow, false, `${name}: horizontal overflow on ${route}`);
@@ -142,6 +167,7 @@ try {
       await Promise.all(assetChecks);
       assert.deepEqual(errors, [], `${name}: browser errors`);
       await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
+      assert.equal(await page.getByRole("menuitem").count(), 1, `${name}: no demo account actions`);
       await page.getByRole("menuitem", { name: "ออกจากระบบ", exact: true }).click();
       await page.getByLabel("อีเมล", { exact: true }).waitFor();
       assert.equal(await page.getByRole("alert").count(), 0, "Logout should complete without an auth error");

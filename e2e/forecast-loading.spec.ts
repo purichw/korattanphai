@@ -36,7 +36,7 @@ test("failed archive loads can retry without losing target or horizon", async ({
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("T+4");
-  await expect(page.locator(".nr-forecast-archive-mode-section")).toContainText("2 · เสี่ยงสูง");
+  await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   await expect(page).toHaveURL(/target=2025-12&horizon=4/);
   expect(attempts).toBe(2);
 });
@@ -75,5 +75,5 @@ test("optional map context failure does not hide the forecast or its local polyg
   await page.goto("/drought?target=2025-12&horizon=1");
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
-  await expect(page.locator(".nr-forecast-archive-mode-section")).toContainText("142/289 ตำบล");
+  await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("142/289 ตำบล");
 });

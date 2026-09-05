@@ -181,6 +181,7 @@ function AccountControl({
   persona,
   language,
   compact = false,
+  demoActions = false,
   onPersonaChange,
   onResetDemo,
   onLogout,
@@ -190,6 +191,7 @@ function AccountControl({
   persona: UserPersona;
   language: Language;
   compact?: boolean;
+  demoActions?: boolean;
   onPersonaChange: (personaId: string) => void;
   onResetDemo: () => void;
   onLogout: () => void;
@@ -249,7 +251,7 @@ function AccountControl({
         <UserRound size={18} aria-hidden="true" />
         <span className="account-trigger-copy">
           <strong>{accountDisplayName}</strong>
-          <small>มุมมอง: {roleLabel}</small>
+          <small>{demoActions ? `มุมมอง: ${roleLabel}` : "บัญชีผู้ใช้"}</small>
         </span>
         <ChevronDown className="account-trigger-chevron" size={17} aria-hidden="true" />
       </button>
@@ -275,7 +277,7 @@ function AccountControl({
               </span>
             </div>
             <div className="account-menu-divider" role="presentation" />
-            <div className="account-menu-section" role="presentation">
+            {demoActions && <><div className="account-menu-section" role="presentation">
               <span className="account-menu-section-label">มุมมองการแสดงผล</span>
               <div className="account-role-options" role="group" aria-label="มุมมองการแสดงผล">
                 {accountPersonaOptions.map((user) => {
@@ -312,7 +314,7 @@ function AccountControl({
             >
               <RotateCcw size={16} aria-hidden="true" />
               <span>{t("resetDemo", language)}</span>
-            </button>
+            </button></>}
             <button
               type="button"
               className="account-menu-action is-danger"

@@ -63,8 +63,8 @@ export function ResearchProvinceDataView({
         readinessMap={readinessMap}
         onCloseReadinessMap={closeReadinessMap}
         level="province"
-        title="คาดการณ์ภัยแล้ง 6 เดือน (T+1 ถึง T+6)"
-        description="เลือกช่วงเวลา T+ เพื่ออ่านกราฟแนวโน้มและแผนที่พยากรณ์ในบริบทเดียวกัน"
+        title="เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6"
+        description="เปรียบเทียบระยะพยากรณ์ของเดือนเป้าหมายเดียวกันและแผนที่พยากรณ์"
         scopeLabel="จ.นครราชสีมา"
         archive={droughtArchive}
         target={{ valid: true, level: "province", tab: activeTab }}
@@ -81,13 +81,13 @@ export function ResearchProvinceDataView({
         selectedSubdistrictCode={selectedSubdistrictCode}
         onSelectedSubdistrictChange={onSelectedSubdistrictChange}
       />
-      <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="สถานะย้อนหลังและข้อมูลรายอำเภอ">
+      {research.meta.normalizedRowCount > 0 && <DroughtOperationalDisclosure title="สถานการณ์ภัยแล้งตามข้อมูลพื้นที่" description="สถานะย้อนหลังและข้อมูลรายอำเภอ">
       <section className="nr-drought-secondary-grid" aria-label="ข้อมูลปฏิบัติการประกอบการคาดการณ์">
         <ResearchSubdistrictAttentionPanel title={attentionTitle} records={attentionRecords} onNavigate={navigateWithForecast} />
         <ResearchDroughtSituationPanel research={research} />
       </section>
       <ResearchDroughtDistrictPanel research={research} onNavigate={navigateWithForecast} />
-      </DroughtOperationalDisclosure>
+      </DroughtOperationalDisclosure>}
       <DroughtOperationalDisclosure title={hasAgriculture ? "พื้นที่เกษตรและความพร้อมข้อมูล" : "ความพร้อมข้อมูลพื้นที่"} description="หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
         <AgricultureImpactPanel provinceRecord={provinceRecord} />
         <PredictionReadinessPanel onOpenMap={openReadinessMap} />

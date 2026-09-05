@@ -20,6 +20,21 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Site-wide semantic UX repair (2026-09-05, local/unreleased):
+
+- Implemented F01-F10 from `SITEWIDE_SEMANTIC_AUDIT_2026-09-05.md`: unavailable
+  forecasts no longer draw as zero-risk; coverage excludes null; chart copy
+  describes fixed-target horizons and count-based references.
+- Single-tambon shared variants show one forecast/evidence status, without
+  population counts or self-links. Duplicate forecast details, empty historical
+  analytics and unavailable area facts are hidden; designs remain in source.
+- Readiness copy distinguishes supporting evidence from forecast quality;
+  account menu hides demo personas/reset; Home area icons do not imply ranking.
+- Canonical/generated archive data, Supabase schema/RLS and bookmarks contracts
+  are unchanged. No push/deploy in this pass; production remains `ff01bd9`.
+- Verification/remaining limitations are recorded in the audit closeout below
+  its original findings. Local database-mode preview: `http://127.0.0.1:5176`.
+
 Scoped archive and saved-workspace migration (2026-09-05):
 
 - User authorized migration of only the approved Excel/normalized forecast

@@ -268,7 +268,7 @@ export function ResearchSourceLimitsPanel({ research }: { research: NakhonRatcha
             </div>
             <div>
               <dt>ข้อมูลพยากรณ์</dt>
-              <dd>พยากรณ์ภัยแล้ง 6 เดือนล่าสุด</dd>
+              <dd>พยากรณ์ภัยแล้ง T+1 ถึง T+6 ของเดือนเป้าหมายที่เลือก</dd>
             </div>
             <div>
               <dt>ข้อมูลรายเดือน</dt>
@@ -324,7 +324,7 @@ export function ResearchAreaHeading({
         <MetricCard
           label="ข้อมูลรองรับ"
           value={isSubdistrict ? (stats.recordCount > 0 ? "มีข้อมูล" : "ไม่มีข้อมูล") : `${stats.recordCount}/${stats.totalSubdistricts} ตำบล`}
-          detail={isSubdistrict ? `${localResearchPeriodLabel(activePeriod)}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}` : `${formatPercent(coveragePercent, 0)} ครอบคลุมทุกพื้นที่`}
+          detail={isSubdistrict ? `${localResearchPeriodLabel(activePeriod)}${activePeriod.isFallback ? " · ใช้เดือนล่าสุดแทน" : ""}` : `${formatPercent(coveragePercent, 0)} ของจำนวนตำบลทั้งหมด`}
           provenance={stats.recordCount > 0 ? "REAL" : "PENDING_SOURCE"}
         />
         <MetricCard
@@ -336,10 +336,10 @@ export function ResearchAreaHeading({
         />
         <MetricCard
           label="ข้อมูลที่ต้องตรวจซ้ำ"
-          value={isSubdistrict ? (stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ") : `${formatThaiNumber(stats.droughtConflictKeys)} ชุด`}
+          value={stats.recordCount === 0 ? "ยังตรวจสอบไม่ได้" : isSubdistrict ? (stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ") : `${formatThaiNumber(stats.droughtConflictKeys)} ชุด`}
           detail="รอเจ้าหน้าที่ตรวจทาน"
-          provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"}
-          tone={stats.droughtConflictKeys > 0 ? "watch" : "good"}
+          provenance={stats.recordCount === 0 ? "PENDING_SOURCE" : "DERIVED"}
+          tone={stats.recordCount === 0 ? "muted" : stats.droughtConflictKeys > 0 ? "watch" : "good"}
         />
         <MetricCard
           label={isSubdistrict ? "ช่องว่างข้อมูล" : "ตำบลไม่มีข้อมูล"}
@@ -402,10 +402,10 @@ export function ResearchAreaSituationPanel({
         />
         <MetricCard
           label="ข้อมูลที่ต้องตรวจซ้ำ"
-          value={isSubdistrict ? (stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ") : `${formatThaiNumber(stats.droughtConflictKeys)} ชุด`}
+          value={stats.recordCount === 0 ? "ยังตรวจสอบไม่ได้" : isSubdistrict ? (stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ") : `${formatThaiNumber(stats.droughtConflictKeys)} ชุด`}
           detail="รายการที่ต้องตรวจทานจากข้อมูลรายเดือน"
-          provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"}
-          tone={stats.droughtConflictKeys > 0 ? "watch" : "good"}
+          provenance={stats.recordCount === 0 ? "PENDING_SOURCE" : "DERIVED"}
+          tone={stats.recordCount === 0 ? "muted" : stats.droughtConflictKeys > 0 ? "watch" : "good"}
         />
       </ResearchStatGrid>
       <p className="nr-compact-note">{researchJoinPolicyNote()}</p>
@@ -586,11 +586,14 @@ export function ResearchAreaAttentionPanel({
       subdistrict,
       record: localResearchRecordForSubdistrict(subdistrict.subdistrictCode, period),
     }))
+    .filter(({ record }) => record && record.droughtRiskLevel !== null && record.droughtRiskLevel > 0)
     .sort(
       (a, b) =>
         (b.record?.droughtRiskLevel ?? -1) - (a.record?.droughtRiskLevel ?? -1),
     )
     .slice(0, 5);
+
+  if (rows.length === 0) return null;
 
   return (
     <DashboardSection
@@ -679,10 +682,10 @@ export function ResearchSubdistrictDataGapPanel({
         />
         <MetricCard
           label="รายการต้องตรวจซ้ำ"
-          value={stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ"}
+          value={stats.recordCount === 0 ? "ยังตรวจสอบไม่ได้" : stats.droughtConflictKeys > 0 ? "พบรายการ" : "ไม่พบ"}
           detail="อ่านจากข้อมูลรายเดือน"
-          provenance={stats.droughtConflictKeys > 0 ? "DERIVED" : "REAL"}
-          tone={stats.droughtConflictKeys > 0 ? "watch" : "good"}
+          provenance={stats.recordCount === 0 ? "PENDING_SOURCE" : "DERIVED"}
+          tone={stats.recordCount === 0 ? "muted" : stats.droughtConflictKeys > 0 ? "watch" : "good"}
         />
       </ResearchStatGrid>
     </DashboardSection>
@@ -1069,6 +1072,7 @@ export function ResearchAreaAgricultureImpactPanel({
   stats: ResearchAreaStats;
   activePeriod: ActiveResearchPeriod;
 }) {
+  if (!activePeriod.hasData || stats.recordCount === 0) return null;
   const isSubdistrict = Boolean(subdistrict);
   const riskSubdistricts = stats.droughtWatchSubdistricts + stats.droughtSevereSubdistricts;
   const dataCoverageValue = isSubdistrict
@@ -1091,7 +1095,7 @@ export function ResearchAreaAgricultureImpactPanel({
         },
         {
           id: "visible-scope",
-          label: "พื้นที่ในขอบเขตประเมิน",
+          label: "ขอบเขตการปกครอง",
           value: isSubdistrict ? "1 ตำบล" : `${formatThaiNumber(stats.totalSubdistricts)} ตำบล`,
           detail: isSubdistrict ? `อำเภอ${district.nameTh}` : `อำเภอ${district.nameTh}`,
           icon: <MapPin size={18} />,
@@ -1122,11 +1126,13 @@ export function PredictionReadinessPanel({
   onOpenMap,
   readiness = predictionReadinessSummary(),
   compact = false,
+  scope = "aggregate",
 }: {
   month?: string;
   onOpenMap: () => void;
   readiness?: PredictionReadinessSummary;
   compact?: boolean;
+  scope?: "aggregate" | "single";
 }) {
   const readyPercentLabel = formatPercent(readiness.readyPercent, 1);
   const clampedReadyPercent = clamp(readiness.readyPercent, 0, 100);
@@ -1156,6 +1162,19 @@ export function PredictionReadinessPanel({
       tone: "watch",
     },
   ];
+  const sourceNote = "จากชุดหลักฐานพื้นที่และความพร้อมของแหล่งข้อมูลประกอบ ไม่ใช่ความครบถ้วนหรือความแม่นยำของคลังพยากรณ์ Excel";
+
+  if (scope === "single") return <section className="nr-panel nr-prediction-readiness is-single" aria-label="ความพร้อมข้อมูลประกอบของตำบล">
+    <MetricGrid ariaLabel="สถานะหลักฐานของตำบล" metrics={[{
+      label: "หลักฐานประกอบของตำบล",
+      value: breakdownItems.find((item) => item.count > 0)?.label ?? "ข้อมูลยังไม่เพียงพอ",
+      detail: sourceNote,
+      icon: <Database size={20} />,
+      tone: "muted",
+      provenance: "DERIVED",
+    }]} />
+    <button type="button" className="secondary-button nr-readiness-map-action" onClick={onOpenMap}><MapIcon size={18} aria-hidden="true" />ดูความพร้อมบนแผนที่</button>
+  </section>;
 
   if (compact) return <DashboardDetailPanel className="nr-home-readiness" provenance="DERIVED" title="ความพร้อมข้อมูล" icon={<Gauge size={20} />} preview={
     <div className="nr-home-readiness-headline">
@@ -1164,8 +1183,8 @@ export function PredictionReadinessPanel({
     </div>
   }>
     <dl className="nr-readiness-breakdown-list">{breakdownItems.map((item) => <div key={item.id} className={`is-${item.tone}`}><dt><i aria-hidden="true" />{item.label}</dt><dd>{formatThaiNumber(item.count)} ตำบล</dd></div>)}</dl>
-    <p>{readiness.readiestLevelLabel} · ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด{month && ` · บริบทข้อมูล ${month}`}</p>
-    <p>รายการเหล่านี้เป็นสถานะความพร้อมของข้อมูลและหลักฐานคนละประเภท ไม่ใช่ระดับภัยที่เกิดแล้ว</p>
+    <p>พร้อมระดับพื้นที่ {readyPercentLabel} ของจำนวนตำบลทั้งหมด{month && ` · บริบทข้อมูล ${month}`}</p>
+    <p>{sourceNote}</p>
     <button type="button" className="secondary-button nr-readiness-map-action" onClick={onOpenMap}><MapIcon size={18} aria-hidden="true" />ดูความพร้อมบนแผนที่</button>
   </DashboardDetailPanel>;
 
@@ -1177,8 +1196,8 @@ export function PredictionReadinessPanel({
             <Gauge size={18} />
           </span>
           <div>
-            <h3>สถานะข้อมูลสำหรับคาดการณ์</h3>
-            <p className="nr-readiness-lede">อ่านความพร้อมข้อมูล ไม่ใช่ระดับความรุนแรงของภัย</p>
+            <h3>ความพร้อมข้อมูลประกอบ</h3>
+            <p className="nr-readiness-lede">หลักฐานพื้นที่ ไม่ใช่ระดับภัยหรือความครบถ้วนของพยากรณ์</p>
           </div>
         </div>
         <DataProvenanceChip kind="DERIVED" />
@@ -1194,10 +1213,10 @@ export function PredictionReadinessPanel({
             <span>จาก {formatThaiNumber(readiness.totalSubdistricts)}</span>
           </div>
           <div>
-            <span>ระดับที่พร้อมที่สุด</span>
-            <strong>{readiness.readiestLevelLabel}</strong>
+            <span>ข้อมูลพร้อมระดับพื้นที่</span>
+            <strong>{formatThaiNumber(readiness.readySubdistricts)} ตำบล</strong>
             <small>
-              {month && `รอบข้อมูล ${month} · `}ประมาณ {readyPercentLabel} ของพื้นที่ทั้งหมด
+              {month && `รอบข้อมูล ${month} · `}{readyPercentLabel} ของจำนวนตำบลทั้งหมด
             </small>
             <div className="nr-readiness-progress" aria-label={`พร้อมคาดการณ์ระดับพื้นที่ ${readyPercentLabel}`}>
               <i style={{ width: `${clampedReadyPercent}%` }} />
@@ -1217,7 +1236,7 @@ export function PredictionReadinessPanel({
         </dl>
       </div>
       <div className="nr-readiness-footer">
-        <p>รายการเหล่านี้เป็นสถานะความพร้อมของข้อมูลและหลักฐานคนละประเภท ไม่ใช่ระดับภัยที่เกิดแล้ว</p>
+        <p>{sourceNote}</p>
         <button type="button" className="secondary-button nr-readiness-map-action" onClick={onOpenMap}>
           <MapIcon size={18} aria-hidden="true" />
           ดูความพร้อมบนแผนที่

@@ -10,9 +10,10 @@ import { type AppSelectOption } from "../AppSelect";
 import { type LocalMapStatus, type LocalRiskCriterion } from "./workspaceModel";
 import { type NakhonRatchasimaRouteTarget } from "../../domain";
 
-export type DroughtForecastBand = "normal" | "watch" | "severe";
+export type DroughtForecastBand = "unavailable" | "normal" | "watch" | "severe";
 
 export const DROUGHT_FORECAST_BAND_RANK: Record<DroughtForecastBand, number> = {
+  unavailable: -1,
   normal: 0,
   watch: 1,
   severe: 2,
@@ -25,10 +26,14 @@ export type DroughtForecastTrendMonth = {
   riskSubdistricts: number;
   normalSubdistricts: number;
   totalSubdistricts: number;
+  inScopeSubdistricts: number;
+  outOfScopeSubdistricts: number;
+  missingSubdistricts: number;
   riskPercent: number;
 };
 
 export function droughtForecastBand(month: DroughtForecastTrendMonth): DroughtForecastBand {
+  if (month.inScopeSubdistricts === 0) return "unavailable";
   if (month.riskPercent >= 0.5) return "severe";
   if (month.riskSubdistricts > 0) return "watch";
   return "normal";
@@ -41,6 +46,7 @@ export function highestDroughtForecastBand(first: DroughtForecastBand, second: D
 export function droughtForecastBandLabel(band: DroughtForecastBand, scope: "area" | "single" = "area") {
   if (scope === "single") {
     const labels: Record<DroughtForecastBand, string> = {
+      unavailable: "ไม่มีค่าพยากรณ์",
       normal: "ไม่เสี่ยง",
       watch: "เสี่ยงแล้ง",
       severe: "เสี่ยงแล้ง",
@@ -48,9 +54,10 @@ export function droughtForecastBandLabel(band: DroughtForecastBand, scope: "area
     return labels[band];
   }
   const labels: Record<DroughtForecastBand, string> = {
-    normal: "ไม่พบพื้นที่เสี่ยง",
+    unavailable: "ไม่มีค่าพยากรณ์",
+    normal: "ไม่พบความเสี่ยงในตำบลที่มีค่า",
     watch: "มีพื้นที่เสี่ยง",
-    severe: "เกินครึ่งพื้นที่",
+    severe: "เสี่ยงตั้งแต่ครึ่งหนึ่งของจำนวนตำบล",
   };
   return labels[band];
 }
@@ -322,6 +329,9 @@ export function forecastArchiveTrendMonthsForSelection(
       riskSubdistricts: summary.riskSubdistricts,
       normalSubdistricts: summary.noRiskSubdistricts,
       totalSubdistricts,
+      inScopeSubdistricts: summary.inScopeSubdistricts,
+      outOfScopeSubdistricts: summary.outOfScopeSubdistricts,
+      missingSubdistricts: summary.missingSubdistricts,
       riskPercent: totalSubdistricts > 0 ? summary.riskSubdistricts / totalSubdistricts : 0,
     };
   });

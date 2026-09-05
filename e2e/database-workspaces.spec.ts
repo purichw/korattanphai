@@ -41,6 +41,8 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await seedAuthSession(page);
   await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high');
   await expect(page.getByRole('heading', { name: /ภัยแล้ง.*บ้านเก่า/ }).first()).toBeVisible();
+  await expect(page.locator('.nr-drought-workspace-kpis .metric-card')).toHaveCount(1);
+  await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
   await page.getByRole('button', { name: 'ติดตามพื้นที่นี้', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('status')).toContainText('เพิ่มพื้นที่ติดตามแล้ว');
@@ -60,6 +62,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
   await page.reload();
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
+  await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'จังหวัดนครราชสีมา', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();

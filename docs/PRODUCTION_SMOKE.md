@@ -23,7 +23,7 @@ This authenticates the runner to Vercel; Supabase login is still tested normally
 
 For database releases, set `SMOKE_DATA_BACKEND=supabase`. The harness compares
 both actual app RPC projections to canonical source, checks the risk class of
-every map polygon on all four routes, rejects static archive fallback and reads
+every map polygon on all five routes, rejects static archive fallback and reads
 the saved-workspace modal. `SMOKE_SAVED_FILTER_NAME` optionally verifies a known
 saved record across fresh login sessions; the harness itself does not create
 or delete personal records. It captures saved-filter desktop/mobile screenshots.
@@ -46,7 +46,10 @@ header checks; deployed checks require them.
 
 Checks cover login, overview, drought, district and subdistrict pages at 1440x960
 and 390x844; 289 map polygons; latest T+1 overview counts and context;
-T+1/T+4 selection; visible images; horizontal
+T+1/T+4 selection; one full-width categorical status above the subdistrict map;
+an all-null district with no false zero-risk graph; fixed-target comparison
+copy; absence of duplicate/unsupported panels and demo account actions;
+visible images; horizontal
 overflow; failed same-origin requests; page errors; asset MIME/cache headers;
 hosting security headers; and the read-only API's response contract, no-store
 policy and absence of the retired provider. Google-hosted font request failures

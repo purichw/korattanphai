@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Gauge, Leaf, Map as MapIcon, RotateCcw, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Gauge, Leaf, MapPin, Map as MapIcon, RotateCcw, ShieldAlert } from "lucide-react";
 import { formatRai, getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaDistricts, type NakhonRatchasimaRouteTarget } from "../../domain";
 import type { NakhonRatchasimaDroughtForecastArchive, NakhonRatchasimaMapLayer, ProvinceMonthRisk } from "../../types";
 import { useForecastArchive } from "../../useForecastArchive";
@@ -94,7 +94,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         <div>
           <p className="eyebrow">ภาพรวมสถานการณ์</p>
           <h1>จังหวัดนครราชสีมา</h1>
-          <p className="nr-forecast-overview-context"><strong>พยากรณ์ {month.labelTh}</strong><span>ล่วงหน้า 1 เดือน (T+1) · ออกคำพยากรณ์ {formatMonth(summary.issueMonth, "th")}</span></p>
+          <p className="nr-forecast-overview-context"><strong>พยากรณ์ {month.labelTh}</strong><span>ล่วงหน้า 1 เดือน (T+1) · เดือนอ้างอิง (คำนวณ) {formatMonth(summary.issueMonth, "th")}</span></p>
         </div>
         <p><DataProvenanceChip kind="REAL" />เป้าหมายล่าสุดในคลัง {formatMonth(archive.meta.targetMonthEnd, "th")} · ไม่ใช่ข้อมูลสด</p>
       </header>
@@ -155,10 +155,10 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
           {attention.length > 0 ? <>
             <p className={showAllAttention ? "is-expanded" : "nr-home-list-context"}>{formatThaiNumber(attention.length)} จาก {formatThaiNumber(summary.highRiskSubdistricts)} ตำบล · เรียงตามรหัสตำบล</p>
             <ul id="home-attention-list" className={showAllAttention ? "is-expanded" : ""}>
-              {attention.map((record, index) => (
+              {attention.map((record) => (
                 <li key={record.subdistrictCode}>
                   <a href={withForecast(pathForSubdistrictCode(record.subdistrictCode) ?? "/drought")}>
-                    <b className="nr-home-rank">{index + 1}</b><span className="nr-home-area-name"><strong>ต.{record.subdistrictNameTh}</strong><small>อ.{record.districtNameTh}</small></span>
+                    <span className="nr-home-area-marker" aria-hidden="true"><MapPin size={18} /></span><span className="nr-home-area-name"><strong>ต.{record.subdistrictNameTh}</strong><small>อ.{record.districtNameTh}</small></span>
                     <span className="status-pill severe">เสี่ยงสูง</span><ChevronRight size={16} />
                   </a>
                 </li>

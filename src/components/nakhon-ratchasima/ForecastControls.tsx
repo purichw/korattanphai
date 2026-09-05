@@ -5,7 +5,6 @@ import {
   forecastArchiveIssueMonthForSelection,
   type DroughtForecastArchiveLevel,
   type DroughtForecastArchiveSummary,
-  forecastArchiveRecordValueLabel,
   forecastArchiveRecordLabel,
 } from "./forecastModel";
 import { formatMonth } from "../../i18n";
@@ -44,7 +43,7 @@ export function DroughtForecastArchiveHorizonSelector({
             onClick={() => onHorizonChange(horizon)}
           >
             <strong>T+{horizon}</strong>
-            <span>ออก {formatMonth(issueMonth, "th")}</span>
+            <span>อ้างอิง {formatMonth(issueMonth, "th")}</span>
           </button>
         );
       })}
@@ -67,7 +66,7 @@ export function DroughtForecastArchiveSummaryMetrics({
     {
       label: "อยู่ในขอบเขต",
       value: `${formatThaiNumber(summary.inScopeSubdistricts)}/${formatThaiNumber(summary.totalSubdistricts)} ตำบล`,
-      detail: "มีค่า 0, 1 หรือ 2 ในรอบพยากรณ์นี้",
+      detail: "มีผลพยากรณ์ในรอบที่เลือก",
       icon: <Database size={18} />,
       tone: "info",
       provenance: "REAL",
@@ -75,26 +74,26 @@ export function DroughtForecastArchiveSummaryMetrics({
     {
       label: "ไม่มีความเสี่ยง",
       value: `${formatThaiNumber(summary.noRiskSubdistricts)} ตำบล`,
-      detail: "ค่าที่พยากรณ์ = 0",
+      detail: summary.inScopeSubdistricts > 0 ? "ผลพยากรณ์: ไม่พบสัญญาณเสี่ยง" : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <ShieldAlert size={18} />,
-      tone: summary.matchedSubdistricts > 0 ? "good" : "muted",
-      provenance: summary.matchedSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      tone: summary.inScopeSubdistricts > 0 ? "good" : "muted",
+      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
     },
     {
       label: "เสี่ยงปานกลาง",
       value: `${formatThaiNumber(summary.moderateRiskSubdistricts)} ตำบล`,
-      detail: "ค่าที่พยากรณ์ = 1",
+      detail: summary.inScopeSubdistricts > 0 ? "ผลพยากรณ์: เสี่ยงปานกลาง" : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <TrendingUp size={18} />,
-      tone: "watch",
-      provenance: summary.matchedSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      tone: summary.inScopeSubdistricts > 0 ? "watch" : "muted",
+      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
     },
     {
       label: "เสี่ยงสูง",
       value: `${formatThaiNumber(summary.highRiskSubdistricts)} ตำบล`,
-      detail: "ค่าที่พยากรณ์ = 2",
+      detail: summary.inScopeSubdistricts > 0 ? "ผลพยากรณ์: เสี่ยงสูง" : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <TrendingUp size={18} />,
-      tone: "danger",
-      provenance: summary.matchedSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      tone: summary.inScopeSubdistricts > 0 ? "danger" : "muted",
+      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
     },
     {
       label: "นอกขอบเขต",
@@ -110,7 +109,7 @@ export function DroughtForecastArchiveSummaryMetrics({
     metrics.push({
       label: "ไม่มีข้อมูลในรอบนี้",
       value: `${formatThaiNumber(summary.missingSubdistricts)} ตำบล`,
-      detail: "เกิดจาก record ขาดหลัง join ไม่ใช่ blank forecast",
+      detail: "ไม่พบรายการข้อมูลของตำบลในรอบที่เลือก",
       icon: <Info size={18} />,
       tone: "muted",
       provenance: "PENDING_SOURCE",
@@ -119,11 +118,11 @@ export function DroughtForecastArchiveSummaryMetrics({
 
   if (level === "subdistrict") {
     metrics.push({
-      label: "ค่าที่พยากรณ์",
+      label: "ผลพยากรณ์ของตำบล",
       value: selectedRecord
-        ? `${forecastArchiveRecordValueLabel(selectedRecord)} · ${forecastArchiveRecordLabel(selectedRecord)}`
+        ? forecastArchiveRecordLabel(selectedRecord)
         : "ไม่มีข้อมูลในรอบนี้",
-      detail: selectedRecord ? `${selectedRecord.horizonLabel} · ออก ${formatMonth(selectedRecord.issueMonth, "th")}` : "ไม่แปลงเป็นไม่มีความเสี่ยง",
+      detail: selectedRecord ? `${selectedRecord.horizonLabel} · อ้างอิง (คำนวณ) ${formatMonth(selectedRecord.issueMonth, "th")}` : "ไม่แปลงเป็นไม่มีความเสี่ยง",
       icon: <TrendingUp size={18} />,
       tone: selectedRecord
         ? selectedRecord.forecastRisk === 2
