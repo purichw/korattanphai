@@ -8,9 +8,34 @@ import { DroughtForecastTrendGraph, DroughtForecastWorkspaceKpiStrip, DroughtFor
 import { PredictionReadinessPanel, ResearchDroughtSituationPanel, ResearchAreaHeading, ResearchAreaSituationPanel, ResearchSubdistrictDataGapPanel, ResearchAreaAgricultureImpactPanel, ResearchAreaAttentionPanel } from "../src/components/nakhon-ratchasima/ResearchPanels";
 import { localResearchPeriodForSelectedMonth, predictionReadinessSummaryForSubdistrictCodes, summarizeResearchAreaRecords } from "../src/components/nakhon-ratchasima/workspaceModel";
 import { DroughtForecastArchiveSummaryMetrics } from "../src/components/nakhon-ratchasima/ForecastControls";
+import { DroughtOperationalDisclosure, DroughtOperationalSummary } from "../src/components/nakhon-ratchasima/DroughtOperationalWorkspace";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const archive = archiveJson as unknown as NakhonRatchasimaDroughtForecastArchive;
+
+it.each([
+  [142, 142, "has-risk", "พบตำบลเสี่ยง 142 ตำบล"],
+  [0, 4, "is-default", "พบตำบลเสี่ยง 0 ตำบล"],
+  [0, 0, "has-no-data", "ไม่มีค่าพยากรณ์ในรอบนี้"],
+] as const)("shares the operational MetricCard without changing risk/availability (%i/%i)", (risk, inScope, state, value) => {
+  const { container } = render(<DroughtOperationalSummary horizon={4} riskSubdistricts={risk} inScopeSubdistricts={inScope} />);
+  expect(container.firstChild).toHaveClass("metric-card", "nr-operational-card-heading", state);
+  expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("สรุปผลพยากรณ์ (T+4)");
+  expect(screen.getByText(value)).toHaveClass("metric-card-value");
+  expect(screen.getByText(`จากตำบลที่มีค่าพยากรณ์ ${inScope} ตำบล`)).toHaveClass("metric-card-detail");
+  expect(screen.queryByRole("button")).toBeNull();
+});
+
+it("centers short operational disclosure copy and supports explicit long-description alignment", () => {
+  const description = "ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ";
+  const { container, rerender } = render(<DroughtOperationalDisclosure title="คำแนะนำ" description={description}><p>คำอธิบายรายละเอียด</p></DroughtOperationalDisclosure>);
+  expect(container.querySelector("summary")).toHaveClass("nr-operational-card-heading");
+  expect(screen.getByText(description)).toHaveClass("is-center");
+  expect(container.querySelector("details")).not.toHaveAttribute("open");
+  rerender(<DroughtOperationalDisclosure title="คำแนะนำ" description={description} descriptionAlign="start"><p>คำอธิบายรายละเอียด</p></DroughtOperationalDisclosure>);
+  expect(screen.getByText(description)).toHaveClass("is-start");
+  expect(container.querySelector(".nr-operational-disclosure-body p")).toHaveTextContent("คำอธิบายรายละเอียด");
+});
 
 it.each(["province", "district", "subdistrict"])("keeps the %s threshold label outside the plot at the same reference value", (level) => {
   vi.stubGlobal("matchMedia", (query: string) => ({ matches: false, media: query, addEventListener: vi.fn(), removeEventListener: vi.fn() }));

@@ -32,6 +32,39 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(chart).toHaveCount(scope === "subdistrict" ? 0 : 1);
     const map = workspace.locator(".nr-map-svg");
     await expect(map.locator(".nr-map-shape")).toHaveCount(289);
+    const cardGeometry = await page.locator(".nr-operational-card-heading").evaluateAll(cards => cards.map(card => {
+      const frame = card.getBoundingClientRect();
+      const copy = [...card.querySelectorAll(":scope > .nr-operational-card-copy, :scope > .metric-card-label, :scope > .metric-card-value, :scope > .metric-card-detail")];
+      const rects = copy.map(node => node.getBoundingClientRect());
+      const top = Math.min(...rects.map(rect => rect.top));
+      const bottom = Math.max(...rects.map(rect => rect.bottom));
+      return {
+        text: card.textContent,
+        horizontalOffsets: rects.map(rect => Math.abs(rect.x + rect.width / 2 - frame.x - frame.width / 2)),
+        verticalOffset: Math.abs((top + bottom) / 2 - frame.y - frame.height / 2),
+        alignment: copy.map(node => getComputedStyle(node).textAlign),
+        overflow: card.scrollWidth > card.clientWidth + 1,
+      };
+    }));
+    expect(cardGeometry.length).toBeGreaterThan(0);
+    for (const card of cardGeometry) {
+      expect(card.horizontalOffsets.every(offset => offset < 1), card.text ?? "card").toBe(true);
+      expect(card.verticalOffset, card.text ?? "card").toBeLessThan(1);
+      expect(card.alignment.every(alignment => alignment === "center")).toBe(true);
+      expect(card.overflow).toBe(false);
+    }
+    const guidance = page.locator(".nr-operational-guidance");
+    const guidanceTrigger = guidance.locator("summary");
+    const initialUrl = page.url();
+    await guidanceTrigger.focus();
+    await guidanceTrigger.press("Enter");
+    await expect(guidance).toHaveAttribute("open", "");
+    await expect(guidance.locator(".nr-operational-disclosure-body")).toBeVisible();
+    await expect(guidance.locator(".nr-operational-disclosure-body")).toHaveCSS("text-align", "start");
+    await guidanceTrigger.press("Space");
+    await expect(guidance).not.toHaveAttribute("open", "");
+    await expect(guidanceTrigger).toBeFocused();
+    expect(page.url()).toBe(initialUrl);
     if (scope === "subdistrict") {
       await expect.poll(async () => {
         const shape = await map.locator('[data-nr-subdistrict-code="300806"]').boundingBox();

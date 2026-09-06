@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, ShieldCheck, Sprout, TrendingUp } from "lucide-react";
 import { AppSelect, type AppSelectOption } from "../AppSelect";
+import { MetricCard } from "../PageSummary";
 import { type DroughtForecastWorkspaceTarget, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
-import { districtOptionsForProvince, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
+import { districtOptionsForProvince, formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
 
 export function useDroughtReadinessMap() {
   const [readinessMap, setReadinessMap] = useState(false);
@@ -65,16 +66,32 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
   </section>;
 }
 
-export function DroughtOperationalDisclosure({ title, description, icon = "activity", children, className = "" }: {
+export function DroughtOperationalSummary({ horizon, riskSubdistricts, inScopeSubdistricts }: {
+  horizon: ForecastArchiveHorizon;
+  riskSubdistricts: number;
+  inScopeSubdistricts: number;
+}) {
+  const state = riskSubdistricts > 0 ? " has-risk" : inScopeSubdistricts === 0 ? " has-no-data" : "";
+  return <MetricCard
+    className={`nr-operational-card-heading nr-operational-forecast-summary${state}`}
+    label={<span role="heading" aria-level={3}>สรุปผลพยากรณ์ (T+{horizon})</span>}
+    value={inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในรอบนี้" : `พบตำบลเสี่ยง ${formatThaiNumber(riskSubdistricts)} ตำบล`}
+    detail={`จากตำบลที่มีค่าพยากรณ์ ${formatThaiNumber(inScopeSubdistricts)} ตำบล`}
+    icon={<TrendingUp size={22} />}
+  />;
+}
+
+export function DroughtOperationalDisclosure({ title, description, descriptionAlign = "center", icon = "activity", children, className = "" }: {
   title: string;
   description?: string;
+  descriptionAlign?: "center" | "start";
   icon?: "activity" | "data" | "crop" | "map";
   children: ReactNode;
   className?: string;
 }) {
   const Icon = icon === "data" ? Database : icon === "crop" ? Sprout : icon === "map" ? MapPin : Activity;
   return <details className={`nr-operational-disclosure ${className}`}>
-    <summary><Icon size={22} aria-hidden="true" /><span><strong>{title}</strong>{description && <small>{description}</small>}</span><ChevronRight size={18} aria-hidden="true" /></summary>
+    <summary className="nr-operational-card-heading"><Icon size={22} aria-hidden="true" /><span className="nr-operational-card-copy"><strong>{title}</strong>{description && <small className={`nr-operational-card-description is-${descriptionAlign}`}>{description}</small>}</span><ChevronRight size={18} aria-hidden="true" /></summary>
     <div className="nr-operational-disclosure-body">{children}</div>
   </details>;
 }

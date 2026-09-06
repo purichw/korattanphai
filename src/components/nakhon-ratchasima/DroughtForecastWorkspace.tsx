@@ -18,7 +18,7 @@ import {
   Sprout,
 } from "lucide-react";
 import { formatThaiNumber, type LocalMapMode, formatPercent, pathForSubdistrictCode, useMediaQuery } from "./workspaceModel";
-import { DroughtWorkspaceHeader, DroughtWorkspaceFilters, DroughtOperationalDisclosure } from "./DroughtOperationalWorkspace";
+import { DroughtWorkspaceHeader, DroughtWorkspaceFilters, DroughtOperationalDisclosure, DroughtOperationalSummary } from "./DroughtOperationalWorkspace";
 import {
   type DroughtForecastTrendMonth,
   type ForecastArchiveHorizon,
@@ -683,13 +683,9 @@ export function DroughtCompactForecastWorkspace({
       </div>
     </section>
     <div className="nr-operational-forecast-actions">
-      {level !== "subdistrict" && !emptyIrrigationScope && <div className={`nr-operational-forecast-summary${summary.riskSubdistricts > 0 ? " has-risk" : summary.inScopeSubdistricts === 0 ? " has-no-data" : ""}`}>
-        <TrendingUp size={22} aria-hidden="true" />
-        <div><h3>สรุปผลพยากรณ์ (T+{selectedHorizon})</h3>
-          <strong>{summary.inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในรอบนี้" : `พบตำบลเสี่ยง ${formatThaiNumber(summary.riskSubdistricts)} ตำบล`}</strong>
-          <small>จากตำบลที่มีค่าพยากรณ์ {formatThaiNumber(summary.inScopeSubdistricts)} ตำบล</small>
-        </div>
-      </div>}
+      {level !== "subdistrict" && !emptyIrrigationScope && <DroughtOperationalSummary
+        horizon={selectedHorizon} riskSubdistricts={summary.riskSubdistricts} inScopeSubdistricts={summary.inScopeSubdistricts}
+      />}
       {level !== "subdistrict" && attentionRecords.length > 0 && <DroughtOperationalDisclosure title="ตำบลภัยแล้งที่ควรตรวจสอบ" icon="map"
         description={`เสี่ยงสูง ${formatThaiNumber(summary.highRiskSubdistricts)} · ปานกลาง ${formatThaiNumber(summary.moderateRiskSubdistricts)} ตำบล`}>
         <ul className="nr-operational-attention-list">{attentionRecords.map((record) => <li key={record.subdistrictCode}>
