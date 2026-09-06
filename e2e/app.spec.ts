@@ -545,6 +545,7 @@ test("custom dropdowns are app-rendered and keyboard operable", async ({ page })
     await expect(page.locator(".operational-filter-fields")).toBeHidden();
     await editFiltersButton.click();
     await expect(page.getByRole("dialog", { name: "ตัวกรองข้อมูล" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ปิดตัวกรองข้อมูล", exact: true })).toBeFocused();
   }
 
   const filters = isMobileSummary ? page.locator(".operational-filter-sheet") : page.locator(".control-band");
