@@ -20,8 +20,11 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
-Forward forecast semantics and UI terminology (2026-09-06, local work):
+Forward forecast semantics and UI terminology production release (2026-09-06):
 
+- Released runtime `8cfa2824f81b9bb886b7479ef9d36a0c6dbcdf41` to
+  `https://korattanphai.vercel.app`; pushed `fix/nr-map-zoom-performance`
+  without merging `main`.
 - The user confirmed that Excel `Source_YearMonth` is origin T for every
   source month, including June 2015. Runtime `issueMonth = T` and
   `targetMonth = T + horizon`: June 2015 forecasts July-December 2015;
@@ -31,35 +34,53 @@ Forward forecast semantics and UI terminology (2026-09-06, local work):
 - `src/forecastPeriod.ts` owns shared calendar-month arithmetic;
   `forecastModel.ts` projects dates for Home, province, district, subdistrict,
   graphs and maps. UI consistently distinguishes `เดือนตั้งต้น (T)` from
-  `เดือนที่พยากรณ์`, including filters, horizon subtitles, map previews,
-  loading placeholders, guidance, and saved-selection descriptions.
+  `เดือนที่พยากรณ์`, including filters, map previews, loading placeholders,
+  guidance, and saved-selection descriptions. The final copy follow-up removes
+  `พยากรณ์` from T+ tab subtitles, leaving only the forward month/year.
 - Immutable canonical/generated JSON and published database/RPC payloads are
   unchanged. Legacy `targetMonths`, `packedRiskByTargetMonth`, URL `target`,
   and saved `target_period` still identify the source row T. Old saved links
   retain the same source/horizon/risk while displaying forward dates. No data
   migration is needed. Active contracts are updated in DATA_CONTRACT,
   ARCHITECTURE, APP_MAP, SHARED_COMPONENTS and SUPABASE_DATA_MIGRATION.
-- Validation: 53 targeted unit tests passed, including exhaustive preservation
-  of all 220,218 projected source/horizon records across 127 months; 40 built
-  browser tests passed for drought scopes, overview and loading; four isolated
-  Supabase-provider/bookmark browser tests passed on desktop/mobile. Four
-  additional focused boundary checks passed on the isolated development server.
-  After matching loading-label order and chart wording to the ready state,
-  the protected build and six affected desktop/mobile loading checks passed
-  again (`tmp-snapshots/forward-forecast-loading-final-20260906/`).
-  A protected static build passed typecheck, exposure and bundle guards, and
-  verified unchanged canonical archive bytes. Vite's existing chunk-size
-  advisory remains within the enforced budgets.
-- Current desktop/mobile screenshots and inspection report are in
-  `tmp-snapshots/source-month-semantics/`: Dec-2025/T+4 subdistrict and
-  Jun-2015/T+6 province, with chart context crops. Origin/target labels,
-  year rollover, and graph date spacing were inspected; no horizontal overflow
-  or browser errors. Test outputs are in
-  `tmp-snapshots/forward-forecast-built-e2e-20260906/` and
-  `tmp-snapshots/forward-forecast-database-e2e-20260906/`.
-- These changes are uncommitted and have not been pushed or deployed. The
-  production release below remains current. No real API writes, production
-  smoke, schema/auth changes, full release suite or physical-device checks.
+- Local gate: 154 unit tests, a fresh protected build and 16 built-browser
+  drought-workspace checks passed after the final tab-copy change. Tests cover
+  preservation of all 220,218 source/horizon/subdistrict values across 127
+  months. Exact-runtime Quality Gate
+  `https://github.com/purichw/korattanphai/actions/runs/34037950815` passed:
+  154 unit tests, 10 isolated migration/integrity/RLS checks, both protected
+  static and Supabase builds, 90 built-browser tests (10 conditional skips),
+  four database UI tests, exposure/bundle guards and no generated-data drift.
+  The existing Vite chunk-size advisory remains within enforced budgets.
+- Deployment `dpl_CNfArLjRBvsG2kX5Bjx2hSVX9RAK` came from a clean detached
+  checkout (227 uploaded source files), used the actual production Supabase
+  configuration, and was promoted unchanged after candidate checks and CI.
+  Deployment URL:
+  `https://korattanphai-eytyko48m-purichwc-1517s-projects.vercel.app`.
+  Candidate and public production each passed 10 endpoint checks with matching
+  bytes/hashes, MIME types, CSP and cache headers. The backend marker remains
+  Supabase; no static forecast archive assets or source maps were emitted.
+- Real production Chrome checks used an existing authenticated session:
+  Home T+1, province Dec-2025/T+6 and Jun-2015/T+6, and subdistrict
+  Dec-2025/T+4 all showed forward dates. All 289 map risk colors matched the
+  canonical source/horizon values in each checked state. The month selector
+  offered 127 origins back to June 2015; saved-filter descriptions used forward
+  dates. Desktop and true 390px mobile screenshots were inspected, with no
+  horizontal overflow or browser errors.
+- Evidence: `tmp-snapshots/forward-forecast-release-e2e-20260906/`,
+  `tmp-snapshots/forward-forecast-candidate-check-20260906/report.json`,
+  `tmp-snapshots/forward-forecast-production-check-20260906/report.json`, and
+  `tmp-snapshots/forward-forecast-production-ui-20260906/report.json`.
+  Production screenshots include `desktop-subdistrict-dec2025-t4.png`,
+  `desktop-june2015-t6.png` and
+  `mobile-subdistrict-dec2025-t4-verified.png` in the production UI directory.
+  The initial mobile capture retained a desktop viewport and is excluded from
+  evidence; the verified capture confirms a settled 390px viewport.
+- No fresh password login was exercised for this release. The signed-in
+  account had no saved filters, so live restoration was not exercised; isolated
+  database UI tests cover restoration. No application-data writes, auth/schema
+  changes, remote migrations, Safari, physical-device or load tests. Recovery
+  deployment: `dpl_xXNKf2hDWCYGu8e3TktWCQHSnLTJ` (runtime `922e28a`).
 
 Shared operational-card alignment production release (2026-09-06):
 
