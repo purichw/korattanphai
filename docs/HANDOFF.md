@@ -20,6 +20,49 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Subdistrict inspection workspace production release (2026-09-07):
+
+- Released runtime `ccd04d75dd842e64ade37bda2cd39ef18413209e` after the separate
+  Rev03 deployment finished and its production smoke passed. The base includes
+  `d8286dd`, `8b149dc` and the cutover documentation `fffe3c9`; see
+  `docs/DROUGHT_REV03_CUTOVER.md`. No new remote migration or data writes here.
+- Subdistrict desktop/tablet now use a dominant map and result/context/guidance
+  rail. The context card stretches so collapsed guidance ends exactly at the
+  map bottom. Mobile stacks the same shared components. Six T+ tabs fill the
+  intro width; duplicate page/map month and page/strip horizon controls remain
+  intentionally synchronized. Forward T+ semantics and Rev03 values are intact.
+- Single-area map fitting opts into a geometry-bounded 28x maximum and readable
+  labels. Other scopes retain 7.2x. The existing renderer, irrigation controls,
+  account/bookmarks and navigation remain; neutral loading follows the layout.
+- Local gate: 160 unit tests, 37 targeted desktop/mobile browser tests (one
+  duplicate matrix skip), ten responsive sizes, protected Supabase build,
+  exposure/bundle checks and no generated-data drift passed. Exact-commit CI
+  passed every required step, including both built-browser suites and isolated
+  migration/RLS checks: https://github.com/purichw/korattanphai/actions/runs/34047516946 .
+- Candidate `dpl_ufZBassRXtWfk7i3UVoeqeG5GbFD` was built from clean detached
+  source `artifacts/subdistrict-v2/release-ccd04d7/` with real Production settings
+  and `--prod --skip-domain`. After CI and endpoint checks, the same artifact was
+  promoted to `https://korattanphai.vercel.app`. Deployment URL:
+  `https://korattanphai-acbri7qqw-purichwc-1517s-projects.vercel.app`.
+- Candidate and public endpoint checks each passed 11 resources: HTML, all
+  three JS/two CSS chunks, backend marker, three geometry files and API. Public
+  bytes match the candidate; CSP/MIME/cache headers pass and backend remains
+  Supabase without static forecast assets. Reports are in
+  `artifacts/subdistrict-v2/{candidate,production}-endpoints.json`.
+- Real production Chrome used the existing authenticated session. All six
+  horizons retain the source month and synchronize the dropdown/context; map
+  category totals match Rev03 and the selected area's risks are 1/1/1/2/2/2.
+  Home-key selection and Enter/Space guidance toggling passed. Desktop 1440x900,
+  tablet 768x1024 and mobile 390x844 have no horizontal overflow. Map/guidance
+  bottoms match exactly: 877.992px desktop and 1089.281px tablet. Desktop and
+  mobile screenshots were inspected inline; browser error logs were empty.
+- No fresh password login, live bookmark writes/restoration, Safari or physical
+  device checks in this UI release. Auth/bookmarks have isolated CI coverage;
+  previous Rev03 real-account smoke is recorded separately. Unrelated rollback
+  notes, spreadsheet lock and Python cache files remain uncommitted/excluded.
+  Recovery deployment is the verified Rev03 release
+  `dpl_J9kqETDCpFdFaD1AcSFigN81cGvW`; preserve its schema and immutable dataset.
+
 Forward forecast semantics and UI terminology production release (2026-09-06):
 
 - Released runtime `8cfa2824f81b9bb886b7479ef9d36a0c6dbcdf41` to
