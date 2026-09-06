@@ -95,7 +95,12 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     expect(geometry.itemAlignment).toBe("center");
     if (scope === "subdistrict") {
       expect(geometry.gridAreas).not.toContain("chart");
-      expect(geometry.map.width).toBeCloseTo(geometry.body.width, 0);
+      if (page.viewportSize()!.width >= 768) {
+        expect(geometry.map.width / geometry.body.width).toBeGreaterThan(.6);
+        expect(geometry.map.width / geometry.body.width).toBeLessThan(.71);
+      } else {
+        expect(geometry.map.width).toBeCloseTo(geometry.body.width, 0);
+      }
       expect(geometry.firstKpi.width).toBeCloseTo(geometry.kpis.width, 0);
       expect(geometry.kpis.bottom).toBeLessThan(geometry.map.top);
     } else if (page.viewportSize()!.width > 1180) {

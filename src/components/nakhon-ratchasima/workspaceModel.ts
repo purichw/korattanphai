@@ -285,8 +285,8 @@ export const localFitTransform = centeredLocalTransform(localFitZoom);
 
 export const localMobileFitTransform = centeredLocalTransform(localMobileFitZoom);
 
-export function clampLocalTransform(next: LocalMapTransform): LocalMapTransform {
-  const k = clamp(Number(next.k.toFixed(3)), localMinZoom, localMaxZoom);
+export function clampLocalTransform(next: LocalMapTransform, maxZoom = localMaxZoom): LocalMapTransform {
+  const k = clamp(Number(next.k.toFixed(3)), localMinZoom, maxZoom);
 
   if (k <= 1) {
     return centeredLocalTransform(k);
@@ -755,6 +755,7 @@ export function transformForLocalFocus(
   focusZoom: number,
   minimumZoom: number,
   padding = localDesktopFocusPadding,
+  maxZoom = localMaxZoom,
 ) {
   if (features.length === 0) return localFitTransform;
   const bounds = projectedBoundsForFeatures(features, projection);
@@ -771,7 +772,7 @@ export function transformForLocalFocus(
     x: padding.left + usableWidth / 2 - centerX * k,
     y: padding.top + usableHeight / 2 - centerY * k,
     k,
-  });
+  }, maxZoom);
 }
 
 export function districtCodeForFeature(feature: NakhonRatchasimaGeoFeature) {

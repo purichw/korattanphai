@@ -41,8 +41,19 @@ export function DroughtForecastArchiveHorizonSelector({
             type="button"
             role="tab"
             aria-selected={isSelected}
+            tabIndex={isSelected ? 0 : -1}
             className={isSelected ? "active" : ""}
             onClick={() => onHorizonChange(horizon)}
+            onKeyDown={(event) => {
+              const index = forecastArchiveHorizonValues.indexOf(horizon);
+              const nextIndex = event.key === "ArrowRight" ? (index + 1) % 6
+                : event.key === "ArrowLeft" ? (index + 5) % 6
+                  : event.key === "Home" ? 0 : event.key === "End" ? 5 : null;
+              if (nextIndex === null) return;
+              event.preventDefault();
+              onHorizonChange(forecastArchiveHorizonValues[nextIndex]);
+              event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]?.focus();
+            }}
           >
             <strong>T+{horizon}</strong>
             <span>{formatMonth(forecastMonth, "th")}</span>

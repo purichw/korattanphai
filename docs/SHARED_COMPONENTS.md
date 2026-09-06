@@ -60,7 +60,9 @@ and failed loads use the shared `ForecastArchiveLoading.tsx` presentation:
 compose layout-matched neutral skeletons, and share one loading announcement and
 error/retry state. No data values, risk colors, interactive placeholder controls,
 or synthetic chart/map data appear while pending. Subdistrict loading has one
-status placeholder and a full-width map, never population charts or lists.
+status placeholder and matches the inspection layout: a dominant map with a
+context/result rail on desktop/tablet, stacked context/result/map on mobile,
+never population charts or lists.
 Skeleton motion respects reduced motion. Back navigation reuses the ready-state
 `DroughtWorkspaceHeader`; its archive label is optional until data is available.
 Request ownership, authentication, cache, retry, and source validation stay in
@@ -126,7 +128,7 @@ recovery feedback. Neither resets persisted state automatically.
 | `DroughtForecastWorkspaceChart` | Province/district forward forecast from one source month T, highlighting the selected T+ and its actual target month. Availability is derived across all six points, independently of the active horizon. An entirely unavailable series shows a neutral status instead of a zero graph. |
 | `DroughtForecastWorkspaceMapCard` | Shared local map card for province, district, and subdistrict forecast archive views. Keeps the existing `NakhonRatchasimaLocalMap` behavior and forecast archive map filters. |
 | `DroughtForecastArchivePanel` | Retained archive detail design, no longer composed into the product because it repeats the primary context and totals. |
-| `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
+| `DroughtForecastArchiveHorizonSelector` | Shared six-slot T+ strip; roving keyboard selection supports arrows, Home and End. One strip per archive module; the page-level horizon dropdown remains synchronized with it. |
 | `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`. Its overview variant displays high, moderate, no-risk and out-of-scope counts, plus a separate missing count when necessary; detail retains coverage and subdistrict values. |
 | `DroughtForecastArchiveMapFilters` | Shared map toolbar using `AppSelect` for source month T, forecast status and page-wide irrigation. Its segmented color control changes encoding only; irrigation selection activates the categorical palette. Narrow layouts wrap fields within the map. Month options use month/year only from `forecastModel`; open menus rise above the legend. Preserve dropdown wheel isolation from map zoom. |
 | `ResearchDroughtSituationPanel` | Province drought status summary. |
@@ -192,14 +194,24 @@ recovery feedback. Neither resets persisted state automatically.
   province/district/subdistrict implementation path unless the breakpoint
   composition genuinely needs to differ.
   Desktop aligns map and chart, followed by full-width stat cards. Mobile puts
-  all risk counts and coverage before chart then map. Subdistrict pages show one
-  status before a full-width map at every breakpoint, with no empty chart slot.
+  all risk counts and coverage before chart then map. Subdistrict pages use a
+  65–70% map column and a result/context/guidance rail from 768px. Mobile stacks
+  the full-width T+ strip, context, one status, map, and guidance. There is no
+  population chart or empty chart slot. The intro explicitly owns its named grid
+  areas so the shared `horizon` area cannot create an unintended extra column.
+  The page horizon dropdown and both source-month dropdowns are intentionally
+  retained per the user's 2026-09-06 follow-up; all bind to the existing selection.
   `pathWithForecastSelection`
   preserves the active source month/horizon through area filters and map drilldowns
   using the backward-compatible `target` query key.
   `compactForecast` opts these routes into map fitting that reserves space for
   zoom controls and respects `localMaxZoom`; controls and legend are outside the
-  plot. Home separately opts into `overviewLayout` for compact fitting, left-side
+  plot. Subdistrict inspection alone opts into a 28x maximum and geometry-bound
+  padded fitting, using the same renderer, gestures, reset and fullscreen path.
+  `clampLocalTransform` and `transformForLocalFocus` accept an optional maximum;
+  the default 7.2x limit on other routes is unchanged. A scoped ResizeObserver
+  compensates viewBox scaling for readable selected-place labels without resetting
+  the camera on T+ changes. Home separately opts into `overviewLayout` for compact fitting, left-side
   controls, a projection/zoom-aware approximate distance scale, preview clearance
   and explicit geometry-load recovery. Archive/default consumers keep their own
   layout and interaction behavior.

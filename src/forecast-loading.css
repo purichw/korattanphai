@@ -109,3 +109,25 @@
   .nr-forecast-load-error { display: grid; grid-template-columns: 24px minmax(0,1fr); padding: 16px; gap: 10px; align-items: start; }
   .nr-forecast-load-error .secondary-button { grid-column: 2; justify-self: start; }
 }
+
+.nr-loading-guidance { grid-area: guidance; display: grid; align-content: center; gap: 10px; min-height: 90px; padding: 14px; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; }
+.nr-loading-forecast.is-single { grid-template-columns: minmax(0,2.1fr) minmax(260px,1fr); grid-template-areas: "heading kpis" "horizon kpis" "map context" "map guidance"; grid-template-rows: auto auto 1fr auto; gap: 16px; align-items: start; }
+.nr-loading-forecast.is-single .nr-loading-horizons > div { min-height: 70px; }
+.nr-loading-forecast.is-single .nr-loading-metrics { align-self: stretch; height: 100%; }
+.nr-loading-forecast.is-single .nr-loading-metrics .metric-card { min-height: 142px; }
+.nr-loading-forecast.is-single .nr-loading-map { height: 500px; }
+.nr-loading-forecast.is-single .nr-loading-context { grid-template-columns: minmax(0,1fr); align-self: stretch; padding: 18px; gap: 16px; }
+.nr-loading-forecast.is-single .nr-loading-context > div { border: 0; min-height: 60px; }
+@media (min-width: 768px) and (max-width: 1180px) {
+  .nr-loading-drought:has(.nr-loading-forecast.is-single) .nr-loading-filters { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; }
+  .nr-loading-forecast.is-single { grid-template-columns: minmax(0,1.9fr) minmax(230px,1fr); gap: 12px; }
+  .nr-loading-forecast.is-single .nr-loading-map { height: 520px; }
+}
+@media (max-width: 767px) {
+  .nr-loading-forecast.is-single { grid-template-columns: minmax(0,1fr); grid-template-areas: "heading" "horizon" "context" "kpis" "map" "guidance"; grid-template-rows: auto; gap: 12px; }
+  .nr-loading-forecast.is-single .nr-loading-context { grid-template-columns: repeat(3,minmax(0,1fr)); padding: 0; gap: 0; }
+  .nr-loading-forecast.is-single .nr-loading-context > div + div { border-left: 1px solid #dce5e7; }
+  .nr-loading-forecast.is-single .nr-loading-horizons > div { min-height: 64px; }
+  .nr-loading-forecast.is-single .nr-loading-metrics .metric-card { min-height: 116px; }
+  .nr-loading-forecast.is-single .nr-loading-map { height: 540px; }
+}

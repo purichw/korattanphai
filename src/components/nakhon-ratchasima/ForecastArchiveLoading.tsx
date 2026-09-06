@@ -105,6 +105,7 @@ export function DroughtWorkspaceLoading({ target, failed, retry, onNavigate }: L
         <LoadingMap />
         {!single && <LoadingChart />}
         <LoadingMetrics className={single ? "is-single" : "is-population"} labels={single ? ["ผลพยากรณ์ภัยแล้งของตำบล"] : ["มีค่าพยากรณ์", "ไม่มีความเสี่ยง", "เสี่ยงปานกลาง", "เสี่ยงสูง", "นอกขอบเขต"]} />
+        {single && <div className="nr-loading-guidance"><h3>คำแนะนำและข้อควรระวัง</h3><Skeleton className="is-line" /></div>}
       </div>
     </ForecastLoadState>
   </div>;

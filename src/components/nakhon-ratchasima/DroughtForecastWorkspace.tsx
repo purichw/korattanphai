@@ -610,38 +610,38 @@ export function DroughtCompactForecastWorkspace({
     .filter((record) => record.forecastRisk === 1 || record.forecastRisk === 2)
     .sort((a, b) => (b.forecastRisk ?? 0) - (a.forecastRisk ?? 0) || a.subdistrictCode.localeCompare(b.subdistrictCode));
 
+  const heading = <div className="nr-drought-workspace-head">
+    <div><p className="eyebrow">ข้อมูลพยากรณ์</p><h2 id={`nr-drought-compact-workspace-${level}`}>{title}</h2><p>{description}</p></div>
+    <DataProvenanceChip kind="REAL" />
+  </div>;
+  const targetNote = <p className="nr-forecast-target-note">เดือนตั้งต้น {selectedTargetMonth.labelTh} · พยากรณ์ล่วงหน้า 1–6 เดือน: {trendMonths[0]?.labelTh} – {trendMonths.at(-1)?.labelTh}</p>;
+  const horizonSelector = <div className="nr-drought-workspace-horizon">
+    <DroughtForecastArchiveHorizonSelector targetMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} onHorizonChange={changeHorizon} />
+  </div>;
+  const context = <DroughtForecastWorkspaceContext level={level} scopeLabel={scopeLabel} selectedMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} summary={summary} />;
+  const guidance = <DroughtOperationalDisclosure className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
+    <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลังและความพร้อมข้อมูล</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
+    <p>T+1 ถึง T+6 คือพยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
+    {level !== "subdistrict" && <p>สีกราฟสรุปสัดส่วนจำนวนตำบล ไม่ใช่ระดับความรุนแรงรายตำบลหรือสัดส่วนเนื้อที่ เส้นครึ่งจำนวนตำบลเป็นเพียงเส้นอ้างอิง ไม่ใช่เกณฑ์เตือนภัยทางการ</p>}
+    <p>เดือนตั้งต้น (T) คือเดือนของข้อมูลต้นทาง เดือนที่พยากรณ์คำนวณโดยบวกระยะ T+ ข้อมูลนี้ระบุเป็นรายเดือน ไม่ได้ระบุวันออกพยากรณ์</p>
+  </DroughtOperationalDisclosure>;
+
   return (
     <>
     <DroughtWorkspaceHeader target={target} archiveLabel={formatMonth(archive.meta.targetMonthEnd, "th")} onNavigate={navigateWithForecast} />
     <DroughtWorkspaceFilters target={target} selectedMonth={selectedMonth} monthOptions={monthOptions} onMonthChange={changeMonth}
       selectedHorizon={selectedHorizon} onHorizonChange={changeHorizon} onNavigate={navigateWithForecast} />
     <section className={`nr-drought-compact-workspace is-${level}${emptyIrrigationScope ? " is-empty-scope" : ""}`} aria-labelledby={`nr-drought-compact-workspace-${level}`}>
-      <div className="nr-drought-workspace-head">
-        <div>
-          <p className="eyebrow">ข้อมูลพยากรณ์</p>
-          <h2 id={`nr-drought-compact-workspace-${level}`}>{title}</h2>
-          <p>{description}</p>
-        </div>
-        <DataProvenanceChip kind="REAL" />
-      </div>
-      <p className="nr-forecast-target-note">เดือนตั้งต้น {selectedTargetMonth.labelTh} · พยากรณ์ล่วงหน้า 1–6 เดือน: {trendMonths[0]?.labelTh} – {trendMonths.at(-1)?.labelTh}</p>
+      {level !== "subdistrict" && <>{heading}{targetNote}</>}
 
       <div className="nr-drought-workspace-body">
-        <div className="nr-drought-workspace-horizon">
-          <DroughtForecastArchiveHorizonSelector
-            targetMonth={selectedTargetMonth}
-            selectedHorizon={selectedHorizon}
-            onHorizonChange={changeHorizon}
-          />
-        </div>
+        {level === "subdistrict" ? <div className="nr-subdistrict-forecast-intro">{heading}{targetNote}{horizonSelector}</div> : horizonSelector}
 
-        <DroughtForecastWorkspaceContext
-          level={level}
-          scopeLabel={scopeLabel}
-          selectedMonth={selectedTargetMonth}
-          selectedHorizon={selectedHorizon}
-          summary={summary}
-        />
+        {level === "subdistrict" ? <section className="nr-subdistrict-forecast-context" aria-labelledby="nr-subdistrict-context-title">
+          <h3 id="nr-subdistrict-context-title">ข้อมูลคาดการณ์ (T+{selectedHorizon})</h3>
+          {context}
+          <p className="nr-subdistrict-forecast-note"><Info size={18} aria-hidden="true" /><span>พยากรณ์ {formatMonth(summary.targetMonth, "th")}<small>ล่วงหน้า {selectedHorizon} เดือน จากเดือนตั้งต้น {selectedTargetMonth.labelTh}</small></span></p>
+        </section> : context}
 
         {emptyIrrigationScope ? <div className="nr-drought-workspace-kpis nr-irrigation-empty" role="status">
           <p>ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้</p>
@@ -680,7 +680,7 @@ export function DroughtCompactForecastWorkspace({
             onSelectedSubdistrictChange={onSelectedSubdistrictChange}
           />
         </div>
-
+        {level === "subdistrict" && guidance}
       </div>
     </section>
     <div className="nr-operational-forecast-actions">
@@ -696,12 +696,7 @@ export function DroughtCompactForecastWorkspace({
         </li>)}</ul>
         <p>เรียงตามระดับพยากรณ์ แล้วตามรหัสตำบล ไม่ใช่การจัดอันดับความเสียหาย</p>
       </DroughtOperationalDisclosure>}
-      <DroughtOperationalDisclosure className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
-        <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลังและความพร้อมข้อมูล</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
-        <p>T+1 ถึง T+6 คือพยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
-        <p>สีกราฟสรุปสัดส่วนจำนวนตำบล ไม่ใช่ระดับความรุนแรงรายตำบลหรือสัดส่วนเนื้อที่ เส้นครึ่งจำนวนตำบลเป็นเพียงเส้นอ้างอิง ไม่ใช่เกณฑ์เตือนภัยทางการ</p>
-        <p>เดือนตั้งต้น (T) คือเดือนของข้อมูลต้นทาง เดือนที่พยากรณ์คำนวณโดยบวกระยะ T+ ข้อมูลนี้ระบุเป็นรายเดือน ไม่ได้ระบุวันออกพยากรณ์</p>
-      </DroughtOperationalDisclosure>
+      {level !== "subdistrict" && guidance}
     </div>
     </>
   );

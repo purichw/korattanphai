@@ -40,7 +40,7 @@ import {
   type LocalMapCriteria,
   localCriteriaEqual,
   localResearchPeriodForSelectedMonth,
-  clampLocalTransform,
+  clampLocalTransform as clampMapTransform,
   isLocalTransformVisuallySettled,
   localDeferredTransformCommitDelayMs,
   prefersReducedMotion,
@@ -55,7 +55,7 @@ import {
   statusForSubdistrict,
   localResearchRecordMatchesCriteria,
   localMinZoom,
-  localMaxZoom,
+  localMaxZoom as defaultLocalMaxZoom,
   pathForFeature,
   pathForGeometry,
   localPreviewTitleForTarget,
@@ -135,6 +135,8 @@ import { MapPreviewFooter } from "../MapPreviewFooter";
 import { irrigationColors, irrigationLabels, irrigationStatusFromSource } from "../../irrigation";
 import { IrrigationStatusSelect, type ForecastMapIrrigation } from "../IrrigationStatusSelect";
 
+const subdistrictInspectionPadding = { top: 100, right: 150, bottom: 100, left: 100 };
+
 export function NakhonRatchasimaLocalMap({
   irrigation,
   filteredSubdistrictCodes,
@@ -179,6 +181,10 @@ export function NakhonRatchasimaLocalMap({
   overviewLayout?: boolean;
 }) {
   const routeSelectedSubdistrictCode = target.valid && target.level === "subdistrict" ? target.subdistrict.subdistrictCode : undefined;
+  // Single-area inspection needs a closer fit; other routes keep their zoom limits.
+  const singleAreaInspection = compactForecast && Boolean(routeSelectedSubdistrictCode);
+  const localMaxZoom = singleAreaInspection ? 28 : defaultLocalMaxZoom;
+  const clampLocalTransform = (next: LocalMapTransform) => clampMapTransform(next, localMaxZoom);
   const activeSelectedSubdistrictCode = externalSelectedSubdistrictCode ?? routeSelectedSubdistrictCode;
   const [geo, setGeo] = useState<NakhonRatchasimaGeoCollection | null>(null);
   const [provinceContextGeo, setProvinceContextGeo] = useState<ProvinceContextGeoCollection | null>(null);
@@ -217,6 +223,21 @@ export function NakhonRatchasimaLocalMap({
   const pinchStart = useRef<PinchStart | null>(null);
   const { isFullscreen, toggleFullscreen } = useFullscreenTarget(canvasRef);
   const isMobileMap = useMediaQuery("(max-width: 720px)");
+  const [inspectionPlotScale, setInspectionPlotScale] = useState(1);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!singleAreaInspection || !geo || !svg) return;
+    // Label sizes are in viewBox units; keep the selected place readable on phones.
+    const updateScale = () => {
+      const rect = svg.getBoundingClientRect();
+      setInspectionPlotScale(Math.min(rect.width / localMapWidth, rect.height / localMapHeight) || 1);
+    };
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(svg);
+    return () => observer.disconnect();
+  }, [geo, singleAreaInspection]);
 
   useEffect(() => {
     let active = true;
@@ -291,13 +312,16 @@ export function NakhonRatchasimaLocalMap({
     );
   }, [compactForecast, geo, isMobileMap, overviewLayout, projection]);
   const districtFocusZoom = isMobileMap ? localMobileDistrictFocusZoom : localDistrictFocusZoom;
-  const subdistrictFocusZoom = isMobileMap ? localMobileSubdistrictFocusZoom : localSubdistrictFocusZoom;
+  const subdistrictFocusZoom = singleAreaInspection ? localMaxZoom : isMobileMap ? localMobileSubdistrictFocusZoom : localSubdistrictFocusZoom;
   const districtMinimumZoom = isMobileMap ? 1.72 : 1.12;
   const subdistrictMinimumZoom = isMobileMap ? 4 : 1.56;
   const districtFocusPadding = isMobileMap ? localMobileDistrictFocusPadding : localDesktopFocusPadding;
-  const selectedFocusPadding = isMobileMap ? localMobileSelectedFocusPadding : localDesktopFocusPadding;
+  const selectedFocusPadding = singleAreaInspection ? subdistrictInspectionPadding : isMobileMap ? localMobileSelectedFocusPadding : localDesktopFocusPadding;
   const targetTransform = useMemo(() => {
     if (!projection) return fitTransform;
+    if (singleAreaInspection) {
+      return transformForLocalFocus(focusFeatures, projection, localMaxZoom, 1, selectedFocusPadding, localMaxZoom);
+    }
     if (compactForecast && (activeSelectedSubdistrictCode || focusDistrictCode)) {
       return transformForLocalFocus(focusFeatures, projection, localMaxZoom, 1, { top: 28, right: 78, bottom: 28, left: 28 });
     }
@@ -319,6 +343,8 @@ export function NakhonRatchasimaLocalMap({
     focusFeatures,
     projection,
     selectedFocusPadding,
+    singleAreaInspection,
+    localMaxZoom,
     subdistrictFocusZoom,
     subdistrictMinimumZoom,
   ]);
@@ -740,7 +766,7 @@ export function NakhonRatchasimaLocalMap({
     setSelectedCode(model.subdistrictCode);
     preservePreviewOnSelectionSync.current = true;
     onSelectedSubdistrictChange?.(model.subdistrictCode);
-    animateTransform(transformForLocalFocus([feature], projection, subdistrictFocusZoom, subdistrictMinimumZoom, selectedFocusPadding));
+    animateTransform(transformForLocalFocus([feature], projection, subdistrictFocusZoom, subdistrictMinimumZoom, selectedFocusPadding, localMaxZoom));
   };
 
   const clearFeatureSelection = () => {
@@ -1128,9 +1154,9 @@ export function NakhonRatchasimaLocalMap({
     return makeVisibleMapLabels(candidates, transform, {
       viewportWidth: localMapWidth,
       viewportHeight: localMapHeight,
-      baseScreenFontSize: 10.2,
-      minScreenFontSize: 8.8,
-      maxScreenFontSize: 12.1,
+      baseScreenFontSize: singleAreaInspection ? 14 / inspectionPlotScale : 10.2,
+      minScreenFontSize: singleAreaInspection ? 12 / inspectionPlotScale : 8.8,
+      maxScreenFontSize: singleAreaInspection ? 16 / inspectionPlotScale : 12.1,
       zoomFontBoost: 0.62,
       haloStrokeWidth: 3,
       collisionPadding: 7,
