@@ -58,11 +58,12 @@ Excel, modify any archive values, or change the published dataset version.
 - Subdistrict pages still omit aggregate charts. Their source irrigation label
   remains available in the map preview independently of the selected criterion.
 
-## Map-Control Correction (Local, Not Deployed)
+## Map-Control Correction (Local Checkpoint)
 
 The UI contract above reflects the follow-up correction after the hosted release
 below. No archive, SQL migration, Auth, RLS or production setting is changed by
-this correction. Current evidence is recorded separately from the older release.
+this correction. This local checkpoint is superseded by the map-control
+production release recorded at the end of this document.
 
 - 18 targeted unit tests passed: source partitions and all-period risk totals,
   live history state, unchanged URL/history length, reset, deep links and saved
@@ -81,7 +82,8 @@ this correction. Current evidence is recorded separately from the older release.
   mocks using canonical data, not production verification.
 - `git diff --check` passed; canonical/generated data and `supabase/` have no
   diff. Whole-site/static-provider E2E, real Safari and remote database checks
-  were intentionally not rerun. This correction is not pushed or deployed.
+  were intentionally not rerun at this checkpoint. Hosted verification follows
+  below.
 
 ## Saved Filters And Release
 
@@ -154,3 +156,41 @@ The archive verifier passed after the migration: full and T+1 projections,
 220,218 cells and the pinned prediction digest are unchanged, with anonymous
 reads denied. No real saved record was created, updated or deleted; save/restore
 writes are covered by isolated database and mocked browser tests.
+
+## Map-Control Production Release (2026-09-06)
+
+Runtime `b4fcc194136e46a134e5d2de5fda77e7a6ccd184` is pushed to
+`fix/nr-map-zoom-performance`. Quality Gate `34022249917` passed with 139 unit
+tests, 10 isolated database checks, 76 built browser passes (10 conditional
+skips), four database UI passes and both protected builds. The final correction
+also retains sufficient mobile Home map height and updates the old top-filter
+regression to assert the control's new map location.
+
+The clean-checkout Production candidate `dpl_4h4XtWn25ATQWhVZ32cuoi4HR1aQ`
+passed real-account smoke and was promoted without rebuilding. Public
+`https://korattanphai.vercel.app` serves this Ready deployment, entry
+`index-7e6dd13fdd.js` and the Supabase provider. Uploaded source inspection
+confirmed no ignored test/smoke artifacts or actual `.env` files; future CLI
+releases should likewise use a clean checkout.
+
+Candidate and production reports each contain 20 passed entries and zero
+failures:
+
+- `smoke-results/irrigation-map-candidate-clean-verified/report.json`
+- `smoke-results/irrigation-map-production/report.json`
+
+Both cover desktop/mobile Home, province, district, single-tambon and unavailable
+district views, actual in-map dropdown interactions, exact source groups and
+categorical fills, filtered risk totals, unchanged URL/history, reload,
+empty/reset, saved reads, exact full/T+1 RPC projections and no static fallback.
+Production diagnostics record 30 HTTP 200 finished requests and no browser or
+visible UI errors. Fresh production screenshots in the same directory were
+visually inspected, with scroll normalized before capture.
+
+Earlier failed attempts remain recorded separately, including transient
+connection closures and map waits. Direct Node and Chromium transport checks
+returned the exact full archive before the successful complete reruns. No
+assertions or timeouts were relaxed. No SQL, archive, Auth, RLS, environment or
+personal records were changed. Physical Safari, load/SLO tests and real saved
+record writes were not exercised. Recovery is the prior good frontend
+`dpl_Eo1sitfh7j4nBT6AJvagFg1VJn9j`, with Supabase left intact.

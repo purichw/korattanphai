@@ -20,6 +20,53 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+In-map irrigation controls production release (2026-09-06):
+
+- Runtime `b4fcc194136e46a134e5d2de5fda77e7a6ccd184` is pushed to
+  `fix/nr-map-zoom-performance`, without merging `main`. Shared irrigation
+  controls now live inside the map on Home, province, district and subdistrict
+  views. Selection filters the whole workspace without changing the URL or
+  history length; reload, explicit area navigation and saved filters retain it.
+  Map encoding uses blue/purple/gray for irrigation metadata, independently of
+  the unchanged drought risk values and chart colors.
+- Exact-commit Quality Gate `34022249917` passed: 139 unit tests, 10 isolated
+  database checks, 76 built browser tests (10 conditional skips), four database
+  UI tests, both protected builds, exposure/bundle checks and generated-data
+  drift checks. The follow-up fixes an obsolete top-filter test selector and
+  preserves mobile Home plot height after moving the controls into the map.
+- Deployment `dpl_4h4XtWn25ATQWhVZ32cuoi4HR1aQ`
+  (`https://korattanphai-imtjgzzqh-purichwc-1517s-projects.vercel.app`) was
+  built from a clean detached checkout of that runtime with Production
+  configuration. Candidate smoke passed before promoting the same artifact.
+  The public alias confirms this Ready deployment, `/assets/index-7e6dd13fdd.js`
+  and backend `supabase`.
+- Real-account candidate and public production smoke both passed all 20 check
+  entries across desktop/mobile: five base routes, exact irrigation source
+  groups 20/97/172 and colors, whole-page risk counts, unchanged URL/history,
+  reload, empty/reset, both actual archive RPC projections, saved reads,
+  login/logout, assets/headers and no static fallback. Evidence:
+  `smoke-results/irrigation-map-candidate-clean-verified/report.json` and
+  `smoke-results/irrigation-map-production/report.json`; both have zero failures.
+  Production evidence is dated 2026-09-06 09:49:45 UTC. All 30 tracked production
+  RPC/saved requests finished HTTP 200, with no browser or visible UI errors.
+  Fresh desktop/mobile production screenshots were inspected at scroll zero.
+- Earlier candidate runs recorded saved-read/map-wait failures and intermittent
+  `ERR_CONNECTION_CLOSED` from Supabase. Those reports remain preserved. A
+  bounded Node/Chromium transport diagnostic subsequently returned the exact
+  full archive, followed by passing full candidate and production runs. No
+  assertions, timeouts or production settings were weakened to pass the gate.
+- Release hygiene: do not deploy from a worktree containing ignored test
+  artifacts. Earlier unpromoted candidates included them as private build
+  source; filename inspection found no actual `.env` files. The promoted clean
+  deployment contains no `tmp-snapshots`, `smoke-results`, test output or actual
+  `.env` files in its uploaded source. Use a clean checkout for future releases.
+- No archive, SQL migration, Auth, RLS, dependency or environment changes were
+  made in this release; concurrent migration work was left intact. Recovery:
+  promote previous good deployment `dpl_Eo1sitfh7j4nBT6AJvagFg1VJn9j`, leaving
+  Supabase and personal records intact. Physical Safari, load/SLO testing and
+  live personal-record writes were not run. Only documentation closeout follows
+  the deployed runtime.
+
 Irrigation status filter production release (2026-09-05):
 
 - Runtime `bd3edcd96e1acc34ad8fd0201886cb8aae41635a` and test-only follow-up
