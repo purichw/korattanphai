@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
+import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import {
   advisory,
@@ -440,18 +440,18 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(getNakhonRatchasimaResearchSubdistrictMonth("300101", "2025-12")).toBeUndefined();
     expect(getNakhonRatchasimaResearchSubdistrictMonth("300101", "2025-11")).toBeUndefined();
 
-    expect(archive.meta.sourceOfTruth).toBe("normalized_rev02_forecast_archive_workbook");
+    expect(archive.meta.sourceOfTruth).toBe("normalized_rev03_original_workbook");
     expect(archive.targetMonths.at(-1)?.period).toBe("2025-12");
     expect(archive.meta.horizonCount).toBe(6);
   });
 
-  it("integrates the rev02 drought forecast archive without collapsing T+ vintages", () => {
+  it("integrates the rev03 drought forecast archive without collapsing T+ vintages", () => {
     const archive = nakhonRatchasimaDroughtForecastArchive;
     expect(archive.meta).toMatchObject({
-      sourceOfTruth: "normalized_rev02_forecast_archive_workbook",
-      sourceWorkbookOriginal: "Drought_T1-6_rev02.xlsx",
-      sourceSheet: "Forecast_Archive_Long",
-      locationSheet: "Location_Master",
+      sourceOfTruth: "normalized_rev03_original_workbook",
+      sourceWorkbookOriginal: "Drought_T1-6_rev03.xlsx",
+      sourceSheet: "Master_Data_Drought_Final",
+      locationSheet: "Master_Data_Drought_Final",
       provenance: "REAL",
       sourceRowCountOriginal: 58312,
       sourceRowCountDeduped: 36703,
@@ -461,13 +461,13 @@ describe("Nakhon Ratchasima incremental research patch", () => {
       horizonCount: 6,
       forecastVintageCount: 220218,
       sourceVintageKeyCount: 220218,
-      forecastVintageIdentity: "subdistrictCode + targetMonth + horizon",
+      forecastVintageIdentity: "sourceId + sourceMonth + horizon",
       totalCanonicalSubdistricts: 289,
       targetMonthStart: "2015-06",
       targetMonthEnd: "2025-12",
-      issueMonthStart: "2014-12",
-      issueMonthEnd: "2025-11",
-      temporalInterpretation: "SOURCE_YEARMONTH_IS_TARGET_MONTH",
+      issueMonthStart: "2015-06",
+      issueMonthEnd: "2025-12",
+      temporalInterpretation: "SOURCE_YEARMONTH_IS_ORIGIN_MONTH",
     });
 
     expect(archive.mapping).toMatchObject({
@@ -489,50 +489,33 @@ describe("Nakhon Ratchasima incremental research patch", () => {
       expect.objectContaining({
         forecastRisk: null,
         scopeStatus: "out_of_scope",
-        labelTh: "นอกขอบเขตการศึกษา",
+        labelTh: "อยู่นอกขอบเขตการศึกษา (การพยากรณ์)",
         mapStatus: "forecast-out-of-scope",
       }),
     );
 
     expect(archive.horizonSummary.map((row) => row.vintageCount)).toEqual([36703, 36703, 36703, 36703, 36703, 36703]);
-    expect(archive.horizonSummary.map((row) => row.outOfScopeVintages)).toEqual([20874, 20874, 20874, 20874, 20874, 20874]);
-    expect(archive.horizonSummary.map((row) => row.inScopeVintages)).toEqual([15829, 15829, 15829, 15829, 15829, 15829]);
+    expect(archive.horizonSummary.map((row) => row.outOfScopeVintages)).toEqual([21844, 21844, 21844, 21844, 21844, 21844]);
+    expect(archive.horizonSummary.map((row) => row.inScopeVintages)).toEqual([14859, 14859, 14859, 14859, 14859, 14859]);
 
     const latest = archive.targetMonths.find((month) => month.period === "2025-12");
     expect(latest?.horizons.map((horizon) => horizon.issueMonth)).toEqual([
-      "2025-11",
-      "2025-10",
-      "2025-09",
-      "2025-08",
-      "2025-07",
-      "2025-06",
+      "2025-12", "2025-12", "2025-12", "2025-12", "2025-12", "2025-12",
     ]);
-    expect(latest?.horizons.map((horizon) => horizon.noRiskSubdistricts)).toEqual([0, 0, 0, 4, 26, 59]);
-    expect(latest?.horizons.map((horizon) => horizon.moderateRiskSubdistricts)).toEqual([129, 120, 81, 56, 38, 14]);
-    expect(latest?.horizons.map((horizon) => horizon.highRiskSubdistricts)).toEqual([13, 22, 61, 82, 78, 69]);
-    expect(latest?.horizons.map((horizon) => horizon.outOfScopeSubdistricts)).toEqual([147, 147, 147, 147, 147, 147]);
+    expect(latest?.horizons.map((horizon) => horizon.targetMonth)).toEqual(["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"]);
+    expect(latest?.horizons.map((horizon) => horizon.noRiskSubdistricts)).toEqual([0, 0, 0, 1, 19, 49]);
+    expect(latest?.horizons.map((horizon) => horizon.moderateRiskSubdistricts)).toEqual([117, 116, 79, 51, 32, 9]);
+    expect(latest?.horizons.map((horizon) => horizon.highRiskSubdistricts)).toEqual([0, 1, 38, 65, 66, 59]);
+    expect(latest?.horizons.map((horizon) => horizon.outOfScopeSubdistricts)).toEqual([172, 172, 172, 172, 172, 172]);
 
     expect(archive.packedRiskByTargetMonth["2025-12"]["300806"]).toEqual([1, 1, 1, 2, 2, 2]);
     expect(archive.packedRiskByTargetMonth["2025-12"]["300101"]).toEqual([null, null, null, null, null, null]);
-    expect(archive.validationExamples.canonicalSubdistrict300806).toMatchObject({
+    expect(archive.locations.find((l) => l.subdistrictCode === "300806")).toMatchObject({
       sourceId: "101",
       districtCode: "3008",
       subdistrictCode: "300806",
-      targetMonth: "2025-12",
-      risksByHorizon: [1, 1, 1, 2, 2, 2],
-      issueMonths: ["2025-11", "2025-10", "2025-09", "2025-08", "2025-07", "2025-06"],
     });
-    expect(archive.validationExamples.equalValuedTPlusVintagesRemainSeparate).toMatchObject({
-      targetMonth: "2025-12",
-      vintageKeys: [
-        "300806|2025-12|T+1",
-        "300806|2025-12|T+2",
-        "300806|2025-12|T+3",
-        "300806|2025-12|T+4",
-        "300806|2025-12|T+5",
-        "300806|2025-12|T+6",
-      ],
-    });
+    expect(latest?.horizons.map((h) => h.horizon)).toEqual([1, 2, 3, 4, 5, 6]);
 
     const danKhunThotCodes = nakhonRatchasimaDistrictSubdistrictMatrix
       .filter((row) => row.district_code === "3008")
@@ -543,17 +526,8 @@ describe("Nakhon Ratchasima incremental research patch", () => {
     expect(danKhunThotT1Risks.filter((risk) => risk !== null)).toHaveLength(6);
     expect(danKhunThotT1Risks.filter((risk) => risk === 1)).toHaveLength(6);
     expect(danKhunThotT1Risks.filter((risk) => risk === 2)).toHaveLength(0);
-    expect(archive.validationExamples.danKhunThotLatestT1).toMatchObject({
-      districtCode: "3008",
-      targetMonth: "2025-12",
-      horizon: 1,
-      issueMonth: "2025-11",
-      totalSubdistricts: 16,
-      inScopeSubdistricts: 6,
-      noRiskSubdistricts: 0,
-      moderateRiskSubdistricts: 6,
-      highRiskSubdistricts: 0,
-      outOfScopeSubdistricts: 10,
+    expect(archive.locations.find((l) => l.sourceId === "222")).toMatchObject({
+      sourceAmphoeEn: "Mueang Nakhon Ratchasima", sourceAmphoeEnCorrected: "Phimai", subdistrictCode: "301512",
     });
   });
 

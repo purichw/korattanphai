@@ -1,7 +1,7 @@
 import { test, expect, seedAuthSession } from "./fixtures";
 import { readFileSync } from "node:fs";
 
-const archive = JSON.parse(readFileSync("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json", "utf8"));
+const archive = JSON.parse(readFileSync("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", "utf8"));
 const overview = JSON.parse(readFileSync("src/data/generated/forecast-overview-t1.json", "utf8"));
 
 test.beforeEach(async ({ page }) => {
@@ -90,8 +90,8 @@ test("overview map owns irrigation; Collecting keeps its forecast and gray categ
   expect(page.url()).toBe(initialUrl);
   await expect(page.locator(".nr-local-map-filter-status")).toContainText("แสดง 172 จาก 289 ตำบล");
   await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(172);
-  await expect(page.locator(".nr-map-shape.is-forecast-high:not(.is-criteria-filtered)").first()).toHaveCSS("fill", "rgb(135, 147, 158)");
-  await expect(page.locator(".nr-home-situation")).toContainText("พบพื้นที่เสี่ยง");
+  await expect(page.locator(".nr-map-shape.is-forecast-out-of-scope:not(.is-criteria-filtered)").first()).toHaveCSS("fill", "rgb(135, 147, 158)");
+  await expect(page.locator(".nr-home-situation")).toContainText("ไม่มีค่าพยากรณ์");
   const expectedHigh = archive.locations.filter((l: any) => l.irrigationStatus === "Collecting" && archive.packedRiskByTargetMonth["2025-12"][l.subdistrictCode][0] === 2).length;
   await expect(page.locator(".nr-forecast-overview-summary .metric-card").filter({ hasText: "เสี่ยงสูง" })).toContainText(`${expectedHigh} ตำบล`);
   const boxes = await page.locator('.nr-map-filter-fields > *').evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));

@@ -1,0 +1,78 @@
+{
+  "schema_version": 3,
+  "dataset_id": "drought-rev03-a3be44486c8e",
+  "source_workbook": "Drought_T1-6_rev03.xlsx",
+  "source_sha256": "a3be44486c8e8039f5744674e261ee9b27306f0c78b46bd1ce62e8903d4915b4",
+  "source_sheet": "Master_Data_Drought_Final",
+  "source_month_role": "forecast_origin_month",
+  "target_month_rule": "source_month + horizon_months",
+  "time_precision": "month",
+  "horizons": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "risk_labels_th": {
+    "0": "ไม่พบสัญญาณเสี่ยง",
+    "1": "เสี่ยงปานกลาง",
+    "2": "เสี่ยงสูง",
+    "null": "อยู่นอกขอบเขตการศึกษา (การพยากรณ์)"
+  },
+  "irrigation_labels_th": {
+    "Collecting": "ยังไม่มีข้อมูล",
+    "RainFed": "พึ่งน้ำฝน (ไม่มีชลประทาน)",
+    "Irrigation": "เข้าถึงชลประทาน"
+  },
+  "blank_risk": "out_of_scope",
+  "missing_record": "missing_record_not_out_of_scope",
+  "forecast_primary_key": [
+    "dataset_id",
+    "source_id",
+    "source_month",
+    "horizon_months"
+  ],
+  "location_identity": "source_id from workbook; no administrative-code mapping or external enrichment",
+  "publication_status": "normalized_only_not_published",
+  "csv_encoding": "UTF-8 with BOM",
+  "csv_null_encoding": "empty field; scope_status remains explicit",
+  "location_primary_key": [
+    "source_id"
+  ],
+  "run_primary_key": [
+    "source_month",
+    "horizon_months"
+  ],
+  "location_join": "forecast_values.source_id = locations.source_id; source IDs are text identifiers",
+  "provenance_join": "source_row_lineage.retained_source_row = forecast_values.source_first_row",
+  "irrigation_time_scope": "one stable workbook attribute per location; no independent observation date supplied",
+  "normalizer_sha256": "c42b2b3f874bb9c5372db904ba991f3efd66bbd62db3131b9d54a0755641a042",
+  "files": {
+    "data_quality.json": {
+      "sha256": "841ec6e7c70e7b2d2e2aab28e9d5eff58bad283f4957719e7bb32017f1110fe4",
+      "bytes": 3167
+    },
+    "forecast_archive.json": {
+      "sha256": "8f70df14b19060440e1b0af8e9bd9df796ea3efd1d6440bb4639cc34b04ee6f8",
+      "bytes": 3944000
+    },
+    "forecast_runs.csv": {
+      "sha256": "4e35f6de980585db739be4604ba8aa0d2245649a6392b0a52503f838e986dd0e",
+      "bytes": 29365
+    },
+    "forecast_values.csv": {
+      "sha256": "a40bbceb0cc0e326f6a110556d1efc4b882577373d2e662a051f72deb387847b",
+      "bytes": 9294922
+    },
+    "locations.csv": {
+      "sha256": "cb7f96e45f34cefb5167b44181d0cca078adc44a494078d6167c580fcc706a79",
+      "bytes": 28558
+    },
+    "source_row_lineage.csv": {
+      "sha256": "eccc6efcf1cd0ee88982e13f806d9e496999ffbec218a64d322f5863c8e7cdd8",
+      "bytes": 1355469
+    }
+  }
+}

@@ -12,7 +12,7 @@ if (!(local || (base.protocol === "https:" && /^korattanphai(?:-[a-z0-9-]+)?\.ve
 }
 const output = path.resolve(process.env.SMOKE_OUTPUT_DIR ?? "smoke-results");
 const databaseMode = process.env.SMOKE_DATA_BACKEND === "supabase";
-const expectedArchive = databaseMode ? JSON.parse(await fs.readFile(new URL("../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json", import.meta.url), "utf8")) : null;
+const expectedArchive = databaseMode ? JSON.parse(await fs.readFile(new URL("../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", import.meta.url), "utf8")) : null;
 const email = process.env.SMOKE_AUTH_EMAIL?.trim();
 const password = process.env.SMOKE_AUTH_PASSWORD;
 if (!email || !password) throw new Error("Set SMOKE_AUTH_EMAIL and SMOKE_AUTH_PASSWORD securely for an admin-provisioned test account. No demo login fallback is available.");
@@ -67,7 +67,7 @@ try {
         })().catch(error => errors.push(error.message)));
       }
       if (url.origin !== base.origin) return;
-      if (databaseMode && /\/(drought_forecast_archive_rev02|forecast-overview-t1).*\.json$/.test(url.pathname)) errors.push("Unexpected static archive fallback");
+      if (databaseMode && /\/(drought_forecast_archive_rev03|forecast-overview-t1).*\.json$/.test(url.pathname)) errors.push("Unexpected static archive fallback");
       if (response.status() >= 400) errors.push(`HTTP ${response.status()}: ${url.pathname}`);
       if (/^\/assets\/.*\.(js|css|json)$/.test(url.pathname)) assetChecks.push((async () => {
         const headers = await response.allHeaders();
@@ -108,7 +108,7 @@ try {
         if (route === "/") {
           const summary = page.locator(".nr-forecast-overview-summary");
           await summary.waitFor();
-          assert.deepEqual(await summary.locator(".metric-card-value").allTextContents(), ["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"], `${name}: latest T+1 forecast counts`);
+          assert.deepEqual(await summary.locator(".metric-card-value").allTextContents(), ["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"], `${name}: latest T+1 forecast counts`);
           await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
           await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
           assert.equal(new URL(page.url()).searchParams.get("target"), "2025-12");
@@ -127,7 +127,7 @@ try {
           assert.equal(await page.locator(".nr-drought-workspace-details, .nr-forecast-archive-mode-section, .nr-agri-impact-module").count(), 0, `${name}: duplicate or unsupported panels`);
         }
         if (route.startsWith("/drought")) {
-          assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /142\/289/);
+          assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /117\/289/);
           await expect(page.locator(".nr-forecast-target-note")).toHaveText("เดือนตั้งต้น ธ.ค. 2568 · พยากรณ์ล่วงหน้า 1–6 เดือน: ม.ค. 2569 – มิ.ย. 2569");
         }
         if (route.includes("/t-300806")) {

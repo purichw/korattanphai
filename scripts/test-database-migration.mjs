@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { buildForecastOverviewArchive } from './generate-forecast-summary.mjs';
-import { archiveAuditSql, assertArchiveAudit, buildDraftSql, buildMonthSql, forecastImport, inspectArchive, publishArchiveSql } from './lib/forecast-migration.mjs';
+import { archiveAuditSql, assertArchiveAudit, buildDraftSql, buildMonthSql, forecastImport, inspectArchive, publishArchiveSql } from './lib/forecast-rev03-migration.mjs';
 
 // Isolated PostgreSQL/WASM. Never connects to Supabase or creates real accounts.
 const { PGlite } = await import(process.env.PGLITE_MODULE ?? '@electric-sql/pglite');
@@ -27,8 +27,10 @@ try {
   await check('existing baseline and additive migration compile', async () => {
     await db.exec(await fs.readFile('supabase/baseline/20260905_existing.sql', 'utf8'));
     await db.exec(await fs.readFile('supabase/migrations/20260905110000_archive_and_saved_workspaces.sql', 'utf8'));
+    await db.exec(await fs.readFile('supabase/migrations/20260905124000_target_month_archive_publication.sql', 'utf8'));
+    await db.exec(await fs.readFile('supabase/migrations/20260906160000_rev03_origin_forecast.sql', 'utf8'));
   });
-  const archive = JSON.parse(await fs.readFile('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json', 'utf8'));
+  const archive = JSON.parse(await fs.readFile('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
   const expected = inspectArchive(archive);
   const districts = [...new Map(archive.locations.map((l) => [l.districtCode, l])).values()];
   for (const l of districts) await db.query('insert into ktp_districts (district_code,canonical_id,name_th,name_en,routing_slug) values ($1,$2,$3,$4,$5)', [l.districtCode,l.districtId,l.districtNameTh,l.districtNameEn,l.districtSlug]);
@@ -50,16 +52,13 @@ try {
     await db.exec(buildDraftSql(archive));
     assertArchiveAudit((await db.query(archiveAuditSql())).rows[0], expected);
   });
-  await check('target-month publication preserves legacy guards and published immutability', async () => {
-    await assert.rejects(db.exec(publishArchiveSql(expected)), /Each origin/);
-    await db.exec('rollback');
-    await db.exec(await fs.readFile('supabase/migrations/20260905124000_target_month_archive_publication.sql', 'utf8'));
+  await check('forward-origin publication preserves lineage and published immutability', async () => {
     const publish = "update ktp_forecast_datasets set status='published',published_at=now()";
     for (const [change, message] of [
-      ["update ktp_forecast_runs set source_year_month=null where horizon=1", /preserve every source month/],
-      ["delete from ktp_forecast_values where horizon=6; delete from ktp_forecast_runs where horizon=6", /Each target month/],
+      ["update ktp_forecast_runs set source_year_month=null where horizon=1", /Origin must equal/],
+      ["delete from ktp_forecast_values where horizon=6; delete from ktp_forecast_runs where horizon=6", /Each origin/],
       ["delete from ktp_forecast_values where subdistrict_code='300806' and horizon=6", /Every run requires/],
-      ["update ktp_forecast_datasets set source_time_role=null", /Each origin/],
+      ["update ktp_forecast_values set source_first_row=null where horizon=1", /trace to an original/],
     ]) {
       await assert.rejects(db.exec(`begin; ${change}; ${publish}; commit;`), message);
       await db.exec('rollback');

@@ -3,23 +3,23 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { archiveAuditSql, assertArchiveAudit, buildDraftSql, buildMonthSql, forecastImport, inspectArchive, publishArchiveSql, sha256 } from './lib/forecast-migration.mjs';
+import { archiveAuditSql, assertArchiveAudit, buildDraftSql, buildMonthSql, forecastImport, inspectArchive, publishArchiveSql, sha256 } from './lib/forecast-rev03-migration.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const command = process.argv[2] ?? 'check';
 if (!['check', 'import', 'verify', 'publish'].includes(command)) throw new Error('Use check, import, verify, or publish');
-const archiveBytes = await fs.readFile(path.join(root, 'src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json'));
+const archiveBytes = await fs.readFile(path.join(root, forecastImport.runtimePath));
 if (sha256(archiveBytes) !== forecastImport.canonicalSha) throw new Error('Canonical archive changed; re-audit before migration');
 const archive = JSON.parse(archiveBytes);
 const expected = inspectArchive(archive);
 if (['check', 'import', 'publish'].includes(command)) {
   const sourceDir = process.env.FORECAST_WORKBOOK_DIR;
-  if (!sourceDir) throw new Error('Set FORECAST_WORKBOOK_DIR to the directory containing the two approved workbooks');
-  for (const [name, hash] of [[forecastImport.original, forecastImport.originalSha], [forecastImport.normalized, forecastImport.normalizedSha]]) {
+  if (!sourceDir) throw new Error('Set FORECAST_WORKBOOK_DIR to the directory containing the approved rev03 original workbook');
+  for (const [name, hash] of [[forecastImport.original, forecastImport.originalSha]]) {
     if (sha256(await fs.readFile(path.join(sourceDir, name))) !== hash) throw new Error(`Unapproved workbook: ${name}`);
   }
 }
-console.log(`[archive] Verified approved rev02 input; ${expected.rows} predictions, ${expected.outOfScope} explicit out-of-scope cells.`);
+console.log(`[archive] Verified approved rev03 input; ${expected.rows} predictions, ${expected.outOfScope} explicit out-of-scope cells.`);
 if (command === 'check') process.exit(0);
 const linked = (await fs.readFile(path.join(root, 'supabase/.temp/project-ref'), 'utf8')).trim();
 if (linked !== forecastImport.project) throw new Error('Wrong linked project; refusing database access');

@@ -1,0 +1,135 @@
+{
+  "source_rows": 58312,
+  "exact_unique_rows": 36703,
+  "exact_duplicates_removed": 21609,
+  "blank_row_numbers": [],
+  "conflicting_keys": 0,
+  "location_metadata_conflicts": 0,
+  "source_month_count": 127,
+  "source_month_start": "2015-06",
+  "source_month_end": "2025-12",
+  "source_id_count": 289,
+  "raw_risk_cell_types": {
+    "str": 206616,
+    "int": 143256
+  },
+  "raw_risk_counts_including_duplicates": {
+    "null": 206616,
+    "2": 29517,
+    "0": 71228,
+    "1": 42511
+  },
+  "duplicate_multiplicity": {
+    "1": 15094,
+    "2": 21609
+  },
+  "workbook": {
+    "sheets": [
+      {
+        "name": "Master_Data_Drought_Final",
+        "state": "visible",
+        "rows_with_header": 58313,
+        "columns": 12
+      }
+    ],
+    "date_encoding": "Gregorian Year and numeric Month columns; no day supplied",
+    "formulas": 0,
+    "cell_errors": 0
+  },
+  "forecast_value_count": 220218,
+  "forecast_run_count": 762,
+  "normalized_risk_counts": {
+    "null": 131064,
+    "2": 20523,
+    "0": 43733,
+    "1": 24898
+  },
+  "irrigation_location_counts": {
+    "Collecting": 172,
+    "Irrigation": 20,
+    "RainFed": 97
+  },
+  "target_month_start": "2015-07",
+  "target_month_end": "2026-06",
+  "missing_location_months": 0,
+  "missing_horizons": 0,
+  "source_district_label_count": 32,
+  "duplicate_location_labels": [
+    {
+      "amphoe_en": "Mueang Nakhon Ratchasima",
+      "tambon_en": "Nong Rawiang",
+      "source_ids": [
+        "5",
+        "222"
+      ]
+    }
+  ],
+  "latest_source_month_runs": [
+    {
+      "source_month": "2025-12",
+      "horizon_months": 1,
+      "target_month": "2026-01",
+      "record_count": 289,
+      "in_scope_count": 117,
+      "out_of_scope_count": 172,
+      "no_signal_count": 0,
+      "moderate_count": 117,
+      "high_count": 0
+    },
+    {
+      "source_month": "2025-12",
+      "horizon_months": 2,
+      "target_month": "2026-02",
+      "record_count": 289,
+      "in_scope_count": 117,
+      "out_of_scope_count": 172,
+      "no_signal_count": 0,
+      "moderate_count": 116,
+      "high_count": 1
+    },
+    {
+      "source_month": "2025-12",
+      "horizon_months": 3,
+      "target_month": "2026-03",
+      "record_count": 289,
+      "in_scope_count": 117,
+      "out_of_scope_count": 172,
+      "no_signal_count": 0,
+      "moderate_count": 79,
+      "high_count": 38
+    },
+    {
+      "source_month": "2025-12",
+      "horizon_months": 4,
+      "target_month": "2026-04",
+      "record_count": 289,
+      "in_scope_count": 117,
+      "out_of_scope_count": 172,
+      "no_signal_count": 1,
+      "moderate_count": 51,
+      "high_count": 65
+    },
+    {
+      "source_month": "2025-12",
+      "horizon_months": 5,
+      "target_month": "2026-05",
+      "record_count": 289,
+      "in_scope_count": 117,
+      "out_of_scope_count": 172,
+      "no_signal_count": 19,
+      "moderate_count": 32,
+      "high_count": 66
+    },
+    {
+      "source_month": "2025-12",
+      "horizon_months": 6,
+      "target_month": "2026-06",
+      "record_count": 289,
+      "in_scope_count": 117,
+      "out_of_scope_count": 172,
+      "no_signal_count": 49,
+      "moderate_count": 9,
+      "high_count": 59
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
-import data from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
+import data from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import { forecastSubdistrictCodesForIrrigation, irrigationColors, irrigationHistoryState, irrigationStatusFromSource, normalizeIrrigationCriterion, readIrrigationSelection } from "../src/irrigation";
 import { forecastArchiveSummaryForSelection, forecastArchiveTrendMonthsForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection } from "../src/components/nakhon-ratchasima/forecastModel";
@@ -28,7 +28,7 @@ it("intersects district/subdistrict scope including an empty result", () => {
   expect(forecastSubdistrictCodesForIrrigation(archive, "irrigated", codes)).toEqual([]);
   expect(forecastSubdistrictCodesForIrrigation(archive, "rainfed", ["300803"])).toEqual(["300803"]);
   expect(forecastSubdistrictCodesForIrrigation(archive, "unknown", ["300803"])).toEqual([]);
-  expect(forecastSubdistrictCodesForIrrigation(archive, "unknown", ["300806"])).toEqual(["300806"]);
+  expect(forecastSubdistrictCodesForIrrigation(archive, "rainfed", ["300806"])).toEqual(["300806"]);
 });
 
 it("preserves source risk/null and reconciles all target/horizon totals across irrigation groups", () => {
@@ -41,7 +41,8 @@ it("preserves source risk/null and reconciles all target/horizon totals across i
   }
   const month = archive.targetMonths.at(-1)!;
   const unknown = forecastArchiveSummaryForSelection(archive, month, 1, groups[2]);
-  expect(unknown.riskSubdistricts).toBeGreaterThan(0);
+  expect(unknown.riskSubdistricts).toBe(0);
+  expect(unknown.outOfScopeSubdistricts).toBe(172);
   expect(forecastArchiveTrendMonthsForSelection(archive, month, groups[0]).every((point) => point.totalSubdistricts === 20)).toBe(true);
   expect(forecastArchiveSummaryForSelection(archive, month, 1, [])).toMatchObject({ totalSubdistricts: 0, inScopeSubdistricts: 0, missingSubdistricts: 0 });
 });

@@ -23,7 +23,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       await expect(workspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
       await expect(page.locator(".nr-operational-forecast-summary, .nr-operational-attention-list")).toHaveCount(0);
     } else {
-      await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage")).toContainText(scope === "province" ? "142/289" : "6/16");
+      await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage")).toContainText(scope === "province" ? "117/289" : "6/16");
       await expect(workspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toBeVisible();
       await expect(page.locator(".nr-operational-forecast-summary")).toHaveClass(/has-risk/);
     }
@@ -157,7 +157,7 @@ for (const boundary of [
   {
     source: "2025-12", label: "ธ.ค. 2568",
     forecasts: ["ม.ค. 2569", "ก.พ. 2569", "มี.ค. 2569", "เม.ย. 2569", "พ.ค. 2569", "มิ.ย. 2569"],
-    counts: [[13, 129, 0, 147], [82, 56, 4, 147], [69, 14, 59, 147]],
+    counts: [[0, 117, 0, 172], [65, 51, 1, 172], [59, 9, 49, 172]],
     homeRisks: ["moderate", "high", "high"],
   },
 ]) {

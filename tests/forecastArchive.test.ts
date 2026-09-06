@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
+import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json";
 import overviewSummary from "../src/data/generated/forecast-archive-summary.json";
 import { buildForecastArchiveSummary, buildForecastOverviewArchive } from "../scripts/generate-forecast-summary.mjs";
 import overviewArchive from "../src/data/generated/forecast-overview-t1.json";
@@ -47,6 +47,19 @@ describe("forecast archive loading", () => {
     await failure;
     await expect(loadForecastArchive()).resolves.toEqual(archiveJson);
   });
+
+  it("never caches a structurally valid archive with unapproved provenance", async () => {
+    const rejectedArchive = { ...archiveJson, meta: { ...archiveJson.meta, sourceWorkbookSha256: "unapproved" } };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => rejectedArchive })
+      .mockResolvedValueOnce({ ok: true, json: async () => archiveJson });
+    vi.stubGlobal("fetch", fetchMock);
+    const { loadForecastArchive, getCachedForecastArchive } = await import("../src/data/forecastArchive");
+    await expect(loadForecastArchive()).rejects.toThrow("Invalid database forecast archive");
+    expect(getCachedForecastArchive()).toBeNull();
+    await expect(loadForecastArchive()).resolves.toEqual(archiveJson);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("overview forecast summary", () => {
@@ -78,7 +91,7 @@ describe("overview forecast summary", () => {
     expect(overviewSummary).toEqual(buildForecastArchiveSummary(archiveJson));
     expect(overviewSummary).toEqual({
       leadMonth: { period: "2025-12", labelTh: "ธ.ค. 2568" },
-      summary: { totalSubdistricts: 289, inScopeSubdistricts: 142, riskSubdistricts: 142 },
+      summary: { totalSubdistricts: 289, inScopeSubdistricts: 117, riskSubdistricts: 117 },
     });
   });
 

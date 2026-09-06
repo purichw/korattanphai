@@ -18,17 +18,17 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   const errors: string[] = [];
   let fullArchiveRequests = 0;
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("request", (request) => { if (/drought_forecast_archive_rev02.*\.json$/.test(request.url())) fullArchiveRequests += 1; });
+  page.on("request", (request) => { if (/drought_forecast_archive_rev03.*\.json$/.test(request.url())) fullArchiveRequests += 1; });
   await page.goto("/");
   const overview = page.locator(".nr-forecast-overview");
   const summary = overview.locator(".nr-forecast-overview-summary");
-  await expect(summary).toContainText("142/289 ตำบล");
+  await expect(summary).toContainText("117/289 ตำบล");
   await expect(overview.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
   await expect(overview.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
   await expect(overview).not.toContainText("รอชุดข้อมูลใหม่");
-  await expect(summary.locator(".metric-card-value")).toHaveText(["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"]);
+  await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
-  await expect(overview.locator(".nr-forecast-overview-attention li")).toHaveCount(3);
+  await expect(overview.locator(".nr-forecast-overview-attention li")).toHaveCount(0);
   expect(fullArchiveRequests).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("overview-full.png"), fullPage: true });
@@ -47,6 +47,7 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   expect(fullArchiveRequests).toBe(1);
   await page.goBack();
   await selectArea(page, "ทุกอำเภอ");
+  await page.goto('/?target=2015-06&horizon=1');
   const firstArea = overview.locator(".nr-forecast-overview-attention li a").first();
   const href = await firstArea.getAttribute("href");
   await firstArea.click();
@@ -74,7 +75,7 @@ test("overview failures remain empty and retry preserves the requested target", 
 
 test("changing month updates map counts and risk filtering uses the same forecast", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".nr-forecast-overview-summary")).toContainText("142/289 ตำบล");
+  await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
   if (await edit.isVisible()) await edit.click();
   await page.getByRole("combobox", { name: /^(เลือก)?เดือน/ }).click();
@@ -82,15 +83,15 @@ test("changing month updates map counts and risk filtering uses the same forecas
   const apply = page.getByRole("button", { name: "แสดงผล", exact: true });
   if (await apply.isVisible()) await apply.click();
   await expect(page.locator(".nr-forecast-overview-summary .metric-card-value"))
-    .toHaveText(["13 ตำบล", "63 ตำบล", "69 ตำบล", "144 ตำบล"]);
+    .toHaveText(["0 ตำบล", "48 ตำบล", "69 ตำบล", "172 ตำบล"]);
   await expect(page.locator(".nr-map-shape.is-forecast-no-risk")).toHaveCount(69);
-  await expect(page.locator(".nr-map-shape.is-forecast-out-of-scope")).toHaveCount(144);
+  await expect(page.locator(".nr-map-shape.is-forecast-out-of-scope")).toHaveCount(172);
   await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ธ.ค. 2568");
   await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) พ.ย. 2568");
   await expect(page).toHaveURL(/target=2025-11&horizon=1/);
   await page.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง", exact: true }).click();
   await page.getByRole("option", { name: "เสี่ยงสูง", exact: true }).click();
-  await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(13);
+  await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
   await page.locator(".nr-local-map-reset").click();
   await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(289);
 });

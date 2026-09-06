@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
-import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
+import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaResearchPanelSummary } from "../src/domain";
 import { droughtForecastBand, droughtForecastBandLabel, forecastArchiveSummaryForSelection, forecastArchiveTrendMonthsForSelection } from "../src/components/nakhon-ratchasima/forecastModel";
@@ -125,7 +125,9 @@ it("does not connect or fill across unavailable horizons", () => {
 it("labels exactly half as at least half of tambon count, not land area", () => {
   const month = archive.targetMonths.find((item) => item.period === "2025-12")!;
   const codes = archive.locations.filter((item) => item.districtSlug === "khon-buri").map((item) => item.subdistrictCode);
-  const point = forecastArchiveTrendMonthsForSelection(archive, month, codes)[0];
+  const fixture = { ...archive, packedRiskByTargetMonth: { [month.period]: Object.fromEntries(codes.map((code, i) =>
+    [code, [i < 6 ? 1 : null, null, null, null, null, null]])) } } as NakhonRatchasimaDroughtForecastArchive;
+  const point = forecastArchiveTrendMonthsForSelection(fixture, month, codes)[0];
   expect(point.riskSubdistricts).toBe(6);
   expect(point.totalSubdistricts).toBe(12);
   expect(droughtForecastBandLabel(droughtForecastBand(point))).toBe("เสี่ยงตั้งแต่ครึ่งหนึ่งของจำนวนตำบล");

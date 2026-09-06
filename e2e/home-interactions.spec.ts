@@ -5,15 +5,15 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("home information is passive and disclosures preserve context and the single map", async ({ page }, testInfo) => {
-  await page.goto("/");
+  await page.goto("/?target=2015-06&horizon=1");
   const summary = page.locator(".nr-forecast-overview-summary");
-  await expect(summary).toContainText("142/289 ตำบล");
+  await expect(summary).toContainText("117/289 ตำบล");
   await expect(summary.locator(".metric-card button, .metric-card a")).toHaveCount(0);
   await expect(page.locator(".nr-home-situation button, .nr-home-situation a")).toHaveCount(0);
   const beforeURL = page.url();
   const attention = page.locator(".nr-forecast-overview-attention");
   await attention.getByRole("button", { name: "ดูทั้งหมด" }).click();
-  await expect(attention.locator("li")).toHaveCount(13);
+  await expect(attention.locator("li")).toHaveCount(60);
   await attention.locator("li").last().scrollIntoViewIfNeeded();
   expect(await attention.locator("ul").evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
   expect(page.url()).toBe(beforeURL);
@@ -37,7 +37,7 @@ test("home information is passive and disclosures preserve context and the singl
   await page.getByRole("button", { name: "กลับแผนที่พยากรณ์" }).click();
   await expect(page.locator(".nr-map-panel")).toHaveClass(/has-forecast-archive-map/);
   await expect(map).toHaveAttribute("data-same-map", "home");
-  await expect(summary.locator(".metric-card-value")).toHaveText(["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"]);
+  await expect(summary.locator(".metric-card-value")).toHaveText(["60 ตำบล", "32 ตำบล", "25 ตำบล", "172 ตำบล"]);
   await expect(page.locator(".nr-data-transparency, .nr-forecast-overview-source")).toHaveCount(0);
   await expect(page.getByText(/^(แหล่งข้อมูลและความสด|ข้อจำกัดสำคัญ|แหล่งข้อมูลและข้อจำกัด)$/)).toHaveCount(0);
   expect(page.url()).toBe(beforeURL);

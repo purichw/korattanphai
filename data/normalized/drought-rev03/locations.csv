@@ -1,0 +1,290 @@
+﻿source_id,source_tambon_en,source_amphoe_en,irrigation_status_raw,irrigation_status,irrigation_label_th
+0,Nai Mueang,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+1,Pho Klang,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+2,Nong Chabok,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+3,Khok Sung,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+4,Maroeng,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+5,Nong Rawiang,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+6,Pru Yai,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+7,Muen Wai,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+8,Phon Krang,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+9,Nong Phai Lom,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+10,Hua Thale,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+11,Ban Ko,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+12,Ban Mai,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+13,Phut Sa,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+14,Ban Pho,Mueang Nakhon Ratchasima,Irrigation,Irrigation,เข้าถึงชลประทาน
+15,Cho Ho,Mueang Nakhon Ratchasima,Irrigation,Irrigation,เข้าถึงชลประทาน
+16,Khok Kruat,Mueang Nakhon Ratchasima,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+17,Chai Mongkhon,Mueang Nakhon Ratchasima,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+18,Nong Bua Sala,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+19,Suranari,Mueang Nakhon Ratchasima,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+20,Si Mum,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+21,Talat,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+22,Phanao,Mueang Nakhon Ratchasima,Irrigation,Irrigation,เข้าถึงชลประทาน
+23,Nong Krathum,Mueang Nakhon Ratchasima,Irrigation,Irrigation,เข้าถึงชลประทาน
+24,Nong Khai Nam,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+25,Kaeng Sanam Nang,Kaeng Sanam Nang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+26,Non Samran,Kaeng Sanam Nang,Collecting,Collecting,ยังไม่มีข้อมูล
+27,Bueng Phalai,Kaeng Sanam Nang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+28,Si Suk,Kaeng Sanam Nang,Collecting,Collecting,ยังไม่มีข้อมูล
+29,Bueng Samrong,Kaeng Sanam Nang,Collecting,Collecting,ยังไม่มีข้อมูล
+30,Kham Thale So,Kham Thale So,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+31,Pong Daeng,Kham Thale So,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+32,Phan Dung,Kham Thale So,Collecting,Collecting,ยังไม่มีข้อมูล
+33,Nong Suang,Kham Thale So,Collecting,Collecting,ยังไม่มีข้อมูล
+34,Bueng O,Kham Thale So,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+35,Kham Sakae Saeng,Kham Sakae Saeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+36,Non Mueang,Kham Sakae Saeng,Collecting,Collecting,ยังไม่มีข้อมูล
+37,Mueang Nat,Kham Sakae Saeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+38,Chiwuek,Kham Sakae Saeng,Collecting,Collecting,ยังไม่มีข้อมูล
+39,Phangat,Kham Sakae Saeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+40,Nong Hua Fan,Kham Sakae Saeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+41,Mueang Kaset,Kham Sakae Saeng,Collecting,Collecting,ยังไม่มีข้อมูล
+42,Mueang Khong,Khong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+43,Khu Khat,Khong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+44,Thephalai,Khong,Collecting,Collecting,ยังไม่มีข้อมูล
+45,Ta Chan,Khong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+46,Ban Prang,Khong,Collecting,Collecting,ยังไม่มีข้อมูล
+47,Nong Manao,Khong,Collecting,Collecting,ยังไม่มีข้อมูล
+48,Nong Bua,Khong,Collecting,Collecting,ยังไม่มีข้อมูล
+49,Non Teng,Khong,Collecting,Collecting,ยังไม่มีข้อมูล
+50,Don Yai,Khong,Collecting,Collecting,ยังไม่มีข้อมูล
+51,Kham Sombun,Khong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+52,Chae,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+53,Chaliang,Khon Buri,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+54,Khon Buri,Khon Buri,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+55,Khok Krachai,Khon Buri,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+56,Chorakhe Hin,Khon Buri,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+57,Map Tako En,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+58,Oraphim,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+59,Ban Mai,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+60,Lamphiak,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+61,Khon Buri Tai,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+62,Tabaek Ban,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+63,Sa Wan Phraya,Khon Buri,Collecting,Collecting,ยังไม่มีข้อมูล
+64,Chakkarat,Chakkarat,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+65,Thong Lang,Chakkarat,Collecting,Collecting,ยังไม่มีข้อมูล
+66,Si Suk,Chakkarat,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+67,Nong Kham,Chakkarat,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+68,Nong Phluang,Chakkarat,Collecting,Collecting,ยังไม่มีข้อมูล
+69,Si Lako,Chakkarat,Collecting,Collecting,ยังไม่มีข้อมูล
+70,Khlong Mueang,Chakkarat,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+71,Hin Khon,Chakkarat,Collecting,Collecting,ยังไม่มีข้อมูล
+72,Chang Thong,Chaloem Phra Kiet,Irrigation,Irrigation,เข้าถึงชลประทาน
+73,Tha Chang,Chaloem Phra Kiet,Irrigation,Irrigation,เข้าถึงชลประทาน
+74,Phraphut,Chaloem Phra Kiet,Irrigation,Irrigation,เข้าถึงชลประทาน
+75,Nong Ngu Lueam,Chaloem Phra Kiet,Collecting,Collecting,ยังไม่มีข้อมูล
+76,Nong Yang,Chaloem Phra Kiet,Collecting,Collecting,ยังไม่มีข้อมูล
+77,Chum Phuang,Chum Phuang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+78,Prasuk,Chum Phuang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+79,Tha Lat,Chum Phuang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+80,Sarai,Chum Phuang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+81,Talat Sai,Chum Phuang,Collecting,Collecting,ยังไม่มีข้อมูล
+82,Non Rang,Chum Phuang,Collecting,Collecting,ยังไม่มีข้อมูล
+83,Nong Lak,Chum Phuang,Collecting,Collecting,ยังไม่มีข้อมูล
+84,Non Tum,Chum Phuang,Collecting,Collecting,ยังไม่มีข้อมูล
+85,Non Yo,Chum Phuang,Collecting,Collecting,ยังไม่มีข้อมูล
+86,Krathok,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+87,Phlapphla,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+88,Tha Ang,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+89,Thung Arun,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+90,Tha Lat Khao,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+91,Tha Chalung,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+92,Tha Yiam,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+93,Chok Chai,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+94,Lalom Mai Phatthana,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+95,Dan Kwian,Chok Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+96,Kut Phiman,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+97,Dan Khun Thot,Dan Khun Thot,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+98,Dan Nok,Dan Khun Thot,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+99,Dan Nai,Dan Khun Thot,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+100,Takhian,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+101,Ban Kao,Dan Khun Thot,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+102,Ban Praeng,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+103,Phan Chana,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+104,Sa Chorakhe,Dan Khun Thot,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+105,Nong Krat,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+106,Nong Bua Takiat,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+107,Nong Bua Lakhon,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+108,Hin Dat,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+109,Huai Bong,Dan Khun Thot,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+110,Non Mueang Phatthana,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+111,Nong Sai,Dan Khun Thot,Collecting,Collecting,ยังไม่มีข้อมูล
+112,Samnak Takhro,Thepharak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+113,Nong Waeng,Thepharak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+114,Bueng Prue,Thepharak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+115,Wang Yai Thong,Thepharak,Collecting,Collecting,ยังไม่มีข้อมูล
+116,Non Daeng,Non Daeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+117,Non Ta Then,Non Daeng,Collecting,Collecting,ยังไม่มีข้อมูล
+118,Sam Phaniang,Non Daeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+119,Wang Hin,Non Daeng,Collecting,Collecting,ยังไม่มีข้อมูล
+120,Don Yao Yai,Non Daeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+121,Non Thai,Non Thai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+122,Dan Chak,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+123,Kampang,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+124,Samrong,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+125,Khang Phlu,Non Thai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+126,Ban Wang,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+127,Banlang,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+128,Sai-O,Non Thai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+129,Thanon Pho,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+130,Makha,Non Thai,Collecting,Collecting,ยังไม่มีข้อมูล
+131,Non Sung,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+132,Mai,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+133,Tanot,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+134,Bing,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+135,Don Chomphu,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+136,Than Prasat,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+137,Lum Khao,Non Sung,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+138,Makha,Non Sung,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+139,Phon Songkhram,Non Sung,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+140,Chan-At,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+141,Kham Thao,Non Sung,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+142,Dan Khla,Non Sung,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+143,Lam Kho Hong,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+144,Mueang Prasat,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+145,Don Wai,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+146,Lammun,Non Sung,Collecting,Collecting,ยังไม่มีข้อมูล
+147,Mueang Phalai,Bua Lai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+148,Non Chan,Bua Lai,Collecting,Collecting,ยังไม่มีข้อมูล
+149,Bua Lai,Bua Lai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+150,Nong Wa,Bua Lai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+151,Bua Yai,Bua Yai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+152,Huai Yang,Bua Yai,Collecting,Collecting,ยังไม่มีข้อมูล
+153,Sema Yai,Bua Yai,Collecting,Collecting,ยังไม่มีข้อมูล
+154,Don Tanin,Bua Yai,Collecting,Collecting,ยังไม่มีข้อมูล
+155,Nong Bua Sa-At,Bua Yai,Collecting,Collecting,ยังไม่มีข้อมูล
+156,Non Thong Lang,Bua Yai,Collecting,Collecting,ยังไม่มีข้อมูล
+157,Kut Chok,Bua Yai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+158,Dan Chang,Bua Yai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+159,Khun Thong,Bua Yai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+160,Nong Chaeng Yai,Bua Yai,Collecting,Collecting,ยังไม่มีข้อมูล
+161,Ban Lueam,Ban Lueam,Collecting,Collecting,ยังไม่มีข้อมูล
+162,Wang Pho,Ban Lueam,Collecting,Collecting,ยังไม่มีข้อมูล
+163,Khok Krabueang,Ban Lueam,Collecting,Collecting,ยังไม่มีข้อมูล
+164,Cho Raka,Ban Lueam,Collecting,Collecting,ยังไม่มีข้อมูล
+165,Prathai,Prathai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+166,Nong Phluang,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+167,Han Huai Sai,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+168,Wang Mai Daeng,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+169,Non Phet,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+170,Krathum Rai,Prathai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+171,Nang Ram,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+172,Nong Khai,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+173,Talat Sai,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+174,Don Man,Prathai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+175,Thung Sawang,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+176,Khok Klang,Prathai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+177,Mueang Don,Prathai,Collecting,Collecting,ยังไม่มีข้อมูล
+178,Mueang Pak,Pak Thong Chai,Irrigation,Irrigation,เข้าถึงชลประทาน
+179,Takhu,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+180,Khok Thai,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+181,Samrong,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+182,Takhop,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+183,Nok Ok,Pak Thong Chai,Irrigation,Irrigation,เข้าถึงชลประทาน
+184,Don,Pak Thong Chai,Irrigation,Irrigation,เข้าถึงชลประทาน
+185,Tum,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+186,Ngio,Pak Thong Chai,Irrigation,Irrigation,เข้าถึงชลประทาน
+187,Sakae Rat,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+188,Lam Nang Kaeo,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+189,Phu Luang,Pak Thong Chai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+190,Thong Chai Nuea,Pak Thong Chai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+191,Suk Kasem,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+192,Kasem Sap,Pak Thong Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+193,Bo Pla Thong,Pak Thong Chai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+194,Pak Chong,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+195,Klang Dong,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+196,Chan Thuek,Pak Chong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+197,Wang Katha,Pak Chong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+198,Mu Si,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+199,Nong Sarai,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+200,Khanong Phra,Pak Chong,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+201,Pong Ta Long,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+202,Khlong Muang,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+203,Nong Nam Daeng,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+204,Wang Sai,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+205,Phaya Yen,Pak Chong,Collecting,Collecting,ยังไม่มีข้อมูล
+206,Sa Phra,Phra Thong Kham,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+207,Map Krat,Phra Thong Kham,Collecting,Collecting,ยังไม่มีข้อมูล
+208,Phang Thiam,Phra Thong Kham,Collecting,Collecting,ยังไม่มีข้อมูล
+209,Thap Rang,Phra Thong Kham,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+210,Nong Hoi,Phra Thong Kham,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+211,Nai Mueang,Phimai,Irrigation,Irrigation,เข้าถึงชลประทาน
+212,Samrit,Phimai,Irrigation,Irrigation,เข้าถึงชลประทาน
+213,Bot,Phimai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+214,Krabueang Yai,Phimai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+215,Tha Luang,Phimai,Collecting,Collecting,ยังไม่มีข้อมูล
+216,Rang Ka Yai,Phimai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+217,Chiwan,Phimai,Collecting,Collecting,ยังไม่มีข้อมูล
+218,Nikhom Sang Ton-Eng,Phimai,Collecting,Collecting,ยังไม่มีข้อมูล
+219,Krachon,Phimai,Collecting,Collecting,ยังไม่มีข้อมูล
+220,Dong Yai,Phimai,Collecting,Collecting,ยังไม่มีข้อมูล
+221,Than Lalot,Phimai,Irrigation,Irrigation,เข้าถึงชลประทาน
+222,Nong Rawiang,Mueang Nakhon Ratchasima,Collecting,Collecting,ยังไม่มีข้อมูล
+223,Mueang Yang,Mueang Yang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+224,Krabueang Nok,Mueang Yang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+225,Lahan Pla Khao,Mueang Yang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+226,Non Udom,Mueang Yang,Collecting,Collecting,ยังไม่มีข้อมูล
+227,Khui,Lamtaman Chai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+228,Ban Yang,Lamtaman Chai,Collecting,Collecting,ยังไม่มีข้อมูล
+229,Chong Maeo,Lamtaman Chai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+230,Phrai,Lamtaman Chai,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+231,Wang Nam Khiao,Wang Nam Khiao,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+232,Wang Mi,Wang Nam Khiao,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+233,Raroeng,Wang Nam Khiao,Collecting,Collecting,ยังไม่มีข้อมูล
+234,Udom Sap,Wang Nam Khiao,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+235,Thai Samakkhi,Wang Nam Khiao,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+236,Sikhio,Si Khio,Irrigation,Irrigation,เข้าถึงชลประทาน
+237,Ban Han,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+238,Kritsana,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+239,Lat Bua Khao,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+240,Nong Ya Khao,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+241,Kut Noi,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+242,Nong Nam Sai,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+243,Wang Rong Yai,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+244,Mittraphap,Si Khio,Irrigation,Irrigation,เข้าถึงชลประทาน
+245,Khlong Phai,Si Khio,Irrigation,Irrigation,เข้าถึงชลประทาน
+246,Don Mueang,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+247,Nong Bua Noi,Si Khio,Collecting,Collecting,ยังไม่มีข้อมูล
+248,Sida,Sida,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+249,Phon Thong,Sida,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+250,Non Pradu,Sida,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+251,Sam Mueang,Sida,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+252,Nong Tat Yai,Sida,Collecting,Collecting,ยังไม่มีข้อมูล
+253,Sung Noen,Sung Noen,Irrigation,Irrigation,เข้าถึงชลประทาน
+254,Sema,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+255,Khorat,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+256,Bung Khi Lek,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+257,Non Kha,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+258,Khong Yang,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+259,Makluea Kao,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+260,Makluea Mai,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+261,Na Klang,Sung Noen,Irrigation,Irrigation,เข้าถึงชลประทาน
+262,Nong Takai,Sung Noen,Collecting,Collecting,ยังไม่มีข้อมูล
+263,Kut Chik,Sung Noen,Irrigation,Irrigation,เข้าถึงชลประทาน
+264,Soeng Sang,Soeng Sang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+265,Sa Takhian,Soeng Sang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+266,Non Sombun,Soeng Sang,Collecting,Collecting,ยังไม่มีข้อมูล
+267,Kut Bot,Soeng Sang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+268,Suk Phaibun,Soeng Sang,Collecting,Collecting,ยังไม่มีข้อมูล
+269,Ban Rat,Soeng Sang,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+270,Nong Bunnak,Nong Bunmak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+271,Saraphi,Nong Bunmak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+272,Thai Charoen,Nong Bunmak,Collecting,Collecting,ยังไม่มีข้อมูล
+273,Nong Hua Raet,Nong Bunmak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+274,Laem Thong,Nong Bunmak,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+275,Nong Takai,Nong Bunmak,Collecting,Collecting,ยังไม่มีข้อมูล
+276,Lung Khwao,Nong Bunmak,Collecting,Collecting,ยังไม่มีข้อมูล
+277,Nong Mai Phai,Nong Bunmak,Collecting,Collecting,ยังไม่มีข้อมูล
+278,Ban Mai,Nong Bunmak,Collecting,Collecting,ยังไม่มีข้อมูล
+279,Huai Thalaeng,Huai Thalaeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+280,Thap Sawai,Huai Thalaeng,Collecting,Collecting,ยังไม่มีข้อมูล
+281,Mueang Phlapphla,Huai Thalaeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+282,Lung Takhian,Huai Thalaeng,Collecting,Collecting,ยังไม่มีข้อมูล
+283,Hin Dat,Huai Thalaeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+284,Ngio,Huai Thalaeng,RainFed,RainFed,พึ่งน้ำฝน (ไม่มีชลประทาน)
+285,Kong Rot,Huai Thalaeng,Collecting,Collecting,ยังไม่มีข้อมูล
+286,Lung Pradu,Huai Thalaeng,Collecting,Collecting,ยังไม่มีข้อมูล
+287,Tako,Huai Thalaeng,Collecting,Collecting,ยังไม่มีข้อมูล
+288,Huai Khaen,Huai Thalaeng,Collecting,Collecting,ยังไม่มีข้อมูล

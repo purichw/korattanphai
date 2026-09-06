@@ -1,6 +1,6 @@
 import { expect, test, fillAuthForm, seedAuthSession } from "./fixtures";
 
-const archiveRequest = /\/drought_forecast_archive_rev02(?:-[\w-]+)?\.json$/;
+const archiveRequest = /\/drought_forecast_archive_rev03(?:-[\w-]+)?\.json$/;
 const overviewRequest = /\/forecast-overview-t1(?:-[\w-]+)?\.json$/;
 
 for (const [name, path, request, title] of [
@@ -73,7 +73,7 @@ test("login and overview defer the archive while preserving summary and forecast
   expect(archiveRequests).toBe(0);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   const summary = page.locator(".nr-forecast-overview");
-  await expect(summary).toContainText("142/289 ตำบล");
+  await expect(summary).toContainText("117/289 ตำบล");
   await expect(summary.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
   await expect(summary.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
@@ -121,7 +121,7 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await expect.poll(() => geometryRequests.length).toBe(3);
   await expect(page.locator(".nr-drought-compact-workspace")).toHaveCount(0);
   await page.getByRole("button", { name: "ภาพรวมจังหวัด", exact: true }).click();
-  await expect(page.locator(".nr-forecast-overview-summary")).toContainText("142/289 ตำบล");
+  await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
   const response = page.waitForResponse(archiveRequest);
   release();
   await (await response).finished();
@@ -140,5 +140,5 @@ test("optional map context failure does not hide the forecast or its local polyg
   await page.goto("/drought?target=2025-12&horizon=1");
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
-  await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("142/289 ตำบล");
+  await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("117/289 ตำบล");
 });

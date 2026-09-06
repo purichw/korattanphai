@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
 import { createClient } from '@supabase/supabase-js';
 import { buildForecastOverviewArchive } from './generate-forecast-summary.mjs';
-import { forecastImport, inspectArchive, sha256 } from './lib/forecast-migration.mjs';
+import { forecastImport, inspectArchive, sha256 } from './lib/forecast-rev03-migration.mjs';
 
 const url = process.env.VITE_SUPABASE_URL;
 const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -11,7 +11,7 @@ const email = process.env.SMOKE_AUTH_EMAIL;
 const password = process.env.SMOKE_AUTH_PASSWORD;
 assert.equal(url, `https://${forecastImport.project}.supabase.co`, 'Wrong Supabase project');
 assert.ok(key?.startsWith('sb_publishable_') && email && password, 'Supply public configuration and smoke credentials in memory');
-const bytes = await fs.readFile('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json');
+const bytes = await fs.readFile('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json');
 assert.equal(sha256(bytes), forecastImport.canonicalSha, 'Canonical source changed');
 const archive = JSON.parse(bytes);
 const expected = inspectArchive(archive);
@@ -22,7 +22,7 @@ const report = { checkedAt: new Date().toISOString(), project: forecastImport.pr
 try {
   const { data: login, error } = await client.auth.signInWithPassword({ email, password });
   assert.ok(!error && login.session, 'Smoke account authentication failed');
-  const datasets = await client.from('ktp_forecast_datasets').select('dataset_id,version_label,source_sha256,normalized_sha256,canonical_sha256,status');
+  const datasets = await client.from('ktp_forecast_datasets').select('dataset_id,version_label,source_sha256,normalized_sha256,canonical_sha256,status').eq('dataset_id', forecastImport.datasetId);
   assert.ok(!datasets.error, 'Dataset read failed');
   assert.equal(datasets.data.length, 1, 'Unexpected published dataset/source');
   assert.deepEqual(datasets.data[0], {

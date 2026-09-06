@@ -537,4 +537,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit("Retired forecast importer. Use normalize-drought-rev03.py and build-forecast-rev03.mjs; only the approved rev03 source may be imported.")

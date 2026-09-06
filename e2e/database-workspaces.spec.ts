@@ -1,7 +1,7 @@
 import { test, expect, seedAuthSession, authTestUser } from './fixtures';
 import { mkdir } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json', 'utf8'));
+const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
 const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
 
 test.skip(process.env.PLAYWRIGHT_DATA_BACKEND !== 'supabase', 'Run with npm run test:e2e:database');
@@ -43,7 +43,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page.getByRole('heading', { name: /ภัยแล้ง.*บ้านเก่า/ }).first()).toBeVisible();
   const initialUrl = page.url();
   await page.locator('.nr-map-panel .nr-irrigation-filter').getByRole('combobox').click();
-  await page.getByRole('option', { name: 'ยังไม่มีข้อมูลชลประทาน', exact: true }).click();
+  await page.getByRole('option', { name: 'พึ่งน้ำฝน (ไม่มีชลประทาน)', exact: true }).click();
   expect(page.url()).toBe(initialUrl);
   await expect(page.locator('.nr-drought-workspace-kpis .metric-card')).toHaveCount(1);
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
@@ -55,7 +55,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await page.getByLabel('ชื่อตัวกรอง', { exact: true }).fill('บ้านเก่า พยากรณ์ T+4');
   await page.getByRole('button', { name: 'บันทึก', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('status')).toContainText('บันทึกตัวกรองแล้ว');
-  expect(filters[0]).toMatchObject({ target_period: '2025-12-01', horizon: 4, area_code: '300806', risk_criterion: 'forecast-high', irrigation_criterion: 'unknown' });
+  expect(filters[0]).toMatchObject({ target_period: '2025-12-01', horizon: 4, area_code: '300806', risk_criterion: 'forecast-high', irrigation_criterion: 'rainfed' });
   await mkdir('tmp-snapshots/database-workspaces', { recursive: true });
   await page.screenshot({ path: `tmp-snapshots/database-workspaces/${testInfo.project.name}-saved-filter.png` });
   await page.getByRole('button', { name: 'ปิดรายการที่บันทึก' }).click();
@@ -68,7 +68,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
   await expect(page.locator('.nr-drought-workspace-context .is-issue strong')).toHaveText('ธ.ค. 2568');
   await page.reload();
-  await expect(page.locator('.nr-map-panel .nr-irrigation-filter')).toContainText('ยังไม่มีข้อมูลชลประทาน');
+  await expect(page.locator('.nr-map-panel .nr-irrigation-filter')).toContainText('พึ่งน้ำฝน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
   await expect(page.locator('.nr-drought-workspace-context .is-issue strong')).toHaveText('ธ.ค. 2568');
@@ -88,7 +88,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
 
 test('database failure shows retry without static fallback and retains the requested vintage', async ({ page }) => {
   let failed = true; const assets: string[] = [];
-  page.on('request', (r) => { if (/(drought_forecast_archive_rev02|forecast-overview-t1).*\.json/.test(r.url())) assets.push(r.url()); });
+  page.on('request', (r) => { if (/(drought_forecast_archive_rev03|forecast-overview-t1).*\.json/.test(r.url())) assets.push(r.url()); });
   await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_archive', (route) => route.fulfill(failed
     ? { status: 503, json: { message: 'Test-only unavailable' } } : { json: archive }));
   await seedAuthSession(page);

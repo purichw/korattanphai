@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import archive from '../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json';
+import archive from '../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json';
 import overview from '../src/data/generated/forecast-overview-t1.json';
 import { createSupabaseForecastLoader, validateDatabaseArchive } from '../src/data/supabaseForecastArchive';
 

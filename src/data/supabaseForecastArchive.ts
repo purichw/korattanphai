@@ -1,20 +1,29 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NakhonRatchasimaDroughtForecastArchive } from '../types';
+import { forecastTargetPeriod } from '../forecastPeriod';
 
-export const FORECAST_DATASET_ID = '9b299cef-c704-4139-8085-18664253cc80';
-export const FORECAST_DATASET_VERSION = 'drought-rev02-9b299cefc704';
+export const FORECAST_DATASET_ID = 'a3be4448-6c8e-4039-b574-4674e261ee9b';
+export const FORECAST_DATASET_VERSION = 'drought-rev03-a3be44486c8e';
+export const FORECAST_SOURCE_SHA256 = 'a3be44486c8e8039f5744674e261ee9b27306f0c78b46bd1ce62e8903d4915b4';
 
 export function validateDatabaseArchive(value: unknown, horizonCount: 1 | 6): NakhonRatchasimaDroughtForecastArchive {
   const archive = value as NakhonRatchasimaDroughtForecastArchive | null;
-  if (!archive || archive.meta?.sourceOfTruth !== 'normalized_rev02_forecast_archive_workbook' ||
+  if (!archive || archive.meta?.sourceOfTruth !== 'normalized_rev03_original_workbook' ||
+      archive.meta.datasetId !== FORECAST_DATASET_ID || archive.meta.datasetVersion !== FORECAST_DATASET_VERSION ||
+      archive.meta.sourceWorkbookSha256 !== FORECAST_SOURCE_SHA256 ||
+      archive.meta.temporalInterpretation !== 'SOURCE_YEARMONTH_IS_ORIGIN_MONTH' ||
       archive.meta.provinceCode !== '30' || archive.meta.horizonCount !== horizonCount ||
       archive.meta.forecastVintageCount !== 289 * 127 * horizonCount ||
       !Array.isArray(archive.locations) || archive.locations.length !== 289 ||
       !Array.isArray(archive.targetMonths) || archive.targetMonths.length !== 127 ||
       !archive.packedRiskByTargetMonth) throw new Error('Invalid database forecast archive');
   const codes = new Set(archive.locations.map((l) => l.subdistrictCode));
-  if (codes.size !== 289 || new Set(archive.targetMonths.map((m) => m.period)).size !== 127) throw new Error('Duplicate forecast keys');
+  if (codes.size !== 289 || new Set(archive.locations.map((l) => l.sourceId)).size !== 289 ||
+      new Set(archive.targetMonths.map((m) => m.period)).size !== 127) throw new Error('Duplicate forecast keys');
   for (const month of archive.targetMonths) {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month.period) || month.period < '2015-06' || month.period > '2025-12' ||
+        !month.horizons?.every((h, i) => h.horizon === i + 1 && h.issueMonth === month.period &&
+          h.targetMonth === forecastTargetPeriod(month.period, h.horizon))) throw new Error('Invalid forecast origin/target');
     const rows = archive.packedRiskByTargetMonth[month.period];
     if (!rows || Object.keys(rows).length !== codes.size || month.horizons?.length !== horizonCount) throw new Error('Incomplete database month');
     for (const code of codes) {

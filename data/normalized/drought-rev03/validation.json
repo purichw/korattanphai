@@ -1,0 +1,15 @@
+{
+  "verified_at": "2026-09-06T14:44:12.977471+00:00",
+  "source_sha256": "a3be44486c8e8039f5744674e261ee9b27306f0c78b46bd1ce62e8903d4915b4",
+  "manifest_sha256": "be910423f3384de067ccdb5ef08a33d6af15c35f7370127c1a4d47636cc74b57",
+  "result": "passed",
+  "independent_reader": "Python standard-library ZIP/XML; no normalizer imports",
+  "source_rows_checked": 58312,
+  "source_risk_cells_checked_including_duplicates": 349872,
+  "normalized_forecast_rows_checked": 220218,
+  "location_rows_checked": 289,
+  "forecast_runs_checked": 762,
+  "lineage_rows_checked": 58312,
+  "duplicate_keys_or_value_mismatches": 0,
+  "external_datasets_used": 0
+}

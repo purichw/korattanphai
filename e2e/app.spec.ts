@@ -293,13 +293,13 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const archiveEntry = page.locator(".nr-forecast-overview");
   await expect(archiveEntry).toBeVisible();
   await expect(archiveEntry).toContainText("T+1–T+6");
-  await expect(archiveEntry).toContainText("142/289 ตำบล");
+  await expect(archiveEntry).toContainText("117/289 ตำบล");
   await expect(archiveEntry).toContainText("T+1");
   await expect(archiveEntry.locator(".nr-forecast-overview-details")).toHaveAttribute(
     "href",
     "/drought?mapLayer=forecast-archive&target=2025-12&horizon=1",
   );
-  await expect(archiveEntry.locator(".nr-forecast-overview-summary .metric-card-value")).toHaveText(["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"]);
+  await expect(archiveEntry.locator(".nr-forecast-overview-summary .metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
   const overviewCockpitBox = await boundingBoxOrThrow(page.locator(".nr-forecast-overview-grid"));
   const overviewSummaryRailBox = await boundingBoxOrThrow(page.locator(".nr-forecast-overview-summary"));
   const overviewMapBox = await boundingBoxOrThrow(page.locator(".nr-dashboard-map-card.is-overview-map"));
@@ -336,7 +336,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(droughtWorkspace.getByRole("heading", { name: "จำนวนตำบลเสี่ยงในแต่ละเดือน" })).toBeVisible();
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group")).toHaveCount(6);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group.is-active")).toHaveCount(1);
-  await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-drought-forecast-point-label", { hasText: "142" })).toHaveCount(3);
+  await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-drought-forecast-point-label", { hasText: "117" })).toHaveCount(3);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   await expect(droughtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("นอกขอบเขต");
   await expect(page.locator(".nr-operational-forecast-actions").getByText("ตำบลภัยแล้งที่ควรตรวจสอบ", { exact: true })).toBeVisible();
@@ -350,8 +350,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const secondaryBox = await boundingBoxOrThrow(page.locator(".nr-operational-forecast-summary"));
   const archiveMode = droughtWorkspace.locator(".nr-drought-workspace-kpis");
   await expect(droughtWorkspace.locator(".nr-forecast-archive-mode-section")).toHaveCount(0);
-  await expect(archiveMode).toContainText("142/289 ตำบล");
-  await expect(archiveMode).toContainText("นอกขอบเขต147 ตำบล");
+  await expect(archiveMode).toContainText("117/289 ตำบล");
+  await expect(archiveMode).toContainText("นอกขอบเขต172 ตำบล");
   await expect(archiveMode.getByRole("tab")).toHaveCount(0);
   const mapToolbar = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria");
   const mapControls = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-map-controls");
@@ -363,8 +363,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
   await horizonTabs.getByRole("tab", { name: /T\+2/ }).click();
   await expect(horizonTabs.getByRole("tab", { name: /T\+2/ })).toHaveAttribute("aria-selected", "true");
-  await expect(archiveMode).toContainText("142/289 ตำบล");
-  await expect(archiveMode).toContainText("เสี่ยงปานกลาง120 ตำบล");
+  await expect(archiveMode).toContainText("117/289 ตำบล");
+  await expect(archiveMode).toContainText("เสี่ยงปานกลาง116 ตำบล");
   await mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" }).click();
   await page.getByRole("option", { name: "ก.ย. 2568", exact: true }).click();
   await expect(archiveMode).toContainText("117/289 ตำบล");
@@ -433,7 +433,7 @@ test("drought forecast archive components are shared across province, district, 
   await expect(provinceWorkspace).toBeVisible();
   await expect(provinceWorkspace.locator(".nr-drought-workspace-horizon").getByRole("tab")).toHaveCount(6);
   await expect(provinceWorkspace.locator(".nr-forecast-archive-mode-section")).toHaveCount(0);
-  await expect(provinceWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("142/289 ตำบล");
+  await expect(provinceWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("117/289 ตำบล");
   await expect(provinceWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
   await expect(provinceWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
 

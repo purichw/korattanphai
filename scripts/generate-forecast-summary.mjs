@@ -19,7 +19,7 @@ export function buildForecastArchiveSummary(archive) {
   };
 }
 
-// The overview needs every target month, but only the nearest forecast vintage.
+// The overview needs every origin month, but only the nearest forecast vintage.
 export function buildForecastOverviewArchive(archive) {
   const targetMonths = archive.targetMonths.map((month) => ({
     ...month,
@@ -47,7 +47,7 @@ export function buildForecastOverviewArchive(archive) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  const archive = JSON.parse(await fs.readFile("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json", "utf8"));
+  const archive = JSON.parse(await fs.readFile("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", "utf8"));
   const directory = "src/data/generated";
   await fs.mkdir(directory, { recursive: true });
   await fs.writeFile(path.join(directory, "forecast-archive-summary.json"), `${JSON.stringify(buildForecastArchiveSummary(archive), null, 2)}\n`);
