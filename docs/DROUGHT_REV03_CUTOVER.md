@@ -134,10 +134,45 @@ compatible during staging.
 - Added a regression for structurally valid but unapproved source metadata:
   rejected payloads are never cached and a fresh retry revalidates the source.
 
-Push, hosted candidate checks and production promotion are pending at this
-checkpoint. Do not delete the old dataset while deployed clients still request
-it. Any new old-dataset saved-filter references must stop deletion, never
-cascade into personal data. No old-data deletion has been performed.
+### Published Release
+
+- Runtime commit `d8286ddfd6312ed6c539cf2628a79001bb13f0cf` is pushed to
+  `fix/nr-map-zoom-performance`; no merge into `main`.
+- Initial CI found a mobile keyboard-test setup race: the filter sheet's
+  scheduled initial focus could arrive after the test had focused its month
+  control. Test-only commit `8b149dce37e6aa73731ac4b210025541c39e11e5` waits for
+  the intended initial focus before beginning keyboard input. No assertion was
+  removed and no runtime/UI code changed. Ten focused mobile repetitions passed.
+- Full CI for that test-only follow-up passed all required steps in 10m41s:
+  https://github.com/purichw/korattanphai/actions/runs/34046251788 .
+  This includes unit/data checks, migration/RLS checks, static and database
+  protected builds, generated-data drift and both browser suites.
+- Candidate `dpl_J9kqETDCpFdFaD1AcSFigN81cGvW` was built from the clean committed
+  source at `tmp-snapshots/rev03-deploy-d8286dd/`, using actual Production
+  variables and `--prod --skip-domain`. Its complete real-account desktop/mobile
+  smoke passed before promotion, including full/T+1 actual RPC/source equality,
+  all 289 map status classes on each route, irrigation categories, saved-list
+  reads, API/assets/security checks, logout and no horizontal overflow/errors.
+  The previously failing keyboard flow also passed on this hosted candidate.
+- The verified candidate was promoted without rebuilding. Vercel inspection
+  confirms `https://korattanphai.vercel.app` serves this Ready deployment;
+  `/data-backend.json` reports `supabase`. Runtime is identical to the passing
+  CI source; the later test-only change does not alter deployed assets.
+- Production real-account smoke then passed the same five routes at 1440x960
+  and 390x844, including unavailable-area behavior. Both RPC projections exactly
+  match rev03, no static fallback occurs, and the reports contain zero failures.
+  Candidate and production screenshots were visually inspected.
+- Evidence: `smoke-results/rev03-candidate/`,
+  `smoke-results/rev03-production/`, and `smoke-results/database-integrity/`.
+- Recovery: promote previous deployment `dpl_CNfArLjRBvsG2kX5Bjx2hSVX9RAK`
+  (`https://korattanphai-eytyko48m-purichwc-1517s-projects.vercel.app`). Preserve
+  the additive schema and both immutable datasets. No rollback was performed.
+- Real Safari and unrelated UI redesign/load testing are outside this release.
+
+Old data remains retained only for recovery/older clients, not as a source or
+fallback for the new app. Do not delete it while deployed clients still request
+it. Any old-dataset saved-filter references must stop deletion, never cascade
+into personal data. No old-data deletion has been performed.
 
 The old canonical forecast file is currently unused by active runtime/import
 paths but is not yet deleted. The old importer CLI is disabled; the generic
