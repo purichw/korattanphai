@@ -61,6 +61,7 @@ import {
   OfficialMetricCard,
 } from "./SharedPanels";
 import { MetricCard, MetricGrid } from "../PageSummary";
+import type { ForecastMapIrrigation } from "../IrrigationStatusSelect";
 import {
   MapPin,
   Database,
@@ -897,6 +898,7 @@ export function ProvinceForecastArchiveEntryCard() {
 }
 
 export function ProvinceDashboardMapCard({
+  irrigation,
   filteredSubdistrictCodes,
   target,
   showMonthFilter,
@@ -918,6 +920,7 @@ export function ProvinceDashboardMapCard({
   selectedSubdistrictCode,
   onSelectedSubdistrictChange,
 }: {
+  irrigation?: ForecastMapIrrigation;
   filteredSubdistrictCodes?: string[];
   target?: NakhonRatchasimaRouteTarget;
   showMonthFilter?: boolean;
@@ -943,7 +946,7 @@ export function ProvinceDashboardMapCard({
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
   const mapMonthLabel = localResearchPeriodLabel(activeResearchPeriod);
   const hasForecastArchive = Boolean(forecastArchiveMonth && forecastArchive && !readinessMode);
-  const title = readinessMode ? "แผนที่ความพร้อมข้อมูลพื้นที่" : hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
+  const title = readinessMode ? "แผนที่ความพร้อมข้อมูลพื้นที่" : hasForecastArchive && irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     hasForecastArchive && forecastArchiveMonth
       ? `เดือนเป้าหมาย ${forecastArchiveMonth.labelTh} · T+${forecastArchiveHorizon ?? 1} จากรอบข้อมูล ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
@@ -966,6 +969,7 @@ export function ProvinceDashboardMapCard({
         {readinessMode && <button type="button" className="secondary-button nr-return-forecast" onClick={onCloseReadiness}>กลับแผนที่พยากรณ์</button>}
       </div>
       <NakhonRatchasimaLocalMap
+        irrigation={irrigation}
         filteredSubdistrictCodes={filteredSubdistrictCodes}
         target={target ?? { valid: true, level: "province", tab: activeTab }}
         showMonthFilter={showMonthFilter}

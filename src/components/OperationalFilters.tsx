@@ -1,7 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
-import { CalendarDays, Droplets, Edit3, Leaf, MapPin, ShieldAlert, TrendingUp, X } from "lucide-react";
-import { IrrigationStatusSelect, type IrrigationFilter } from "./IrrigationStatusSelect";
-import { irrigationLabels } from "../irrigation";
+import { CalendarDays, Edit3, Leaf, MapPin, ShieldAlert, TrendingUp, X } from "lucide-react";
 import type { AppSelectOption } from "./AppSelect";
 import { AppSelect } from "./AppSelect";
 import { months, provinces } from "../data/catalog";
@@ -40,7 +38,6 @@ type OperationalFiltersProps = {
   ariaLabel?: string;
   className?: string;
   compactOverview?: boolean;
-  irrigation?: IrrigationFilter;
 };
 
 const scopedHazardOptions: AppSelectOption[] = [{ value: "All", label: "ภัยแล้ง" }];
@@ -79,7 +76,6 @@ export function OperationalFilters({
   ariaLabel = "ตัวกรองการปฏิบัติการ",
   className,
   compactOverview = false,
-  irrigation,
 }: OperationalFiltersProps) {
   const state = useAppState();
   const dispatch = useAppDispatch();
@@ -113,7 +109,7 @@ export function OperationalFilters({
           options: areaPlaceholder ? [{ value: "", label: areaPlaceholder, disabled: true }, ...areaOptions] : areaOptions,
         }
       : null;
-  const itemCount = filterCount(Boolean(areaSelectConfig), (compactOverview ? 0 : contextChips.length) + (irrigation ? 1 : 0));
+  const itemCount = filterCount(Boolean(areaSelectConfig), compactOverview ? 0 : contextChips.length);
   const monthLabel = labelForOption(resolvedMonthOptions, selectedMonth, formatMonth(selectedMonth, language));
   const hazardLabel = labelForOption(scopedHazardOptions, state.selectedHazard, scopedHazardOptions[0].label);
   const cropLabel = labelForOption(scopedCropOptions, state.selectedCrop, scopedCropOptions[0].label);
@@ -129,7 +125,6 @@ export function OperationalFilters({
     if (areaSummaryLabel) {
       items.push({ id: "area", label: areaSelectConfig?.label ?? "พื้นที่", value: areaSummaryLabel, icon: <MapPin size={16} /> });
     }
-    if (irrigation) items.push({ id: "irrigation", label: "สถานะชลประทาน", value: irrigationLabels[irrigation.value], icon: <Droplets size={16} /> });
     contextChips.forEach((chip) => {
       items.push({
         id: `context-${chip.label}-${chip.value}`,
@@ -139,7 +134,7 @@ export function OperationalFilters({
       });
     });
     return items;
-  }, [areaSelectConfig?.label, areaSummaryLabel, compactOverview, contextChips, cropLabel, hazardLabel, language, monthLabel, irrigation?.value]);
+  }, [areaSelectConfig?.label, areaSummaryLabel, compactOverview, contextChips, cropLabel, hazardLabel, language, monthLabel]);
 
   useEffect(() => {
     if (!isEditorOpen) return;
@@ -224,7 +219,6 @@ export function OperationalFilters({
             menuClassName="app-select-menu-wide"
           />
         )}
-        {irrigation && <IrrigationStatusSelect {...irrigation} />}
         {!compactOverview && contextChips.map((chip) => (
           <div key={`${chip.label}-${chip.value}`} className="context-chip">
             <span>{chip.label}</span>
@@ -248,7 +242,7 @@ export function OperationalFilters({
           </button>
         </div>
         <div className="operational-filter-chip-row">
-          {summaryItems.map((item) => compactOverview && !["month", "area", "irrigation"].includes(item.id) ? (
+          {summaryItems.map((item) => compactOverview && !["month", "area"].includes(item.id) ? (
             <div key={item.id} className={`operational-filter-chip is-fixed is-${item.id}`}>
               <span aria-hidden="true">{item.icon}</span><b>{item.value}</b>
             </div>
@@ -343,7 +337,6 @@ export function OperationalFilters({
                   />
                 </div>
               )}
-              {irrigation && <div className="operational-filter-sheet-row"><span>สถานะชลประทาน</span><IrrigationStatusSelect {...irrigation} compact /></div>}
               {contextChips.map((chip) => (
                 <div key={`sheet-${chip.label}-${chip.value}`} className="operational-filter-sheet-static-row">
                   <span>{chip.label}</span>

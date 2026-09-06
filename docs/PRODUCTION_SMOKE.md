@@ -27,8 +27,10 @@ every map polygon on all five routes, rejects static archive fallback and reads
 the saved-workspace modal. `SMOKE_SAVED_FILTER_NAME` optionally verifies a known
 saved record across fresh login sessions; the harness itself does not create
 or delete personal records. Database-mode smoke also checks all three irrigation
-groups against canonical location codes and forecast counts, plus a zero-match
-subdistrict/reset without false no-risk results. It captures irrigation and
+groups by selecting the in-map dropdown: unchanged URL/history length,
+categorical colors, canonical location codes, forecast counts and reload
+persistence, plus a zero-match subdistrict/reset without false no-risk results.
+It captures irrigation and
 saved-filter desktop/mobile screenshots.
 Run `scripts/verify-database-archive.mjs` separately with the real public Vite
 configuration and smoke credentials for complete API/source and anonymous-access

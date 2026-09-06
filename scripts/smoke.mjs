@@ -151,14 +151,27 @@ try {
         report.checks.push({ viewport: name, route, polygons: 289 });
       }
       if (databaseMode) {
-        for (const [criterion, status] of [["irrigated", "Irrigation"], ["rainfed", "RainFed"], ["unknown", "Collecting"]]) {
-          const route = `${criterion === "unknown" ? "/" : "/drought"}?target=2025-12&horizon=1&irrigation=${criterion}`;
+        for (const [criterion, status, label, color] of [
+          ["irrigated", "Irrigation", "เข้าถึงชลประทาน", "rgb(57, 127, 197)"],
+          ["rainfed", "RainFed", "พึ่งน้ำฝน (ไม่มีชลประทาน)", "rgb(146, 98, 183)"],
+          ["unknown", "Collecting", "ยังไม่มีข้อมูลชลประทาน", "rgb(135, 147, 158)"],
+        ]) {
+          const route = `${criterion === "unknown" ? "/" : "/drought"}?target=2025-12&horizon=1`;
           await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
-          await page.locator(".nr-irrigation-scope").waitFor();
+          const select = page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox");
+          await expect(select).toBeVisible();
+          const initialUrl = page.url();
+          const initialHistoryLength = await page.evaluate(() => history.length);
+          await select.click();
+          await page.getByRole("option", { name: label, exact: true }).click();
+          assert.equal(page.url(), initialUrl, `${name}: selecting ${criterion} must not change URL`);
+          assert.equal(await page.evaluate(() => history.length), initialHistoryLength);
+          await page.locator(".nr-map-panel .nr-local-map-filter-status").waitFor();
           const codes = expectedArchive.locations.filter(location => location.irrigationStatus === status).map(location => location.subdistrictCode).sort();
           const shapes = page.locator(".nr-map-shape:not(.is-criteria-filtered)");
           await expect(shapes).toHaveCount(codes.length);
           assert.deepEqual(await shapes.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-nr-subdistrict-code")).sort()), codes, `${name}: ${criterion} matches source locations`);
+          await expect.poll(() => shapes.evaluateAll((nodes, expected) => nodes.every(node => getComputedStyle(node).fill === expected), color)).toBe(true);
           const high = codes.filter(code => expectedArchive.packedRiskByTargetMonth["2025-12"][code][0] === 2).length;
           const highCard = criterion === "unknown"
             ? page.locator(".nr-forecast-overview-summary .metric-card").filter({ hasText: "เสี่ยงสูง" })
@@ -166,15 +179,19 @@ try {
           await expect(highCard).toContainText(`${high} ตำบล`);
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `${name}: irrigation overflow`);
           await page.screenshot({ path: path.join(output, `${name}-irrigation-${criterion}.png`), fullPage: true });
-          report.checks.push({ viewport: name, irrigation: criterion, matched: codes.length, highRisk: high, sourceMatch: true });
+          await page.reload({ waitUntil: "domcontentloaded" });
+          await expect(select).toContainText(label);
+          await expect(shapes).toHaveCount(codes.length);
+          report.checks.push({ viewport: name, irrigation: criterion, matched: codes.length, highRisk: high, sourceMatch: true, categoricalColor: color, unchangedUrl: true, reloadPreserved: true });
         }
         await page.goto(new URL("/dan-khun-thot/t-300803?target=2025-12&horizon=4&irrigation=irrigated", base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-irrigation-empty").waitFor();
         await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
         await expect(page.locator(".nr-drought-workspace-kpis .metric-card, .nr-drought-workspace-chart-card")).toHaveCount(0);
+        const emptyUrl = page.url();
         await page.getByRole("button", { name: "แสดงทุกสถานะชลประทาน", exact: true }).click();
         await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
-        assert.equal(new URL(page.url()).searchParams.has("irrigation"), false);
+        assert.equal(page.url(), emptyUrl);
         report.checks.push({ viewport: name, irrigationEmptyReset: true });
         await page.getByRole("button", { name: "รายการที่บันทึก", exact: true }).click();
         const dialog = page.getByRole("dialog");

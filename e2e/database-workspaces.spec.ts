@@ -39,8 +39,12 @@ test('database archive and shared bookmarks survive reload and restore the same 
     return route.abort();
   });
   await seedAuthSession(page);
-  await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high&irrigation=unknown');
+  await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high&irrigation=irrigated');
   await expect(page.getByRole('heading', { name: /ภัยแล้ง.*บ้านเก่า/ }).first()).toBeVisible();
+  const initialUrl = page.url();
+  await page.locator('.nr-map-panel .nr-irrigation-filter').getByRole('combobox').click();
+  await page.getByRole('option', { name: 'ยังไม่มีข้อมูลชลประทาน', exact: true }).click();
+  expect(page.url()).toBe(initialUrl);
   await expect(page.locator('.nr-drought-workspace-kpis .metric-card')).toHaveCount(1);
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
@@ -61,7 +65,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page).toHaveURL(/target=2025-12&horizon=4&mapRisk=forecast-high/);
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
   await page.reload();
-  await expect(page.locator('.nr-operational-filters .nr-irrigation-filter')).toContainText('ยังไม่มีข้อมูลชลประทาน');
+  await expect(page.locator('.nr-map-panel .nr-irrigation-filter')).toContainText('ยังไม่มีข้อมูลชลประทาน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.goto('/');

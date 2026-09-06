@@ -61,22 +61,22 @@
 .is-home-overview .nr-forecast-overview-attention li strong { font-size: 14px; }
 .is-home-overview .nr-forecast-overview-attention .status-pill { background: transparent; color: #d8283f; padding: 0; font-size: 12px; white-space: nowrap; }
 .is-home-overview .nr-forecast-overview-details { position: absolute; top: 31px; right: 16px; width: auto; min-height: 32px; padding: 4px 0; margin: 0; font-size: 11px; color: #086785; border: 0; background: none; }
-.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 472px; min-height: 0; position: relative; border: 1px solid #dce5e2; border-radius: 8px; box-shadow: none; grid-template-rows: 66px minmax(0,1fr); overflow: visible; }
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 530px; min-height: 0; position: relative; border: 1px solid #dce5e2; border-radius: 8px; box-shadow: none; grid-template-rows: auto minmax(0,1fr); overflow: visible; }
 .is-home-overview .nr-dashboard-map-header { display: grid; grid-row: 1; align-content: start; align-items: start; padding: 10px 14px; background: white; border: 0; }
-.is-home-overview .nr-dashboard-map-header > div { max-width: calc(100% - 246px); }
+.is-home-overview .nr-dashboard-map-header > div { max-width: none; }
 .is-home-overview .nr-dashboard-map-header .eyebrow { display: none; }
 .is-home-overview .nr-dashboard-map-header h2 { font-size: 16px; margin: 0; line-height: 1.4; }
 .is-home-overview .nr-dashboard-map-header span { font-size: 11px; line-height: 1.4; }
-.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel { grid-row: 2; height: 100%; min-height: 0; border-radius: 0 0 8px 8px; overflow: visible; }
-.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-svg { width: 100%; height: 100%; min-height: 0; border-radius: 0 0 8px 8px; }
-.is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { display: grid; position: absolute; top: -54px; right: 12px; left: auto; bottom: auto; width: 238px; max-width: calc(100% - 24px); grid-template-columns: minmax(0,1fr) 30px; gap: 5px; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel { display: grid; grid-template-rows: auto minmax(0,1fr) auto; grid-row: 2; height: 100%; min-height: 0; border-radius: 0 0 8px 8px; overflow: visible; }
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-svg { grid-row: 2; width: 100%; height: 100%; min-height: 0; border-radius: 0 0 8px 8px; }
+.is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { display: grid; position: relative; inset: auto; grid-row: 1; width: 100%; max-width: none; grid-template-columns: minmax(0,1fr); gap: 6px; margin: 0; padding: 0 10px 8px; overflow: visible; border: 0; border-radius: 0; background: #fff; box-shadow: none; }
 .is-home-overview .nr-local-map-select { min-width: 0; }
 .is-home-overview .nr-local-map-select .app-select-trigger { min-height: 38px; height: auto; padding: 7px 22px; font-size: 12px; border-radius: 6px; }
 .is-home-overview .nr-local-map-reset { min-height: 36px; min-width: 30px; padding: 5px; }
 .is-home-overview .nr-local-map-reset span { display: none; }
-.is-home-overview .nr-map-controls { position: absolute; top: 12px; left: 12px; right: auto; display: grid; grid-template-columns: 36px; gap: 4px; width: 36px; max-width: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.is-home-overview .nr-map-controls { position: absolute; grid-row: 2; top: 12px; left: 12px; right: auto; display: grid; grid-template-columns: 36px; gap: 4px; width: 36px; max-width: none; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
 .is-home-overview .nr-map-controls .icon-button { width: 36px; height: 36px; min-height: 36px; min-width: 36px; padding: 6px; border: 1px solid transparent; border-radius: 5px; background: white; }
-.is-home-overview .nr-map-panel .nr-map-legend { left: 12px; right: auto; bottom: 10px; width: auto; max-width: calc(100% - 24px); padding: 7px 10px; gap: 8px; border-radius: 8px; justify-content: center; }
+.is-home-overview .nr-map-panel .nr-map-legend { position: static; grid-row: 3; width: 100%; max-width: none; padding: 7px 10px; gap: 8px; border: 0; border-radius: 0; background: #fff; justify-content: center; }
 .is-home-overview .nr-map-legend > strong { display: none; }
 .is-home-overview .nr-map-panel .nr-map-legend span { font-size: 11px; }
 .is-home-overview .nr-map-panel .nr-map-legend i { width: 11px; height: 11px; }
@@ -86,7 +86,7 @@
 .is-home-overview .nr-dashboard-map-card:has(.nr-return-forecast) { grid-template-rows: 66px minmax(0,1fr); }
 .is-home-overview .nr-return-forecast { position: absolute; right: 12px; top: 13px; min-height: 38px; font-size: 12px; }
 .is-home-overview .nr-map-panel:fullscreen { height: 100dvh !important; border-radius: 0; }
-.is-home-overview .nr-map-panel:fullscreen .nr-local-map-criteria { top: 12px; }
+.is-home-overview .nr-map-panel:fullscreen .nr-local-map-criteria { inset: auto; }
 .is-home-overview .nr-map-panel:fullscreen .nr-map-svg { height: 100%; }
 .nr-home-support { display: grid; grid-template-columns: 1.35fr 1fr .85fr; gap: 12px; align-items: start; }
 .nr-home-support.is-forecast-only { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -136,9 +136,8 @@
   .is-home-overview .nr-forecast-overview-heading { padding-top: 0; }
   .is-home-overview .nr-forecast-overview-heading > p { max-width: 240px; padding-top: 50px; line-height: 1.4; }
   .is-home-overview .nr-forecast-overview-grid { grid-template-columns: minmax(0,1.3fr) minmax(285px,1fr); }
-  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 490px; grid-template-rows: 106px minmax(0,1fr); }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 530px; }
   .is-home-overview .nr-dashboard-map-header > div { max-width: none; }
-  .is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { top: -44px; right: 10px; width: calc(100% - 20px); }
   .nr-home-situation .metric-card { padding: 5px 8px; column-gap: 5px; grid-template-columns: 28px minmax(0,1fr); }
   .nr-home-situation .metric-card-icon { width: 28px; height: 28px; }
   .nr-forecast-overview .nr-home-situation .metric-card-value { font-size: 17px; }
@@ -168,7 +167,6 @@
   .is-overview-filter .operational-filter-chip-row { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 6px; }
   .is-overview-filter .operational-filter-chip { grid-column: span 2; min-height: 44px; padding: 5px; gap: 5px; border-radius: 6px; font-size: 12px; }
   .is-overview-filter .operational-filter-chip.is-month { grid-column: span 4; }
-  .is-overview-filter .operational-filter-chip.is-irrigation { grid-column: span 4; }
   .is-overview-filter .operational-filter-chip.is-hazard { grid-column: span 2; }
   .is-overview-filter .operational-filter-chip.is-fixed { cursor: default; }
   .is-overview-filter .operational-filter-chip b { white-space: normal; line-height: 1.35; text-align: center; }
@@ -184,20 +182,18 @@
   .is-home-overview .nr-forecast-overview-summary-heading h3 { font-size: 16px; }
   .is-home-overview .nr-forecast-overview-summary-heading p { margin: 2px 0 7px; }
   .is-home-overview .nr-forecast-overview-scope-note { display: none; }
-  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 366px; grid-template-rows: 88px minmax(0,1fr); }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 440px; }
   .is-home-overview .nr-dashboard-map-header { padding: 10px; }
   .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card .nr-dashboard-map-header { display: grid; }
   .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map .nr-map-svg { height: 100%; min-height: 0; }
   .is-home-overview .nr-dashboard-map-header > div { max-width: none; }
   .is-home-overview .nr-dashboard-map-header h2 { font-size: 15px; }
   .is-home-overview .nr-dashboard-map-header span { display: none; }
-  .is-home-overview .nr-local-map-criteria.is-forecast-archive-controls { top: -47px; left: 10px; right: 10px; width: auto; max-width: none; padding: 0; border: 0; grid-template-columns: minmax(0,1fr) 36px; }
+  .is-home-overview .nr-local-map-criteria.is-forecast-archive-controls::after { display: none; }
   .is-home-overview .nr-local-map-select .app-select-trigger { min-height: 38px; }
-  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-select .app-select-trigger { min-height: 38px; border-radius: 6px; padding: 6px 24px; box-shadow: none; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-select .app-select-trigger { width: 100%; min-width: 0; min-height: 44px; border-radius: 6px; padding: 6px 24px; box-shadow: none; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-reset { display: inline-flex; align-items: center; justify-content: center; width: 36px; min-height: 38px; padding: 6px; border-radius: 6px; box-shadow: none; }
-  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-filter-status { grid-column: 1 / -1; min-height: 18px; padding: 0; margin: 0; font-size: 10px; }
-  .is-home-overview .nr-dashboard-map-card:has(.nr-local-map-filter-status) { grid-template-rows: 110px minmax(0,1fr); }
-  .is-home-overview .nr-dashboard-map-card:has(.nr-local-map-filter-status) .nr-local-map-criteria { top: -69px; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-filter-status { grid-column: 1 / -1; min-height: 18px; padding: 0; margin: 0; border-radius: 0; background: none; font-size: 11px; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls { top: 10px; left: 10px; bottom: auto; right: auto; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid transparent; border-radius: 5px; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-map-legend { bottom: 7px; left: 7px; right: 7px; width: auto; max-width: none; margin: 0; padding: 6px; gap: 5px 8px; }

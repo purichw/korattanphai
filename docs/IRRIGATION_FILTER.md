@@ -27,9 +27,10 @@ Excel, modify any archive values, or change the published dataset version.
 
 ## UI Contract
 
-- `src/irrigation.ts` owns mapping, labels and intersection with administrative
-  scope. `IrrigationStatusSelect` reuses `AppSelect` in both filter bands and the
-  Home mobile editor. Default is `all` (ทุกสถานะ).
+- `src/irrigation.ts` owns mapping, labels, categorical colors and intersection
+  with administrative scope. `IrrigationStatusSelect` reuses `AppSelect` inside
+  the shared map toolbar, not the page filter band or Home mobile editor.
+  Default is `all` (ทุกสถานะ).
 - The selected set drives forecast map eligibility, summary counts, the six
   fixed-target horizon comparisons and attention lists. Counts/denominators use
   the matching tambons, not the unfiltered provincial/district population.
@@ -40,11 +41,47 @@ Excel, modify any archive values, or change the published dataset version.
 - Nonmatching map features are muted and cannot be selected, rather than
   reclassified as no-risk or missing. A zero-match selection displays an empty
   filter state with an explicit reset, not a green result or missing forecast.
-- `irrigation=irrigated|rainfed|unknown` survives refresh, month/T+ changes,
-  drilldown and parent navigation. `all` removes only this parameter. Explicit
-  saved-item restoration uses the existing workspace navigation lifecycle.
+- Choosing a status does not change the URL, history length or route. Live
+  selection is held in React and `history.state.ktpIrrigation`; refresh and
+  month/T+/risk updates retain it. Existing deep links still initialize from
+  `irrigation=irrigated|rainfed|unknown` when no live state exists. `all` also
+  overrides an older query value without rewriting that URL. Explicit area
+  navigation and saved links encode the active selection. Copying the address
+  alone does not capture later local filter changes; use saved filters for that.
+- Map color buttons switch between drought forecast and irrigation metadata.
+  Choosing an irrigation criterion activates irrigation colors: blue `#397fc5`
+  (irrigated), purple `#9262b7` (rainfed), gray `#87939e` (unknown). Heading,
+  accessible feature labels and legend match the encoding. Underlying source
+  risk values/classes stay unchanged; charts/KPIs keep their hazard colors.
+  Switching colors alone does not filter data. Selecting all while viewing
+  irrigation shows all three categories. Map risk reset only clears map risk.
 - Subdistrict pages still omit aggregate charts. Their source irrigation label
-  is visible independently of the currently selected filter.
+  remains available in the map preview independently of the selected criterion.
+
+## Map-Control Correction (Local, Not Deployed)
+
+The UI contract above reflects the follow-up correction after the hosted release
+below. No archive, SQL migration, Auth, RLS or production setting is changed by
+this correction. Current evidence is recorded separately from the older release.
+
+- 18 targeted unit tests passed: source partitions and all-period risk totals,
+  live history state, unchanged URL/history length, reset, deep links and saved
+  selection precedence.
+- Protected Supabase-mode build passed TypeScript, exposure checks and budgets;
+  entry `index-897c68b4e4.js`, no static forecast payload. The usual large-chunk
+  advisory remains; enforced budgets pass.
+- 12 built browser tests passed on Chromium desktop (1440x960) and mobile
+  (390x844). They cover whole-page counts/charts, map/risk intersection, exact URL
+  stability, reload, explicit area navigation, empty subdistrict reset, keyboard
+  selection, all 289 categorical fills, readiness filtering, bookmark save/restore
+  from live state rather than a stale URL, and database failure/retry.
+- Final screenshots: `tmp-snapshots/irrigation-map-proof/`; desktop/mobile maps
+  and the 1024x900 tablet adaptation were inspected. Home mobile puts irrigation
+  on its own row to avoid long-label overlap. Browser Auth/RPC are localhost-only
+  mocks using canonical data, not production verification.
+- `git diff --check` passed; canonical/generated data and `supabase/` have no
+  diff. Whole-site/static-provider E2E, real Safari and remote database checks
+  were intentionally not rerun. This correction is not pushed or deployed.
 
 ## Saved Filters And Release
 

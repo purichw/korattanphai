@@ -15,7 +15,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(workspace).toBeVisible();
     await expect(page.locator(".nr-data-transparency, .nr-forecast-overview-source")).toHaveCount(0);
     await expect(page.getByText(/^(แหล่งข้อมูลและความสด|ข้อจำกัดสำคัญ)$/)).toHaveCount(0);
-    await expect(filters.getByRole("combobox")).toHaveCount(4);
+    await expect(filters.getByRole("combobox")).toHaveCount(3);
     await expect(filters.locator(".nr-fixed-filter")).toHaveText(["ภัยภัยแล้ง", "พืชข้าว"]);
     await expect(workspace.locator(".nr-drought-workspace-context .is-crop")).toContainText("ข้าว");
     if (scope === "subdistrict") {

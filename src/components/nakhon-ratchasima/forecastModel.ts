@@ -9,7 +9,7 @@ import { useState, useMemo } from "react";
 import { type AppSelectOption } from "../AppSelect";
 import { type LocalMapStatus, type LocalRiskCriterion } from "./workspaceModel";
 import { type NakhonRatchasimaRouteTarget } from "../../domain";
-import { normalizeIrrigationCriterion, type IrrigationCriterion } from "../../irrigation";
+import { irrigationHistoryState, readIrrigationSelection, type ForecastMapColorMode, type IrrigationCriterion } from "../../irrigation";
 
 export type DroughtForecastBand = "unavailable" | "normal" | "watch" | "severe";
 
@@ -134,7 +134,7 @@ export function writeForecastArchiveLocation(month: NakhonRatchasimaDroughtForec
   url.searchParams.set("mapLayer", "forecast-archive");
   url.searchParams.set("target", month.period);
   url.searchParams.set("horizon", String(horizon));
-  window.history.replaceState(null, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
+  window.history.replaceState(window.history.state, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
 }
 
 export function pathWithForecastSelection(path: string, period: string, horizon: ForecastArchiveHorizon, irrigation: IrrigationCriterion = "all") {
@@ -159,9 +159,9 @@ export function forecastArchiveIssueMonthForSelection(
 }
 
 export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDroughtForecastArchive, fixedHorizon?: ForecastArchiveHorizon) {
-  const [selectedIrrigation, setSelectedIrrigation] = useState(() => normalizeIrrigationCriterion(
-    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("irrigation"),
-  ));
+  const [selectedIrrigation, setSelectedIrrigation] = useState(() => typeof window === "undefined"
+    ? "all" as IrrigationCriterion : readIrrigationSelection(window.location.search, window.history.state));
+  const [mapColorMode, setMapColorMode] = useState<ForecastMapColorMode>(() => selectedIrrigation === "all" ? "forecast" : "irrigation");
   const [selection, setSelection] = useState(() => {
     const initial = readForecastArchiveInitialSelection(archive);
     return { ...initial, selectedHorizon: fixedHorizon ?? initial.selectedHorizon };
@@ -197,10 +197,9 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
 
   const changeIrrigation = (criterion: IrrigationCriterion) => {
     setSelectedIrrigation(criterion);
-    const url = new URL(window.location.href);
-    if (criterion === "all") url.searchParams.delete("irrigation");
-    else url.searchParams.set("irrigation", criterion);
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    setMapColorMode("irrigation");
+    // Keep the same URL/history entry; explicit saved links still encode the selection.
+    window.history.replaceState(irrigationHistoryState(window.history.state, criterion), "");
   };
 
   return {
@@ -212,6 +211,7 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     changeTargetMonth,
     selectedIrrigation,
     changeIrrigation,
+    irrigation: { value: selectedIrrigation, onChange: changeIrrigation, colorMode: mapColorMode, onColorModeChange: setMapColorMode },
   };
 }
 

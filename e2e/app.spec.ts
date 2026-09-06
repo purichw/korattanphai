@@ -356,7 +356,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const mapToolbar = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria");
   const mapControls = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-map-controls");
   await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
-  await expect(mapToolbar.getByRole("combobox")).toHaveCount(2);
+  await expect(mapToolbar.getByRole("combobox")).toHaveCount(3);
   await expect(mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
@@ -435,7 +435,7 @@ test("drought forecast archive components are shared across province, district, 
   await expect(provinceWorkspace.locator(".nr-forecast-archive-mode-section")).toHaveCount(0);
   await expect(provinceWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("142/289 ตำบล");
   await expect(provinceWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
-  await expect(provinceWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
+  await expect(provinceWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
 
   await page.goto("/dan-khun-thot?mapLayer=forecast-archive&horizon=1");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*ด่านขุนทด/, level: 1 })).toBeVisible();
@@ -446,7 +446,7 @@ test("drought forecast archive components are shared across province, district, 
   await expect(districtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("6/16 ตำบล");
   await expect(districtWorkspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toContainText("10 ตำบล");
   await expect(districtWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งระดับตำบล" })).toBeVisible();
-  await expect(districtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
+  await expect(districtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
 
   await page.goto("/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=1");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
@@ -457,7 +457,7 @@ test("drought forecast archive components are shared across province, district, 
   await expect(subdistrictWorkspace.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(1);
   await expect(subdistrictWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
   await expect(subdistrictWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล" })).toBeVisible();
-  await expect(subdistrictWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
+  await expect(subdistrictWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
 });
 
 test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async ({ page }) => {
@@ -794,7 +794,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   const subdistrictFilters = page.locator(".nr-operational-filters");
-  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(4);
+  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(3);
   await expect(subdistrictFilters.getByRole("combobox", { name: /^สถานะชลประทาน/ })).toContainText("ทุกสถานะ");
   await expect(subdistrictFilters.getByRole("combobox", { name: /^ตำบล/ })).toContainText("อุดมทรัพย์");
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();

@@ -71,7 +71,7 @@ export function DistrictView({
         target={{ valid: true, level: "district", district }}
         selectedTargetMonth={forecastArchive.selectedMonth}
         selectedHorizon={forecastArchive.selectedHorizon}
-        irrigation={{ value: forecastArchive.selectedIrrigation, onChange: forecastArchive.changeIrrigation }}
+        irrigation={forecastArchive.irrigation}
         onHorizonChange={forecastArchive.changeHorizon}
         layer={layer}
         mapMode={mapMode}

@@ -2,7 +2,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, expect, it } from "vitest";
 import data from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
-import { forecastSubdistrictCodesForIrrigation, irrigationStatusFromSource, normalizeIrrigationCriterion } from "../src/irrigation";
+import { forecastSubdistrictCodesForIrrigation, irrigationColors, irrigationHistoryState, irrigationStatusFromSource, normalizeIrrigationCriterion, readIrrigationSelection } from "../src/irrigation";
 import { forecastArchiveSummaryForSelection, forecastArchiveTrendMonthsForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection } from "../src/components/nakhon-ratchasima/forecastModel";
 
 const archive = data as NakhonRatchasimaDroughtForecastArchive;
@@ -46,7 +46,33 @@ it("preserves source risk/null and reconciles all target/horizon totals across i
   expect(forecastArchiveSummaryForSelection(archive, month, 1, [])).toMatchObject({ totalSubdistricts: 0, inScopeSubdistricts: 0, missingSubdistricts: 0 });
 });
 
-it("preserves irrigation across month/horizon changes and route navigation; reset clears only irrigation", () => {
+it("keeps the exact URL and history entry when changing irrigation, and restores the live state", () => {
+  window.history.replaceState({ existing: "preserved" }, "", "/drought?target=2025-12&horizon=4&irrigation=rainfed#map");
+  const url = window.location.href;
+  const length = window.history.length;
+  const { result, unmount } = renderHook(() => useDroughtForecastArchiveSelection(archive));
+  act(() => result.current.changeIrrigation("unknown"));
+  expect(window.location.href).toBe(url);
+  expect(window.history.length).toBe(length);
+  expect(window.history.state).toEqual({ existing: "preserved", ktpIrrigation: "unknown" });
+  expect(result.current.irrigation.colorMode).toBe("irrigation");
+  unmount();
+  const restored = renderHook(() => useDroughtForecastArchiveSelection(archive));
+  expect(restored.result.current.selectedIrrigation).toBe("unknown");
+  act(() => restored.result.current.irrigation.onColorModeChange("forecast"));
+  expect(restored.result.current.selectedIrrigation).toBe("unknown");
+  expect(window.location.href).toBe(url);
+});
+
+it("validates live state, falls back to deep links and distinguishes categorical colors", () => {
+  expect(readIrrigationSelection("?irrigation=rainfed", { ktpIrrigation: "all" })).toBe("all");
+  expect(readIrrigationSelection("?irrigation=rainfed", { ktpIrrigation: "Collecting" })).toBe("rainfed");
+  expect(readIrrigationSelection("?irrigation=unsafe", null)).toBe("all");
+  expect(irrigationHistoryState(null, "unknown")).toEqual({ ktpIrrigation: "unknown" });
+  expect(new Set(Object.values(irrigationColors)).size).toBe(3);
+});
+
+it("preserves irrigation across month/horizon changes and route navigation; reset clears only irrigation state", () => {
   window.history.replaceState(null, "", "/drought?target=2025-12&horizon=4&irrigation=rainfed&mapRisk=forecast-high");
   const { result } = renderHook(() => useDroughtForecastArchiveSelection(archive));
   expect(result.current.selectedIrrigation).toBe("rainfed");
@@ -56,7 +82,9 @@ it("preserves irrigation across month/horizon changes and route navigation; rese
   expect(pathWithForecastSelection("/dan-khun-thot#map", "2025-11", 3, "rainfed")).toBe("/dan-khun-thot?mapLayer=forecast-archive&target=2025-11&horizon=3&irrigation=rainfed#map");
   act(() => result.current.changeIrrigation("all"));
   const params = new URLSearchParams(window.location.search);
-  expect(params.has("irrigation")).toBe(false);
+  expect(params.get("irrigation")).toBe("rainfed");
+  expect(result.current.selectedIrrigation).toBe("all");
+  expect(readIrrigationSelection(window.location.search, window.history.state)).toBe("all");
   expect(params.get("mapRisk")).toBe("forecast-high");
   expect(result.current.selectedMonth?.period).toBe("2025-11");
   expect(result.current.selectedHorizon).toBe(3);

@@ -16,8 +16,10 @@ import {
   TrendingUp,
   Info,
   RotateCcw,
+  Droplets,
 } from "lucide-react";
 import { type AppSelectOption, AppSelect } from "../AppSelect";
+import { IrrigationStatusSelect, type ForecastMapIrrigation } from "../IrrigationStatusSelect";
 
 export function DroughtForecastArchiveHorizonSelector({
   targetMonth,
@@ -150,6 +152,7 @@ export function DroughtForecastArchiveSummaryMetrics({
 }
 
 export function DroughtForecastArchiveMapFilters({
+  irrigation,
   showMonthFilter = true,
   selectedMonth,
   monthOptions,
@@ -161,6 +164,7 @@ export function DroughtForecastArchiveMapFilters({
   statusText,
   compactValue,
 }: {
+  irrigation?: ForecastMapIrrigation;
   showMonthFilter?: boolean;
   selectedMonth: string;
   monthOptions: AppSelectOption[];
@@ -173,7 +177,12 @@ export function DroughtForecastArchiveMapFilters({
   compactValue: boolean;
 }) {
   return (
-    <div className={`nr-local-map-criteria is-forecast-archive-controls${showMonthFilter ? "" : " has-single-filter"}`} aria-label="ตัวกรองแผนที่พยากรณ์ภัยแล้ง">
+    <div className={`nr-local-map-criteria is-forecast-archive-controls${irrigation ? " has-irrigation-filter" : ""}${showMonthFilter ? "" : " has-single-filter"}`} aria-label="ตัวกรองแผนที่พยากรณ์ภัยแล้ง">
+      {irrigation && <div className="nr-map-color-modes" role="group" aria-label="การแสดงสีแผนที่">
+        <button type="button" aria-pressed={irrigation.colorMode === "forecast"} onClick={() => irrigation.onColorModeChange("forecast")}><ShieldAlert size={16} />ความเสี่ยงภัยแล้ง</button>
+        <button type="button" aria-pressed={irrigation.colorMode === "irrigation"} onClick={() => irrigation.onColorModeChange("irrigation")}><Droplets size={16} />ชลประทาน</button>
+      </div>}
+      <div className="nr-map-filter-fields">
       {showMonthFilter && <AppSelect
         className="nr-local-map-select"
         ariaLabel="เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง"
@@ -190,17 +199,19 @@ export function DroughtForecastArchiveMapFilters({
         options={forecastArchiveRiskCriterionOptions}
         compactValue={compactValue}
       />
+      {irrigation && <IrrigationStatusSelect {...irrigation} compact />}
       <button
         type="button"
         className="nr-local-map-reset"
         onClick={onReset}
         disabled={resetDisabled}
-        title="ล้างเงื่อนไขแผนที่"
+        title="ล้างตัวกรองความเสี่ยงภัยแล้ง"
         aria-label="รีเซ็ต"
       >
         <RotateCcw size={14} />
         <span>รีเซ็ต</span>
       </button>
+      </div>
       {statusText && (
         <span className="nr-local-map-filter-status" role="status" aria-live="polite">
           {statusText}

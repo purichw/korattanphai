@@ -71,7 +71,7 @@ export function SubdistrictView({
         target={{ valid: true, level: "subdistrict", district, subdistrict }}
         selectedTargetMonth={forecastArchive.selectedMonth}
         selectedHorizon={forecastArchive.selectedHorizon}
-        irrigation={{ value: forecastArchive.selectedIrrigation, onChange: forecastArchive.changeIrrigation }}
+        irrigation={forecastArchive.irrigation}
         onHorizonChange={forecastArchive.changeHorizon}
         layer={layer}
         mapMode={mapMode}

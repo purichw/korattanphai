@@ -72,7 +72,7 @@ export function ResearchProvinceDataView({
         target={{ valid: true, level: "province", tab: activeTab }}
         selectedTargetMonth={forecastArchive.selectedMonth}
         selectedHorizon={forecastArchive.selectedHorizon}
-        irrigation={{ value: forecastArchive.selectedIrrigation, onChange: forecastArchive.changeIrrigation }}
+        irrigation={forecastArchive.irrigation}
         onHorizonChange={forecastArchive.changeHorizon}
         layer={layer}
         mapMode={mapMode}

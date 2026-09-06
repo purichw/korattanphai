@@ -1,7 +1,7 @@
 import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaPath, resolveAppRoute } from './domain';
 import { isSavedSelection, savedRiskCriteria, type SavedForecastSelection, type SavedRiskCriterion } from './data/savedWorkspaces';
 import { FORECAST_DATASET_ID } from './data/supabaseForecastArchive';
-import { normalizeIrrigationCriterion } from './irrigation';
+import { readIrrigationSelection } from './irrigation';
 
 export function savedAreaInfo(code: string): { label: string; path: string } | null {
   if (code === '30') return { label: 'จังหวัดนครราชสีมา', path: '/drought' };
@@ -12,7 +12,7 @@ export function savedAreaInfo(code: string): { label: string; path: string } | n
   return subdistrict ? { label: `ตำบล${subdistrict.nameTh} · อำเภอ${district.nameTh}`, path: getNakhonRatchasimaPath(district, subdistrict) } : null;
 }
 
-export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'search'>): SavedForecastSelection | null {
+export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'search'>, historyState?: unknown): SavedForecastSelection | null {
   const route = resolveAppRoute(location.pathname);
   if (route.kind !== 'nakhon-ratchasima' || !route.target.valid) return null;
   const target = route.target;
@@ -22,7 +22,7 @@ export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'se
     : target.level === 'district' ? target.district.districtCode : overview ? params.get('district') || '30' : '30';
   if (!savedAreaInfo(code)) return null;
   const risk = params.get('mapRisk') ?? 'all';
-  const irrigation = normalizeIrrigationCriterion(params.get('irrigation'));
+  const irrigation = readIrrigationSelection(location.search, historyState);
   const selection: SavedForecastSelection = {
     view_name: overview ? 'overview' : 'drought', area_code: code, dataset_id: FORECAST_DATASET_ID,
     target_period: `${params.get('target') ?? ''}-01`, horizon: overview ? 1 : Number(params.get('horizon') ?? '1'),

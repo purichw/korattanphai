@@ -4,6 +4,14 @@ import { isSavedSelection } from '../src/data/savedWorkspaces';
 import { readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../src/savedWorkspaceRoutes';
 
 describe('saved forecast selections', () => {
+  it('saves the live map filter instead of a stale URL value', () => {
+    const location = { pathname: '/drought', search: '?target=2025-12&horizon=4&irrigation=irrigated' };
+    for (const criterion of ['unknown', 'rainfed', 'all'] as const) {
+      const selection = readWorkspaceSelection(location, { ktpIrrigation: criterion })!;
+      expect(selection.irrigation_criterion ?? 'all').toBe(criterion);
+      expect(readWorkspaceSelection(new URL(savedFilterPath(selection)!, 'https://local.test'))).toEqual(selection);
+    }
+  });
   it.each([
     ['/', '?target=2025-12&horizon=1&district=3008&mapRisk=forecast-high', '3008', 1, 'overview'],
     ['/drought', '?target=2025-11&horizon=3&irrigation=irrigated', '30', 3, 'drought'],

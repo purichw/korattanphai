@@ -23,7 +23,7 @@ files.
 | Component | File | Use For | Current Contract |
 | --- | --- | --- | --- |
 | `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, option badges support `good`, `watch`, `danger`, and `muted`, and `align="start"` only when scan-left text is intentionally needed. |
-| `IrrigationStatusSelect` | `src/components/IrrigationStatusSelect.tsx` | Location irrigation filter across Home/drought/district/subdistrict | Reuses `AppSelect`; all/irrigated/rainfed/unknown labels and matching come from `src/irrigation.ts`. Compact variant is used in the Home mobile editor. Unknown irrigation never implies missing or zero-risk forecasts. |
+| `IrrigationStatusSelect` | `src/components/IrrigationStatusSelect.tsx` | Location irrigation filter inside Home/drought/district/subdistrict maps | Reuses `AppSelect`; all/irrigated/rainfed/unknown labels and matching come from `src/irrigation.ts`. Lives in the shared map toolbar, not page filters or the Home editor. Selection updates the whole page without changing URL. Unknown irrigation never implies missing or zero-risk forecasts. |
 | `MetricCard` | `src/components/PageSummary.tsx` | Individual stat-only cards | Centered content by default; use `tone`, `icon`, `detail`, and `provenance` instead of one-off stat tile classes. |
 | `MetricGrid` | `src/components/PageSummary.tsx` | Groups of stat cards | Variants: `default`, `segmented`, `compact`; use for repeated KPI/stat groups instead of custom grids. |
 | `PageSummary` | `src/components/PageSummary.tsx` | Top summary panels with copy plus metrics | Use for high-level overview summaries where a short narrative and metrics share one surface. |
@@ -93,7 +93,7 @@ recovery feedback. Neither resets persisted state automatically.
 | `DataGovernanceGuardrailList` | Guardrail list explaining readiness/source caveats. |
 | `DataGovernanceGuardrailAccordion` | Compact guardrail disclosure. |
 | `DroughtWorkspaceHeader` | Shared province/district/subdistrict drought identity, scope and back navigation. District back goes to `/drought`, subdistrict back goes to its district, and province drought back goes to `/`; forecast navigation preserves the selected target and T+. |
-| `DroughtWorkspaceFilters` | Forecast month, fixed drought/rice context, area navigation, T+ and irrigation status using the same selection as the chart/map. Desktop has six slots, tablet three per row and mobile two per row. Actual dropdowns reuse `AppSelect`, including its keyboard, typeahead and mobile menus. |
+| `DroughtWorkspaceFilters` | Forecast month, fixed drought/rice context, area navigation and T+. Five slots; irrigation is in `DroughtForecastArchiveMapFilters`. Actual dropdowns reuse `AppSelect`, including its keyboard, typeahead and mobile menus. |
 | `DroughtOperationalDisclosure` | Shared expandable operational content. Short titles and icons stay visible; historical evidence, agriculture, readiness and caveats remain reachable. |
 | `useDroughtReadinessMap` | Opens readiness on the existing forecast map instance. An explicit return button restores the forecast; changing target or primary T+ also returns to it. |
 | `ResearchStatGrid` | Local grid wrapper for research metric groups. |
@@ -106,7 +106,7 @@ recovery feedback. Neither resets persisted state automatically.
 | `DroughtForecastArchivePanel` | Retained archive detail design, no longer composed into the product because it repeats the primary context and totals. |
 | `DroughtForecastArchiveHorizonSelector` | Shared single-choice T+ selector for archive mode. Use exactly one selector per archive module. |
 | `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`. Its overview variant displays high, moderate, no-risk and out-of-scope counts, plus a separate missing count when necessary; detail retains coverage and subdistrict values. |
-| `DroughtForecastArchiveMapFilters` | Shared forecast archive map filter rail using `AppSelect` for target month and forecast status. Month options use month/year only from `forecastModel`; open map menus rise above the legend and lift their map container out of clipping until closed. Preserve dropdown wheel isolation from map zoom. |
+| `DroughtForecastArchiveMapFilters` | Shared map toolbar using `AppSelect` for target month, forecast status and page-wide irrigation. Its segmented color control changes encoding only; irrigation selection activates the categorical palette. Narrow layouts wrap fields within the map. Month options use month/year only from `forecastModel`; open menus rise above the legend. Preserve dropdown wheel isolation from map zoom. |
 | `ResearchDroughtSituationPanel` | Province drought status summary. |
 | `ResearchDroughtDistrictPanel` | District ranking/status module. |
 | `ResearchSubdistrictAttentionPanel` | Subdistrict attention/follow-up list. |
@@ -192,10 +192,17 @@ recovery feedback. Neither resets persisted state automatically.
 
 - Irrigation status narrows forecast counts, denominator, map eligibility,
   horizon comparison, attention lists and supporting readiness together. Keep
-  this selection through URL navigation and saved filters. Zero matching areas
+  this selection through explicit area navigation and saved filters. Choosing
+  irrigation updates React state and the current history entry's state, never
+  the URL or route. Month/risk URL writes preserve that state; bookmarks read it
+  before old query values. Zero matching areas
   are an empty filter, not a no-risk or missing-forecast result. The map-only risk
   dropdown intersects the irrigation set. See `IRRIGATION_FILTER.md` for source
-  mappings and the additive saved-filter migration required before release.
+  mappings and the already-applied additive saved-filter migration.
+- Map color mode is independent of page-wide filtering: forecast colors retain
+  hazard semantics; irrigation colors are blue `#397fc5`, purple `#9262b7`, gray
+  `#87939e`, with matching labels and legend. Choosing irrigation activates its
+  color mode. Toggling back to forecast colors does not change counts or filters.
 
 - Cleared historical datasets must not mount empty analytics, administrative
   watchlists, or a green quality-check result. Keep the designs in source and

@@ -34,8 +34,8 @@ import {
 } from "./forecastModel";
 import { DashboardSection, EmptyLocalEvidence } from "./SharedPanels";
 import { DroughtForecastArchiveHorizonSelector, DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
-import { forecastSubdistrictCodesForIrrigation, irrigationLabels, irrigationStatusFromSource } from "../../irrigation";
-import type { IrrigationFilter } from "../IrrigationStatusSelect";
+import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
+import type { ForecastMapIrrigation } from "../IrrigationStatusSelect";
 import { type DataProvenanceChipKind, DataProvenanceChip } from "../DataProvenanceChip";
 import { type AppSelectOption } from "../AppSelect";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
@@ -442,6 +442,7 @@ export function DroughtForecastWorkspaceChart({
 }
 
 export function DroughtForecastWorkspaceMapCard({
+  irrigation,
   filteredSubdistrictCodes,
   readinessMap = false,
   onCloseReadinessMap,
@@ -461,6 +462,7 @@ export function DroughtForecastWorkspaceMapCard({
   selectedSubdistrictCode,
   onSelectedSubdistrictChange,
 }: {
+  irrigation?: ForecastMapIrrigation;
   filteredSubdistrictCodes?: string[];
   readinessMap?: boolean;
   onCloseReadinessMap?: () => void;
@@ -493,7 +495,7 @@ export function DroughtForecastWorkspaceMapCard({
       <div className="nr-drought-workspace-card-heading nr-dashboard-map-header">
         <div>
           <p className="eyebrow">แผนที่</p>
-          <h3>{readinessMap ? "แผนที่ความพร้อมข้อมูลพื้นที่" : `${title} (T+${forecastArchiveHorizon})`}</h3>
+          <h3>{readinessMap ? "แผนที่ความพร้อมข้อมูลพื้นที่" : irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : `${title} (T+${forecastArchiveHorizon})`}</h3>
           <span>
             เดือนเป้าหมาย {forecastArchiveMonth.labelTh} · T+{forecastArchiveHorizon} จากรอบข้อมูล {issueMonthLabel}
           </span>
@@ -502,6 +504,7 @@ export function DroughtForecastWorkspaceMapCard({
       </div>
       {readinessMap && <button type="button" className="secondary-button nr-return-forecast" onClick={onCloseReadinessMap}>กลับแผนที่พยากรณ์</button>}
       <NakhonRatchasimaLocalMap
+        irrigation={irrigation}
         filteredSubdistrictCodes={filteredSubdistrictCodes}
         compactForecast
         researchCriteriaEnabled={!readinessMap}
@@ -549,7 +552,7 @@ export function DroughtCompactForecastWorkspace({
   selectedSubdistrictCode,
   onSelectedSubdistrictChange,
 }: {
-  irrigation: IrrigationFilter;
+  irrigation: ForecastMapIrrigation;
   readinessMap?: boolean;
   onCloseReadinessMap?: () => void;
   level: DroughtForecastArchiveLevel;
@@ -608,10 +611,7 @@ export function DroughtCompactForecastWorkspace({
     <>
     <DroughtWorkspaceHeader target={target} archiveLabel={formatMonth(archive.meta.targetMonthEnd, "th")} onNavigate={navigateWithForecast} />
     <DroughtWorkspaceFilters target={target} selectedMonth={selectedMonth} monthOptions={monthOptions} onMonthChange={changeMonth}
-      selectedHorizon={selectedHorizon} onHorizonChange={changeHorizon} onNavigate={navigateWithForecast}
-      irrigation={{ value: irrigation.value, onChange: (value) => { onCloseReadinessMap?.(); irrigation.onChange(value); } }} />
-    {irrigation.value !== "all" && <p className="nr-irrigation-scope" role="status">{irrigationLabels[irrigation.value]} · ตรงกับตัวกรอง {formatThaiNumber(matchingCodes.length)} ตำบล</p>}
-    {level === "subdistrict" && <p className="nr-irrigation-scope">สถานะชลประทานของตำบล: {irrigationLabels[irrigationStatusFromSource(archive.locations.find((location) => location.subdistrictCode === expectedSubdistrictCodes?.[0])?.irrigationStatus)]}</p>}
+      selectedHorizon={selectedHorizon} onHorizonChange={changeHorizon} onNavigate={navigateWithForecast} />
     <section className={`nr-drought-compact-workspace is-${level}${emptyIrrigationScope ? " is-empty-scope" : ""}`} aria-labelledby={`nr-drought-compact-workspace-${level}`}>
       <div className="nr-drought-workspace-head">
         <div>
@@ -656,6 +656,7 @@ export function DroughtCompactForecastWorkspace({
             />
           )}
           <DroughtForecastWorkspaceMapCard
+            irrigation={{ ...irrigation, onChange: (value) => { onCloseReadinessMap?.(); irrigation.onChange(value); } }}
             filteredSubdistrictCodes={irrigation.value === "all" ? undefined : matchingCodes}
             readinessMap={readinessMap}
             onCloseReadinessMap={onCloseReadinessMap}

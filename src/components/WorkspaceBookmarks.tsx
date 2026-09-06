@@ -14,7 +14,7 @@ export function WorkspaceBookmarks({ onNavigate }: { onNavigate: (path: string) 
   if (!services) return null;
   return <>
     <button type="button" className="secondary-button nr-bookmarks-trigger" title="รายการที่บันทึก" aria-label="รายการที่บันทึก"
-      onClick={() => { setSelection(readWorkspaceSelection(window.location)); setOpen(true); }}><Bookmark size={18} aria-hidden="true" /></button>
+      onClick={() => { setSelection(readWorkspaceSelection(window.location, window.history.state)); setOpen(true); }}><Bookmark size={18} aria-hidden="true" /></button>
     {open && <SavedWorkspaceDialog key={services.userId} services={services} selection={selection} onClose={() => setOpen(false)} onNavigate={onNavigate} />}
   </>;
 }
