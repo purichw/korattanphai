@@ -33,19 +33,40 @@ There is no arbitrary source URL, provider fallback or score transformation.
 
 - Version: `drought-rev02-9b299cefc704`.
 - Dataset ID: `9b299cef-c704-4139-8085-18664253cc80`.
-- 289 canonical codes, 127 months, 6 horizons, 220,218 vintages.
+- 289 canonical codes, 127 source months T (`2015-06` through `2025-12`),
+  6 horizons, 220,218 vintages.
 - Risk 0: 44,474; risk 1: 27,670; risk 2: 22,830; explicit null: 125,244.
 - `source_year_month` preserves `Source_YearMonth` verbatim.
-- The normalized workbook does NOT confirm whether this is issue or target
-  month. `source_time_role = UNCONFIRMED_PRODUCT_USES_TARGET` records that fact.
-- Existing product interpretation is retained: target = source month;
-  `origin_period` = derived issue month = target minus horizon. Do not describe
-  this interpretation as confirmed by the workbook.
+- The normalized workbook originally did NOT confirm whether this is issue or
+  target month. The published marker
+  `source_time_role = UNCONFIRMED_PRODUCT_USES_TARGET` records that provenance
+  and the earlier product convention; it remains unchanged.
+- Published rows retain the legacy representation: stored `target_period` =
+  source month; stored `origin_period` = source month minus horizon. These are
+  immutable storage dates, not the current product's displayed dates.
 - Crosswalk evidence preserves Source_ID, irrigation metadata, mapping method,
   flags and the known ID 222 correction. Admin codes remain the join keys.
 - Manifests store unchanged full/T+1 metadata; actual predictions live only in
   the normalized values table. The security-invoker read RPC reconstructs the
   existing archive shape and obeys table RLS, including unpublished isolation.
+
+## Forward Dates (User Confirmed 2026-09-06)
+
+The user confirmed that `Source_YearMonth` is the origin/base month T for all
+127 source months. This supersedes the previous product convention without
+rewriting the workbook's original `UNCONFIRMED` provenance. Runtime projection
+uses `issueMonth = sourcePeriod` and actual `targetMonth = sourcePeriod + horizon`.
+Selectable T remains June 2015-December 2025; targets span July 2015-June 2026.
+December 2025 T+1 targets January 2026 and T+6 targets June 2026.
+
+The canonical file, SHA-256 pins, published rows, RPC manifests and their legacy
+field names remain unchanged. `targetMonths`, `packedRiskByTargetMonth`, URL
+`target` and saved `target_period` continue to key the same source row, paired
+with its horizon. Runtime helpers ignore the manifest's backwards-calculated
+`issueMonth` for product display. Old and new links/saved filters select the same
+values and show the same forward dates. Risk `0`, `1`, `2` and explicit `null`
+keep their meanings. This change requires no schema migration, production data
+write, import, saved-row rewrite or new canonical hash.
 
 ## Import Safety
 
@@ -79,8 +100,9 @@ anonymous client. Browser clients never receive a service key or DB password.
 
 - `ktp_followed_areas`: owner UUID + canonical province/district/subdistrict
   code. Generated FK columns reject unknown areas. Opening a followed area
-  selects that area with the page's latest available archive month.
-- `ktp_saved_filters`: explicit name, view, area, dataset ID, target, horizon,
+  selects that area with the page's latest available source month T.
+- `ktp_saved_filters`: explicit name, view, area, dataset ID, source month T
+  (stored in the backward-compatible `target_period` field), horizon,
   risk status and irrigation criterion. Migration `20260906010000` adds the
   latter with default `all` and allowed values `all`, `irrigated`, `rainfed`,
   `unknown`; see `IRRIGATION_FILTER.md`. Foreign keys require a real vintage.
@@ -103,8 +125,8 @@ their original static assets; this change does not revoke old deployment URLs.
 
 `WorkspaceBookmarks` is composed once per visible desktop/mobile account
 toolbar, using the existing shared buttons and compact modal. Saving records
-target, T+, area, dataset and map risk. `mapRisk` now round-trips through URLs;
-restoring a saved item remounts only the route workspace, preserving provider
+source month T, T+, area, dataset and map risk. `mapRisk` now round-trips through
+URLs; restoring a saved item remounts only the route workspace, preserving provider
 caches while applying a saved selection even on the same route. Ordinary
 navigation/dropdown changes keep their existing lifecycle. Full CI caught and
 rejected a broader URL-keyed remount that closed the mobile filter sheet;
@@ -118,6 +140,13 @@ npm run test:e2e:database
 The UI harness runs a separate local Vite server with a fake Supabase host and
 source-backed archive responses. Personal records are test-only network
 fixtures. It never reaches the real project or saves credentials.
+
+### Historical Migration And Release Evidence
+
+The records below describe the migration/release checks under the earlier
+product convention. Month/T+ pairs identify the unchanged source-row keys;
+their old date labels do not verify the forward runtime projection confirmed
+on 2026-09-06.
 
 Local isolated PostgreSQL/PGlite: all 220,218 values imported and checked;
 full and T+1 RPC results deep-equal canonical projections; anonymous reads and
@@ -166,12 +195,15 @@ horizons; these are smoke observations, not a latency SLO. Evidence:
 and never changes predictions or personal records.
 
 Hosted candidate checks verified all 289 map statuses against source on Home
-Dec-2025 T+1, province Dec-2025 T+6 and district Jun-2015 T+2. Ban Kao Dec-2025
-T+4 is high-risk, as in the workbook. The smoke account saved Ban Kao and a named
-test filter, reloaded, and restored Dec-2025/T+4/high-risk on mobile. These two
+Dec-2025 T+1, province Dec-2025 T+6 and district Jun-2015 T+2 (source-month keys).
+Ban Kao Dec-2025 T+4 is high-risk, as in the workbook. Under the current forward
+projection its actual target is April 2026. The smoke account saved Ban Kao and a
+named test filter, reloaded, and restored Dec-2025/T+4/high-risk on mobile. These two
 personal test records remain in that account; they are not prediction data.
 Read-only role/claim simulation against those real rows verified owner reads
 and cross-owner isolation; no real second account was created.
+
+## Release Smoke Harness
 
 The release smoke harness supports `SMOKE_DATA_BACKEND=supabase`. It compares
 actual app RPC responses and all 289 rendered map classes on every tested route,

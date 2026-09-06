@@ -90,6 +90,7 @@ import {
   localMapStatusForForecastRecord,
   forecastArchiveRecordMatchesCriteria,
   forecastArchiveIssueMonthForSelection,
+  forecastArchiveTargetMonthForSelection,
   forecastArchiveRecordValueLabel,
   forecastArchiveRecordLabel,
 } from "./forecastModel";
@@ -1597,16 +1598,16 @@ export function NakhonRatchasimaLocalMap({
             </div>
             {useForecastArchiveMap && forecastArchiveMonth && (
               <div>
-                <dt>เป้าหมาย</dt>
-                <dd>{forecastArchiveMonth.labelTh}</dd>
+                <dt>เดือนที่พยากรณ์</dt>
+                <dd>{formatMonth(previewForecastRecord?.targetMonth ?? forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}</dd>
               </div>
             )}
             {useForecastArchiveMap && forecastArchiveMonth && (
               <div>
-                <dt>เดือนอ้างอิง (คำนวณ)</dt>
+                <dt>เดือนตั้งต้น (T)</dt>
                 <dd>
                   {formatMonth(
-                    forecastArchiveIssueMonth ??
+                    previewForecastRecord?.issueMonth ?? forecastArchiveIssueMonth ??
                       forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1),
                     "th",
                   )}{" "}
@@ -1668,7 +1669,7 @@ export function NakhonRatchasimaLocalMap({
       )}
       <div className="nr-map-legend" aria-label="คำอธิบายแผนที่จังหวัดนครราชสีมา">
         {useIrrigationColors ? <strong>สถานะชลประทาน</strong> : useForecastArchiveMap && forecastArchiveMonth ? (
-          <strong>พยากรณ์ {forecastArchiveMonth.labelTh}</strong>
+          <strong>พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}</strong>
         ) : useResearchCriteriaMap ? (
           <strong>
             {localMapViewOptions.find((option) => option.value === criteria.viewMode)?.label} {localResearchPeriodLabel(activeResearchPeriod)}

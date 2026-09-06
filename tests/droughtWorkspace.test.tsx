@@ -65,7 +65,13 @@ it.each([false, true])("reserves space below zero-value points for X-axis labels
   const zeroY = Number(zeroGuide.querySelector("line")!.getAttribute("y1"));
   const labels = container.querySelectorAll(".nr-forecast-axis-date");
   expect(labels).toHaveLength(6);
-  for (const label of labels) expect(Number(label.getAttribute("y")) - zeroY).toBeGreaterThanOrEqual(38);
+  for (const [index, label] of [...labels].entries()) {
+    const [horizonLabel, monthLabel] = label.querySelectorAll("tspan");
+    expect(horizonLabel.textContent).toBe(`T+${index + 1}`);
+    expect(Number(label.getAttribute("y")) - zeroY).toBeGreaterThanOrEqual(24);
+    expect(Number(label.getAttribute("y")) + Number(monthLabel.getAttribute("dy")) - zeroY).toBeGreaterThanOrEqual(40);
+    expect(monthLabel.textContent).toContain(months[index].labelTh.slice(0, 4));
+  }
 });
 
 it("renders missing and out-of-scope as separate shared stat cards", () => {

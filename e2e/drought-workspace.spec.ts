@@ -110,7 +110,8 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await page.getByRole("option", { name: "T+4", exact: true }).click();
     await expect(page).toHaveURL(/horizon=4/);
     await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
-    await expect(workspace.locator(".nr-drought-workspace-context .is-issue")).toContainText("ส.ค. 2568");
+    await expect(workspace.locator(".nr-drought-workspace-context .is-issue strong")).toHaveText("ธ.ค. 2568");
+    await expect(workspace.locator(".nr-drought-workspace-context .is-target strong")).toHaveText("เม.ย. 2569");
     if (scope !== "subdistrict") {
       await expect(workspace.locator(".nr-forecast-point-group.is-active")).toContainText("T+4");
     }
@@ -142,6 +143,66 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(1);
       await expect(map).toHaveAttribute("data-instance-probe", "same-map");
       await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
+    }
+  });
+}
+
+for (const boundary of [
+  {
+    source: "2015-06", label: "มิ.ย. 2558",
+    forecasts: ["ก.ค. 2558", "ส.ค. 2558", "ก.ย. 2558", "ต.ค. 2558", "พ.ย. 2558", "ธ.ค. 2558"],
+    counts: [[60, 32, 25, 172], [1, 1, 115, 172], [0, 4, 113, 172]],
+    homeRisks: ["moderate", "no-risk", "no-risk"],
+  },
+  {
+    source: "2025-12", label: "ธ.ค. 2568",
+    forecasts: ["ม.ค. 2569", "ก.พ. 2569", "มี.ค. 2569", "เม.ย. 2569", "พ.ค. 2569", "มิ.ย. 2569"],
+    counts: [[13, 129, 0, 147], [82, 56, 4, 147], [69, 14, 59, 147]],
+    homeRisks: ["moderate", "high", "high"],
+  },
+]) {
+  test(`source month ${boundary.source} advances forecast dates while retaining the same source risks`, async ({ page }) => {
+    await page.goto("/drought?target=2025-12&horizon=1");
+    const workspace = page.locator(".nr-drought-compact-workspace");
+    const sourceSelect = workspace.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง", exact: true });
+    await expect(sourceSelect).toContainText("ธ.ค. 2568");
+    if (boundary.source === "2015-06") {
+      await sourceSelect.click();
+      await expect(page.getByRole("option").last()).toHaveText(boundary.label);
+      await page.getByRole("option", { name: boundary.label, exact: true }).click();
+    }
+    const tabs = workspace.locator(".nr-drought-workspace-horizon").getByRole("tab");
+    await expect(tabs.locator("span")).toHaveText(boundary.forecasts);
+    const chart = workspace.locator(".nr-drought-workspace-chart-card");
+    await expect(chart.getByRole("heading", { name: "จำนวนตำบลเสี่ยงในแต่ละเดือน", exact: true })).toBeVisible();
+    await expect(chart.getByRole("img", { name: "แนวโน้มจำนวนตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า", exact: true })).toBeVisible();
+    const context = workspace.locator(".nr-drought-workspace-context");
+    const map = workspace.locator(".nr-drought-workspace-map-card");
+    for (const [index, horizon] of [1, 4, 6].entries()) {
+      const forecast = boundary.forecasts[horizon - 1];
+      await tabs.filter({ hasText: `T+${horizon}` }).click();
+      await expect(tabs.filter({ hasText: `T+${horizon}` })).toHaveAttribute("aria-selected", "true");
+      await expect(page).toHaveURL(new RegExp(`target=${boundary.source}&horizon=${horizon}`));
+      await expect(sourceSelect).toContainText(boundary.label);
+      await expect(context.locator(".is-issue dt")).toHaveText("เดือนตั้งต้น (T)");
+      await expect(context.locator(".is-issue strong")).toHaveText(boundary.label);
+      await expect(context.locator(".is-target dt")).toHaveText("เดือนที่พยากรณ์");
+      await expect(context.locator(".is-target strong")).toHaveText(forecast);
+      await expect(chart.locator(".nr-forecast-point-group.is-active")).toContainText(forecast);
+      await expect(map.locator(".nr-map-legend")).toContainText(`พยากรณ์ ${forecast}`);
+      await expect(map.locator(".nr-map-shape")).toHaveCount(289);
+      // Exact source-file counts ensure shifting dates never shifts the selected risk row.
+      for (const [riskIndex, risk] of ["high", "moderate", "no-risk", "out-of-scope"].entries()) {
+        await expect(map.locator(`.nr-map-shape.is-forecast-${risk}`)).toHaveCount(boundary.counts[index][riskIndex]);
+      }
+      const home = map.locator('.nr-map-shape[data-nr-subdistrict-code="300806"]');
+      await expect(home).toHaveClass(new RegExp(`is-forecast-${boundary.homeRisks[index]}(?:\\s|$)`));
+      await home.scrollIntoViewIfNeeded();
+      await home.focus();
+      const preview = map.locator(".nr-map-preview-card");
+      await expect(preview).toBeVisible();
+      await expect(preview.locator("dl > div").filter({ has: page.getByText("เดือนที่พยากรณ์", { exact: true }) }).locator("dd")).toHaveText(forecast);
+      await expect(preview.locator("dl > div").filter({ has: page.getByText("เดือนตั้งต้น (T)", { exact: true }) }).locator("dd")).toHaveText(`${boundary.label} · T+${horizon}`);
     }
   });
 }

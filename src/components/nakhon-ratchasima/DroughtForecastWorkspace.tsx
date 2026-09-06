@@ -31,6 +31,7 @@ import {
   forecastArchiveRecordLabel,
   type DroughtForecastWorkspaceTarget,
   forecastArchiveTrendMonthsForSelection,
+  forecastArchiveTargetMonthForSelection,
   pathWithForecastSelection,
 } from "./forecastModel";
 import { DashboardSection, EmptyLocalEvidence } from "./SharedPanels";
@@ -90,9 +91,9 @@ export function DroughtForecastTrendGraph({
         className="nr-forecast-line-svg"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="เปรียบเทียบจำนวนตำบลเสี่ยงภัยแล้ง 6 ระยะพยากรณ์ของเดือนเป้าหมายเดียวกัน"
+        aria-label="แนวโน้มจำนวนตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า"
       >
-        <title>เปรียบเทียบจำนวนตำบลเสี่ยงภัยแล้ง 6 ระยะพยากรณ์ของเดือนเป้าหมายเดียวกัน</title>
+        <title>แนวโน้มจำนวนตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า</title>
         {guideValues.map((value) => {
           const y = yForValue(value);
           return (
@@ -124,7 +125,7 @@ export function DroughtForecastTrendGraph({
         {points.map((point) => (
           <g key={point.month.period} className={`nr-forecast-point-group${point.isActive ? " is-active" : ""}`}>
             <title>
-              {point.month.labelTh} · {droughtForecastBandLabel(point.band, singleSubdistrict ? "single" : "area")}
+              T+{point.month.monthIndex} · {point.month.labelTh} · {droughtForecastBandLabel(point.band, singleSubdistrict ? "single" : "area")}
               {point.band !== "unavailable" ? ` · ${formatThaiNumber(point.month.riskSubdistricts)} ตำบลเสี่ยง` : ""}
               {` · มีค่าพยากรณ์ ${point.month.inScopeSubdistricts}/${point.month.totalSubdistricts} ตำบล · นอกขอบเขต ${point.month.outOfScopeSubdistricts} · ไม่มีข้อมูล ${point.month.missingSubdistricts}`}
             </title>
@@ -132,8 +133,9 @@ export function DroughtForecastTrendGraph({
             <text className={`nr-drought-forecast-point-label is-${point.band}`} x={point.x} y={point.y - 14}>
               {point.band === "unavailable" ? "ไม่มีค่า" : formatThaiNumber(point.month.riskSubdistricts)}
             </text>
-            <text className="nr-forecast-axis-date" x={point.x} y={height - 12}>
-              {point.month.labelTh.replace(/\s+\d{4}$/, "")}
+            <text className="nr-forecast-axis-date" x={point.x} y={height - 28}>
+              <tspan x={point.x}>T+{point.month.monthIndex}</tspan>
+              <tspan x={point.x} dy="16">{compactChart ? point.month.labelTh.replace(/\d{2}(\d{2})$/, "$1") : point.month.labelTh}</tspan>
             </text>
           </g>
         ))}
@@ -177,10 +179,10 @@ export function DroughtForecastArchivePanel({
       ? "พยากรณ์ย้อนหลังระดับอำเภอ"
       : "คำพยากรณ์ที่ใช้วาดแผนที่ย้อนหลัง";
   const sectionDescription = isSubdistrict
-    ? "เลือกรอบพยากรณ์ตาม T+ ของเดือนเป้าหมาย โดยแสดงเฉพาะข้อมูลของตำบลนี้"
+    ? "เลือกเดือนตั้งต้นและระยะพยากรณ์ T+ โดยแสดงเฉพาะข้อมูลของตำบลนี้"
     : isDistrict
-      ? "ใช้เดือนเป้าหมายจาก dropdown เดิมของแผนที่ และรวมผลเฉพาะตำบลที่มีข้อมูลในรอบเดียวกัน"
-      : "เลือกกรอบพยากรณ์ T+1 ถึง T+6 จากคลังพยากรณ์ย้อนหลัง แล้วอ่านผลบนแผนที่เป้าหมายเดียวกัน";
+      ? "ใช้เดือนตั้งต้นจากตัวเลือกของแผนที่ และรวมผลเฉพาะตำบลที่มีข้อมูลในรอบเดียวกัน"
+      : "เลือกเดือนตั้งต้นจากคลังพยากรณ์ แล้วอ่านผลล่วงหน้า 1 ถึง 6 เดือนบนแผนที่";
 
   if (!selectedMonth) {
     return (
@@ -221,14 +223,14 @@ export function DroughtForecastArchivePanel({
             </div>
           </div>
           <p>
-            สีแผนที่มาจากคำพยากรณ์รายตำบลของเดือนเป้าหมาย และแยกพื้นที่นอกขอบเขตการศึกษาออกจากพื้นที่ไม่มีความเสี่ยง
+            สีแผนที่มาจากคำพยากรณ์รายตำบลของเดือนที่พยากรณ์ และแยกพื้นที่นอกขอบเขตการศึกษาออกจากพื้นที่ไม่มีความเสี่ยง
           </p>
         </div>
-        <aside className="nr-forecast-archive-target" aria-label="บริบทเดือนเป้าหมายของแผนที่พยากรณ์">
-          <span>เป้าหมายบนแผนที่</span>
-          <strong>{selectedMonth.labelTh}</strong>
+        <aside className="nr-forecast-archive-target" aria-label="บริบทเดือนที่พยากรณ์บนแผนที่">
+          <span>เดือนที่พยากรณ์บนแผนที่</span>
+          <strong>{formatMonth(summary.targetMonth, "th")}</strong>
           <small>
-            T+{selectedHorizon} จากรอบข้อมูล {issueMonthLabel}
+            T+{selectedHorizon} · เดือนตั้งต้น {issueMonthLabel}
           </small>
         </aside>
       </div>
@@ -259,21 +261,20 @@ export function DroughtForecastWorkspaceContext({
   selectedHorizon: ForecastArchiveHorizon;
   summary: DroughtForecastArchiveSummary;
 }) {
-  const issueMonthLabel = formatMonth(summary.issueMonth, "th");
   const contextItems = [
-    {
-      id: "target",
-      icon: <MapPin size={17} />,
-      label: "เป้าหมาย",
-      value: selectedMonth.labelTh,
-      detail: `แผนที่ใช้ T+${selectedHorizon}`,
-    },
     {
       id: "issue",
       icon: <CalendarDays size={17} />,
-      label: "เดือนอ้างอิง (คำนวณ)",
-      value: issueMonthLabel,
-      detail: "คำนวณจากเดือนเป้าหมายและ T+ ยังไม่ยืนยันวันออกพยากรณ์จากต้นทาง",
+      label: "เดือนตั้งต้น (T)",
+      value: selectedMonth.labelTh,
+      detail: "เดือนเริ่มพยากรณ์ของชุดข้อมูลที่เลือก",
+    },
+    {
+      id: "target",
+      icon: <MapPin size={17} />,
+      label: "เดือนที่พยากรณ์",
+      value: formatMonth(summary.targetMonth, "th"),
+      detail: `ล่วงหน้า ${selectedHorizon} เดือน (T+${selectedHorizon})`,
     },
     {
       id: "crop",
@@ -412,11 +413,11 @@ export function DroughtForecastWorkspaceChart({
     <section className="nr-drought-workspace-chart-card" aria-labelledby="nr-drought-workspace-chart-title">
       <div className="nr-drought-workspace-card-heading">
         <div>
-          <p className="eyebrow">เปรียบเทียบ 6 ระยะพยากรณ์</p>
-          <h3 id="nr-drought-workspace-chart-title">จำนวนตำบลเสี่ยงในแต่ละระยะพยากรณ์</h3>
+          <p className="eyebrow">พยากรณ์ 6 เดือนข้างหน้า</p>
+          <h3 id="nr-drought-workspace-chart-title">จำนวนตำบลเสี่ยงในแต่ละเดือน</h3>
           <span>
             {activeForecastMonth
-              ? `เน้น T+${selectedHorizon} สำหรับ ${scopeLabel} · เดือนเป้าหมายเดียวกัน`
+              ? `เน้น T+${selectedHorizon} · ${activeForecastMonth.labelTh} · ${scopeLabel}`
               : `ยังไม่มีเดือนพยากรณ์สำหรับ ${scopeLabel}`}
           </span>
         </div>
@@ -499,7 +500,7 @@ export function DroughtForecastWorkspaceMapCard({
           <p className="eyebrow">แผนที่</p>
           <h3>{readinessMap ? "แผนที่ความพร้อมข้อมูลพื้นที่" : irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : `${title} (T+${forecastArchiveHorizon})`}</h3>
           <span>
-            เดือนเป้าหมาย {forecastArchiveMonth.labelTh} · T+{forecastArchiveHorizon} จากรอบข้อมูล {issueMonthLabel}
+            เดือนที่พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon), "th")} · T+{forecastArchiveHorizon} จากเดือนตั้งต้น {issueMonthLabel}
           </span>
         </div>
         <DataProvenanceChip kind="REAL" />
@@ -623,7 +624,7 @@ export function DroughtCompactForecastWorkspace({
         </div>
         <DataProvenanceChip kind="REAL" />
       </div>
-      <p className="nr-forecast-target-note">เป้าหมาย {selectedTargetMonth.labelTh} · T+1 ถึง T+6 เปรียบเทียบคนละระยะของเดือนเดียวกัน ไม่ใช่แนวโน้มรายเดือน</p>
+      <p className="nr-forecast-target-note">เดือนตั้งต้น {selectedTargetMonth.labelTh} · พยากรณ์ล่วงหน้า 1–6 เดือน: {trendMonths[0]?.labelTh} – {trendMonths.at(-1)?.labelTh}</p>
 
       <div className="nr-drought-workspace-body">
         <div className="nr-drought-workspace-horizon">
@@ -697,9 +698,9 @@ export function DroughtCompactForecastWorkspace({
       </DroughtOperationalDisclosure>}
       <DroughtOperationalDisclosure className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
         <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลังและความพร้อมข้อมูล</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
-        <p>กรอบ T+1 ถึง T+6 เป็นหลายรอบพยากรณ์ของเดือนเป้าหมายเดียวกัน ไม่ใช่สถานการณ์ปัจจุบันหรือการยืนยันความเสียหายทางการ</p>
+        <p>T+1 ถึง T+6 คือพยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
         <p>สีกราฟสรุปสัดส่วนจำนวนตำบล ไม่ใช่ระดับความรุนแรงรายตำบลหรือสัดส่วนเนื้อที่ เส้นครึ่งจำนวนตำบลเป็นเพียงเส้นอ้างอิง ไม่ใช่เกณฑ์เตือนภัยทางการ</p>
-        <p>เดือนอ้างอิงคำนวณจากเดือนเป้าหมายและระยะ T+ ตามข้อตกลงของระบบ ยังไม่ใช่วันออกพยากรณ์ที่ยืนยันจากต้นทาง</p>
+        <p>เดือนตั้งต้น (T) คือเดือนของข้อมูลต้นทาง เดือนที่พยากรณ์คำนวณโดยบวกระยะ T+ ข้อมูลนี้ระบุเป็นรายเดือน ไม่ได้ระบุวันออกพยากรณ์</p>
       </DroughtOperationalDisclosure>
     </div>
     </>

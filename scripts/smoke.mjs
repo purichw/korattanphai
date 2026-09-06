@@ -109,6 +109,8 @@ try {
           const summary = page.locator(".nr-forecast-overview-summary");
           await summary.waitFor();
           assert.deepEqual(await summary.locator(".metric-card-value").allTextContents(), ["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"], `${name}: latest T+1 forecast counts`);
+          await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
+          await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
           assert.equal(new URL(page.url()).searchParams.get("target"), "2025-12");
           assert.equal(new URL(page.url()).searchParams.get("horizon"), "1");
           await page.screenshot({ path: path.join(output, `${name}-overview.png`), fullPage: true });
@@ -116,11 +118,17 @@ try {
         if (route.includes("target=")) {
           await page.locator(".nr-drought-compact-workspace").waitFor();
           assert.match(await page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).innerText(), route.includes("horizon=4") ? /T\+4/ : /T\+1/);
+          const forecastMonth = route.includes("horizon=4") ? "เม.ย. 2569" : "ม.ค. 2569";
+          await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).locator("span")).toHaveText(forecastMonth);
+          await expect(page.locator(".nr-drought-workspace-context .is-issue dt")).toHaveText("เดือนตั้งต้น (T)");
+          await expect(page.locator(".nr-drought-workspace-context .is-issue strong")).toHaveText("ธ.ค. 2568");
+          await expect(page.locator(".nr-drought-workspace-context .is-target dt")).toHaveText("เดือนที่พยากรณ์");
+          await expect(page.locator(".nr-drought-workspace-context .is-target strong")).toHaveText(forecastMonth);
           assert.equal(await page.locator(".nr-drought-workspace-details, .nr-forecast-archive-mode-section, .nr-agri-impact-module").count(), 0, `${name}: duplicate or unsupported panels`);
         }
         if (route.startsWith("/drought")) {
           assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /142\/289/);
-          assert.match(await page.locator(".nr-forecast-target-note").innerText(), /ไม่ใช่แนวโน้มรายเดือน/);
+          await expect(page.locator(".nr-forecast-target-note")).toHaveText("เดือนตั้งต้น ธ.ค. 2568 · พยากรณ์ล่วงหน้า 1–6 เดือน: ม.ค. 2569 – มิ.ย. 2569");
         }
         if (route.includes("/t-300806")) {
           const kpis = page.locator(".nr-drought-workspace-kpis");

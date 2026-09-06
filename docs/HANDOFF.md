@@ -20,6 +20,47 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Forward forecast semantics and UI terminology (2026-09-06, local work):
+
+- The user confirmed that Excel `Source_YearMonth` is origin T for every
+  source month, including June 2015. Runtime `issueMonth = T` and
+  `targetMonth = T + horizon`: June 2015 forecasts July-December 2015;
+  December 2025 forecasts January-June 2026. This supersedes the previous
+  fixed-target/backwards-reference product convention below. The original
+  normalized workbook's `UNCONFIRMED` marker remains historical provenance.
+- `src/forecastPeriod.ts` owns shared calendar-month arithmetic;
+  `forecastModel.ts` projects dates for Home, province, district, subdistrict,
+  graphs and maps. UI consistently distinguishes `เดือนตั้งต้น (T)` from
+  `เดือนที่พยากรณ์`, including filters, horizon subtitles, map previews,
+  loading placeholders, guidance, and saved-selection descriptions.
+- Immutable canonical/generated JSON and published database/RPC payloads are
+  unchanged. Legacy `targetMonths`, `packedRiskByTargetMonth`, URL `target`,
+  and saved `target_period` still identify the source row T. Old saved links
+  retain the same source/horizon/risk while displaying forward dates. No data
+  migration is needed. Active contracts are updated in DATA_CONTRACT,
+  ARCHITECTURE, APP_MAP, SHARED_COMPONENTS and SUPABASE_DATA_MIGRATION.
+- Validation: 53 targeted unit tests passed, including exhaustive preservation
+  of all 220,218 projected source/horizon records across 127 months; 40 built
+  browser tests passed for drought scopes, overview and loading; four isolated
+  Supabase-provider/bookmark browser tests passed on desktop/mobile. Four
+  additional focused boundary checks passed on the isolated development server.
+  After matching loading-label order and chart wording to the ready state,
+  the protected build and six affected desktop/mobile loading checks passed
+  again (`tmp-snapshots/forward-forecast-loading-final-20260906/`).
+  A protected static build passed typecheck, exposure and bundle guards, and
+  verified unchanged canonical archive bytes. Vite's existing chunk-size
+  advisory remains within the enforced budgets.
+- Current desktop/mobile screenshots and inspection report are in
+  `tmp-snapshots/source-month-semantics/`: Dec-2025/T+4 subdistrict and
+  Jun-2015/T+6 province, with chart context crops. Origin/target labels,
+  year rollover, and graph date spacing were inspected; no horizontal overflow
+  or browser errors. Test outputs are in
+  `tmp-snapshots/forward-forecast-built-e2e-20260906/` and
+  `tmp-snapshots/forward-forecast-database-e2e-20260906/`.
+- These changes are uncommitted and have not been pushed or deployed. The
+  production release below remains current. No real API writes, production
+  smoke, schema/auth changes, full release suite or physical-device checks.
+
 Shared operational-card alignment production release (2026-09-06):
 
 - Released runtime `922e28aef6e62f0a531ba47bda6efee80285d739` to

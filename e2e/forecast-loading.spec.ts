@@ -24,6 +24,10 @@ for (const [name, path, request, title] of [
       await expect(loading.locator(".nr-loading-map")).toBeVisible();
       await expect(loading.locator(".nr-loading-chart")).toHaveCount(name === "overview" || name === "subdistrict" ? 0 : 1);
       await expect(loading.locator(".nr-loading-metrics.is-single .metric-card")).toHaveCount(name === "subdistrict" ? 1 : 0);
+      if (name !== "overview") {
+        await expect(loading.locator(".nr-loading-context small").nth(0)).toHaveText("เดือนตั้งต้น (T)");
+        await expect(loading.locator(".nr-loading-context small").nth(1)).toHaveText("เดือนที่พยากรณ์");
+      }
       expect(await loading.innerText()).not.toMatch(/0 ตำบล|\d+%/);
       expect(await loading.locator(".nr-skeleton").first().evaluate(node => getComputedStyle(node).animationName)).toBe("none");
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
@@ -70,7 +74,8 @@ test("login and overview defer the archive while preserving summary and forecast
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   const summary = page.locator(".nr-forecast-overview");
   await expect(summary).toContainText("142/289 ตำบล");
-  await expect(summary).toContainText("ธ.ค. 2568");
+  await expect(summary.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
+  await expect(summary.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
   expect(archiveRequests).toBe(0);
   await summary.locator(".nr-forecast-overview-details").click();
@@ -95,6 +100,7 @@ test("failed archive loads can retry without losing target or horizon", async ({
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("T+4");
+  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).locator("span")).toHaveText("เม.ย. 2569");
   await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   await expect(page).toHaveURL(/target=2025-12&horizon=4/);
   expect(attempts).toBe(2);

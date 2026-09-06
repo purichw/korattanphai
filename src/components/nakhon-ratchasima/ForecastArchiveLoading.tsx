@@ -34,7 +34,7 @@ function LoadingFilters({ overview = false, target }: { overview?: boolean; targ
   const area = !target ? undefined : target.level === "province" ? "ทุกอำเภอ" : target.level === "district" ? "ทุกตำบล" : target.subdistrict.nameTh;
   return <div className={`nr-loading-filters${overview ? " is-overview" : ""}`}>
     {overview && <div className="nr-loading-filter-heading">ตัวกรองข้อมูล</div>}
-    <LoadingField label="เป้าหมาย" icon={<CalendarDays size={20} />} />
+    <LoadingField label="เดือนตั้งต้น" icon={<CalendarDays size={20} />} />
     <LoadingField label="ภัย" value="ภัยแล้ง" icon={<ShieldCheck size={20} />} />
     <LoadingField label="พืช" value="ข้าว" icon={<Leaf size={20} />} />
     <LoadingField label={!target || target.level === "province" ? "อำเภอ" : "ตำบล"} value={area} icon={<MapPin size={20} />} />
@@ -59,7 +59,7 @@ function LoadingMap() {
 
 function LoadingChart() {
   return <div className="nr-loading-chart">
-    <h3>จำนวนตำบลเสี่ยงในแต่ละระยะพยากรณ์</h3>
+    <h3>จำนวนตำบลเสี่ยงในแต่ละเดือน</h3>
     <div className="nr-loading-chart-surface"><TrendingUp size={32} strokeWidth={1.25} aria-hidden="true" /></div>
     <Skeleton className="is-line" />
   </div>;
@@ -100,7 +100,7 @@ export function DroughtWorkspaceLoading({ target, failed, retry, onNavigate }: L
         <div className="nr-loading-forecast-heading"><h2>{single ? "พยากรณ์ภัยแล้งรายตำบล" : "เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6"}</h2><Skeleton className="is-line" /></div>
         <div className="nr-loading-horizons">{[1, 2, 3, 4, 5, 6].map((horizon) => <div key={horizon}><strong>T+{horizon}</strong><Skeleton /></div>)}</div>
         <div className={`nr-loading-context${single ? " is-single" : ""}`}>
-          {(single ? ["เป้าหมาย", "เดือนอ้างอิง", "พืชที่ประเมิน"] : ["เป้าหมาย", "เดือนอ้างอิง", "มีค่าพยากรณ์", "พืชที่ประเมิน"]).map((label) => <div key={label}><small>{label}</small><Skeleton className="is-value" /></div>)}
+          {(single ? ["เดือนตั้งต้น (T)", "เดือนที่พยากรณ์", "พืชที่ประเมิน"] : ["เดือนตั้งต้น (T)", "เดือนที่พยากรณ์", "มีค่าพยากรณ์", "พืชที่ประเมิน"]).map((label) => <div key={label}><small>{label}</small><Skeleton className="is-value" /></div>)}
         </div>
         <LoadingMap />
         {!single && <LoadingChart />}

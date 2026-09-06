@@ -10,6 +10,9 @@ import { type AppSelectOption } from "../AppSelect";
 import { type LocalMapStatus, type LocalRiskCriterion } from "./workspaceModel";
 import { type NakhonRatchasimaRouteTarget } from "../../domain";
 import { irrigationHistoryState, readIrrigationSelection, type ForecastMapColorMode, type IrrigationCriterion } from "../../irrigation";
+import { forecastTargetPeriod } from "../../forecastPeriod";
+import { formatMonth } from "../../i18n";
+export { shiftMonthPeriod } from "../../forecastPeriod";
 
 export type DroughtForecastBand = "unavailable" | "normal" | "watch" | "severe";
 
@@ -97,14 +100,9 @@ export function normalizeForecastArchiveHorizon(value: string | number | null | 
     : 1;
 }
 
-export function shiftMonthPeriod(period: string, monthOffset: number) {
-  const [year, monthIndex] = period.split("-").map(Number);
-  if (!Number.isFinite(year) || !Number.isFinite(monthIndex)) return null;
-  const date = new Date(Date.UTC(year, monthIndex - 1 + monthOffset, 1));
-  const shiftedMonth = `${date.getUTCMonth() + 1}`.padStart(2, "0");
-  return `${date.getUTCFullYear()}-${shiftedMonth}`;
-}
-
+// The immutable archive/RPC and legacy URL use "target" in their field names.
+// These keys preserve the original Excel source row, now confirmed as origin T.
+// Derive product dates here; never use the old manifest's backwards issue dates.
 export function forecastArchiveDefaultTargetMonth(archive: NakhonRatchasimaDroughtForecastArchive) {
   return (
     archive.targetMonths.find((month) => month.period === archive.meta.targetMonthEnd) ??
@@ -149,13 +147,16 @@ export function pathWithForecastSelection(path: string, period: string, horizon:
 
 export function forecastArchiveIssueMonthForSelection(
   month: NakhonRatchasimaDroughtForecastArchiveTargetMonth,
+  _horizon: ForecastArchiveHorizon,
+) {
+  return month.period;
+}
+
+export function forecastArchiveTargetMonthForSelection(
+  month: NakhonRatchasimaDroughtForecastArchiveTargetMonth,
   horizon: ForecastArchiveHorizon,
 ) {
-  return (
-    month.horizons.find((item) => item.horizon === horizon)?.issueMonth ??
-    shiftMonthPeriod(month.period, -horizon) ??
-    month.period
-  );
+  return forecastTargetPeriod(month.period, horizon);
 }
 
 export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDroughtForecastArchive, fixedHorizon?: ForecastArchiveHorizon) {
@@ -170,13 +171,13 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
   const selectedMonth =
     archive.targetMonths.find((month) => month.period === selection.selectedTargetPeriod) ??
     forecastArchiveDefaultTargetMonth(archive);
-  const selectedIssueMonth = selectedMonth ? forecastArchiveIssueMonthForSelection(selectedMonth, selectedHorizon) : archive.meta.issueMonthEnd;
+  const selectedIssueMonth = selectedMonth?.period ?? archive.meta.targetMonthEnd;
   const targetMonthOptions = useMemo<AppSelectOption[]>(
     () =>
       [...archive.targetMonths].reverse().map((month) => ({
         value: month.period,
         label: month.labelTh,
-        group: "เดือนเป้าหมาย",
+        group: "เดือนตั้งต้น",
       })),
     [archive],
   );
@@ -265,7 +266,7 @@ export function forecastArchiveRecordForSubdistrict({
     districtCode: location.districtCode,
     districtNameTh: location.districtNameTh,
     sourceYearMonth: month.period,
-    targetMonth: month.period,
+    targetMonth: forecastArchiveTargetMonthForSelection(month, horizon),
     issueMonth,
     horizon,
     horizonLabel: `T+${horizon}`,
@@ -317,6 +318,7 @@ export function forecastArchiveSummaryForSelection(
 
   return {
     issueMonth: forecastArchiveIssueMonthForSelection(month, horizon),
+    targetMonth: forecastArchiveTargetMonthForSelection(month, horizon),
     inScopeSubdistricts,
     matchedSubdistricts: recordsBySubdistrict.size,
     missingSubdistricts: Math.max(0, totalSubdistricts - recordsBySubdistrict.size),
@@ -340,8 +342,8 @@ export function forecastArchiveTrendMonthsForSelection(
     const totalSubdistricts = summary.totalSubdistricts;
     return {
       monthIndex: horizon,
-      period: `${month.period}-t-plus-${horizon}`,
-      labelTh: `T+${horizon}`,
+      period: summary.targetMonth,
+      labelTh: formatMonth(summary.targetMonth, "th"),
       riskSubdistricts: summary.riskSubdistricts,
       normalSubdistricts: summary.noRiskSubdistricts,
       totalSubdistricts,

@@ -81,7 +81,8 @@ Boundary rules:
   full/T+1 projections. Static archive loaders/assets are replaced at build time;
   network errors do not fall back to JSON. Logout/account changes clear caches.
 - `WorkspaceBookmarks` is shared by desktop/mobile account toolbars. Structured
-  selections preserve area, target, T+, dataset and map risk. Only restoring a
+  selections preserve area, source month T, T+, dataset and map risk. Legacy
+  `target`/`target_period` fields continue to key that source month. Only restoring a
   saved item remounts the route workspace; normal filter dialogs remain open.
 - `src/domain.ts` owns deterministic joins and derived summaries.
 - `src/store.tsx` owns UI state, workflow transitions, and local persistence.
@@ -114,9 +115,11 @@ Boundary rules:
   `getNakhonRatchasimaRainfall*` selectors and must keep direct-station coverage
   separate from nearest-station representative context.
 - Drought forecast archive calculations live in
-  `src/components/nakhon-ratchasima/forecastModel.ts`. They must preserve target
-  month, issue month, and T+ horizon instead of reducing the archive to a single
-  latest-risk value.
+  `src/components/nakhon-ratchasima/forecastModel.ts`, using shared calendar-month
+  arithmetic in `src/forecastPeriod.ts` for forecast views and saved selections.
+  They preserve the source month T and T+ horizon, deriving origin = T and actual
+  target = T+horizon for product display instead of using the legacy manifest's
+  backwards issue date.
 
 ## Frontend / Backend / API Ownership
 
@@ -228,10 +231,16 @@ needs audit:
   source of truth for whether a subdistrict has a direct station, nearest
   station, or no available source. Nearest-station context must never be rendered
   as a direct subdistrict reading.
-- For the drought forecast archive, `Source_YearMonth` is the target month and
-  `issueMonth = targetMonth - horizon`. The record identity is
-  `subdistrictCode + targetMonth + horizon`; equal numeric values across T+
-  horizons are still different forecast vintages.
+- For the drought forecast archive, the user confirmed on 2026-09-06 that
+  `Source_YearMonth` is the origin/base month T for all 127 source months.
+  Runtime projection uses `issueMonth = sourcePeriod` and actual
+  `targetMonth = sourcePeriod + horizon`. The record identity remains
+  `subdistrictCode + sourcePeriod + horizon`; equal numeric values across T+
+  horizons are still different forecast vintages. Canonical bytes, published
+  rows/RPC manifests and legacy source-month keys (`targetMonths`,
+  `packedRiskByTargetMonth`, URL `target`, saved `target_period`) remain unchanged.
+  The old fixed-target convention and workbook's original `UNCONFIRMED` marker
+  remain historical provenance only; see `DATA_CONTRACT.md`.
 - Archive risk values are `0` no forecast risk, `1` moderate forecast risk,
   `2` high forecast risk, and blank workbook cells are out of scope. Missing
   joined records are a different data-quality issue.
@@ -267,9 +276,10 @@ PROPOSAL:
 - Nakhon Ratchasima rainfall coverage: 49 stations, 29 direct-station
   subdistricts, and 260 nearest-station records with explicit distance and
   confidence.
-- Nakhon Ratchasima drought archive coverage: 289 mapped Source_IDs, 127 target
-  months from `2015-06` through `2025-12`, 6 horizons, and 220,218 canonical
-  forecast vintages.
+- Nakhon Ratchasima drought archive coverage: 289 mapped Source_IDs, 127 source
+  months T from `2015-06` through `2025-12`, 6 forward horizons, and 220,218
+  canonical forecast vintages. Actual target dates span `2015-07` through
+  `2026-06`.
 - 22-month province coverage and 1,694 province-month records.
 - Thai-only visible production UI; no TH/EN switch.
 - Farmer alert gating after advisory publication.

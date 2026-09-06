@@ -84,7 +84,7 @@ import {
   getNakhonRatchasimaSourceRows,
 } from "../../domain";
 import { type AppSelectOption } from "../AppSelect";
-import { type ForecastArchiveHorizon, forecastArchiveIssueMonthForSelection } from "./forecastModel";
+import { type ForecastArchiveHorizon, forecastArchiveIssueMonthForSelection, forecastArchiveTargetMonthForSelection } from "./forecastModel";
 import { formatMonth, severityLabel, labelConfidence } from "../../i18n";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
 import forecastArchiveOverview from "../../data/generated/forecast-archive-summary.json";
@@ -269,7 +269,7 @@ export function ResearchSourceLimitsPanel({ research }: { research: NakhonRatcha
             </div>
             <div>
               <dt>ข้อมูลพยากรณ์</dt>
-              <dd>พยากรณ์ภัยแล้ง T+1 ถึง T+6 ของเดือนเป้าหมายที่เลือก</dd>
+              <dd>พยากรณ์ภัยแล้งล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก</dd>
             </div>
             <div>
               <dt>ข้อมูลรายเดือน</dt>
@@ -452,7 +452,7 @@ export function ResearchAreaMapSection({
       : "แผนที่ตำบล";
   const description =
     hasForecastArchive && forecastArchiveMonth
-      ? `เดือนเป้าหมาย ${forecastArchiveMonth.labelTh} · T+${forecastArchiveHorizon ?? 1} จากรอบข้อมูล ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
+      ? `เดือนที่พยากรณ์ ${formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")} · T+${forecastArchiveHorizon ?? 1} จากเดือนตั้งต้น ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
       : isSubdistrict
         ? "แผนที่แสดงตำแหน่งและระดับความเสี่ยงของตำบลนี้ตามข้อมูลปัจจุบัน"
         : "ใช้ตัวกรองร่วมกันบนแผนที่: ข้อมูลรองรับและระดับความเสี่ยง สามารถกรองซ้อนกันแบบตรงทุกเงื่อนไขได้";
@@ -882,7 +882,7 @@ export function ProvinceForecastArchiveEntryCard() {
           </dd>
         </div>
         <div>
-          <dt>เดือนเป้าหมาย</dt>
+          <dt>เดือนตั้งต้น</dt>
           <dd>{leadMonth ? leadMonth.labelTh : "รอข้อมูล"}</dd>
         </div>
         <div>
@@ -949,7 +949,7 @@ export function ProvinceDashboardMapCard({
   const title = readinessMode ? "แผนที่ความพร้อมข้อมูลพื้นที่" : hasForecastArchive && irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     hasForecastArchive && forecastArchiveMonth
-      ? `เดือนเป้าหมาย ${forecastArchiveMonth.labelTh} · T+${forecastArchiveHorizon ?? 1} จากรอบข้อมูล ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
+      ? `เดือนที่พยากรณ์ ${formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")} · T+${forecastArchiveHorizon ?? 1} จากเดือนตั้งต้น ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
       : activeTab === "drought"
       ? activeResearchPeriod.isCleared
         ? "ยังไม่มีชุดข้อมูลภัยแล้งรายตำบลสำหรับแผนที่ รอชุดข้อมูลใหม่"

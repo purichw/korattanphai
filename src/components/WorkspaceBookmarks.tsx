@@ -5,7 +5,14 @@ import { savedWorkspaceError, type FollowedArea, type SavedFilter, type SavedFor
 import { readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../savedWorkspaceRoutes';
 import { formatMonth } from '../i18n';
 import { irrigationLabels } from '../irrigation';
+import { forecastTargetPeriod } from '../forecastPeriod';
 import '../saved-workspaces.css';
+
+function selectionPeriodLabel(selection: SavedForecastSelection) {
+  // target_period is the persisted source-row key, retained for existing saves.
+  const origin = selection.target_period.slice(0, 7);
+  return `เดือนตั้งต้น ${formatMonth(origin, 'th')} → ${formatMonth(forecastTargetPeriod(origin, selection.horizon), 'th')} (T+${selection.horizon})`;
+}
 
 export function WorkspaceBookmarks({ onNavigate }: { onNavigate: (path: string) => void }) {
   const services = useDatabaseWorkspace();
@@ -36,7 +43,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
   const [message, setMessage] = useState('');
   const [confirm, setConfirm] = useState<string | null>(null);
   const area = selection ? savedAreaInfo(selection.area_code) : null;
-  const [name, setName] = useState(selection && area ? `${area.label.split(' · ')[0]} ${formatMonth(selection.target_period.slice(0,7), 'th')} T+${selection.horizon}` : '');
+  const [name, setName] = useState(selection && area ? `${area.label.split(' · ')[0]} ตั้งต้น ${formatMonth(selection.target_period.slice(0,7), 'th')} T+${selection.horizon}` : '');
 
   async function refresh(signal: AbortSignal) {
     const nextAreas = await services.saved.listAreas(signal);
@@ -77,7 +84,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
     return { id: item.area_code, label: info?.label ?? item.area_code, path: info?.path ?? null, detail: '' };
   }) : filters.map((item) => ({
     id: item.id, label: item.name, path: savedFilterPath(item),
-    detail: `${savedAreaInfo(item.area_code)?.label ?? item.area_code} · ${formatMonth(item.target_period.slice(0,7), 'th')} · T+${item.horizon} · ${irrigationLabels[item.irrigation_criterion ?? 'all']}`,
+    detail: `${savedAreaInfo(item.area_code)?.label ?? item.area_code} · ${selectionPeriodLabel(item)} · ${irrigationLabels[item.irrigation_criterion ?? 'all']}`,
   }));
   return <dialog ref={dialog} className="nr-saved-dialog" aria-labelledby={`${id}-title`} onCancel={onClose} onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <div className="nr-saved-dialog-body">
@@ -101,7 +108,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
           <label htmlFor={`${id}-name`}>ชื่อตัวกรอง</label>
           <div><input id={`${id}-name`} value={name} onChange={(event) => setName(event.target.value)} maxLength={80} required disabled={busy} />
             <button type="submit" className="primary-button" disabled={busy || !name.trim()}><Plus size={17} />บันทึก</button></div>
-          <small>{area.label} · {formatMonth(selection.target_period.slice(0,7), 'th')} · T+{selection.horizon} · {irrigationLabels[selection.irrigation_criterion ?? 'all']}</small>
+          <small>{area.label} · {selectionPeriodLabel(selection)} · {irrigationLabels[selection.irrigation_criterion ?? 'all']}</small>
         </form> : <p className="empty-note">รอข้อมูลพยากรณ์พร้อมก่อนบันทึกตัวกรอง</p>}
         {error && <div role="alert" className="nr-saved-error"><span>{error}</span><button type="button" className="secondary-button" disabled={busy} onClick={() => void perform()}><RotateCcw size={16} />ลองใหม่</button></div>}
         <p role="status" className="nr-saved-status">{busy ? 'กำลังโหลดรายการ...' : message}</p>

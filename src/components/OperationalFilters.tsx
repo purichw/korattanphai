@@ -25,6 +25,7 @@ type FilterSummaryItem = {
 };
 
 type OperationalFiltersProps = {
+  monthFieldLabel?: string;
   monthOptions?: AppSelectOption[];
   monthValue?: string;
   onMonthChange?: (month: string) => void;
@@ -63,6 +64,7 @@ export function provinceOptionsForMonth(month: string): AppSelectOption[] {
 }
 
 export function OperationalFilters({
+  monthFieldLabel,
   monthOptions,
   monthValue,
   onMonthChange,
@@ -84,6 +86,7 @@ export function OperationalFilters({
   const editButtonRef = useRef<HTMLButtonElement | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const language = state.language;
+  const resolvedMonthFieldLabel = monthFieldLabel ?? t("month", language);
   const selectedMonth = monthValue ?? state.selectedMonth;
   const changeMonth = onMonthChange ?? ((month: string) => dispatch({ type: "setMonth", month }));
   const baseMonthOptions =
@@ -118,7 +121,7 @@ export function OperationalFilters({
     : null;
   const summaryItems = useMemo<FilterSummaryItem[]>(() => {
     const items: FilterSummaryItem[] = [
-      { id: "month", label: t("month", language), value: monthLabel, icon: <CalendarDays size={16} /> },
+      { id: "month", label: resolvedMonthFieldLabel, value: monthLabel, icon: <CalendarDays size={16} /> },
       { id: "hazard", label: t("hazard", language), value: hazardLabel, icon: <ShieldAlert size={16} /> },
       { id: "crop", label: t("crop", language), value: cropLabel, icon: <Leaf size={16} /> },
     ];
@@ -134,7 +137,7 @@ export function OperationalFilters({
       });
     });
     return items;
-  }, [areaSelectConfig?.label, areaSummaryLabel, compactOverview, contextChips, cropLabel, hazardLabel, language, monthLabel]);
+  }, [areaSelectConfig?.label, areaSummaryLabel, compactOverview, contextChips, cropLabel, hazardLabel, language, monthLabel, resolvedMonthFieldLabel]);
 
   useEffect(() => {
     if (!isEditorOpen) return;
@@ -190,7 +193,7 @@ export function OperationalFilters({
     >
       <div className="operational-filter-fields">
         <AppSelect
-          label={t("month", language)}
+          label={resolvedMonthFieldLabel}
           icon={compactOverview ? <CalendarDays size={20} /> : undefined}
           compactValue={compactOverview}
           value={selectedMonth}
@@ -290,9 +293,9 @@ export function OperationalFilters({
             </header>
             <div className="operational-filter-sheet-fields">
               <div className="operational-filter-sheet-row">
-                <span>เดือน</span>
+                <span>{resolvedMonthFieldLabel}</span>
                 <AppSelect
-                  ariaLabel="เลือกเดือน"
+                  ariaLabel={`เลือก${resolvedMonthFieldLabel}`}
                   value={selectedMonth}
                   onChange={changeMonth}
                   options={resolvedMonthOptions}

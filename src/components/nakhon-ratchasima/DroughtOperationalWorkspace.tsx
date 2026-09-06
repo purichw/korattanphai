@@ -32,7 +32,7 @@ export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
     </button>}
     <h1>ภัยแล้ง{target.level !== "province" && <span> · {scope}</span>}</h1>
     <p>ติดตามสถานการณ์และคาดการณ์พื้นที่เสี่ยงภัยแล้งของ{scope}</p>
-    <small>{archiveLabel && <>คลังพยากรณ์ถึง {archiveLabel} · </>}ข้อมูลพยากรณ์ย้อนหลัง ไม่ใช่สถานการณ์ปัจจุบัน</small>
+    <small>{archiveLabel && <>เดือนตั้งต้นล่าสุดในคลัง {archiveLabel} · </>}ข้อมูลพยากรณ์ย้อนหลัง ไม่ใช่สถานการณ์ปัจจุบัน</small>
   </header>;
 }
 
@@ -50,7 +50,7 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
     ? [{ value: "", label: "ทุกอำเภอ" }, ...districtOptionsForProvince().map(({ value, label }) => ({ value, label }))]
     : [{ value: "", label: "ทุกตำบล" }, ...target.district.subdistricts.map((item) => ({ value: item.subdistrictCode, label: item.nameTh ?? item.name }))];
   return <section className="nr-operational-filters" aria-label="ตัวกรองข้อมูลพื้นที่นครราชสีมา">
-    <AppSelect label="เป้าหมาย" ariaLabel="เดือนเป้าหมาย" icon={<CalendarDays size={20} />} value={selectedMonth}
+    <AppSelect label="เดือนตั้งต้น" ariaLabel="เดือนตั้งต้น" icon={<CalendarDays size={20} />} value={selectedMonth}
       compactValue options={monthOptions} onChange={onMonthChange} />
     <div className="nr-fixed-filter"><ShieldCheck size={20} aria-hidden="true" /><span>ภัย<strong>ภัยแล้ง</strong></span></div>
     <div className="nr-fixed-filter"><Sprout size={20} aria-hidden="true" /><span>พืช<strong>ข้าว</strong></span></div>

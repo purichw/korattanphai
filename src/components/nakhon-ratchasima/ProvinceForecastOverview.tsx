@@ -88,13 +88,14 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         <div>
           <p className="eyebrow">ภาพรวมสถานการณ์</p>
           <h1>จังหวัดนครราชสีมา</h1>
-          <p className="nr-forecast-overview-context"><strong>พยากรณ์ {month.labelTh}</strong><span>ล่วงหน้า 1 เดือน (T+1) · เดือนอ้างอิง (คำนวณ) {formatMonth(summary.issueMonth, "th")}</span></p>
+          <p className="nr-forecast-overview-context"><strong>พยากรณ์ {formatMonth(summary.targetMonth, "th")}</strong><span>ล่วงหน้า 1 เดือน (T+1) · เดือนตั้งต้น (T) {formatMonth(summary.issueMonth, "th")}</span></p>
         </div>
-        <p><DataProvenanceChip kind="REAL" />เป้าหมายล่าสุดในคลัง {formatMonth(archive.meta.targetMonthEnd, "th")} · ไม่ใช่ข้อมูลสด</p>
+        <p><DataProvenanceChip kind="REAL" />เดือนตั้งต้นล่าสุดในคลัง {formatMonth(archive.meta.targetMonthEnd, "th")} · ไม่ใช่ข้อมูลสด</p>
       </header>
       <OperationalFilters
         compactOverview
-        monthOptions={forecast.targetMonthOptions.map((option) => ({ ...option, triggerLabel: `${formatMonth(option.value, "th")} (T+1)` }))}
+        monthFieldLabel="เดือนตั้งต้น"
+        monthOptions={forecast.targetMonthOptions}
         monthValue={month.period}
         onMonthChange={changeMonth}
         areaLabel="อำเภอ"
@@ -166,7 +167,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
                 </li>
               ))}
             </ul>
-          </> : <p>{summary.inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในขอบเขตที่เลือก" : "ไม่พบตำบลที่พยากรณ์เสี่ยงสูงในเดือนที่เลือก"}</p>}
+          </> : <p>{summary.inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในขอบเขตที่เลือก" : "ไม่พบตำบลที่พยากรณ์เสี่ยงสูงในเดือนที่พยากรณ์"}</p>}
           <a className="secondary-button nr-forecast-overview-details" href={detailsHref}>
             ดูพยากรณ์ T+1–T+6{district ? ` · ${scopeLabel}` : ""}<ArrowRight size={16} />
           </a>
@@ -179,7 +180,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
           setSelectedSubdistrictCode(null);
           window.requestAnimationFrame(() => document.querySelector(".nr-forecast-overview-map")?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" }));
         }} />}
-        <section className="nr-home-archive"><h3><MapIcon size={22} aria-hidden="true" />คลังพยากรณ์ย้อนหลัง</h3><a href={withForecast("/drought")}><MapIcon size={30} aria-hidden="true" /><span><strong>ดูสถานการณ์ย้อนหลัง</strong><small>T+1 ถึง T+6</small></span><ArrowRight size={20} /></a></section>
+        <section className="nr-home-archive"><h3><MapIcon size={22} aria-hidden="true" />คลังพยากรณ์ย้อนหลัง</h3><a href={withForecast("/drought")}><MapIcon size={30} aria-hidden="true" /><span><strong>ดูพยากรณ์ล่วงหน้า</strong><small>T+1 ถึง T+6</small></span><ArrowRight size={20} /></a></section>
       </section>
       <footer className="nr-home-footer">
       <p className="nr-forecast-overview-support-note">{hasAgriculture ? `ข้อมูลเกษตรระดับจังหวัด · ${formatMonth(provinceRecord.month, "th")} · ตัวเลขไร่และความเชื่อมั่นเป็นคนละชุดกับพยากรณ์รายตำบล` : "ความพร้อมข้อมูลเป็นข้อมูลประกอบ ไม่ใช่ความแม่นยำของแบบจำลองพยากรณ์"}</p>

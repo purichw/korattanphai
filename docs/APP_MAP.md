@@ -30,7 +30,7 @@ Primary user-facing surface:
   weather, and rainfall catalog entries are retained in source but hidden from
   the current product UI.
 - Drought pages at province, district, and subdistrict level include the shared
-  source-backed forecast archive experience: target month selection, one T+
+  source-backed forecast archive experience: origin/base month T selection, one T+
   horizon selector, archive summary metrics, shared map filters, the local
   Nakhon map, trend context, readiness, and source/limitation disclosures. These
   pages use the same archive fixture and semantics across all three geography
@@ -41,8 +41,10 @@ or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
 
 Database mode adds a shared bookmark control in the desktop/mobile account
 toolbar, not a new route. Its modal lists followed areas and saved filters for
-the authenticated user. Restoring an item preserves target, horizon, area and
-map risk, including restoration on the same pathname.
+the authenticated user. Restoring an item preserves source month T, horizon,
+area and map risk, including restoration on the same pathname. Existing and new
+links/saved filters keep the same source-row values; legacy `target` query and
+saved `target_period` keys still identify T, with forward dates derived at runtime.
 
 ## Admin / Internal Routes
 
@@ -93,10 +95,12 @@ needs audit:
 - Nakhon Ratchasima local controls mirror the nationwide select component:
   province/district views show month, hazard, crop, and subdistrict filters;
   subdistrict views show month, hazard, and crop only.
-- Drought archive controls use target month + T+ horizon as the primary
-  navigation state. Changing T+ must not silently change the selected target
-  month, and a no-data/out-of-scope archive combination must remain visibly
-  distinct from no-risk.
+- Drought archive controls use source/base month T + T+ horizon as the primary
+  navigation state, following the user's 2026-09-06 confirmation that source
+  rows are forecast origins. Changing T+ preserves T and changes the actual
+  target month to T+horizon. Selectable T spans June 2015-December 2025; for
+  December 2025, T+1-T+6 target January-June 2026. A no-data/out-of-scope archive
+  combination must remain visibly distinct from no-risk.
 - Nakhon Ratchasima route slugs are navigation-only. Data joins must use admin
   codes.
 - Nakhon Ratchasima rainfall layer navigation may open subdistrict detail for

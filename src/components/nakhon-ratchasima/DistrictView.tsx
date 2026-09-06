@@ -64,7 +64,7 @@ export function DistrictView({
         onCloseReadinessMap={closeReadinessMap}
         level="district"
         title={`คาดการณ์ภัยแล้งของอำเภอ${district.nameTh}`}
-        description="เปรียบเทียบระยะพยากรณ์ของเดือนเป้าหมายเดียวกันและแผนที่รายตำบลของอำเภอนี้"
+        description="ดูพยากรณ์ล่วงหน้า 6 เดือนจากเดือนตั้งต้นเดียวกันและแผนที่รายตำบลของอำเภอนี้"
         scopeLabel={`อ.${district.nameTh}`}
         archive={droughtArchive}
         expectedSubdistrictCodes={subdistrictCodes}

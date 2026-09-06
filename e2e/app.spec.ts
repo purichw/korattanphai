@@ -333,7 +333,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(droughtWorkspace).toBeVisible();
   await expect(horizonTabs.getByRole("tab")).toHaveCount(6);
   await expect(horizonTabs.getByRole("tab", { name: /T\+1/ })).toHaveAttribute("aria-selected", "true");
-  await expect(droughtWorkspace.getByRole("heading", { name: "จำนวนตำบลเสี่ยงในแต่ละระยะพยากรณ์" })).toBeVisible();
+  await expect(droughtWorkspace.getByRole("heading", { name: "จำนวนตำบลเสี่ยงในแต่ละเดือน" })).toBeVisible();
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group")).toHaveCount(6);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group.is-active")).toHaveCount(1);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-drought-forecast-point-label", { hasText: "142" })).toHaveCount(3);
@@ -357,7 +357,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const mapControls = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-map-controls");
   await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox")).toHaveCount(3);
-  await expect(mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
   await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
@@ -365,7 +365,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(horizonTabs.getByRole("tab", { name: /T\+2/ })).toHaveAttribute("aria-selected", "true");
   await expect(archiveMode).toContainText("142/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง120 ตำบล");
-  await mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" }).click();
+  await mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" }).click();
   await page.getByRole("option", { name: "ก.ย. 2568", exact: true }).click();
   await expect(archiveMode).toContainText("117/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง17 ตำบล");
@@ -474,7 +474,7 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
   await page.waitForTimeout(220);
 
-  await mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" }).click();
+  await mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" }).click();
   const targetMonthMenu = page.locator(".app-select-menu").last();
   const targetMonthOptions = targetMonthMenu.locator(".app-select-options");
   await expect(targetMonthMenu).toBeVisible();
@@ -528,7 +528,7 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
   expect(transformAfterDropdownWheel.y).toBeCloseTo(transformBeforeDropdownWheel.y, 1);
   await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
   await expect(page).toHaveURL(/target=2025-11&horizon=1/);
-  await expect(mapToolbar.getByRole("combobox", { name: "เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง" })).toContainText("พ.ย. 2568");
+  await expect(mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" })).toContainText("พ.ย. 2568");
   await expect(mapCard).toHaveCSS("overflow", "hidden");
 });
 
@@ -751,7 +751,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
     await expect(nakhonRatchasimaFilters.locator(".operational-filter-mobile-summary")).toBeVisible();
     await expect(nakhonRatchasimaFilters.locator(".operational-filter-chip b", { hasText: "ทุกอำเภอ" })).toBeVisible();
     const sheet = await openMobileFilterSheet(page);
-    await expect(sheet.getByRole("combobox", { name: "เลือกเดือน" })).toBeVisible();
+    await expect(sheet.getByRole("combobox", { name: "เลือกเดือนตั้งต้น" })).toBeVisible();
     await expect(sheet.getByRole("combobox", { name: "เลือกภัย" })).toHaveCount(0);
     await expect(sheet.getByRole("combobox", { name: "เลือกพืช" })).toHaveCount(0);
     await expect(sheet).toContainText("ภัยแล้ง");

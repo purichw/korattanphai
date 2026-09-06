@@ -23,7 +23,8 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   const overview = page.locator(".nr-forecast-overview");
   const summary = overview.locator(".nr-forecast-overview-summary");
   await expect(summary).toContainText("142/289 ตำบล");
-  await expect(overview.locator(".nr-forecast-overview-context")).toContainText("พ.ย. 2568");
+  await expect(overview.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
+  await expect(overview.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
   await expect(overview).not.toContainText("รอชุดข้อมูลใหม่");
   await expect(summary.locator(".metric-card-value")).toHaveText(["13 ตำบล", "129 ตำบล", "0 ตำบล", "147 ตำบล"]);
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
@@ -65,7 +66,8 @@ test("overview failures remain empty and retry preserves the requested target", 
   await expect(page.getByRole("alert")).toHaveText("โหลดข้อมูลพยากรณ์ไม่สำเร็จ กรุณาลองใหม่");
   await expect(page.locator(".nr-forecast-overview-summary")).toHaveCount(0);
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
-  await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ พ.ย. 2568");
+  await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ธ.ค. 2568");
+  await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) พ.ย. 2568");
   await expect(page.locator(".nr-forecast-overview-context")).toContainText("(T+1)");
   await expect(page.locator(".nr-forecast-overview-details")).toHaveAttribute("href", /target=2025-11&horizon=1/);
 });
@@ -83,6 +85,8 @@ test("changing month updates map counts and risk filtering uses the same forecas
     .toHaveText(["13 ตำบล", "63 ตำบล", "69 ตำบล", "144 ตำบล"]);
   await expect(page.locator(".nr-map-shape.is-forecast-no-risk")).toHaveCount(69);
   await expect(page.locator(".nr-map-shape.is-forecast-out-of-scope")).toHaveCount(144);
+  await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ธ.ค. 2568");
+  await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) พ.ย. 2568");
   await expect(page).toHaveURL(/target=2025-11&horizon=1/);
   await page.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง", exact: true }).click();
   await page.getByRole("option", { name: "เสี่ยงสูง", exact: true }).click();

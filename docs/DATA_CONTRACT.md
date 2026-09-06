@@ -126,8 +126,9 @@ Current facts:
 - Nakhon Ratchasima admin province code: `30`.
 - Nakhon Ratchasima local hierarchy: 32 districts and 289 subdistricts.
 - Nakhon Ratchasima drought forecast archive rev02: 289 mapped Source_IDs,
-  127 target months from `2015-06` through `2025-12`, 6 horizons per target
-  month, and 220,218 canonical forecast vintages.
+  127 source/base months T from `2015-06` through `2025-12`, 6 forward horizons
+  per source month, and 220,218 canonical forecast vintages. Actual forecast
+  target months span `2015-07` through `2026-06`.
 - Naming contract: "Nakhon Ratchasima" is the province. Local nicknames and
   district/local names must not be used as province-level synonyms.
 - Nakhon Ratchasima seeded local subset: 8 districts and 11 subdistricts with
@@ -195,13 +196,38 @@ normal. A source pathway may reduce “unknown source coverage” without reduci
 
 ## Nakhon Ratchasima Drought Forecast Archive
 
-### Display Semantics (2026-09-05)
+### Time Semantics (User Confirmed 2026-09-06)
+
+The user confirmed that every `Source_YearMonth` row is the forecast origin/base
+month T. T+1 through T+6 are the following six calendar months. This decision
+supersedes the earlier product convention that treated the source month as a
+fixed target and calculated issue months backwards. The normalized workbook
+itself originally marked the time role `UNCONFIRMED`; that remains a provenance
+fact, not the current product decision.
+
+- Selectable source months T remain `2015-06` through `2025-12` (127 months).
+- Runtime projection uses `issueMonth = sourcePeriod` and
+  `targetMonth = sourcePeriod + horizon` with calendar-month arithmetic.
+- Source `2015-06` forecasts `2015-07` through `2015-12`; source `2025-12`
+  forecasts `2026-01` through `2026-06`. T+6 targets therefore span `2015-12`
+  through `2026-06`. The source month T is not an additional T+0 risk value.
+- Canonical bytes, hashes, generated archive shape, published database rows and
+  RPC manifests remain unchanged. Legacy fields `targetMonths` and
+  `packedRiskByTargetMonth`, URL query `target`, and saved `target_period` still
+  identify the source month T. Their names do not define the displayed target
+  date. Runtime helpers ignore the legacy manifest's backwards-calculated
+  `issueMonth` when projecting product dates.
+- Existing and new links/saved filters retain the same source-row/horizon
+  selection and risk values; both display the forward dates consistently. This
+  interpretation change does not import forecasts or migrate saved records.
+
+### Display Semantics
 
 - User-facing coverage is `(no risk + moderate + high) / expected tambons`.
   Matched rows, including explicit null, measure import completeness only.
-- Six chart slots compare T+1-T+6 for one fixed target month. They are not a
-  six-calendar-month time series. Reference months are calculated under the
-  existing product convention; workbook time role remains unconfirmed.
+- Six chart slots show the six forward target months T+1-T+6 from one selected
+  source month T. All six share the same origin month; changing the selected
+  horizon changes the displayed target month while preserving T.
 - Each chart slot retains in-scope, explicit out-of-scope and missing counts.
   An all-unavailable slot must not become a green zero. Do not connect/fill
   across unavailable slots; a fully unavailable series has no risk graph.
@@ -217,11 +243,11 @@ normal. A source pathway may reduce “unknown source coverage” without reduci
   change does not add observations, restore removed data or change the archive.
 
 The local Supabase provider reconstructs the same full/T+1 archive shapes from
-normalized rows, without a static fallback. Source_YearMonth is preserved
-verbatim; the normalized workbook leaves issue-vs-target role unconfirmed.
-The current target-month interpretation is a product convention, not a newly
-verified source claim. The database explicitly records this distinction.
-Only the approved original/normalized/canonical SHA-256 set is importable.
+normalized rows, without a static fallback. `Source_YearMonth` is preserved
+verbatim. The published database's time-role marker and stored derived dates
+record the earlier convention; the runtime projection applies the user-confirmed
+forward meaning above. This does not rewrite workbook provenance or published
+rows. Only the approved original/normalized/canonical SHA-256 set is importable.
 
 FACT: `drought_forecast_archive_rev02.json` is the source-backed T+1 through
 T+6 drought forecast archive built from
@@ -235,7 +261,7 @@ Loading contract:
   whose bytes are checked against the canonical file by `npm run check:bundle`.
 - Login and province overview do not fetch the full archive. The overview map
   fetches `src/data/generated/forecast-overview-t1.json`, the T+1-only projection
-  of all 127 target months, as a separate content-hashed asset. Counts and map
+  of all 127 source months T, as a separate content-hashed asset. Counts and map
   statuses use the same forecast helpers as the full archive. The tiny
   `forecast-archive-summary.json` remains available for entry summaries. Both
   are regenerated by `npm run generate:forecast-summary` before dev/build;
@@ -244,7 +270,7 @@ Loading contract:
   an in-memory result for the current document. A reload starts a new loader;
   the content-hashed asset can use the existing immutable HTTP cache policy.
 - Pending, failed, and timed-out loads must not render forecast counts or map
-  risk states. Retry preserves the requested target month and T+ horizon.
+  risk states. Retry preserves the requested source month T and T+ horizon.
 - Failed requests are not cached; leaving a loading view cannot update the
   departed view. The shared request can finish for subsequent navigation.
 - Database mode obtains the same full/T+1 shapes from the security-invoker
@@ -262,9 +288,13 @@ Source and mapping contract:
 - Exact duplicate source rows removed: 21,609.
 - Mapped source IDs: 289 of 289.
 - Mapped canonical subdistricts: 289 of 289.
-- Forecast vintage identity: `subdistrictCode + targetMonth + horizon`.
-- `Source_YearMonth` is interpreted as `targetMonth`.
-- `issueMonth = targetMonth - horizon`.
+- Forecast vintage identity: `subdistrictCode + sourcePeriod + horizon`.
+  Legacy archive/URL/storage keys named `targetMonth`, `target` or
+  `target_period` preserve that source-period identity.
+- `Source_YearMonth` is the origin/base month T, confirmed by the user on
+  `2026-09-06` for the entire archive.
+- Runtime dates: `issueMonth = sourcePeriod`;
+  `targetMonth = sourcePeriod + horizon`.
 - Equal numeric values across T+ horizons remain separate forecast vintages.
 
 Risk value contract:
@@ -279,17 +309,18 @@ Risk value contract:
 
 UI contract:
 
-- Drought archive modules use the selected target month plus a single T+
-  selector.
+- Drought archive modules use the selected source/base month T plus a single
+  T+ selector. Actual target month is derived from that pair.
 - Province, district, and subdistrict drought maps use the same archive fixture
   and the same map status semantics.
 - Archive map legends show no-risk, moderate risk, high risk, and out-of-scope
   states. Out-of-scope areas use a muted hatched treatment.
-- Tooltip/detail copy must identify target month, issue month, T+ horizon,
-  numeric risk value, and semantic label.
+- Tooltip/detail copy must identify the actual target month, origin/base month
+  T, T+ horizon, numeric risk value, and semantic label.
 - Archive forecasts are not official damage figures and are not observed
   historical drought impacts.
-- The overview starts at the latest available target month and fixes T+1.
+- The overview starts at the latest available source month T and fixes T+1
+  (`2025-12` T, forecasting `2026-01`).
   Changing district scope updates map focus, counts and high-risk links.
   Counts use canonical subdistrict codes, with null/out-of-scope and missing
   records kept separate. Synthetic agricultural rai and confidence have been
@@ -299,15 +330,16 @@ UI contract:
   remains separate from forecast severity and model accuracy, and must not use
   the removed agriculture rows as its reference date.
 
-Latest validated target month in the archive:
+Latest source month in the archive and its forward projection:
 
-- Target month `2025-12` (`ธ.ค. 2568`) is archive forecast data, not the old
-  cleared historical map panel.
-- T+1 for `2025-12` has 142 in-scope subdistricts, 147 out-of-scope
-  subdistricts, 0 no-risk, 129 moderate-risk, and 13 high-risk subdistricts.
-- Ban Kao (`300806`) remains a useful validation example: target month
+- Source month T `2025-12` (`ธ.ค. 2568`) is archive forecast data, not the old
+  cleared historical map panel. Its target months are January-June 2026.
+- T+1 from `2025-12`, targeting `2026-01`, has 142 in-scope subdistricts,
+  147 out-of-scope subdistricts, 0 no-risk, 129 moderate-risk, and 13 high-risk
+  subdistricts.
+- Ban Kao (`300806`) remains a useful validation example: source month T
   `2025-12` has forecast risks `[1, 1, 1, 2, 2, 2]` across T+1 through T+6,
-  with issue months `2025-11` through `2025-06`.
+  targeting `2026-01` through `2026-06`, all with origin month `2025-12`.
 
 ## Nakhon Ratchasima Rainfall Contract
 

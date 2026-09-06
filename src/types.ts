@@ -567,6 +567,8 @@ export interface NakhonRatchasimaDroughtForecastArchiveLocation {
   qualityFlags: string;
 }
 
+/** Immutable archive metadata: legacy dates predate the confirmed forward interpretation.
+ * Product dates must be projected by forecastModel from the source month and horizon. */
 export interface NakhonRatchasimaDroughtForecastArchiveHorizonSummary {
   horizon: 1 | 2 | 3 | 4 | 5 | 6;
   horizonLabel: string;
@@ -580,12 +582,14 @@ export interface NakhonRatchasimaDroughtForecastArchiveHorizonSummary {
   highRiskSubdistricts: number;
 }
 
+/** Legacy type name; period identifies the Excel source month / forecast origin T. */
 export interface NakhonRatchasimaDroughtForecastArchiveTargetMonth {
   period: string;
   labelTh: string;
   horizons: NakhonRatchasimaDroughtForecastArchiveHorizonSummary[];
 }
 
+/** Runtime projection: sourceYearMonth = issueMonth = T; targetMonth = T + horizon. */
 export interface NakhonRatchasimaDroughtForecastArchiveRecord {
   sourceId: string;
   subdistrictCode: string;
@@ -635,6 +639,7 @@ export interface NakhonRatchasimaDroughtForecastArchive {
     targetMonthEnd: string;
     issueMonthStart: string;
     issueMonthEnd: string;
+    /** Historical storage contract, not the current product interpretation. */
     temporalInterpretation: "SOURCE_YEARMONTH_IS_TARGET_MONTH";
     targetMonthRule: string;
     issueMonthRule: string;

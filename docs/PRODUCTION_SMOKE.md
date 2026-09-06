@@ -52,8 +52,9 @@ header checks; deployed checks require them.
 Checks cover login, overview, drought, district and subdistrict pages at 1440x960
 and 390x844; 289 map polygons; latest T+1 overview counts and context;
 T+1/T+4 selection; one full-width categorical status above the subdistrict map;
-an all-null district with no false zero-risk graph; fixed-target comparison
-copy; absence of duplicate/unsupported panels and demo account actions;
+an all-null district with no false zero-risk graph; forward target months from
+the selected source month T and date-only T+ tab subtitles; absence of
+duplicate/unsupported panels and demo account actions;
 visible images; horizontal
 overflow; failed same-origin requests; page errors; asset MIME/cache headers;
 hosting security headers; and the read-only API's response contract, no-store

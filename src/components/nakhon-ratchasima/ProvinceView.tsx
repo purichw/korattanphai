@@ -66,7 +66,7 @@ export function ResearchProvinceDataView({
         onCloseReadinessMap={closeReadinessMap}
         level="province"
         title="เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6"
-        description="เปรียบเทียบระยะพยากรณ์ของเดือนเป้าหมายเดียวกันและแผนที่พยากรณ์"
+        description="ดูพยากรณ์ล่วงหน้า 6 เดือนจากเดือนตั้งต้นเดียวกันและแผนที่พยากรณ์"
         scopeLabel="จ.นครราชสีมา"
         archive={droughtArchive}
         target={{ valid: true, level: "province", tab: activeTab }}

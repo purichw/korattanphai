@@ -47,6 +47,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   expect(page.url()).toBe(initialUrl);
   await expect(page.locator('.nr-drought-workspace-kpis .metric-card')).toHaveCount(1);
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
   await page.getByRole('button', { name: 'ติดตามพื้นที่นี้', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('status')).toContainText('เพิ่มพื้นที่ติดตามแล้ว');
@@ -64,9 +65,13 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await page.getByRole('button', { name: /^บ้านเก่า พยากรณ์ T\+4/ }).click();
   await expect(page).toHaveURL(/target=2025-12&horizon=4&mapRisk=forecast-high/);
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
+  await expect(page.locator('.nr-drought-workspace-context .is-issue strong')).toHaveText('ธ.ค. 2568');
   await page.reload();
   await expect(page.locator('.nr-map-panel .nr-irrigation-filter')).toContainText('ยังไม่มีข้อมูลชลประทาน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
+  await expect(page.locator('.nr-drought-workspace-context .is-issue strong')).toHaveText('ธ.ค. 2568');
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'จังหวัดนครราชสีมา', exact: true })).toBeVisible();
@@ -91,6 +96,7 @@ test('database failure shows retry without static fallback and retains the reque
   const retry = page.getByRole('button', { name: /ลองใหม่/ });
   await expect(retry).toBeVisible(); failed = false; await retry.click();
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+3');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('ก.พ. 2569');
   await expect(page).toHaveURL(/target=2025-11&horizon=3/);
   expect(assets).toEqual([]);
 });

@@ -2,7 +2,7 @@ import { type NakhonRatchasimaDroughtForecastArchiveTargetMonth, type NakhonRatc
 import {
   type ForecastArchiveHorizon,
   forecastArchiveHorizonValues,
-  forecastArchiveIssueMonthForSelection,
+  forecastArchiveTargetMonthForSelection,
   type DroughtForecastArchiveLevel,
   type DroughtForecastArchiveSummary,
   forecastArchiveRecordLabel,
@@ -33,7 +33,7 @@ export function DroughtForecastArchiveHorizonSelector({
   return (
     <div className="nr-forecast-archive-horizon-tabs" role="tablist" aria-label="เลือกกรอบพยากรณ์ภัยแล้ง">
       {forecastArchiveHorizonValues.map((horizon) => {
-        const issueMonth = forecastArchiveIssueMonthForSelection(targetMonth, horizon);
+        const forecastMonth = forecastArchiveTargetMonthForSelection(targetMonth, horizon);
         const isSelected = selectedHorizon === horizon;
         return (
           <button
@@ -45,7 +45,7 @@ export function DroughtForecastArchiveHorizonSelector({
             onClick={() => onHorizonChange(horizon)}
           >
             <strong>T+{horizon}</strong>
-            <span>อ้างอิง {formatMonth(issueMonth, "th")}</span>
+            <span>{formatMonth(forecastMonth, "th")}</span>
           </button>
         );
       })}
@@ -124,7 +124,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       value: selectedRecord
         ? forecastArchiveRecordLabel(selectedRecord)
         : "ไม่มีข้อมูลในรอบนี้",
-      detail: selectedRecord ? `${selectedRecord.horizonLabel} · อ้างอิง (คำนวณ) ${formatMonth(selectedRecord.issueMonth, "th")}` : "ไม่แปลงเป็นไม่มีความเสี่ยง",
+      detail: selectedRecord ? `${selectedRecord.horizonLabel} · พยากรณ์ ${formatMonth(selectedRecord.targetMonth, "th")} · เดือนตั้งต้น (T) ${formatMonth(selectedRecord.issueMonth, "th")}` : "ไม่แปลงเป็นไม่มีความเสี่ยง",
       icon: <TrendingUp size={18} />,
       tone: selectedRecord
         ? selectedRecord.forecastRisk === 2
@@ -185,7 +185,7 @@ export function DroughtForecastArchiveMapFilters({
       <div className="nr-map-filter-fields">
       {showMonthFilter && <AppSelect
         className="nr-local-map-select"
-        ariaLabel="เดือนเป้าหมายบนแผนที่พยากรณ์ภัยแล้ง"
+        ariaLabel="เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง"
         value={selectedMonth}
         onChange={onMonthChange}
         options={monthOptions}
