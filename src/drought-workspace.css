@@ -118,6 +118,37 @@
 .is-drought-route .nr-drought-workspace-kpis .is-watch .metric-card-icon { color: #b86100; background: #fff4e1; }
 .is-drought-route .nr-drought-workspace-kpis .is-danger .metric-card-icon { color: #d32630; background: #fff0f1; }
 .is-drought-route .nr-drought-workspace-kpis .is-info .metric-card-icon { color: #086794; background: #eaf5fb; }
+.is-drought-route .nr-drought-workspace-kpis .metric-card.is-forecast-status {
+  --forecast-status-bg: #f1f4f5;
+  --forecast-status-border: #aebac0;
+  --forecast-status-accent: #52616a;
+  --forecast-status-icon-bg: #e1e7ea;
+  background: var(--forecast-status-bg);
+  border-color: var(--forecast-status-border);
+}
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status.is-good {
+  --forecast-status-bg: #edf8f0;
+  --forecast-status-border: #91c4a3;
+  --forecast-status-accent: #17643a;
+  --forecast-status-icon-bg: #d7eedf;
+}
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status.is-watch {
+  --forecast-status-bg: #fff3d6;
+  --forecast-status-border: #ddb45a;
+  --forecast-status-accent: #885000;
+  --forecast-status-icon-bg: #ffe3a3;
+}
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status.is-danger {
+  --forecast-status-bg: #fff0f0;
+  --forecast-status-border: #e5a2a7;
+  --forecast-status-accent: #a91f2b;
+  --forecast-status-icon-bg: #ffd9dd;
+}
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status.is-forecast-missing { border-style: dashed; }
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status :is(.metric-card-label, .metric-card-detail) { color: #47564e; }
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status .metric-card-value,
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status .metric-card-icon { color: var(--forecast-status-accent); }
+.is-drought-route .nr-drought-workspace-kpis .is-forecast-status .metric-card-icon { background: var(--forecast-status-icon-bg); }
 .is-drought-route .nr-drought-workspace-details { border: 0; padding: 0; background: none; }
 .nr-operational-forecast-actions { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
 .nr-operational-forecast-summary { display: flex; gap: 10px; align-items: center; padding: 12px; background: #f0f8f3; border: 1px solid #d4e8dc; border-radius: 8px; }

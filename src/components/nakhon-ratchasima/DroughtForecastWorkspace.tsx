@@ -10,6 +10,7 @@ import {
   Database,
   LocateFixed,
   ShieldAlert,
+  ShieldCheck,
   AlertTriangle,
   MapPin,
   CalendarDays,
@@ -321,11 +322,12 @@ export function DroughtForecastWorkspaceKpiStrip({
     const risk = selectedRecord?.forecastRisk;
     return <MetricGrid className="nr-drought-workspace-kpis is-single" ariaLabel="ผลพยากรณ์ของตำบลที่เลือก" metrics={[{
       label: "ผลพยากรณ์ของตำบล",
+      className: `is-forecast-status${risk === undefined ? " is-forecast-missing" : ""}`,
       value: forecastArchiveRecordLabel(selectedRecord),
       detail: risk === null ? "ไม่มีค่าพยากรณ์สำหรับตำบลนี้ ไม่ใช่ผลว่าไม่มีความเสี่ยง"
         : risk === undefined ? "ไม่พบรายการพยากรณ์ของตำบลนี้ในรอบที่เลือก"
           : "ผลจากคลังพยากรณ์ ไม่ใช่การยืนยันความเสียหาย",
-      icon: risk === null || risk === undefined ? <Info size={20} /> : <ShieldAlert size={20} />,
+      icon: risk === null || risk === undefined ? <Info size={20} /> : risk === 0 ? <ShieldCheck size={20} /> : <ShieldAlert size={20} />,
       tone: risk === 2 ? "danger" : risk === 1 ? "watch" : risk === 0 ? "good" : "muted",
       provenance: selectedRecord ? "REAL" : "PENDING_SOURCE",
     }]} />;
