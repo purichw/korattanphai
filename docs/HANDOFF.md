@@ -20,6 +20,49 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Combined loading and compact UI production release (2026-09-06):
+
+- Released runtime `cf522816bfd49309ea03792f7c51a30c1e16377c`, including all
+  work confirmed at the task 2/3/4 release freeze: equal map dropdowns, shared
+  route-aware loading/error UI, smaller T+ labels, and removal of subdistrict
+  supporting-data readiness. Pushed `fix/nr-map-zoom-performance`; no main merge.
+- Quality Gate `34032847073` passed for that exact commit: 147 unit tests,
+  isolated database tests, 86 built-browser checks (10 conditional skips), 4
+  database UI checks, both protected builds, exposure/bundle guards and no
+  generated-data drift.
+- Built from a clean detached checkout (226 source files, no local artifacts
+  or credentials uploaded). Production-config candidate
+  `dpl_ANiaDLyVAHN3LNnsvsyTEBfRgHMQ` was verified before promoting the same
+  artifact to `https://korattanphai.vercel.app`. Deployment URL:
+  `https://korattanphai-l663tcia8-purichwc-1517s-projects.vercel.app`.
+  Public entry `index-0a68bf2664.js`, main CSS `index-rNBiO4qe.css`, loading
+  CSS `AuthenticatedApp-Ca5_jlRf.css`, and `data-backend.json` all returned
+  HTTP 200 with the expected Supabase mode. No static forecast assets emitted.
+- Real-account candidate and public production smoke passed 20 checks each:
+  five routes on desktop/mobile, all source-matched map colors/counts, three
+  irrigation categories, empty-filter/reset, saved-workspace reads, no static
+  fallback, valid assets and no overflow. Each run recorded 30 successful
+  RPC/personal-workspace reads and no browser errors. Held real RPC requests
+  additionally verified the deployed Home desktop and drought mobile loading
+  layout; actual T+ sizes and absent subdistrict readiness were asserted.
+- Evidence: `smoke-results/combined-release-candidate-verified-20260906/`
+  (2026-09-06T12:24:13.096Z) and
+  `smoke-results/combined-release-production-20260906/`
+  (2026-09-06T12:32:26.592Z). Screenshots were visually reviewed. The first
+  candidate diagnostic attempt had a request-release race in temporary
+  screenshot instrumentation; fixed its cleanup ordering before the successful
+  rerun, without changing app code or smoke assertions.
+- Read-only archive integrity evidence is recorded below. No auth settings,
+  schema, migrations or application-data writes. Physical-device, Safari and
+  load tests were not run. Recovery artifact:
+  `dpl_4DWNAUdkYi6kCWyiBhsES4E5aubr`.
+- A NEW task 4 request after the freeze added subdistrict forecast-card colors
+  locally in `DroughtForecastWorkspace.tsx`, `drought-workspace.css`, and the
+  corresponding `SHARED_COMPONENTS.md` entry. Its owner confirmed this later
+  scope is complete locally but not committed/deployed. Those edits are
+  preserved, intentionally excluded from this verified runtime and closeout
+  commit; do not describe them as present in production.
+
 Combined loading and compact UI release preparation (2026-09-06):
 
 - The user authorized pushing/deploying all pending work from Korat tasks 2,
