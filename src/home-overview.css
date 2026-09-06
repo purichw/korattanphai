@@ -182,7 +182,7 @@
   .is-home-overview .nr-forecast-overview-summary-heading h3 { font-size: 16px; }
   .is-home-overview .nr-forecast-overview-summary-heading p { margin: 2px 0 7px; }
   .is-home-overview .nr-forecast-overview-scope-note { display: none; }
-  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 440px; }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 480px; }
   .is-home-overview .nr-dashboard-map-header { padding: 10px; }
   .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card .nr-dashboard-map-header { display: grid; }
   .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map .nr-map-svg { height: 100%; min-height: 0; }
