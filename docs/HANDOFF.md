@@ -20,6 +20,47 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Subdistrict forecast-card colors production release (2026-09-06):
+
+- Released runtime `dfc25ee0f0ac5889e6f1e0741fc583f317e04c02` to
+  `https://korattanphai.vercel.app`; pushed `fix/nr-map-zoom-performance`
+  without merging `main`. The single subdistrict forecast card now uses
+  green/amber/red surfaces for no-risk/moderate/high, neutral gray for
+  out-of-scope, and a dashed neutral border for missing records. Status text,
+  icons and provenance remain explicit; aggregate cards are unchanged.
+- Local gate: 147 unit tests, protected build/typecheck/exposure/bundle guards,
+  unchanged generated data, and 12 built drought-workspace browser checks
+  passed. Earlier targeted visual checks covered all five states and mobile.
+  Exact-runtime Quality Gate `34033707957` passed: 147 unit tests, isolated
+  database checks, 86 built-browser checks (10 conditional skips), four
+  database UI checks and both protected builds.
+- Deployment `dpl_3QjrznVqYQFLRTEWHpoxujhJTJH7` was built from a clean
+  detached checkout (226 uploaded source files), checked as a production-config
+  candidate, then promoted unchanged. Candidate/public checks confirmed
+  the expected CSS palette, headers, geodata, read-only API and Supabase mode.
+  Public entry: `index-328ce87869.js`; main CSS: `index-dne0t-rj.css`;
+  authenticated app: `AuthenticatedApp-b4d0d1bb7b.js`. No static forecast
+  archive assets were emitted.
+- Fresh public UI inspection used the existing authenticated Chrome session
+  in a separate tab: desktop 1440x960 showed the high-risk red card; selecting
+  T+1 changed the status to moderate, and mobile 390x844 showed the amber card
+  fitting the page. Screenshots were inspected in the task, and captured browser
+  error logs were empty. The existing user tab/session was preserved and the
+  temporary viewport was reset. The browser tool's computed-style selector
+  reads timed out after reload, so deployed visual proof uses its successful
+  native screenshots/AX reads plus the exact served CSS; local computed-style
+  checks remain in the five-state evidence.
+- Evidence: `tmp-snapshots/subdistrict-forecast-colors-20260906/`,
+  `tmp-snapshots/release-forecast-colors-e2e-20260906/`,
+  `smoke-results/forecast-colors-candidate-20260906/report.json` and
+  `smoke-results/forecast-colors-production-20260906/assets-report.json`.
+  The full fresh-login smoke harness was not rerun: this task had no supplied
+  smoke password, so public UI verification used the existing logged-in browser.
+  No auth settings, schema, data writes, physical-device or Safari tests.
+- Recovery artifact: `dpl_ANiaDLyVAHN3LNnsvsyTEBfRgHMQ`. New concurrent
+  local edits appeared after the release checkout was frozen; they were left
+  intact and are not included in runtime `dfc25ee` or this release evidence.
+
 Combined loading and compact UI production release (2026-09-06):
 
 - Released runtime `cf522816bfd49309ea03792f7c51a30c1e16377c`, including all
