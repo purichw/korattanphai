@@ -6890,7 +6890,7 @@ textarea {
 
 .nr-map-filter-fields { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 32px; align-items: center; gap: 6px; min-width: 0; }
 .nr-local-map-criteria.has-irrigation-filter .nr-map-filter-fields { grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) 32px; }
-.nr-local-map-criteria.has-single-filter .nr-map-filter-fields { grid-template-columns: minmax(0,1fr) minmax(0,1.4fr) 32px; }
+.nr-local-map-criteria.has-single-filter .nr-map-filter-fields { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 32px; }
 .nr-map-filter-fields > * { min-width: 0; }
 .nr-map-filter-fields .app-select-value { white-space: normal; overflow: visible; overflow-wrap: anywhere; text-overflow: clip; line-height: 1.4; }
 .nr-map-color-modes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px; padding: 2px; border: 1px solid #d7e1e6; border-radius: 6px; background: #f2f5f7; }

@@ -97,6 +97,10 @@ test("overview map owns irrigation; Collecting keeps its forecast and gray categ
   const boxes = await page.locator('.nr-map-filter-fields > *').evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
   expect(boxes[0].right <= boxes[1].left || boxes[0].bottom <= boxes[1].top).toBe(true);
   const triggerBoxes = await page.locator('.nr-map-filter-fields .app-select-trigger').evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().toJSON()));
+  if (!mobile) {
+    expect(triggerBoxes[0].width).toBeCloseTo(triggerBoxes[1].width, 1);
+    expect(triggerBoxes[0].height).toBeCloseTo(triggerBoxes[1].height, 1);
+  }
   expect(triggerBoxes[0].right <= triggerBoxes[1].left || triggerBoxes[0].bottom <= triggerBoxes[1].top).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("unknown-irrigation-overview.png"), fullPage: true });
