@@ -18,7 +18,7 @@ export function useDroughtReadinessMap() {
 
 export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
   target: DroughtForecastWorkspaceTarget;
-  archiveLabel: string;
+  archiveLabel?: string;
   onNavigate: (path: string) => void;
 }) {
   const back = routeBackTargetForRoute(target);
@@ -31,7 +31,7 @@ export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
     </button>}
     <h1>ภัยแล้ง{target.level !== "province" && <span> · {scope}</span>}</h1>
     <p>ติดตามสถานการณ์และคาดการณ์พื้นที่เสี่ยงภัยแล้งของ{scope}</p>
-    <small>คลังพยากรณ์ถึง {archiveLabel} · ข้อมูลพยากรณ์ย้อนหลัง ไม่ใช่สถานการณ์ปัจจุบัน</small>
+    <small>{archiveLabel && <>คลังพยากรณ์ถึง {archiveLabel} · </>}ข้อมูลพยากรณ์ย้อนหลัง ไม่ใช่สถานการณ์ปัจจุบัน</small>
   </header>;
 }
 

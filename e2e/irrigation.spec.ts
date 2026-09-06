@@ -144,7 +144,7 @@ test("all irrigation categories use their own colors; keyboard selection never n
   for (const [status, count, color] of [['irrigated', 20, 'rgb(57, 127, 197)'], ['rainfed', 97, 'rgb(146, 98, 183)'], ['unknown', 172, 'rgb(135, 147, 158)']] as const) {
     const shapes = page.locator(`.nr-map-shape[data-irrigation-status="${status}"]`);
     await expect(shapes).toHaveCount(count);
-    expect(await shapes.evaluateAll((elements, expected) => elements.every((element) => getComputedStyle(element).fill === expected), color)).toBe(true);
+    await expect.poll(() => shapes.evaluateAll((elements, expected) => elements.every((element) => getComputedStyle(element).fill === expected), color)).toBe(true);
   }
   const select = page.locator('.nr-map-panel .nr-irrigation-filter').getByRole('combobox');
   await select.click();

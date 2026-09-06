@@ -18,7 +18,8 @@ import { formatMonth } from "../i18n";
 import { useForecastArchive } from "../useForecastArchive";
 import { preloadLocalMapGeometry } from "../data/localMapGeometry";
 import { PanelTitle } from "./nakhon-ratchasima/SharedPanels";
-import { AlertTriangle, ArrowLeft, RotateCcw } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { DroughtWorkspaceLoading } from "./nakhon-ratchasima/ForecastArchiveLoading";
 import { ProvinceView } from "./nakhon-ratchasima/ProvinceView";
 import { DistrictView } from "./nakhon-ratchasima/DistrictView";
 import { SubdistrictView } from "./nakhon-ratchasima/SubdistrictView";
@@ -116,25 +117,7 @@ export function NakhonRatchasimaWorkspace({
   }
 
   if (isDroughtWorkspaceRoute && !droughtArchive) {
-    return (
-      <div className="page-stack nr-workspace">
-        <section className="nr-route-bar">
-          <button type="button" className="secondary-button" onClick={() => onNavigate(NAKHON_RATCHASIMA_ROUTE_BASE)}>
-            <ArrowLeft size={16} /> กลับภาพรวม
-          </button>
-        </section>
-        <section className="nr-archive-load-state" aria-busy={!archiveFailed}>
-          <p role={archiveFailed ? "alert" : "status"}>
-            {archiveFailed ? "โหลดข้อมูลพยากรณ์ไม่สำเร็จ กรุณาลองใหม่" : "กำลังโหลดข้อมูลพยากรณ์ภัยแล้ง"}
-          </p>
-          {archiveFailed && (
-            <button type="button" className="secondary-button" onClick={retryArchive}>
-              <RotateCcw size={16} /> ลองใหม่
-            </button>
-          )}
-        </section>
-      </div>
-    );
+    return <DroughtWorkspaceLoading target={route} failed={archiveFailed} retry={retryArchive} onNavigate={onNavigate} />;
   }
 
   return (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Gauge, Leaf, MapPin, Map as MapIcon, RotateCcw, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Gauge, Leaf, MapPin, Map as MapIcon, ShieldAlert } from "lucide-react";
 import { formatRai, getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaDistricts, type NakhonRatchasimaRouteTarget } from "../../domain";
 import type { NakhonRatchasimaDroughtForecastArchive, NakhonRatchasimaMapLayer, ProvinceMonthRisk } from "../../types";
 import { useForecastArchive } from "../../useForecastArchive";
@@ -12,6 +12,7 @@ import { MetricGrid, type SummaryMetric } from "../PageSummary";
 import { forecastArchiveSummaryForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection, writeForecastArchiveLocation } from "./forecastModel";
 import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, predictionReadinessSummaryForSubdistrictCodes, prefersReducedMotion, type LocalMapMode } from "./workspaceModel";
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
+import { ForecastOverviewLoading } from "./ForecastArchiveLoading";
 
 type OverviewProps = {
   layer: NakhonRatchasimaMapLayer;
@@ -23,15 +24,7 @@ type OverviewProps = {
 
 export function ProvinceForecastOverview(props: OverviewProps) {
   const { archive, failed, retry } = useForecastArchive(true, "overview");
-  if (!archive) return (
-    <section className="nr-archive-load-state" aria-busy={!failed}>
-      <p role={failed ? "alert" : "status"}>
-        {failed ? "โหลดข้อมูลพยากรณ์ไม่สำเร็จ กรุณาลองใหม่" : "กำลังโหลดภาพรวมพยากรณ์ภัยแล้ง"}
-      </p>
-      {failed && <button type="button" className="secondary-button" onClick={retry}><RotateCcw size={16} /> ลองใหม่</button>}
-      <a className="secondary-button" href="/drought">ดูคลังพยากรณ์ย้อนหลัง<ArrowRight size={16} /></a>
-    </section>
-  );
+  if (!archive) return <ForecastOverviewLoading failed={failed} retry={retry} />;
   return <ForecastOverviewContent {...props} archive={archive} />;
 }
 

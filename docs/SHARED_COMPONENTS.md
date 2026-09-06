@@ -53,8 +53,16 @@ Helper exports:
 
 The workspace loads the full archive on demand with `useForecastArchive` and
 passes it to the existing province/district/subdistrict forecast views. Pending
-and failed loads use one shared workspace state with overview navigation and
-retry. The province overview fetches `forecast-overview-t1.json`, a generated
+and failed loads use the shared `ForecastArchiveLoading.tsx` presentation:
+`ForecastOverviewLoading` and `DroughtWorkspaceLoading` retain route identity,
+compose layout-matched neutral skeletons, and share one loading announcement and
+error/retry state. No data values, risk colors, interactive placeholder controls,
+or synthetic chart/map data appear while pending. Subdistrict loading has one
+status placeholder and a full-width map, never population charts or lists.
+Skeleton motion respects reduced motion. Back navigation reuses the ready-state
+`DroughtWorkspaceHeader`; its archive label is optional until data is available.
+Request ownership, authentication, cache, retry, and source validation stay in
+the existing loaders. The province overview uses a generated
 T+1-only projection of every target month. It uses the same loader, map and
 summary functions with a separate cache; it must not fetch the full archive.
 Forecast components retain the existing
@@ -72,11 +80,12 @@ the route, filters and loading state.
 | `NakhonRatchasimaLocalMap.tsx` | Map rendering, gestures, previews, wheel isolation and geometry loading. |
 | `ForecastControls.tsx` | Shared archive selectors, filters and summary metrics. |
 | `DroughtForecastWorkspace.tsx` | Shared compact forecast, chart, map and archive context sections. |
-| `DroughtOperationalWorkspace.tsx` | Shared drought identity, five context/filter slots, operational disclosures and single-map readiness presentation. |
+| `DroughtOperationalWorkspace.tsx` | Shared drought identity (also during loading), five context/filter slots, operational disclosures and single-map readiness presentation. |
+| `ForecastArchiveLoading.tsx`, `src/forecast-loading.css` | Shared neutral loading/error presentation for Home and every drought route; separate compositions reuse skeleton, filter, metric, map and recovery primitives. |
 | `src/drought-workspace.css` | Scoped compact layout for drought/district/subdistrict routes; does not restyle the root overview. |
 | `src/home-overview.css` | Home-only v4 composition, compact context, map/situation panel and expandable support. |
 | `SharedPanels.tsx`, `ResearchPanels.tsx` | Reused local sections and research/evidence panels. |
-| `ProvinceView.tsx`, `DistrictView.tsx`, `SubdistrictView.tsx` | Level-specific composition, retaining the same shared forecast workspace. |
+| `ProvinceView.tsx`, `DistrictView.tsx`, `SubdistrictView.tsx` | Level-specific composition, retaining the same shared forecast workspace. Subdistrict pages omit the supporting-data readiness disclosure and its map action; Home, province and district readiness remain available. |
 
 `src/components/AppErrorBoundary.tsx` and `StorageNotice.tsx` provide application
 recovery feedback. Neither resets persisted state automatically.

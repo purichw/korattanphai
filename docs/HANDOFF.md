@@ -20,6 +20,68 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Combined loading and compact UI release preparation (2026-09-06):
+
+- The user authorized pushing/deploying all pending work from Korat tasks 2,
+  3 and 4. Their owners confirmed the scope and stopped concurrent edits.
+  Includes the already-deployed, unpushed `f9865d1` map dropdown change, the
+  shared loading UI below, removal of supporting-data readiness only from the
+  subdistrict view, and smaller T+ labels (14px desktop, 13px mobile). Loading
+  labels now match those ready-state sizes. Shared readiness components and
+  Home/province/district readiness remain intact.
+- Local combined gate: 147 unit tests, protected static build/exposure/bundle
+  checks, unchanged generated data, and 38 built desktop/mobile/tablet E2E
+  scenarios passed. Evidence: `tmp-snapshots/combined-release-e2e-final-20260906/`.
+  Initial run had 37 passes and a map-color assertion during the 140ms fill
+  transition; trace confirmed the early read. The assertion now polls the
+  same exact colors for every polygon; no expected values were relaxed.
+- Read-only real-account verification at 2026-09-06T12:17:51.448Z confirmed
+  the only published dataset, original/normalized/canonical hashes, exact T+1
+  and T+1-T+6 RPC projections, all 220,218 source values and denied anonymous
+  access. Evidence: `smoke-results/database-integrity/report.json`.
+- No auth/schema/data writes or migrations. CI, candidate verification and
+  production promotion remain pending at this preparation checkpoint. Previous
+  good artifact: `dpl_4DWNAUdkYi6kCWyiBhsES4E5aubr`.
+
+Shared forecast loading UI (2026-09-06, local work; not deployed):
+
+- Home, province drought, district and subdistrict now compose
+  `ForecastOverviewLoading` / `DroughtWorkspaceLoading` from
+  `ForecastArchiveLoading.tsx`. Route identity/back navigation remain visible;
+  neutral skeletons follow each route's desktop/mobile layout. Subdistrict has
+  one status placeholder and no population chart or attention list.
+- One accessible loading announcement, reduced-motion support, and shared
+  compact failure/retry state replace the sparse full-page loading messages.
+  No forecast values, risk colors, map geometry or selected-area assumptions are
+  fabricated during loading. Auth, requests, caches, archive validation and
+  Supabase/database data are unchanged.
+- Verification: build, 31 focused unit tests (excluding ignored release
+  checkouts), and 18 desktop/mobile loading E2E checks passed. Held/failed
+  requests prove pending/ready/error/retry and leaving/returning while pending;
+  retry preserves target/T+, and heading positions remain stable. Final images
+  and capture context: `smoke-results/forecast-loading/`.
+- No push/deploy, production data writes, full release suite, physical-device
+  or load testing was requested for this UI pass. Local authenticated preview
+  uses `http://127.0.0.1:5176`; the test-only server on port 5178 was stopped
+  after verification.
+
+Equal-width Home map dropdown follow-up (2026-09-06, deployed separately):
+
+- Runtime `f9865d1` changes the shared single-filter map rail to equal `1fr`
+  columns with its existing 32px reset column. This local commit is still ahead
+  of the remote branch; the release owner deployed without pushing.
+- Clean deployment `dpl_4DWNAUdkYi6kCWyiBhsES4E5aubr` is Ready on the public
+  alias, with `index-eb04ae25bc.js` / `index-BVO-2F5g.css`. The loading UI above
+  is not included. Candidate evidence:
+  `smoke-results/equal-map-dropdowns-candidate-ready/report.json`.
+- Targeted real-account checks passed default/unknown/rainfed on desktop and
+  mobile: desktop fields both 331.421875x38px, mobile stacking preserved, no
+  reset overlap or horizontal overflow, unchanged URL and no browser errors.
+  The first attempt used a short 5s readiness assertion; the bounded 30s check
+  passed with HTTP 200 RPC reads. This CSS-only release did not rerun the full
+  archive/database suite or change Supabase. Recovery is the prior good
+  `dpl_4h4XtWn25ATQWhVZ32cuoi4HR1aQ` artifact.
+
 In-map irrigation controls production release (2026-09-06):
 
 - Runtime `b4fcc194136e46a134e5d2de5fda77e7a6ccd184` is pushed to

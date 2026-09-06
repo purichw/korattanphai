@@ -47,7 +47,7 @@
 .is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-drought-workspace-context { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs { height: 100%; border-radius: 8px; }
 .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button { min-height: 62px; padding: 7px 3px; }
-.is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 16px; }
+.is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 14px; }
 .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs span { font-size: 11px; line-height: 1.35; white-space: normal; }
 .is-drought-route .nr-drought-workspace-context { border-color: #d9e3e7; border-radius: 8px; background: #fff; }
 .is-drought-route .nr-drought-workspace-context > div { grid-template-columns: minmax(0,1fr); padding: 6px 4px; gap: 2px; min-height: 62px; text-align: center; }
@@ -226,7 +226,7 @@
   .is-drought-route .nr-drought-compact-workspace:is(.is-subdistrict,.is-empty-scope) .nr-drought-workspace-body { grid-template-areas: "horizon" "context" "kpis" "map" "details"; }
   .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs { grid-template-columns: repeat(6,minmax(0,1fr)); width: 100%; overflow: visible; }
   .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs button { min-height: 60px; padding: 6px 2px; }
-  .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 14px; }
+  .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs strong { font-size: 13px; }
   .is-drought-route .nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs span { font-size: 10px; }
   .is-drought-route .nr-drought-workspace-context { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .is-drought-route .nr-drought-workspace-context > div { min-height: 54px; }
