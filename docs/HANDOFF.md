@@ -20,6 +20,51 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Shared operational-card alignment production release (2026-09-06):
+
+- Released runtime `922e28aef6e62f0a531ba47bda6efee80285d739` to
+  `https://korattanphai.vercel.app`; pushed `fix/nr-map-zoom-performance`
+  without merging `main`. Includes the preceding subdistrict-card colors.
+  `DroughtOperationalSummary` reuses `MetricCard`; it and the existing native
+  disclosure share a centered heading layout across applicable drought scopes.
+  Short copy centers on both axes; long header descriptions can opt into start
+  alignment, and expanded prose stays start-aligned. Counts, unavailable states,
+  navigation, keyboard toggling and focus behavior are unchanged.
+- Local gate: 151 unit tests passed, reusing the current-source build and eight
+  targeted browser checks plus desktop/tablet/mobile visual geometry evidence.
+  Exact-runtime Quality Gate `34034466561` passed: 151 unit tests, isolated
+  database checks, 86 built-browser checks (10 conditional skips), four database
+  UI checks, both protected builds, exposure/bundle guards and no generated-data
+  drift. The existing Vite chunk-size advisory remains; bundle budgets pass.
+- Deployment `dpl_xXNKf2hDWCYGu8e3TktWCQHSnLTJ` came from a clean detached
+  checkout (226 uploaded source files), was verified as a production-config
+  candidate, then promoted unchanged. Deployment URL:
+  `https://korattanphai-pa5asyxg9-purichwc-1517s-projects.vercel.app`.
+  Public entry `index-d3fcf64c1c.js`, main CSS `index-DgUoUktb.css`, loading CSS
+  `AuthenticatedApp-Ca5_jlRf.css` and `data-backend.json` returned HTTP 200.
+  The backend marker is Supabase; no static forecast archive assets were emitted.
+- Fresh real-account candidate and public smoke each passed 20 checks across
+  five desktop/mobile routes, irrigation filters/reset/reload and saved-workspace
+  reads. The actual full/T+1 RPC payloads match the canonical Excel archive;
+  map colors/counts match source, and there is no static fallback. Each run
+  recorded 30 successful RPC/workspace reads and no browser errors. Additional
+  deployed assertions verified centered card copy, Enter/Space toggling,
+  retained focus/URL and start-aligned expanded guidance. Desktop/mobile and
+  expanded-guidance screenshots were visually inspected.
+- Evidence: `tmp-snapshots/operational-cards-centered-20260906/`,
+  `smoke-results/operational-cards-candidate-verified-20260906/`
+  (2026-09-06T12:56:55.246Z) and
+  `smoke-results/operational-cards-production-20260906/`
+  (2026-09-06T13:06:24.339Z). Initial temporary diagnostics needed correction:
+  the desktop wrapper uses `display: contents`, so screenshot crops use its
+  visible children; the backend marker key is `backend`, not `provider`.
+  Both probes passed after matching the existing contracts, with no app edits
+  or weakened behavior assertions. The first candidate report is retained.
+- No auth settings, schema, migrations or application-data writes. No Safari,
+  physical-device or load tests; full local E2E was not duplicated because CI
+  covered the exact runtime. Recovery artifact:
+  `dpl_3QjrznVqYQFLRTEWHpoxujhJTJH7`.
+
 Subdistrict forecast-card colors production release (2026-09-06):
 
 - Released runtime `dfc25ee0f0ac5889e6f1e0741fc583f317e04c02` to
