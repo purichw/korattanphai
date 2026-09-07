@@ -20,6 +20,38 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Overview map month and bookmark production release (2026-09-07):
+
+- Pushed runtime `7e7f3ecc5b3dd6f820c8ab2795ac67a0eb095269` on
+  `fix/nr-map-zoom-performance`. `05bf09b` narrows the existing Home test's
+  month selector; runtime, data and deployment configuration are identical.
+- Home enables the existing shared map month dropdown, synchronized with the
+  top filter, URL and T+1 summary. Included the concurrent bookmark redesign:
+  shared buttons, fixed dialog header/tabs, internal scrolling, empty/error
+  states, inline delete confirmation and restored focus on close.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34119431352)
+  passed: 171 unit tests, isolated database/RLS checks, 109 built-browser tests
+  (27 conditional skips), 34 database-browser tests, protected builds,
+  exposure/bundle budgets and generated-data drift checks. Local targeted
+  desktop/mobile flows also passed, including mocked bookmark writes.
+- Built clean commit archive `7e7f3ec` using Production settings with
+  `--prod --skip-domain`. After candidate smoke and CI, promoted the same
+  artifact without rebuilding. Production alias inspection confirms
+  `dpl_B477wzpSX4kBhxVgcJCriFbfzCF1` at
+  `https://korattanphai-9c7y4x9ca-purichwc-1517s-projects.vercel.app`.
+- Authenticated candidate and production smoke passed on desktop/mobile:
+  month synchronization both ways, bookmark reads/keyboard/focus, five route
+  scopes, source-equal scoped RPCs/map colors, chart units, irrigation and
+  unavailable states, login/logout, assets/API/security headers and overflow.
+  Evidence: `smoke-results/combined-ui-{candidate,production}/report.json`,
+  `*-overview-month-filter.png` and `*-saved-filters.png`.
+- No Supabase migrations, application-data writes, auth changes or forecast
+  data edits. New in-progress work started during CI remains uncommitted and
+  was not included; spreadsheet lock and Python cache files remain untouched.
+  Chromium only; Safari/Firefox/physical devices were not checked.
+- Recovery: promote previous verified deployment
+  `dpl_61UY2UeoW9vKE4bMofVvuof1SXDn`; leave Supabase data/schema unchanged.
+
 Shared forecast bar graph production release (2026-09-07):
 
 - Pushed runtime `b96340fc35a65403b3076219375babccca68ef6f` on
