@@ -120,6 +120,26 @@ try {
           assert.equal(new URL(page.url()).searchParams.get("target"), "2025-12");
           assert.equal(new URL(page.url()).searchParams.get("horizon"), "1");
           await page.screenshot({ path: path.join(output, `${name}-overview.png`), fullPage: true });
+          if (databaseMode) {
+            const mapMonth = page.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง", exact: true });
+            await expect(mapMonth).toContainText("ธ.ค. 2568");
+            await mapMonth.click();
+            await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
+            await expect(mapMonth).toContainText("พ.ย. 2568");
+            await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "48 ตำบล", "69 ตำบล", "172 ตำบล"]);
+            await expect(page).toHaveURL(/target=2025-11.*horizon=1/);
+            if (name === "mobile") await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" }).click();
+            const topMonth = page.getByRole("combobox", { name: name === "mobile" ? "เลือกเดือนตั้งต้น" : /^เดือนตั้งต้น / });
+            await expect(topMonth).toContainText("พ.ย. 2568");
+            await topMonth.click();
+            await page.getByRole("option", { name: "ธ.ค. 2568", exact: true }).click();
+            if (name === "mobile") await page.getByRole("button", { name: "แสดงผล", exact: true }).click();
+            await expect(mapMonth).toContainText("ธ.ค. 2568");
+            await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
+            await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
+            await page.locator(".nr-forecast-overview-map").screenshot({ path: path.join(output, `${name}-overview-month-filter.png`) });
+            report.checks.push({ viewport: name, overviewMonthSync: "both directions", forecastHorizon: 1 });
+          }
         }
         if (route.includes("target=")) {
           await page.locator(".nr-drought-compact-workspace").waitFor();
@@ -242,10 +262,16 @@ try {
         await dialog.waitFor();
         await dialog.getByText("กำลังโหลดรายการ...", { exact: true }).waitFor({ state: "hidden" });
         assert.equal(await dialog.getByRole("alert").count(), 0, "Saved workspace read");
-        await dialog.getByRole("tab", { name: "ตัวกรองที่บันทึก", exact: true }).click();
+        await expect(dialog.locator(".nr-saved-header")).toBeInViewport();
+        await dialog.getByRole("tab", { name: "พื้นที่ติดตาม", exact: true }).focus();
+        await page.keyboard.press("ArrowRight");
+        await expect(dialog.getByRole("tab", { name: "ตัวกรองที่บันทึก", exact: true })).toBeFocused();
+        await expect(dialog.getByRole("status")).toBeEmpty();
         if (process.env.SMOKE_SAVED_FILTER_NAME) await dialog.getByRole("button", { name: new RegExp(`^${process.env.SMOKE_SAVED_FILTER_NAME.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} `) }).waitFor();
         await page.screenshot({ path: path.join(output, `${name}-saved-filters.png`), fullPage: true });
         await dialog.getByRole("button", { name: "ปิดรายการที่บันทึก" }).click();
+        await expect(dialog).toHaveCount(0);
+        await expect(page.getByRole("button", { name: "รายการที่บันทึก", exact: true })).toBeFocused();
         await Promise.all(rpcChecks);
         assert.ok(rpcHorizons.has(1) && rpcHorizons.has(6), "App must load both authenticated database projections");
         report.checks.push({ viewport: name, databaseProjectionsMatch: true, savedWorkspaceRead: true, staticFallback: false });

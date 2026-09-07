@@ -19,6 +19,15 @@ overwrites a saved source-month/horizon selection. Legacy `target` URL and
 `target_period` saved keys retain the source month T. See
 `SUPABASE_DATA_MIGRATION.md`.
 
+The bookmark control reuses the shared `primary-button`, `secondary-button`,
+and `icon-button` styles with scoped sizing in `src/saved-workspaces.css`.
+Its native dialog keeps the heading and keyboard tabs visible while the panel
+scrolls internally. Current selection, empty/populated lists, loading, errors,
+and inline delete confirmation share one layout across desktop/mobile. Tab
+changes clear prior success notices; closing calls the native dialog close
+before unmounting so focus returns to the opener. Persistence and saved-route
+semantics remain in the existing data/route helpers.
+
 These components are exported from `src/components/` and may be reused across
 files.
 

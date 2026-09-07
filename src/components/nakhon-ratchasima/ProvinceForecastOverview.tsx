@@ -138,7 +138,6 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
             forecastArchiveMonth={month}
             forecastArchiveHorizon={1}
             forecastArchiveIssueMonth={summary.issueMonth}
-            showMonthFilter={false}
             selectedSubdistrictCode={selectedSubdistrictCode}
             onSelectedSubdistrictChange={setSelectedSubdistrictCode}
           />

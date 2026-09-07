@@ -9,6 +9,7 @@ vi.mock('../src/DatabaseWorkspaceProvider', () => ({ useDatabaseWorkspace: () =>
 beforeEach(() => {
   window.history.replaceState(null, '', '/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high');
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
   const areas: any[] = []; const filters: any[] = [];
   f.context = { userId: 'owner-a', saved: {
     listAreas: vi.fn(async () => [...areas]), listFilters: vi.fn(async () => [...filters]),
@@ -40,9 +41,16 @@ describe('shared saved workspace controls', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /^ลบ ตำบล/ })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: /^ลบ ตำบล/ }));
     expect(f.context.saved.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'ยกเลิกการลบ' }));
+    expect(f.context.saved.remove).not.toHaveBeenCalled();
+    expect(screen.queryByText('ลบรายการนี้?')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^ลบ ตำบล/ }));
     fireEvent.click(screen.getByRole('button', { name: 'ลบ', exact: true }));
     await screen.findByText('ลบรายการแล้ว');
     expect(f.context.saved.remove).toHaveBeenCalledWith('area', '300806', expect.any(AbortSignal));
+    fireEvent.click(screen.getByRole('tab', { name: 'ตัวกรองที่บันทึก' }));
+    expect(screen.queryByText('ลบรายการแล้ว')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeEmptyDOMElement();
   });
   it('saves actual month/horizon/risk and navigates to the same filter', async () => {
     const onNavigate = vi.fn(); render(<WorkspaceBookmarks onNavigate={onNavigate} />);
