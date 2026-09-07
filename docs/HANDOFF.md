@@ -20,6 +20,48 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Forecast Excel export and overview cleanup production release (2026-09-07):
+
+- Released runtime `ccf506c0b2a382e7a69281e1258f3dc0bf18b21c` and pushed
+  `e7ced247e9aa5f3eff58a74dd65399e6a6aaac86` on
+  `fix/nr-map-zoom-performance`. The latter updates only an obsolete test
+  expecting a derived-readiness badge; it now requires absent readiness UI
+  and all four real-forecast provenance indicators. Runtime bytes are unchanged.
+- Combined both tasks: shared filtered Excel export with district/tambon
+  T+1-T+6, editable native charts/PivotTable and traceable provenance; removal
+  of supporting-readiness UI/map actions/loading slots; clearer Home empty
+  attention state and summary-heading forecast navigation without duplicate
+  archive cards. Forecast values, irrigation rules and geometry are unchanged.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34126361083)
+  passed: 175 unit tests, 11 isolated migration/integrity/RLS checks, 109
+  built-browser tests (31 conditional skips), 38 database-browser tests,
+  protected builds, exposure/bundle budgets and generated-data drift checks.
+  Local tests exclude ignored `artifacts/**` and `tmp-snapshots/**` copies;
+  no product test is omitted by that exclusion.
+- Candidate `dpl_GvGMGxBQEKgn74xbmwvdhDWhnKjy` was built from a clean Git
+  archive of `ccf506c` with Production settings and `--prod --skip-domain`.
+  After candidate smoke and passing CI, the same artifact was promoted to
+  `https://korattanphai.vercel.app`; alias inspection confirms this deployment.
+  Candidate URL: `https://korattanphai-c5t8t0qbj-purichwc-1517s-projects.vercel.app`.
+- Authenticated candidate and production smoke both passed on desktop/mobile:
+  five route scopes, source-equal scoped RPCs and map colors, forward months,
+  chart units, irrigation, unavailable states, saved-workspace reads,
+  login/logout, API/assets/security headers and no overflow/browser errors.
+  Real downloads contain 32 districts/289 tambons/1,734 source-equal values
+  on desktop and one district/six tambons/36 values on mobile, with district
+  maximum-risk summaries, chart/PivotTable parts and dataset provenance.
+  Evidence: `smoke-results/excel-overview-{candidate,production}/report.json`.
+- No remote migration, forecast/normalized edits, application-data writes or
+  Auth/protection-setting changes. Candidate smoke used the project's existing
+  authorized automation access; credentials/cookies were not saved in reports.
+  Spreadsheet lock and Python cache files remain untouched and uncommitted.
+- Residual limits: Chromium only, not Safari/Firefox/physical devices; native
+  Microsoft Excel was not available (ONLYOFFICE was exercised during feature
+  development). Pivot may require Refresh All. The pinned ExcelJS fork's uuid
+  dependency retains a moderate advisory outside the v4-only paths used here;
+  see `FORECAST_EXCEL_EXPORT.md`. Recovery: promote previous verified deployment
+  `dpl_B477wzpSX4kBhxVgcJCriFbfzCF1`, without changing Supabase schema/data.
+
 Overview map month and bookmark production release (2026-09-07):
 
 - Pushed runtime `7e7f3ecc5b3dd6f820c8ab2795ac67a0eb095269` on
