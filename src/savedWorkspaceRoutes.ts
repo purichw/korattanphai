@@ -23,8 +23,10 @@ export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'se
   if (!savedAreaInfo(code)) return null;
   const risk = params.get('mapRisk') ?? 'all';
   const irrigation = readIrrigationSelection(location.search, historyState);
+  const displayedDataset = historyState && typeof historyState === 'object' && 'ktpForecastDatasetId' in historyState
+    && typeof historyState.ktpForecastDatasetId === 'string' ? historyState.ktpForecastDatasetId : FORECAST_DATASET_ID;
   const selection: SavedForecastSelection = {
-    view_name: overview ? 'overview' : 'drought', area_code: code, dataset_id: FORECAST_DATASET_ID,
+    view_name: overview ? 'overview' : 'drought', area_code: code, dataset_id: displayedDataset,
     target_period: `${params.get('target') ?? ''}-01`, horizon: overview ? 1 : Number(params.get('horizon') ?? '1'),
     risk_criterion: savedRiskCriteria.includes(risk as SavedRiskCriterion) ? risk as SavedRiskCriterion : 'all',
     ...(irrigation === 'all' ? {} : { irrigation_criterion: irrigation }),

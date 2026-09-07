@@ -585,7 +585,7 @@ export interface NakhonRatchasimaDroughtForecastArchiveHorizonSummary {
 export interface NakhonRatchasimaDroughtForecastArchiveTargetMonth {
   period: string;
   labelTh: string;
-  horizons: NakhonRatchasimaDroughtForecastArchiveHorizonSummary[];
+  horizons: Pick<NakhonRatchasimaDroughtForecastArchiveHorizonSummary, 'horizon' | 'horizonLabel' | 'issueMonth' | 'targetMonth'>[];
 }
 
 /** Runtime projection: sourceYearMonth = issueMonth = T; targetMonth = T + horizon. */
@@ -608,6 +608,8 @@ export interface NakhonRatchasimaDroughtForecastArchiveRecord {
 }
 
 export interface NakhonRatchasimaDroughtForecastArchive {
+  // Dataset metadata describes the full archive; this marks a partial runtime read.
+  loadedSelection?: { originPeriod: string; areaCode: string; horizonCount: 1 | 6; subdistrictCount: number };
   meta: {
     sourceOfTruth: string;
     sourceWorkbook: string;

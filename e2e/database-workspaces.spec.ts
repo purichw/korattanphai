@@ -1,6 +1,7 @@
 import { test, expect, seedAuthSession, authTestUser } from './fixtures';
 import { mkdir } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
+import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
 const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
 
@@ -14,9 +15,10 @@ test('database archive and shared bookmarks survive reload and restore the same 
   page.on('request', (request) => { if (/forecast-(overview|archive)|drought_forecast_archive/.test(request.url()) && request.url().endsWith('.json')) staticForecasts.push(request.url()); });
   await page.route('https://ktp-auth-test.supabase.co/rest/v1/**', async (route) => {
     const request = route.request(); const url = new URL(request.url());
-    if (url.pathname.endsWith('/rpc/ktp_load_forecast_archive')) {
+    if (url.pathname.endsWith('/rpc/ktp_latest_forecast_revision')) return route.fallback();
+    if (url.pathname.endsWith('/rpc/ktp_load_forecast_slice')) {
       const count = request.postDataJSON().p_horizon_count; rpcHorizons.push(count);
-      return route.fulfill({ json: count === 1 ? overview : archive });
+      return route.fulfill({ json: forecastSlice(count === 1 ? overview : archive, request.postDataJSON()) });
     }
     const isAreas = url.pathname.endsWith('/ktp_followed_areas');
     const rows = isAreas ? areas : filters;
@@ -89,8 +91,8 @@ test('database archive and shared bookmarks survive reload and restore the same 
 test('database failure shows retry without static fallback and retains the requested vintage', async ({ page }) => {
   let failed = true; const assets: string[] = [];
   page.on('request', (r) => { if (/(drought_forecast_archive_rev03|forecast-overview-t1).*\.json/.test(r.url())) assets.push(r.url()); });
-  await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_archive', (route) => route.fulfill(failed
-    ? { status: 503, json: { message: 'Test-only unavailable' } } : { json: archive }));
+  await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice', (route) => route.fulfill(failed
+    ? { status: 503, json: { message: 'Test-only unavailable' } } : { json: forecastSlice(archive, route.request().postDataJSON()) }));
   await seedAuthSession(page);
   await page.goto('/drought?target=2025-11&horizon=3');
   const retry = page.getByRole('button', { name: /ลองใหม่/ });

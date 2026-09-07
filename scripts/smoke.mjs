@@ -4,6 +4,7 @@ import path from "node:path";
 import { chromium, expect } from "@playwright/test";
 import { isDeepStrictEqual } from "node:util";
 import { buildForecastOverviewArchive } from "./generate-forecast-summary.mjs";
+import { forecastSlice } from "../tests/fixtures/forecast-slice.mjs";
 
 const base = new URL(process.env.SMOKE_URL ?? "https://korattanphai.vercel.app");
 const local = ["localhost", "127.0.0.1"].includes(base.hostname);
@@ -57,11 +58,12 @@ try {
     });
     page.on("response", (response) => {
       const url = new URL(response.url());
-      if (databaseMode && url.origin === "https://dihchjflzhcekywarhxd.supabase.co" && url.pathname === "/rest/v1/rpc/ktp_load_forecast_archive") {
+      if (databaseMode && url.pathname === "/rest/v1/rpc/ktp_load_forecast_archive") errors.push("Unexpected full archive read");
+      if (databaseMode && url.origin === "https://dihchjflzhcekywarhxd.supabase.co" && url.pathname === "/rest/v1/rpc/ktp_load_forecast_slice") {
         rpcChecks.push((async () => {
           assert.equal(response.status(), 200, "Forecast RPC status");
           const horizon = response.request().postDataJSON().p_horizon_count;
-          const expected = horizon === 1 ? buildForecastOverviewArchive(expectedArchive) : expectedArchive;
+          const expected = forecastSlice(horizon === 1 ? buildForecastOverviewArchive(expectedArchive) : expectedArchive, response.request().postDataJSON());
           assert.ok(isDeepStrictEqual(await response.json(), expected), "Rendered app RPC differs from source archive");
           rpcHorizons.add(horizon);
         })().catch(error => errors.push(error.message)));
@@ -91,7 +93,7 @@ try {
       } catch {
         throw new Error("Smoke login failed. Verify the configured test account, environment and network; credential values are not reported.");
       }
-      for (const route of ["/", "/drought?target=2025-12&horizon=1", "/dan-khun-thot?target=2025-12&horizon=4", "/dan-khun-thot/t-300806?target=2025-12&horizon=4", "/ban-lueam?target=2025-12&horizon=1"]) {
+      for (const [route, areaCode] of [["/", "30"], ["/drought?target=2025-12&horizon=1", "30"], ["/dan-khun-thot?target=2025-12&horizon=4", "3008"], ["/dan-khun-thot/t-300806?target=2025-12&horizon=4", "300806"], ["/ban-lueam?target=2025-12&horizon=1", "3005"]]) {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
         assert.equal(await page.locator(".nr-map-shape").count(), 289, `${name}: polygon count`);
@@ -100,10 +102,14 @@ try {
           const horizon = Number(new URL(page.url()).searchParams.get("horizon"));
           const actual = await page.locator(".nr-map-shape").evaluateAll(nodes => nodes.map(node => ({
             code: node.getAttribute("data-nr-subdistrict-code"),
+            filtered: node.classList.contains("is-criteria-filtered"),
             risk: node.classList.contains("is-forecast-high") ? 2 : node.classList.contains("is-forecast-moderate") ? 1
               : node.classList.contains("is-forecast-no-risk") ? 0 : node.classList.contains("is-forecast-out-of-scope") ? null : "missing",
           })));
-          assert.ok(actual.every(({ code, risk }) => risk === expectedArchive.packedRiskByTargetMonth[target]?.[code]?.[horizon - 1]), `${name}: all map colors match source`);
+          const expectedCodes = expectedArchive.locations.filter(location => areaCode === "30" || location.districtCode === areaCode || location.subdistrictCode === areaCode).map(location => location.subdistrictCode).sort();
+          const visible = actual.filter(shape => !shape.filtered);
+          assert.deepEqual(visible.map(shape => shape.code).sort(), expectedCodes, `${name}: exact route scope; other polygons filtered`);
+          assert.ok(visible.every(({ code, risk }) => risk === expectedArchive.packedRiskByTargetMonth[target]?.[code]?.[horizon - 1]), `${name}: all in-scope map colors match source`);
         }
         if (route === "/") {
           const summary = page.locator(".nr-forecast-overview-summary");
@@ -156,7 +162,7 @@ try {
         const brokenImages = await page.locator("img").evaluateAll((images) => images.filter((image) => image.getBoundingClientRect().width > 0 && (!image.complete || !image.naturalWidth)).map((image) => new URL(image.src).pathname));
         assert.deepEqual(brokenImages, [], `${name}: visible images`);
         if (route.startsWith("/drought")) await page.screenshot({ path: path.join(output, `${name}-drought.png`), fullPage: true });
-        report.checks.push({ viewport: name, route, polygons: 289 });
+        report.checks.push({ viewport: name, route, polygons: 289, forecastScope: areaCode });
       }
       if (databaseMode) {
         for (const [criterion, status, label, color] of [

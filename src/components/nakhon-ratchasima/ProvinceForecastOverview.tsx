@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Gauge, Leaf, MapP
 import { formatRai, getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaDistricts, type NakhonRatchasimaRouteTarget } from "../../domain";
 import type { NakhonRatchasimaDroughtForecastArchive, NakhonRatchasimaMapLayer, ProvinceMonthRisk } from "../../types";
 import { useForecastArchive } from "../../useForecastArchive";
+import { ForecastArchiveRequest } from "../ForecastArchiveRequest";
 import { formatMonth, labelConfidence } from "../../i18n";
 import { OperationalFilters } from "../OperationalFilters";
 import { DataProvenanceChip, dataProvenanceChipKindFromText } from "../DataProvenanceChip";
@@ -23,9 +24,10 @@ type OverviewProps = {
 };
 
 export function ProvinceForecastOverview(props: OverviewProps) {
-  const { archive, failed, retry } = useForecastArchive(true, "overview");
+  const request = useForecastArchive(true, "overview");
+  const { archive, failed, retry } = request;
   if (!archive) return <ForecastOverviewLoading failed={failed} retry={retry} />;
-  return <ForecastOverviewContent {...props} archive={archive} />;
+  return <ForecastArchiveRequest request={request}><ForecastOverviewContent {...props} archive={archive} /></ForecastArchiveRequest>;
 }
 
 function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onNavigate, provinceRecord }: OverviewProps & {

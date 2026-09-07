@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, seedAuthSession } from './fixtures';
+import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 
 const source = JSON.parse(readFileSync('data/normalized/drought-rev03/forecast_archive.json', 'utf8'));
 const runtime = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
@@ -8,9 +9,9 @@ const colors: Record<string, string> = { '0': 'rgb(93, 174, 121)', '1': 'rgb(241
 const statuses: Record<string, string> = { '0': 'no-risk', '1': 'moderate', '2': 'high', null: 'out-of-scope' };
 
 test.beforeEach(async ({ page }) => {
-  await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_archive', (route) => {
+  await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice', (route) => {
     expect(route.request().postDataJSON().p_version).toBe('drought-rev03-a3be44486c8e');
-    return route.fulfill({ json: route.request().postDataJSON().p_horizon_count === 1 ? overview : runtime });
+    return route.fulfill({ json: forecastSlice(route.request().postDataJSON().p_horizon_count === 1 ? overview : runtime, route.request().postDataJSON()) });
   });
   await seedAuthSession(page);
 });

@@ -5,7 +5,8 @@ import {
   type NakhonRatchasimaDroughtForecastArchiveRecord,
   type NakhonRatchasimaDroughtForecastArchiveLocation,
 } from "../../types";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useForecastPeriodRequest } from "../ForecastArchiveRequest";
 import { type AppSelectOption } from "../AppSelect";
 import { type LocalMapStatus, type LocalRiskCriterion } from "./workspaceModel";
 import { type NakhonRatchasimaRouteTarget } from "../../domain";
@@ -160,6 +161,7 @@ export function forecastArchiveTargetMonthForSelection(
 }
 
 export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDroughtForecastArchive, fixedHorizon?: ForecastArchiveHorizon) {
+  const requestPeriod = useForecastPeriodRequest();
   const [selectedIrrigation, setSelectedIrrigation] = useState(() => typeof window === "undefined"
     ? "all" as IrrigationCriterion : readIrrigationSelection(window.location.search, window.history.state));
   const [mapColorMode, setMapColorMode] = useState<ForecastMapColorMode>(() => selectedIrrigation === "all" ? "forecast" : "irrigation");
@@ -169,8 +171,17 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
   });
   const selectedHorizon = selection.selectedHorizon;
   const selectedMonth =
-    archive.targetMonths.find((month) => month.period === selection.selectedTargetPeriod) ??
+    archive.targetMonths.find((month) => month.period === (archive.loadedSelection?.originPeriod ?? selection.selectedTargetPeriod)) ??
     forecastArchiveDefaultTargetMonth(archive);
+  useEffect(() => {
+    if (archive.loadedSelection && selectedMonth) {
+      window.history.replaceState({ ...window.history.state, ktpForecastDatasetId: archive.meta.datasetId }, "");
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("target") !== selectedMonth.period || Number(params.get("horizon") ?? "1") !== selectedHorizon) {
+        writeForecastArchiveLocation(selectedMonth, selectedHorizon);
+      }
+    }
+  }, [archive.loadedSelection, archive.meta.datasetId, selectedMonth, selectedHorizon]);
   const selectedIssueMonth = selectedMonth?.period ?? archive.meta.targetMonthEnd;
   const targetMonthOptions = useMemo<AppSelectOption[]>(
     () =>
@@ -192,6 +203,7 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
   const changeTargetMonth = (period: string) => {
     const month = archive.targetMonths.find((item) => item.period === period);
     if (!month) return;
+    if (requestPeriod) { requestPeriod(period); return; }
     setSelection((current) => ({ ...current, selectedTargetPeriod: month.period }));
     writeForecastArchiveLocation(month, selectedHorizon);
   };

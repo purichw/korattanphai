@@ -4,6 +4,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { createClient } from '@supabase/supabase-js';
 import { buildForecastOverviewArchive } from './generate-forecast-summary.mjs';
 import { forecastImport, inspectArchive, sha256 } from './lib/forecast-rev03-migration.mjs';
+import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 
 const url = process.env.VITE_SUPABASE_URL;
 const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -37,6 +38,35 @@ try {
     assert.ok(isDeepStrictEqual(result.data, horizons === 1 ? buildForecastOverviewArchive(archive) : archive), `RPC T+${horizons} differs from canonical projection`);
     report.checks.push({ horizons, exactProjectionMatch: true, milliseconds: Math.round(performance.now() - start) });
   }
+  const revision = await client.rpc('ktp_latest_forecast_revision').abortSignal(AbortSignal.timeout(30_000));
+  assert.ok(!revision.error, 'Published revision RPC failed');
+  const { publishedAt, ...revisionMeta } = revision.data ?? {};
+  assert.ok(Number.isFinite(Date.parse(publishedAt)), 'Published revision must have a publication time');
+  assert.deepEqual(revisionMeta, archive.meta, 'Latest published revision differs from the audited source');
+  report.checks.push({ latestRevisionMatch: true, publishedAt });
+  for (const [area, origin, horizons] of [
+    ['30', '2015-06', 1], ['30', '2025-12', 1],
+    ['30', '2015-06', 6], ['30', '2025-12', 6],
+    ['3008', '2015-06', 6], ['3008', '2025-12', 6],
+    ['300806', '2025-12', 6], ['300106', '2025-12', 6], ['301512', '2025-12', 6],
+  ]) {
+    const args = { p_version: forecastImport.version, p_area_code: area, p_origin_period: origin, p_horizon_count: horizons };
+    const start = performance.now();
+    const result = await client.rpc('ktp_load_forecast_slice', args).abortSignal(AbortSignal.timeout(30_000));
+    assert.ok(!result.error, `Scoped RPC ${area}/${origin}/T+${horizons} failed`);
+    const expectedSlice = forecastSlice(horizons === 1 ? buildForecastOverviewArchive(archive) : archive, args);
+    assert.deepEqual(result.data, expectedSlice, `Scoped RPC differs from source: ${area}/${origin}/T+${horizons}`);
+    report.checks.push({ area, origin, horizons, scopedProjectionMatch: true,
+      riskCells: expectedSlice.locations.length * horizons, milliseconds: Math.round(performance.now() - start) });
+  }
+  for (const [name, args] of [
+    ['ktp_latest_forecast_revision', {}],
+    ['ktp_load_forecast_slice', { p_version: forecastImport.version, p_area_code: '300806', p_origin_period: '2025-12', p_horizon_count: 6 }],
+  ]) {
+    const denied = await anonymous.rpc(name, args).abortSignal(AbortSignal.timeout(30_000));
+    assert.ok(denied.error, `Anonymous RPC access must be denied: ${name}`);
+    report.checks.push({ rpc: name, anonymousAccessDenied: true });
+  }
   const denied = await anonymous.rpc('ktp_load_forecast_archive', { p_version: forecastImport.version, p_horizon_count: 6 });
   assert.ok(denied.error, 'Anonymous archive access must be denied');
   for (const table of ['ktp_forecast_values', 'ktp_saved_filters', 'ktp_followed_areas']) {
@@ -51,7 +81,8 @@ try {
   process.exitCode = 1;
 } finally {
   await client.auth.signOut({ scope: 'local' });
-  await fs.mkdir('smoke-results/database-integrity', { recursive: true });
-  await fs.writeFile('smoke-results/database-integrity/report.json', JSON.stringify(report, null, 2));
+  const reportDirectory = process.env.DATABASE_VERIFY_OUTPUT_DIR ?? 'smoke-results/database-integrity';
+  await fs.mkdir(reportDirectory, { recursive: true });
+  await fs.writeFile(`${reportDirectory}/report.json`, JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 }

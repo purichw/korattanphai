@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
 import { buildForecastOverviewArchive } from './generate-forecast-summary.mjs';
+import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 import { archiveAuditSql, assertArchiveAudit, buildDraftSql, buildMonthSql, forecastImport, inspectArchive, publishArchiveSql } from './lib/forecast-rev03-migration.mjs';
 
 // Isolated PostgreSQL/WASM. Never connects to Supabase or creates real accounts.
@@ -29,6 +30,7 @@ try {
     await db.exec(await fs.readFile('supabase/migrations/20260905110000_archive_and_saved_workspaces.sql', 'utf8'));
     await db.exec(await fs.readFile('supabase/migrations/20260905124000_target_month_archive_publication.sql', 'utf8'));
     await db.exec(await fs.readFile('supabase/migrations/20260906160000_rev03_origin_forecast.sql', 'utf8'));
+    await db.exec(await fs.readFile('supabase/migrations/20260907040000_scoped_forecast_reads.sql', 'utf8'));
   });
   const archive = JSON.parse(await fs.readFile('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
   const expected = inspectArchive(archive);
@@ -40,6 +42,8 @@ try {
     await asUser(a, async (tx) => {
       assert.equal((await tx.query('select * from ktp_forecast_datasets')).rows.length, 0);
       assert.equal((await tx.query('select ktp_load_forecast_archive($1,6) as archive', [forecastImport.version])).rows[0].archive, null);
+      assert.equal((await tx.query("select ktp_load_forecast_slice($1,null,'30',6) as archive", [forecastImport.version])).rows[0].archive, null);
+      assert.equal((await tx.query('select ktp_latest_forecast_revision() as revision')).rows[0].revision, null);
     });
   });
   await check('incomplete archive cannot publish', async () => {
@@ -80,8 +84,33 @@ try {
   await check('authenticated users cannot change forecast values', async () => {
     await assert.rejects(asUser(a, (tx) => tx.exec('update ktp_forecast_values set risk_level=0')), /permission denied/);
   });
+  await check('scoped reads match every source month plus every district and tambon without changing any prediction', async () => {
+    const start = performance.now();
+    const overview = buildForecastOverviewArchive(archive);
+    const read = (tx, period, area, horizons) => tx.query('select ktp_load_forecast_slice($1,$2,$3,$4) as archive', [forecastImport.version,period,area,horizons]);
+    await asUser(a, async (tx) => {
+      const revision = (await tx.query('select ktp_latest_forecast_revision() as revision')).rows[0].revision;
+      assert.equal(revision.datasetId, archive.meta.datasetId);
+      assert.equal(revision.sourceWorkbookSha256, archive.meta.sourceWorkbookSha256);
+      for (const month of archive.targetMonths) for (const projection of [archive, overview]) {
+        const result = (await read(tx, month.period, '30', projection.meta.horizonCount)).rows[0].archive;
+        assert.deepEqual(result, forecastSlice(projection, { p_origin_period: month.period }));
+      }
+      for (const area of [...districts.map(l => l.districtCode), ...archive.locations.map(l => l.subdistrictCode)]) {
+        const result = (await read(tx, '2025-12', area, 6)).rows[0].archive;
+        assert.deepEqual(result, forecastSlice(archive, { p_origin_period: '2025-12', p_area_code: area }));
+      }
+      for (const invalid of [null, 'bad-date', '2026-01']) {
+        assert.deepEqual((await read(tx, invalid, '300806', 6)).rows[0].archive, forecastSlice(archive, { p_area_code: '300806' }));
+      }
+      assert.equal((await read(tx, '2025-12', '309999', 6)).rows[0].archive, null);
+      assert.equal((await read(tx, '2025-12', '30', 7)).rows[0].archive, null);
+    });
+    assertArchiveAudit((await db.query(archiveAuditSql())).rows[0], expected);
+    console.log(`[database] scoped parity ${Math.round(performance.now() - start)} ms (local WASM)`);
+  });
   await check('anonymous callers cannot read archive or personal data', async () => {
-    for (const sql of ["select ktp_load_forecast_archive('x',6)", 'select * from ktp_forecast_values', 'select * from ktp_followed_areas', 'select * from ktp_saved_filters']) {
+    for (const sql of ["select ktp_load_forecast_archive('x',6)", "select ktp_load_forecast_slice('x',null,'30',6)", 'select ktp_latest_forecast_revision()', 'select * from ktp_forecast_values', 'select * from ktp_followed_areas', 'select * from ktp_saved_filters']) {
       await assert.rejects(db.transaction(async (tx) => { await tx.exec('set local role anon'); return tx.exec(sql); }), /permission denied/);
     }
   });

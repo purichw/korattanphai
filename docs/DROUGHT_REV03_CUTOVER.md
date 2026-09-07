@@ -1,5 +1,9 @@
 # Rev03 Forecast Cutover
 
+The subsequent, not-yet-deployed read/cache optimization is documented in
+[FORECAST_SCOPED_LOADING.md](FORECAST_SCOPED_LOADING.md). It leaves this source
+and normalization contract unchanged.
+
 ## Scope
 
 Forecast data and its ingestion, projection, validation and regression tests

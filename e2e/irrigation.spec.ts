@@ -1,11 +1,12 @@
 import { test, expect, seedAuthSession } from "./fixtures";
 import { readFileSync } from "node:fs";
+import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 
 const archive = JSON.parse(readFileSync("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", "utf8"));
 const overview = JSON.parse(readFileSync("src/data/generated/forecast-overview-t1.json", "utf8"));
 
 test.beforeEach(async ({ page }) => {
-  await page.route("https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_archive", (route) => route.fulfill({ json: route.request().postDataJSON().p_horizon_count === 1 ? overview : archive }));
+  await page.route("https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice", (route) => route.fulfill({ json: forecastSlice(route.request().postDataJSON().p_horizon_count === 1 ? overview : archive, route.request().postDataJSON()) }));
   await seedAuthSession(page);
 });
 

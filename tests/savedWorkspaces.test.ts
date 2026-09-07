@@ -4,6 +4,12 @@ import { isSavedSelection } from '../src/data/savedWorkspaces';
 import { readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../src/savedWorkspaceRoutes';
 
 describe('saved forecast selections', () => {
+  it('records the dataset actually displayed after a new publication', () => {
+    const id = '11111111-1111-4111-8111-111111111111';
+    const selected = readWorkspaceSelection({ pathname: '/drought', search: '?target=2026-01&horizon=4' }, { ktpForecastDatasetId: id });
+    expect(selected).toMatchObject({ dataset_id: id, target_period: '2026-01-01', horizon: 4 });
+    expect(savedFilterPath(selected!)).toContain('target=2026-01');
+  });
   it('saves the live map filter instead of a stale URL value', () => {
     const location = { pathname: '/drought', search: '?target=2025-12&horizon=4&irrigation=irrigated' };
     for (const criterion of ['unknown', 'rainfed', 'all'] as const) {

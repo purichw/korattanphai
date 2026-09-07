@@ -16,6 +16,7 @@ import {
 } from "./nakhon-ratchasima/workspaceModel";
 import { formatMonth } from "../i18n";
 import { useForecastArchive } from "../useForecastArchive";
+import { ForecastArchiveRequest } from "./ForecastArchiveRequest";
 import { preloadLocalMapGeometry } from "../data/localMapGeometry";
 import { PanelTitle } from "./nakhon-ratchasima/SharedPanels";
 import { AlertTriangle } from "lucide-react";
@@ -97,7 +98,10 @@ export function NakhonRatchasimaWorkspace({
   }, [provinceRouteTab]);
 
   const isDroughtWorkspaceRoute = route.valid && (route.level !== "province" || route.tab === "drought");
-  const { archive: droughtArchive, failed: archiveFailed, retry: retryArchive } = useForecastArchive(isDroughtWorkspaceRoute);
+  const areaCode = route.valid && route.level === "subdistrict" ? route.subdistrict.subdistrictCode
+    : route.valid && route.level === "district" ? route.district.districtCode : "30";
+  const forecastRequest = useForecastArchive(isDroughtWorkspaceRoute, "full", areaCode);
+  const { archive: droughtArchive, failed: archiveFailed, retry: retryArchive } = forecastRequest;
   useEffect(() => {
     if (isDroughtWorkspaceRoute) void preloadLocalMapGeometry();
   }, [isDroughtWorkspaceRoute]);
@@ -121,6 +125,7 @@ export function NakhonRatchasimaWorkspace({
   }
 
   return (
+    <ForecastArchiveRequest request={forecastRequest}>
     <div className={["page-stack", "nr-workspace", isDroughtWorkspaceRoute ? "is-drought-route" : ""].join(" ")}>
       {route.level === "province" && (
         <ProvinceView
@@ -163,5 +168,6 @@ export function NakhonRatchasimaWorkspace({
         />
       )}
     </div>
+    </ForecastArchiveRequest>
   );
 }
