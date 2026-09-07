@@ -5,9 +5,15 @@
 This follow-up changes forecast reads and per-account memory caching, not
 forecast values, normalization, geometry, risk calculations or personal rows.
 Migration `20260907040000_scoped_forecast_reads.sql` is applied to the hosted
-project; frontend deployment is pending release verification. The original
+project; the frontend was deployed and verified on 2026-09-07. The original
 workbook/lineage contract remains documented in
 [DROUGHT_REV03_CUTOVER.md](DROUGHT_REV03_CUTOVER.md).
+
+The final release also includes the completed forecast-summary work from the
+other task, as explicitly requested by the user. Those separate changes replace
+the aggregate severity threshold with source-category stacked bars and a
+percent/count control. Percentages use only tambons with values 0/1/2; coverage
+is displayed separately. They change derived presentation, not stored values.
 
 ## Read Contract
 
@@ -131,6 +137,49 @@ it was not rerun after the interrupted CLI session.
   `authenticated/report.json`; pre-migration source audit:
   `tmp-snapshots/archive-migration-Xvt4vt/verification.json`.
 
-Frontend candidate/production verification remains separate from successful
-database migration. Recovery can keep this additive migration and promote the
-previous frontend, because the old RPC and immutable data remain available.
+The post-migration source audit at
+`tmp-snapshots/archive-migration-czIR6X/verification.json` matches the pre-migration
+audit: 220,218 rows, 762 runs, 289 locations, no temporal or lineage errors, and
+ordered source/value/lineage digest
+`44cfcd55c251d9c95f169d3b391040de435b3b6462139f501559a155456e5fd1`.
+
+## Combined Production Release
+
+- Pushed branch: `fix/nr-map-zoom-performance`. Runtime commits:
+  `d8cf659` (scoped reads/cache) and `c05857a` (source-category summaries).
+  `7f9100c` adds the database fixture for the combined chart regression only;
+  runtime, source data and deployment configuration match `c05857a` exactly.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34100110799)
+  passed for `7f9100c7ddc8f58bc2ac258c4a08a80eeefa8141`: 170 unit tests,
+  11 isolated database/integrity/RLS checks, 105 built-browser tests,
+  26 database-browser tests, static and database protected builds, generated
+  drift, exposure and bundle checks. The built run reports 23 conditional skips,
+  including database-only scenarios covered by the separate database run.
+- Candidate: `dpl_BtffbjmaXRzBPLNt1Wffp9R7W7gX`,
+  `https://korattanphai-7ug7htnqs-purichwc-1517s-projects.vercel.app`.
+  Created from an isolated staged-source export with production Supabase
+  configuration, not the test build. Existing Vercel protection stayed enabled;
+  authorized candidate access remained in process memory.
+- The same candidate was promoted without rebuilding to
+  [production](https://korattanphai.vercel.app). Vercel inspection confirms the
+  production alias resolves to the deployment above.
+- Real-account candidate and production smoke both passed on desktop/mobile:
+  five route scopes, exact in-scope map colors and RPC/source projections,
+  both graph units/category counts, irrigation selection/reload/empty reset,
+  null-versus-zero handling, saved-workspace reads, login/logout, hosting API,
+  asset/header checks and no overflow or page errors. No personal rows were
+  created, edited or deleted. No full-archive RPC or static fallback was used.
+- Evidence: `smoke-results/scoped-combined-candidate/` and
+  `smoke-results/scoped-combined-production/`; production snapshots include
+  `desktop-drought.png`, `desktop-district.png` and `mobile-district.png`.
+- The first combined database chart check failed because its static-only test
+  fixture did not implement the new RPC. The fixture was added without changing
+  assertions; all four affected cases and the final full CI passed.
+- Browser coverage uses Chromium at 1440 px and 390 px. Safari/Firefox and a
+  new whole-page latency benchmark were not run; the API timing observations
+  above are not presented as browser-load guarantees. Existing large-chunk
+  advisory remains non-blocking and within the enforced bundle budget.
+- Recovery: promote `dpl_ufZBassRXtWfk7i3UVoeqeG5GbFD`
+  (`https://korattanphai-acbri7qqw-purichwc-1517s-projects.vercel.app`). Keep the
+  additive migration and immutable datasets; the previous frontend's full RPC
+  remains available. No reverse data migration is required.

@@ -22,8 +22,10 @@ rejects localhost use and API redirects, and redacts it from failure reports.
 This authenticates the runner to Vercel; Supabase login is still tested normally.
 
 For database releases, set `SMOKE_DATA_BACKEND=supabase`. The harness compares
-both actual app RPC projections to canonical source, checks the risk class of
-every map polygon on all five routes, rejects static archive fallback and reads
+actual scoped app RPC projections to canonical source, checks the risk class of
+every in-scope map polygon on all five routes and that other areas are filtered,
+checks both chart units and source risk categories, rejects full-archive reads
+and static archive fallback, and reads
 the saved-workspace modal. `SMOKE_SAVED_FILTER_NAME` optionally verifies a known
 saved record across fresh login sessions; the harness itself does not create
 or delete personal records. Database-mode smoke also checks all three irrigation
