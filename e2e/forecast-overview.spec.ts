@@ -78,7 +78,7 @@ test("changing month updates map counts and risk filtering uses the same forecas
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
   if (await edit.isVisible()) await edit.click();
-  await page.getByRole("combobox", { name: /^(เลือก)?เดือน/ }).click();
+  await page.getByRole("combobox", { name: /^เดือนตั้งต้น |^เลือกเดือนตั้งต้น$/ }).click();
   await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
   const apply = page.getByRole("button", { name: "แสดงผล", exact: true });
   if (await apply.isVisible()) await apply.click();
