@@ -2,8 +2,8 @@ import { useState, type ReactNode } from "react";
 import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, ShieldCheck, Sprout, TrendingUp } from "lucide-react";
 import { AppSelect, type AppSelectOption } from "../AppSelect";
 import { MetricCard } from "../PageSummary";
-import { type DroughtForecastWorkspaceTarget, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
-import { districtOptionsForProvince, formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
+import { type DroughtForecastWorkspaceTarget, type DroughtForecastArchiveSummary, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
+import { districtOptionsForProvince, formatThaiNumber, formatPercent, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
 
 export function useDroughtReadinessMap() {
   const [readinessMap, setReadinessMap] = useState(false);
@@ -66,17 +66,20 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
   </section>;
 }
 
-export function DroughtOperationalSummary({ horizon, riskSubdistricts, inScopeSubdistricts }: {
+export function DroughtOperationalSummary({ horizon, summary }: {
   horizon: ForecastArchiveHorizon;
-  riskSubdistricts: number;
-  inScopeSubdistricts: number;
+  summary: DroughtForecastArchiveSummary;
 }) {
-  const state = riskSubdistricts > 0 ? " has-risk" : inScopeSubdistricts === 0 ? " has-no-data" : "";
+  const { riskPercent, riskSubdistricts, inScopeSubdistricts, totalSubdistricts } = summary;
+  const state = riskPercent === null ? " has-no-data" : "";
   return <MetricCard
     className={`nr-operational-card-heading nr-operational-forecast-summary${state}`}
-    label={<span role="heading" aria-level={3}>สรุปผลพยากรณ์ (T+{horizon})</span>}
-    value={inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในรอบนี้" : `พบตำบลเสี่ยง ${formatThaiNumber(riskSubdistricts)} ตำบล`}
-    detail={`จากตำบลที่มีค่าพยากรณ์ ${formatThaiNumber(inScopeSubdistricts)} ตำบล`}
+    label={<span role="heading" aria-level={3}>ตำบลที่พบความเสี่ยง (T+{horizon})</span>}
+    value={riskPercent === null ? "ไม่มีค่าพยากรณ์ในรอบนี้" : formatPercent(riskPercent * 100, 1)}
+    detail={<>
+      {riskPercent !== null && <span>เสี่ยง {formatThaiNumber(riskSubdistricts)} จาก {formatThaiNumber(inScopeSubdistricts)} ตำบลที่มีค่าพยากรณ์</span>}
+      <span>มีค่าพยากรณ์ {formatThaiNumber(inScopeSubdistricts)}/{formatThaiNumber(totalSubdistricts)} ตำบลทั้งหมด</span>
+    </>}
     icon={<TrendingUp size={22} />}
   />;
 }

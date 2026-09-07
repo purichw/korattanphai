@@ -333,9 +333,11 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(droughtWorkspace).toBeVisible();
   await expect(horizonTabs.getByRole("tab")).toHaveCount(6);
   await expect(horizonTabs.getByRole("tab", { name: /T\+1/ })).toHaveAttribute("aria-selected", "true");
-  await expect(droughtWorkspace.getByRole("heading", { name: "จำนวนตำบลเสี่ยงในแต่ละเดือน" })).toBeVisible();
+  await expect(droughtWorkspace.getByRole("heading", { name: "ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ" })).toBeVisible();
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group")).toHaveCount(6);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group.is-active")).toHaveCount(1);
+  await expect(droughtWorkspace.getByRole("button", { name: "เปอร์เซ็นต์", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await droughtWorkspace.getByRole("button", { name: "จำนวนตำบล", exact: true }).click();
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-drought-forecast-point-label", { hasText: "117" })).toHaveCount(3);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   await expect(droughtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("นอกขอบเขต");

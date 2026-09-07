@@ -15,56 +15,24 @@ import { forecastTargetPeriod } from "../../forecastPeriod";
 import { formatMonth } from "../../i18n";
 export { shiftMonthPeriod } from "../../forecastPeriod";
 
-export type DroughtForecastBand = "unavailable" | "normal" | "watch" | "severe";
-
-export const DROUGHT_FORECAST_BAND_RANK: Record<DroughtForecastBand, number> = {
-  unavailable: -1,
-  normal: 0,
-  watch: 1,
-  severe: 2,
-};
-
 export type DroughtForecastTrendMonth = {
   monthIndex: number;
   period: string;
   labelTh: string;
   riskSubdistricts: number;
+  moderateRiskSubdistricts: number;
+  highRiskSubdistricts: number;
   normalSubdistricts: number;
   totalSubdistricts: number;
   inScopeSubdistricts: number;
   outOfScopeSubdistricts: number;
   missingSubdistricts: number;
-  riskPercent: number;
+  riskPercent: number | null;
 };
 
-export function droughtForecastBand(month: DroughtForecastTrendMonth): DroughtForecastBand {
-  if (month.inScopeSubdistricts === 0) return "unavailable";
-  if (month.riskPercent >= 0.5) return "severe";
-  if (month.riskSubdistricts > 0) return "watch";
-  return "normal";
-}
-
-export function highestDroughtForecastBand(first: DroughtForecastBand, second: DroughtForecastBand) {
-  return DROUGHT_FORECAST_BAND_RANK[first] >= DROUGHT_FORECAST_BAND_RANK[second] ? first : second;
-}
-
-export function droughtForecastBandLabel(band: DroughtForecastBand, scope: "area" | "single" = "area") {
-  if (scope === "single") {
-    const labels: Record<DroughtForecastBand, string> = {
-      unavailable: "ไม่มีค่าพยากรณ์",
-      normal: "ไม่เสี่ยง",
-      watch: "เสี่ยงแล้ง",
-      severe: "เสี่ยงแล้ง",
-    };
-    return labels[band];
-  }
-  const labels: Record<DroughtForecastBand, string> = {
-    unavailable: "ไม่มีค่าพยากรณ์",
-    normal: "ไม่พบความเสี่ยงในตำบลที่มีค่า",
-    watch: "มีพื้นที่เสี่ยง",
-    severe: "เสี่ยงตั้งแต่ครึ่งหนึ่งของจำนวนตำบล",
-  };
-  return labels[band];
+// Coverage uses all selected tambons; risk shares use only source values 0/1/2.
+export function forecastRiskShare(count: number, inScopeSubdistricts: number): number | null {
+  return inScopeSubdistricts > 0 ? count / inScopeSubdistricts : null;
 }
 
 export function droughtForecastHasRiskSignal(months: DroughtForecastTrendMonth[]) {
@@ -86,7 +54,8 @@ export function droughtForecastPeakSummary(months: DroughtForecastTrendMonth[]) 
   return {
     riskSubdistricts: peakRiskSubdistricts,
     monthLabel: formatDroughtForecastMonthRange(peakMonths),
-    riskPercent: Math.max(...peakMonths.map((month) => month.riskPercent)),
+    riskPercent: peakMonths.some((month) => month.riskPercent !== null)
+      ? Math.max(...peakMonths.flatMap((month) => month.riskPercent === null ? [] : [month.riskPercent])) : null,
   };
 }
 
@@ -340,6 +309,7 @@ export function forecastArchiveSummaryForSelection(
     outOfScopeSubdistricts,
     recordsBySubdistrict,
     riskSubdistricts: moderateRiskSubdistricts + highRiskSubdistricts,
+    riskPercent: forecastRiskShare(moderateRiskSubdistricts + highRiskSubdistricts, inScopeSubdistricts),
     totalSubdistricts,
   };
 }
@@ -357,12 +327,14 @@ export function forecastArchiveTrendMonthsForSelection(
       period: summary.targetMonth,
       labelTh: formatMonth(summary.targetMonth, "th"),
       riskSubdistricts: summary.riskSubdistricts,
+      moderateRiskSubdistricts: summary.moderateRiskSubdistricts,
+      highRiskSubdistricts: summary.highRiskSubdistricts,
       normalSubdistricts: summary.noRiskSubdistricts,
       totalSubdistricts,
       inScopeSubdistricts: summary.inScopeSubdistricts,
       outOfScopeSubdistricts: summary.outOfScopeSubdistricts,
       missingSubdistricts: summary.missingSubdistricts,
-      riskPercent: totalSubdistricts > 0 ? summary.riskSubdistricts / totalSubdistricts : 0,
+      riskPercent: summary.riskPercent,
     };
   });
 }

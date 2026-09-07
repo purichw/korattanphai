@@ -13,7 +13,7 @@ const server = await createServer({ server: {
 } });
 try {
   await server.listen();
-  const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', 'e2e/database-workspaces.spec.ts', 'e2e/forecast-rev03-integrity.spec.ts', 'e2e/forecast-scoped-loading.spec.ts', '--workers=2', ...process.argv.slice(2)], {
+  const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', 'e2e/database-workspaces.spec.ts', 'e2e/forecast-rev03-integrity.spec.ts', 'e2e/forecast-scoped-loading.spec.ts', 'e2e/forecast-risk-summary.spec.ts', '--workers=2', ...process.argv.slice(2)], {
     stdio: 'inherit', env: { ...process.env, PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${port}`, PLAYWRIGHT_DATA_BACKEND: 'supabase' },
   });
   process.exitCode = await new Promise((resolve, reject) => { child.on('error', reject); child.on('exit', (code) => resolve(code ?? 1)); });

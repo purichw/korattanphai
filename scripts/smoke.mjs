@@ -136,6 +136,36 @@ try {
           assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /117\/289/);
           await expect(page.locator(".nr-forecast-target-note")).toHaveText("เดือนตั้งต้น ธ.ค. 2568 · พยากรณ์ล่วงหน้า 1–6 เดือน: ม.ค. 2569 – มิ.ย. 2569");
         }
+        if (databaseMode && (areaCode === "30" && route !== "/" || areaCode === "3008")) {
+          const chart = page.locator(".nr-drought-workspace-chart-card");
+          const codes = expectedArchive.locations.filter(location => areaCode === "30" || location.districtCode === areaCode).map(location => location.subdistrictCode);
+          const initialUrl = page.url();
+          for (const unit of ["percent", "count"]) {
+            if (unit === "count") await chart.getByRole("button", { name: "จำนวนตำบล", exact: true }).click();
+            await expect(chart.locator("figure")).toHaveAttribute("data-unit", unit);
+            const columns = chart.locator(".nr-forecast-point-group");
+            await expect(columns).toHaveCount(6);
+            for (let h = 0; h < 6; h++) {
+              const risks = codes.map(code => expectedArchive.packedRiskByTargetMonth["2025-12"][code][h]);
+              const moderate = risks.filter(value => value === 1).length;
+              const high = risks.filter(value => value === 2).length;
+              const inScope = risks.filter(value => value !== null).length;
+              const label = !inScope ? "ไม่มีค่า" : unit === "count" ? String(moderate + high)
+                : `${((moderate + high) / inScope * 100).toLocaleString("th-TH", { maximumFractionDigits: 1 })}%`;
+              await expect(columns.nth(h).locator(".nr-drought-forecast-point-label")).toHaveText(label);
+              for (const [level, count] of [["moderate", moderate], ["high", high]]) {
+                const bar = columns.nth(h).locator(`.nr-drought-forecast-bar.is-${level}`);
+                if (count) await expect(bar).toHaveAttribute("data-count", String(count));
+                else await expect(bar).toHaveCount(0);
+              }
+            }
+            assert.equal(page.url(), initialUrl, `${name}: chart units preserve selection`);
+          }
+          await expect(chart.locator(".nr-drought-forecast-graph-threshold, .is-severe")).toHaveCount(0);
+          await chart.getByRole("button", { name: "เปอร์เซ็นต์", exact: true }).click();
+          if (areaCode === "3008") await page.screenshot({ path: path.join(output, `${name}-district.png`), fullPage: true });
+          report.checks.push({ viewport: name, route, graphUnits: ["percent", "count"], sourceCategoriesMatch: true });
+        }
         if (route.includes("/t-300806")) {
           const kpis = page.locator(".nr-drought-workspace-kpis");
           assert.equal(await kpis.locator(".metric-card").count(), 1, `${name}: single tambon status`);
@@ -150,7 +180,7 @@ try {
         if (route.startsWith("/ban-lueam")) {
           await page.locator(".nr-forecast-unavailable").waitFor();
           assert.match(await page.locator(".nr-forecast-unavailable").innerText(), /ไม่มีค่าพยากรณ์ให้เปรียบเทียบ/);
-          assert.equal(await page.locator(".nr-drought-forecast-point").count(), 0, `${name}: null forecasts are not zero`);
+          assert.equal(await page.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero").count(), 0, `${name}: null forecasts are not zero`);
           assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /0\/4 ตำบล/);
           assert.match(await page.locator(".nr-drought-workspace-kpis .is-no-risk").getAttribute("class"), /is-muted/);
           assert.equal(await page.locator(".nr-operational-attention-list").count(), 0);

@@ -1,5 +1,29 @@
 # Rollback Parking Lot
 
+## 2026-09-06 — Abandon Subdistrict UI Redesign
+
+- Request: explicitly roll back all subdistrict UI redesign work.
+- Status: intentionally abandoned by the user; no restoration pending.
+- Baseline: `757143f20b3dc2f16360d1e606f6c8820f92613f`; its runtime matches
+  verified production commit `8cfa2824f81b9bb886b7479ef9d36a0c6dbcdf41`.
+- Checkpoint: `tmp-snapshots/rollback-subdistrict-ui-20260906/`, containing
+  the scoped working/index patches, original files, manifest and parked new
+  stylesheet/spec. Existing screenshots remain in the task snapshot directory.
+- Scope: subdistrict grid/rail, new note, selector deduplication, style changes,
+  keyboard additions, loading/navigation follow-ups and their tests/docs.
+- Preserve: all concurrent rev03 data/importer/migration work, including its
+  archive references and data-specific fixtures/expectations in shared tests. Published forward T+
+  semantics and production risk colors/readiness visibility remain intact.
+- Restore only on a new explicit request: selectively reapply checkpoint UI
+  hunks, rewire the parked stylesheet, reconcile any newer data contracts and
+  verify route layout/selection/loading. Do not apply the full patch over
+  unrelated work or revert rev03 references.
+- Verification: all eight runtime owner files match the verified production
+  commit byte-for-byte. Desktop 1440 px and mobile 390 px checks passed: six
+  forward T+ tabs, original page/map selectors, 289 map polygons, guidance
+  disclosure, no page errors or horizontal overflow. Both snapshots reviewed;
+  `git diff --check` passed. No production change; broader release tests skipped.
+
 ## 2026-09-05 - Remove Synthetic Korat Metrics, Preserve Components
 
 - Request: delete the synthetic numbers and remove their UI, keeping the

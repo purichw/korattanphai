@@ -25,7 +25,8 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     } else {
       await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage")).toContainText(scope === "province" ? "117/289" : "6/16");
       await expect(workspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toBeVisible();
-      await expect(page.locator(".nr-operational-forecast-summary")).toHaveClass(/has-risk/);
+      await expect(page.locator(".nr-operational-forecast-summary .metric-card-value")).toHaveText("100%");
+      await expect(page.locator(".nr-operational-forecast-summary")).not.toHaveClass(/has-risk|is-danger/);
     }
     await expect(page.getByText("สถานการณ์ภัยแล้งตามข้อมูลพื้นที่", { exact: true })).toHaveCount(0);
     const chart = workspace.locator(".nr-drought-workspace-chart-card");
@@ -179,8 +180,8 @@ for (const boundary of [
     const tabs = workspace.locator(".nr-drought-workspace-horizon").getByRole("tab");
     await expect(tabs.locator("span")).toHaveText(boundary.forecasts);
     const chart = workspace.locator(".nr-drought-workspace-chart-card");
-    await expect(chart.getByRole("heading", { name: "จำนวนตำบลเสี่ยงในแต่ละเดือน", exact: true })).toBeVisible();
-    await expect(chart.getByRole("img", { name: "แนวโน้มจำนวนตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า", exact: true })).toBeVisible();
+    await expect(chart.getByRole("heading", { name: "ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ", exact: true })).toBeVisible();
+    await expect(chart.getByRole("img", { name: "แนวโน้มสัดส่วนตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า", exact: true })).toBeVisible();
     const context = workspace.locator(".nr-drought-workspace-context");
     const map = workspace.locator(".nr-drought-workspace-map-card");
     for (const [index, horizon] of [1, 4, 6].entries()) {
@@ -216,7 +217,7 @@ test("all-null districts and tambons remain unavailable, never a green zero fore
   await page.goto("/ban-lueam?target=2025-12&horizon=1");
   const workspace = page.locator(".nr-drought-compact-workspace");
   await expect(workspace.locator(".nr-forecast-unavailable")).toContainText("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
-  await expect(workspace.locator(".nr-drought-forecast-point")).toHaveCount(0);
+  await expect(workspace.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
   await expect(workspace.locator(".is-coverage").last()).toContainText("0/4 ตำบล");
   await expect(workspace.locator(".nr-drought-workspace-kpis .is-no-risk")).toHaveClass(/is-muted/);
   await expect(page.locator(".nr-operational-forecast-summary")).toContainText("ไม่มีค่าพยากรณ์ในรอบนี้");

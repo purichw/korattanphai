@@ -59,7 +59,7 @@ function LoadingMap() {
 
 function LoadingChart() {
   return <div className="nr-loading-chart">
-    <h3>จำนวนตำบลเสี่ยงในแต่ละเดือน</h3>
+    <h3>ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ</h3>
     <div className="nr-loading-chart-surface"><TrendingUp size={32} strokeWidth={1.25} aria-hidden="true" /></div>
     <Skeleton className="is-line" />
   </div>;

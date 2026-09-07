@@ -27,6 +27,7 @@ test("irrigation filters map, totals and horizons and survives district navigati
   await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(20);
   await expect(page.locator(".nr-drought-workspace-context .is-coverage")).toContainText("/20 ตำบล");
   const expectedTrend = Array.from({ length: 6 }, (_, h) => String(archive.locations.filter((l: any) => l.irrigationStatus === "Irrigation" && archive.packedRiskByTargetMonth["2025-12"][l.subdistrictCode][h] > 0).length));
+  await page.getByRole("button", { name: "จำนวนตำบล", exact: true }).click();
   await expect(page.locator(".nr-drought-forecast-point-label")).toHaveText(expectedTrend);
   await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)").first()).toHaveCSS("fill", "rgb(57, 127, 197)");
   await expect(page.locator(".nr-map-legend")).toContainText("ยังไม่มีข้อมูลชลประทาน");
