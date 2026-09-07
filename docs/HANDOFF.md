@@ -20,6 +20,44 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Shared forecast bar graph production release (2026-09-07):
+
+- Pushed runtime `b96340fc35a65403b3076219375babccca68ef6f` on
+  `fix/nr-map-zoom-performance`. `f7ef591` corrects the loading test for static
+  versus database providers; runtime/data/configuration match `b96340f` exactly.
+- Province and every district reuse `ForecastRiskBarGraph.tsx` through
+  `DroughtForecastWorkspaceChart`. Full-width percent/count controls, readable
+  six-horizon labels, four-item responsive legend, coverage strip and
+  hover/focus/tap details follow the supplied desktop/mobile references.
+  Subdistricts still omit the population chart. Risk/date/denominator semantics,
+  map state and archive values are unchanged.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34116923885)
+  passed for `f7ef591`: 171 unit tests, isolated database/integrity/RLS checks,
+  109 built-browser tests (23 conditional skips), 30 database-browser tests,
+  protected builds, exposure/bundle budgets and generated-data drift checks.
+  Local chart evidence also covers all six requested desktop/mobile sizes.
+- Candidate `dpl_61UY2UeoW9vKE4bMofVvuof1SXDn` was built from a clean archive of
+  `b96340f`, using Production settings and `--prod --skip-domain`. After CI and
+  authenticated candidate smoke, the same artifact was promoted without a
+  rebuild to `https://korattanphai.vercel.app`. Verified deployment URL:
+  `https://korattanphai-mniipewgq-purichwc-1517s-projects.vercel.app`.
+- Candidate and production real-account smoke passed on desktop/mobile:
+  login/logout, five route scopes, source-equal scoped RPCs and map colors,
+  chart units, all-null handling, irrigation/reload/reset, saved-workspace
+  reads, assets/API/headers and no overflow or page errors. Additional Soeng
+  Sang checks confirm the new legend and keyboard/touch detail behavior.
+- Evidence: `smoke-results/bar-graph-{candidate,production}/report.json`,
+  `shared-chart-report.json`, and `desktop-shared-chart.png` /
+  `mobile-shared-chart.png`. Local reference comparison:
+  `artifacts/bar-graph-v1/reference-development.png`.
+- No remote migration, application-data writes, Auth settings or normalized
+  source changes. Concurrent uncommitted bookmark design changes and the
+  existing spreadsheet lock/Python cache were excluded from this release.
+  Chromium only; Safari/Firefox/physical devices were not checked. The existing
+  large-chunk advisory remains within the enforced budget.
+- Recovery: promote `dpl_BtffbjmaXRzBPLNt1Wffp9R7W7gX`, the previous verified
+  combined forecast release. Keep Supabase schema/datasets unchanged.
+
 Subdistrict inspection workspace production release (2026-09-07):
 
 - Released runtime `ccd04d75dd842e64ade37bda2cd39ef18413209e` after the separate
