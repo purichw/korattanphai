@@ -903,8 +903,6 @@ export function ProvinceDashboardMapCard({
   target,
   showMonthFilter,
   compactOverview = false,
-  readinessMode = false,
-  onCloseReadiness,
   activeTab,
   layer,
   mapMode,
@@ -925,8 +923,6 @@ export function ProvinceDashboardMapCard({
   target?: NakhonRatchasimaRouteTarget;
   showMonthFilter?: boolean;
   compactOverview?: boolean;
-  readinessMode?: boolean;
-  onCloseReadiness?: () => void;
   activeTab: ProvinceDashboardTab;
   layer: NakhonRatchasimaMapLayer;
   mapMode: LocalMapMode;
@@ -945,8 +941,8 @@ export function ProvinceDashboardMapCard({
   const research = getNakhonRatchasimaResearchPanelSummary();
   const activeResearchPeriod = localResearchPeriodForSelectedMonth(selectedMonth, research);
   const mapMonthLabel = localResearchPeriodLabel(activeResearchPeriod);
-  const hasForecastArchive = Boolean(forecastArchiveMonth && forecastArchive && !readinessMode);
-  const title = readinessMode ? "แผนที่ความพร้อมข้อมูลพื้นที่" : hasForecastArchive && irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
+  const hasForecastArchive = Boolean(forecastArchiveMonth && forecastArchive);
+  const title = hasForecastArchive && irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : hasForecastArchive ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" : "แผนที่สถานการณ์ภัยแล้ง";
   const helper =
     hasForecastArchive && forecastArchiveMonth
       ? `เดือนที่พยากรณ์ ${formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")} · T+${forecastArchiveHorizon ?? 1} จากเดือนตั้งต้น ${formatMonth(forecastArchiveIssueMonth ?? forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}`
@@ -964,9 +960,8 @@ export function ProvinceDashboardMapCard({
         <div>
           <p className="eyebrow">แผนที่</p>
           <h2>{title}</h2>
-          <span>{readinessMode ? "ความพร้อมข้อมูล ไม่ใช่ระดับความรุนแรงของภัย" : helper}</span>
+          <span>{helper}</span>
         </div>
-        {readinessMode && <button type="button" className="secondary-button nr-return-forecast" onClick={onCloseReadiness}>กลับแผนที่พยากรณ์</button>}
       </div>
       <NakhonRatchasimaLocalMap
         irrigation={irrigation}
@@ -975,16 +970,15 @@ export function ProvinceDashboardMapCard({
         showMonthFilter={showMonthFilter}
         compactForecast={compactOverview}
         overviewLayout={compactOverview}
-        researchCriteriaEnabled={!readinessMode}
         layer={layer}
-        mapMode={readinessMode ? "prediction-readiness" : mapMode}
+        mapMode={mapMode}
         onMapModeChange={onMapModeChange}
         onNavigate={onNavigate}
         selectedMonth={selectedMonth}
         monthOptions={monthOptions}
         onMonthChange={onMonthChange}
-        forecastArchive={readinessMode ? undefined : forecastArchive}
-        forecastArchiveMonth={readinessMode ? undefined : forecastArchiveMonth}
+        forecastArchive={forecastArchive}
+        forecastArchiveMonth={forecastArchiveMonth}
         forecastArchiveHorizon={forecastArchiveHorizon}
         forecastArchiveIssueMonth={forecastArchiveIssueMonth}
         selectedSubdistrictCode={selectedSubdistrictCode}

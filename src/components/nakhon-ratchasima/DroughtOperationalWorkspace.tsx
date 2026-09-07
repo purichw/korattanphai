@@ -1,21 +1,9 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, ShieldCheck, Sprout, TrendingUp } from "lucide-react";
 import { AppSelect, type AppSelectOption } from "../AppSelect";
 import { MetricCard } from "../PageSummary";
 import { type DroughtForecastWorkspaceTarget, type DroughtForecastArchiveSummary, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
 import { districtOptionsForProvince, formatThaiNumber, formatPercent, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
-
-export function useDroughtReadinessMap() {
-  const [readinessMap, setReadinessMap] = useState(false);
-  return {
-    readinessMap,
-    closeReadinessMap: () => setReadinessMap(false),
-    openReadinessMap: () => {
-      setReadinessMap(true);
-      window.requestAnimationFrame(() => document.querySelector(".nr-drought-workspace-map-card")?.scrollIntoView({ block: "center" }));
-    },
-  };
-}
 
 export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
   target: DroughtForecastWorkspaceTarget;

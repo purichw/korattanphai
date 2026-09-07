@@ -35,8 +35,8 @@ Excel, modify any archive values, or change the published dataset version.
   fixed-target horizon comparisons and attention lists. Counts/denominators use
   the matching tambons, not the unfiltered provincial/district population.
   The map risk dropdown remains a separate map-only intersection.
-- Supporting readiness uses the same matching locations; it remains distinct
-  from forecast availability. Hidden legacy research/agriculture data is not
+- Supporting-data readiness UI has been removed sitewide. Forecast availability
+  is still displayed separately; hidden legacy research/agriculture data is not
   substituted with irrigation-based estimates.
 - Nonmatching map features are muted and cannot be selected, rather than
   reclassified as no-risk or missing. A zero-match selection displays an empty

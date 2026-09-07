@@ -5,7 +5,6 @@ import {
   researchRecordsForSubdistrictCodes,
   summarizeResearchAreaRecords,
   researchMonthlySeriesForDistrict,
-  predictionReadinessSummaryForSubdistrictCodes,
 } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
 import { getNakhonRatchasimaResearchPanelSummary } from "../../domain";
@@ -15,13 +14,11 @@ import {
   ResearchAreaAttentionPanel,
   ResearchAreaSituationPanel,
   ResearchAreaAgricultureImpactPanel,
-  PredictionReadinessPanel,
   ResearchAreaDroughtHistoryPanel,
   ResearchAreaSubdistrictsPanel,
 } from "./ResearchPanels";
 import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
-import { ContentSection } from "../ContentSection";
-import { DroughtOperationalDisclosure, useDroughtReadinessMap } from "./DroughtOperationalWorkspace";
+import { DroughtOperationalDisclosure } from "./DroughtOperationalWorkspace";
 import { pathWithForecastSelection } from "./forecastModel";
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 
@@ -53,15 +50,13 @@ export function DistrictView({
   const activeRecords = researchRecordsForSubdistrictCodes(subdistrictCodes, activeResearchPeriod.period);
   const stats = summarizeResearchAreaRecords(activeRecords, district.subdistricts.length);
   const monthlySeries = researchMonthlySeriesForDistrict(district, activeResearchPeriod.period);
-  const readiness = predictionReadinessSummaryForSubdistrictCodes(forecastSubdistrictCodesForIrrigation(droughtArchive, forecastArchive.selectedIrrigation, subdistrictCodes));
-  const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
+  const hasAgriculture = activeResearchPeriod.hasData && stats.recordCount > 0
+    && forecastSubdistrictCodesForIrrigation(droughtArchive, forecastArchive.selectedIrrigation, subdistrictCodes).length > 0;
   const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon, forecastArchive.selectedIrrigation));
 
   return (
     <div className="nr-area-template is-district">
       <DroughtCompactForecastWorkspace
-        readinessMap={readinessMap}
-        onCloseReadinessMap={closeReadinessMap}
         level="district"
         title={`คาดการณ์ภัยแล้งของอำเภอ${district.nameTh}`}
         description="ดูพยากรณ์ล่วงหน้า 6 เดือนจากเดือนตั้งต้นเดียวกันและแผนที่รายตำบลของอำเภอนี้"
@@ -92,19 +87,8 @@ export function DistrictView({
         <ResearchAreaSubdistrictsPanel district={district} period={activeResearchPeriod.period} onNavigate={navigateWithForecast} />
       </section>
       </DroughtOperationalDisclosure>}
-      {readiness.totalSubdistricts > 0 && <DroughtOperationalDisclosure title="ความพร้อมข้อมูลพื้นที่" description="หลักฐานประกอบ แยกจากความครบถ้วนของพยากรณ์" icon="crop">
-      <ResearchAreaAgricultureImpactPanel district={district} stats={stats} activePeriod={activeResearchPeriod} />
-      <ContentSection
-        className="nr-data-readiness-section"
-        eyebrow="ความพร้อมข้อมูล"
-        title="ก่อนใช้ข้อมูลเพื่อคาดการณ์หรือตัดสินใจ"
-        description="แสดงระดับความพร้อมของข้อมูลพื้นที่ โดยแยกจากระดับความรุนแรงของภัย"
-      >
-        <PredictionReadinessPanel
-          readiness={readiness}
-          onOpenMap={openReadinessMap}
-        />
-      </ContentSection>
+      {hasAgriculture && <DroughtOperationalDisclosure title="พื้นที่เกษตร" description="ข้อมูลเกษตรในอำเภอ" icon="crop">
+        <ResearchAreaAgricultureImpactPanel district={district} stats={stats} activePeriod={activeResearchPeriod} />
       </DroughtOperationalDisclosure>}
     </div>
   );

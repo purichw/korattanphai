@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarDays, ChartColumn, CircleAlert, Database, Leaf, Map, MapPin, RotateCcw, ShieldCheck, TrendingUp } from "lucide-react";
+import { CalendarDays, ChartColumn, CircleAlert, Leaf, Map, MapPin, RotateCcw, ShieldCheck, TrendingUp } from "lucide-react";
 import { MetricGrid } from "../PageSummary";
 import { DroughtWorkspaceHeader } from "./DroughtOperationalWorkspace";
 import type { DroughtForecastWorkspaceTarget } from "./forecastModel";
@@ -84,7 +84,6 @@ export function ForecastOverviewLoading({ failed, retry }: LoadStateProps) {
           {[1, 2, 3].map((row) => <div className="nr-loading-list-row" key={row}><Skeleton className="is-icon" /><span><Skeleton /><Skeleton className="is-line" /></span></div>)}
         </div>
       </div>
-      <div className="nr-loading-support"><div><Database size={20} /><Skeleton className="is-line" /></div><div><Map size={20} /><Skeleton className="is-line" /></div></div>
     </ForecastLoadState>
   </section>;
 }

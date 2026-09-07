@@ -1266,7 +1266,7 @@ export function NakhonRatchasimaLocalMap({
           )}
         </div>
       ) : irrigation ? (
-        <div className="nr-local-map-criteria is-forecast-archive-controls" aria-label="ตัวกรองพื้นที่บนแผนที่ความพร้อมข้อมูล">
+        <div className="nr-local-map-criteria is-forecast-archive-controls" aria-label="ตัวกรองพื้นที่บนแผนที่">
           <IrrigationStatusSelect {...irrigation} compact />
           {criteriaStatusText && <span className="nr-local-map-filter-status" role="status">{criteriaStatusText}</span>}
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, Gauge, Leaf, MapPin, Map as MapIcon, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ArrowRight, ChevronDown, ChevronRight, ClipboardCheck, Gauge, Info, Leaf, MapPin, ShieldAlert } from "lucide-react";
 import { formatRai, getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaDistricts, type NakhonRatchasimaRouteTarget } from "../../domain";
 import type { NakhonRatchasimaDroughtForecastArchive, NakhonRatchasimaMapLayer, ProvinceMonthRisk } from "../../types";
 import { useForecastArchive } from "../../useForecastArchive";
@@ -8,10 +8,10 @@ import { formatMonth, labelConfidence } from "../../i18n";
 import { OperationalFilters } from "../OperationalFilters";
 import { DataProvenanceChip, dataProvenanceChipKindFromText } from "../DataProvenanceChip";
 import { DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
-import { AgricultureImpactPanel, PredictionReadinessPanel, ProvinceDashboardMapCard } from "./ResearchPanels";
+import { AgricultureImpactPanel, ProvinceDashboardMapCard } from "./ResearchPanels";
 import { MetricGrid, type SummaryMetric } from "../PageSummary";
 import { forecastArchiveSummaryForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection, writeForecastArchiveLocation } from "./forecastModel";
-import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, predictionReadinessSummaryForSubdistrictCodes, prefersReducedMotion, type LocalMapMode } from "./workspaceModel";
+import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, type LocalMapMode } from "./workspaceModel";
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import { ForecastOverviewLoading } from "./ForecastArchiveLoading";
 
@@ -40,12 +40,10 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
   });
   const [selectedSubdistrictCode, setSelectedSubdistrictCode] = useState<string | null>(null);
   const [showAllAttention, setShowAllAttention] = useState(false);
-  const [readinessMode, setReadinessMode] = useState(false);
   const district = getNakhonRatchasimaDistrictByCode(districtCode);
   const month = forecast.selectedMonth;
   const codes = useMemo(() => forecastSubdistrictCodesForIrrigation(archive, forecast.selectedIrrigation, district?.subdistricts.map((area) => area.subdistrictCode)), [archive, forecast.selectedIrrigation, district]);
   const summary = useMemo(() => month ? forecastArchiveSummaryForSelection(archive, month, 1, codes) : null, [archive, month, codes]);
-  const readiness = useMemo(() => predictionReadinessSummaryForSubdistrictCodes(codes ?? getNakhonRatchasimaDistricts().flatMap((area) => area.subdistricts.map((item) => item.subdistrictCode))), [codes]);
   useEffect(() => { if (month) writeForecastArchiveLocation(month, 1); }, [month]);
   if (!month || !summary) return <section className="nr-archive-load-state"><p role="status">ยังไม่มีข้อมูลพยากรณ์สำหรับรอบนี้</p><a href="/drought" className="secondary-button">ดูคลังพยากรณ์ย้อนหลัง<ArrowRight size={16} /></a></section>;
 
@@ -64,7 +62,6 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
     setDistrictCode(value);
     setSelectedSubdistrictCode(null);
     setShowAllAttention(false);
-    setReadinessMode(false);
     const url = new URL(window.location.href);
     if (value) url.searchParams.set("district", value);
     else url.searchParams.delete("district");
@@ -74,7 +71,6 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
     forecast.changeTargetMonth(period);
     setSelectedSubdistrictCode(null);
     setShowAllAttention(false);
-    setReadinessMode(false);
   };
   const hasRisk = summary.highRiskSubdistricts + summary.moderateRiskSubdistricts > 0;
   const hasAgriculture = provinceRecord && dataProvenanceChipKindFromText(provinceRecord.provenance) === "REAL";
@@ -119,13 +115,10 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
               forecast.changeIrrigation(value);
               setSelectedSubdistrictCode(null);
               setShowAllAttention(false);
-              setReadinessMode(false);
             } }}
             filteredSubdistrictCodes={forecast.selectedIrrigation === "all" ? undefined : codes}
             target={target}
             compactOverview
-            readinessMode={readinessMode}
-            onCloseReadiness={() => setReadinessMode(false)}
             activeTab="overview"
             layer={layer}
             mapMode={mapMode}
@@ -144,15 +137,20 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         </div>
         <section className="nr-forecast-overview-summary" aria-label="สรุปพยากรณ์พื้นที่ที่เลือก">
           <div className="nr-forecast-overview-summary-heading">
-            <h3>สรุปพยากรณ์ {scopeLabel}</h3>
-            <p>อยู่ในขอบเขต {formatThaiNumber(summary.inScopeSubdistricts)}/{formatThaiNumber(summary.totalSubdistricts)} ตำบล</p>
+            <div className="nr-forecast-overview-summary-copy">
+              <h3>สรุปพยากรณ์ {scopeLabel}</h3>
+              <p>อยู่ในขอบเขต {formatThaiNumber(summary.inScopeSubdistricts)}/{formatThaiNumber(summary.totalSubdistricts)} ตำบล</p>
+            </div>
+            <a className="primary-button nr-forecast-overview-details" href={detailsHref}>
+              ดูพยากรณ์ T+1–T+6{district ? ` · ${scopeLabel}` : ""}<ArrowRight size={16} />
+            </a>
           </div>
           {codes.length === 0 ? <div className="nr-irrigation-empty" role="status"><p>ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้</p><button type="button" className="secondary-button" onClick={() => forecast.changeIrrigation("all")}>แสดงทุกสถานะชลประทาน</button></div>
             : <DroughtForecastArchiveSummaryMetrics level={district ? "district" : "province"} summary={summary} variant="overview" />}
           {codes.length > 0 && summary.matchedSubdistricts === 0 && <p role="status">ยังไม่มีข้อมูลสำหรับรอบนี้ · เลือกเดือนอื่นหรือดูคลังพยากรณ์ย้อนหลัง</p>}
           <p className="nr-forecast-overview-scope-note">นอกขอบเขตการศึกษา คือไม่มีค่าพยากรณ์ในชุดข้อมูลสำหรับตำบลนั้น</p>
         </section>
-        <section className="nr-forecast-overview-attention" aria-label="ตำบลที่พยากรณ์เสี่ยงสูง">
+        <section className={`nr-forecast-overview-attention${attention.length === 0 ? " is-empty" : ""}`} aria-label="ตำบลที่พยากรณ์เสี่ยงสูง">
           <div className="nr-home-attention-heading"><h3>ตำบลที่พยากรณ์เสี่ยงสูง</h3>
             {allAttention.length > 3 && <button type="button" className="nr-home-text-action" aria-expanded={showAllAttention} aria-controls="home-attention-list" onClick={() => setShowAllAttention(!showAllAttention)}>{showAllAttention ? "ย่อรายการ" : "ดูทั้งหมด"}<ChevronDown size={16} /></button>}
           </div>
@@ -168,24 +166,26 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
                 </li>
               ))}
             </ul>
-          </> : <p>{summary.inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในขอบเขตที่เลือก" : "ไม่พบตำบลที่พยากรณ์เสี่ยงสูงในเดือนที่พยากรณ์"}</p>}
-          <a className="secondary-button nr-forecast-overview-details" href={detailsHref}>
-            ดูพยากรณ์ T+1–T+6{district ? ` · ${scopeLabel}` : ""}<ArrowRight size={16} />
-          </a>
+          </> : <div className="nr-home-attention-empty" role="status">
+            <span className="nr-home-attention-empty-icon" aria-hidden="true">
+              {summary.inScopeSubdistricts === 0 ? <Info size={28} /> : <ClipboardCheck size={28} />}
+            </span>
+            <strong>{summary.inScopeSubdistricts === 0 ? "ไม่มีค่าพยากรณ์ในขอบเขตที่เลือก" : "ไม่พบตำบลที่พยากรณ์เสี่ยงสูง"}</strong>
+            <p>เดือนพยากรณ์ {formatMonth(summary.targetMonth, "th")}</p>
+            <small>{summary.inScopeSubdistricts === 0
+              ? "ยังไม่สามารถสรุปความเสี่ยงของพื้นที่นี้ได้"
+              : summary.moderateRiskSubdistricts > 0
+                ? `ยังมีตำบลเสี่ยงปานกลาง ${formatThaiNumber(summary.moderateRiskSubdistricts)} ตำบล`
+                : "เฉพาะตำบลที่มีค่าพยากรณ์ในขอบเขตที่เลือก"}</small>
+          </div>}
         </section>
       </div>
-      <section className={`nr-home-support${hasAgriculture ? "" : " is-forecast-only"}`} aria-label={hasAgriculture ? "ข้อมูลเกษตรและความพร้อมข้อมูล" : "ความพร้อมข้อมูลและคลังพยากรณ์"}>
+      {hasAgriculture && <section className="nr-home-support" aria-label="ข้อมูลเกษตร">
         <AgricultureImpactPanel provinceRecord={provinceRecord} compact />
-        {codes.length > 0 && <PredictionReadinessPanel compact readiness={readiness} onOpenMap={() => {
-          setReadinessMode(true);
-          setSelectedSubdistrictCode(null);
-          window.requestAnimationFrame(() => document.querySelector(".nr-forecast-overview-map")?.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" }));
-        }} />}
-        <section className="nr-home-archive"><h3><MapIcon size={22} aria-hidden="true" />คลังพยากรณ์ย้อนหลัง</h3><a href={withForecast("/drought")}><MapIcon size={30} aria-hidden="true" /><span><strong>ดูพยากรณ์ล่วงหน้า</strong><small>T+1 ถึง T+6</small></span><ArrowRight size={20} /></a></section>
-      </section>
-      <footer className="nr-home-footer">
-      <p className="nr-forecast-overview-support-note">{hasAgriculture ? `ข้อมูลเกษตรระดับจังหวัด · ${formatMonth(provinceRecord.month, "th")} · ตัวเลขไร่และความเชื่อมั่นเป็นคนละชุดกับพยากรณ์รายตำบล` : "ความพร้อมข้อมูลเป็นข้อมูลประกอบ ไม่ใช่ความแม่นยำของแบบจำลองพยากรณ์"}</p>
-      </footer>
+      </section>}
+      {hasAgriculture && <footer className="nr-home-footer">
+        <p className="nr-forecast-overview-support-note">ข้อมูลเกษตรระดับจังหวัด · {formatMonth(provinceRecord.month, "th")} · ตัวเลขไร่และความเชื่อมั่นเป็นคนละชุดกับพยากรณ์รายตำบล</p>
+      </footer>}
     </section>
   );
 }

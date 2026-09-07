@@ -20,6 +20,7 @@ it("keeps the Home identity and one loading announcement without fake data or co
   expect(screen.queryByRole("link")).toBeNull();
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
   expect(container.querySelector(".nr-loading-map")).not.toBeNull();
+  expect(container.querySelectorAll(".nr-loading-support")).toHaveLength(0);
   expect(container.textContent).not.toContain("ทุกอำเภอ");
   expect(container.textContent).not.toMatch(/0 ตำบล|\d+%|ThaiWater|2568/);
   expect(container.querySelectorAll(".metric-card-value")).toHaveLength(6);

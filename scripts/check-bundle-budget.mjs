@@ -31,6 +31,7 @@ function checkChunk(file, initial = false) {
       const target = node.moduleSpecifier.text;
       if (target.startsWith(".") || target.startsWith("/assets/")) {
         const dependency = path.basename(target);
+        if (/^forecastExcelWriter-[\w-]+\.js$/.test(dependency)) throw new Error('Excel writer must remain a user-action-only dynamic import.');
         if (!sources.has(dependency)) throw new Error(`Broken chunk reference: ${file} -> ${target}`);
         if (initial) checkChunk(dependency, true);
       }
@@ -46,10 +47,15 @@ console.log(`[bundle-budget] Login startup: ${startupGzipBytes} gzip bytes; chun
 const authChunks = [...sources.entries()].filter(([file]) => /^supabaseClient-[\w-]+\.js$/.test(file));
 const authGzipBytes = authChunks.reduce((sum, [, source]) => sum + gzipSync(source).length, 0);
 if (authChunks.length > 1 || authGzipBytes > 105_000) throw new Error(`Supabase SDK exceeds 105000 gzip bytes: ${authGzipBytes}`);
-if (!jsBytes || jsBytes > 3_500_000 || jsGzipBytes - authGzipBytes > 370_000) {
-  throw new Error(`JavaScript budget exceeded: ${jsBytes} bytes / ${jsGzipBytes - authGzipBytes} app gzip bytes (limits 3500000 / 370000 plus bounded SDK).`);
+// Native XLSX charts/pivots are loaded only after Download, never on page load.
+const exportChunks = [...sources.entries()].filter(([file]) => /^forecastExcelWriter-[\w-]+\.js$/.test(file));
+const exportBytes = exportChunks.reduce((sum, [, source]) => sum + source.length, 0);
+const exportGzipBytes = exportChunks.reduce((sum, [, source]) => sum + gzipSync(source).length, 0);
+if (exportChunks.length > 1 || exportBytes > 2_500_000 || exportGzipBytes > 650_000) throw new Error(`Excel export chunk exceeds its isolated budget: ${exportBytes} / ${exportGzipBytes}`);
+if (!jsBytes || jsBytes - exportBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes > 370_000) {
+  throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes} app gzip bytes (limits 3500000 / 370000 plus bounded SDK).`);
 }
-console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; application: ${jsGzipBytes - authGzipBytes} gzip bytes.`);
+console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; Excel on demand: ${exportGzipBytes}; application: ${jsGzipBytes - authGzipBytes - exportGzipBytes} gzip bytes.`);
 const archiveAsset = assets.find((name) => /^drought_forecast_archive_rev03-[\w-]+\.json$/.test(name));
 let databaseBuild = false;
 try { databaseBuild = JSON.parse(await fs.readFile(path.join(distDir, "data-backend.json"), "utf8")).backend === "supabase"; }

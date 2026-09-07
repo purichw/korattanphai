@@ -137,8 +137,8 @@ export function ProvinceWorkspacePlaceholder({
         title={`${name}: ภาพรวมสถานการณ์จังหวัด`}
         description={
           <>
-            หน้านี้เป็นโครงหน้าสรุปสถานการณ์ระดับจังหวัดจากแผนที่ประเทศ ไม่ใช่หน้าความพร้อมข้อมูลโดยตรง
-            จะแสดงสถานการณ์ น้ำ ฝน พื้นที่เกษตร และความพร้อมข้อมูลเมื่อมีแหล่งข้อมูลจังหวัดที่ตรวจสอบแล้ว
+            หน้านี้เป็นโครงหน้าสรุปสถานการณ์ระดับจังหวัดจากแผนที่ประเทศ
+            จะแสดงสถานการณ์ น้ำ ฝน และพื้นที่เกษตรเมื่อมีแหล่งข้อมูลจังหวัดที่ตรวจสอบแล้ว
           </>
         }
         metrics={[
@@ -154,7 +154,6 @@ export function ProvinceWorkspacePlaceholder({
         <button type="button" disabled>น้ำ</button>
         <button type="button" disabled>ฝน</button>
         <button type="button" disabled>พื้นที่เกษตร</button>
-        <button type="button" disabled>ความพร้อมข้อมูล</button>
       </nav>
 
       <section className="province-dashboard-grid">
@@ -181,11 +180,6 @@ export function ProvinceWorkspacePlaceholder({
             )}
           </PlaceholderPanel>
 
-          <PlaceholderPanel icon={<Database size={18} />} eyebrow="ความพร้อมข้อมูล" title="โครงรองเท่านั้น">
-            <p>
-              ยังไม่แสดงเป็นหน้าความพร้อมข้อมูลเต็มรูปแบบ จนกว่าจะมีทะเบียนแหล่งข้อมูลและกฎข้อมูลว่าง/ที่มาข้อมูลสำหรับจังหวัดนี้
-            </p>
-          </PlaceholderPanel>
         </div>
       </section>
 

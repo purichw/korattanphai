@@ -157,9 +157,8 @@ test("all irrigation categories use their own colors; keyboard selection never n
   await expect(select).toBeFocused();
   await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)')).toHaveCount(20);
   expect(page.url()).toBe(initialUrl);
-  await page.locator('.nr-operational-disclosure > summary').filter({ hasText: 'ความพร้อมข้อมูลพื้นที่' }).click();
-  await page.getByRole('button', { name: 'ดูความพร้อมบนแผนที่', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'แผนที่ความพร้อมข้อมูลพื้นที่', exact: true })).toBeVisible();
+  await expect(page.getByText(/ความพร้อมข้อมูล|ดูความพร้อมบนแผนที่/)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'แผนที่สถานะชลประทาน', exact: true })).toBeVisible();
   await expect(select).toContainText('เข้าถึงชลประทาน');
   await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)')).toHaveCount(20);
   await select.click();

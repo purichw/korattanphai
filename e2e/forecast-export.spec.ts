@@ -1,0 +1,115 @@
+import { readFileSync } from 'node:fs';
+import { test, expect, seedAuthSession } from './fixtures';
+import { forecastSlice, forecastRevision } from '../tests/fixtures/forecast-slice.mjs';
+import ExcelJS from '@protobi/exceljs';
+
+test.skip(process.env.PLAYWRIGHT_DATA_BACKEND !== 'supabase', 'Excel export requires authenticated database mode');
+const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
+const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
+
+test('Excel export filters, real download and fresh revision gate', async ({ page }, testInfo) => {
+  const requests: any[] = [];
+  const downloads: string[] = [];
+  let offline = false;
+  let current = archive;
+  page.on('request', request => { if (request.url().includes('forecastExcelWriter')) downloads.push(request.url()); });
+  await page.route('**/rest/v1/rpc/ktp_latest_forecast_revision', route => route.fulfill(offline
+    ? { status: 503, json: { message: 'offline' } } : { json: { ...forecastRevision(current), publishedAt: current === archive ? '2026-09-06T10:00:00Z' : '2026-09-07T10:00:00Z' } }));
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
+    const query = route.request().postDataJSON(); requests.push(query);
+    return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 && current === archive ? overview : current, query) });
+  });
+  await seedAuthSession(page);
+  await page.goto('/?target=2025-12&horizon=1');
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
+  expect(downloads).toHaveLength(0);
+  expect(requests.every(query => query.p_horizon_count === 1)).toBe(true);
+  if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
+  await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
+  await expect(dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' })).toBeEnabled();
+  await dialog.getByRole('combobox', { name: /^พื้นที่ / }).click();
+  await page.getByRole('option', { name: 'อำเภอเสิงสาง', exact: true }).click();
+  await expect(dialog).toContainText('ม.ค. 2569 – มิ.ย. 2569');
+  await page.screenshot({ path: testInfo.outputPath('excel-export-filters.png') });
+  expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+  const event = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  const download = await event;
+  const output = testInfo.outputPath(download.suggestedFilename());
+  await download.saveAs(output);
+  const book = new ExcelJS.Workbook(); await book.xlsx.readFile(output);
+  expect(book.getWorksheet('รายตำบล')!.rowCount).toBe(10);
+  expect(book.getWorksheet('สรุปอำเภอ')!.rowCount).toBe(5);
+  expect(book.getWorksheet('ฐาน Pivot')!.rowCount).toBe(37);
+  expect(book.getWorksheet('วิเคราะห์')!.getCell('A1').font.size).toBe(17);
+  expect(book.getWorksheet('วิเคราะห์')!.getCell('C9').numFmt).toBe('#,##0');
+  expect(book.getWorksheet('วิเคราะห์')!.getCell('H9').numFmt).toBe('0.0%');
+  await expect(dialog.getByRole('status')).toContainText('1 อำเภอ · 6 ตำบล');
+  expect(requests.some(query => query.p_area_code === '3003' && query.p_origin_period === '2025-12' && query.p_horizon_count === 6)).toBe(true);
+  expect(downloads.length).toBeGreaterThan(0);
+  await expect(page).toHaveURL(/\/\?target=2025-12&horizon=1/);
+  offline = true;
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  await expect(dialog.getByRole('alert')).toContainText('จะไม่ใช้ข้อมูลเก่าแทน');
+  offline = false;
+  current = structuredClone(archive);
+  current.meta.datasetId = '11111111-1111-4111-8111-111111111111';
+  current.meta.datasetVersion = 'test-only-export-new-publication';
+  current.meta.sourceWorkbookSha256 = 'b'.repeat(64);
+  current.packedRiskByTargetMonth['2025-12']['300301'][0] = 2;
+  const nextEvent = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  const next = await nextEvent;
+  const nextPath = testInfo.outputPath('new-revision.xlsx');
+  await next.saveAs(nextPath);
+  const updated = new ExcelJS.Workbook(); await updated.xlsx.readFile(nextPath);
+  expect(updated.getWorksheet('รายตำบล')!.getCell('H5').value).toBe(2);
+  expect(updated.getWorksheet('ที่มาและนิยาม')!.getSheetValues().flat().join(' ')).toContain('test-only-export-new-publication');
+});
+
+test('Excel export from tambon defaults to its district, supports month/irrigation and cancels late downloads', async ({ page }, testInfo) => {
+  let block = false;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  let downloads = 0;
+  page.on('download', () => { downloads++; });
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', async route => {
+    const query = route.request().postDataJSON();
+    if (block && query.p_horizon_count === 6 && query.p_origin_period === '2025-11') await gate;
+    return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 ? overview : archive, query) });
+  });
+  await seedAuthSession(page);
+  await page.goto('/soeng-sang/t-300301?target=2025-12&horizon=6');
+  await expect(page.getByRole('heading', { level: 1 }).filter({ hasText: 'เสิงสาง' })).toBeVisible();
+  if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
+  await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
+  await expect(dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' })).toBeEnabled();
+  await expect(dialog.getByRole('combobox', { name: /^พื้นที่ / })).toContainText('อำเภอเสิงสาง');
+  await dialog.getByRole('combobox', { name: /^เดือนตั้งต้น/ }).click();
+  await page.getByRole('option', { name: 'พ.ย. 2568', exact: true }).click();
+  await expect(dialog).toContainText('ธ.ค. 2568 – พ.ค. 2569');
+  await dialog.getByRole('combobox', { name: /^สถานะชลประทาน/ }).click();
+  await page.getByRole('option', { name: 'เข้าถึงชลประทาน', exact: true }).click();
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  await expect(dialog.getByRole('alert')).toContainText('ไม่มีตำบลตรงกับตัวกรอง');
+  expect(downloads).toBe(0);
+  await dialog.getByRole('combobox', { name: /^สถานะชลประทาน/ }).click();
+  await page.getByRole('option', { name: 'ทุกสถานะ', exact: true }).click();
+  // A fresh month forces an uncached full-scope request, held until after cancel.
+  await dialog.getByRole('combobox', { name: /^เดือนตั้งต้น/ }).click();
+  await page.getByRole('option', { name: 'ต.ค. 2568', exact: true }).click();
+  block = true;
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', async route => {
+    const query = route.request().postDataJSON(); await gate;
+    return route.fulfill({ json: forecastSlice(archive, query) });
+  });
+  const response = page.waitForResponse(r => r.url().includes('ktp_load_forecast_slice') && r.request().postDataJSON().p_origin_period === '2025-10');
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  await dialog.getByRole('button', { name: 'ยกเลิก', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  release(); await (await response).finished();
+  expect(downloads).toBe(0);
+  await expect(page).toHaveURL(/target=2025-12&horizon=6/);
+});

@@ -4,7 +4,7 @@ test.beforeEach(async ({ page }) => {
   await seedAuthSession(page);
 });
 
-test("home information is passive and disclosures preserve context and the single map", async ({ page }, testInfo) => {
+test("home information stays passive without readiness panels or map actions", async ({ page }, testInfo) => {
   await page.goto("/?target=2015-06&horizon=1");
   const summary = page.locator(".nr-forecast-overview-summary");
   await expect(summary).toContainText("117/289 ตำบล");
@@ -25,26 +25,23 @@ test("home information is passive and disclosures preserve context and the singl
   await expect(page.getByText(/67,347|8,081|พื้นที่ประเมินทั้งจังหวัด|ความเชื่อมั่นข้อมูลเกษตร/)).toHaveCount(0);
 
   const map = page.locator(".nr-map-svg");
-  await map.evaluate((element) => element.setAttribute("data-same-map", "home"));
-  const readiness = page.locator(".nr-home-readiness");
-  await readiness.getByRole("button", { name: "ความพร้อมข้อมูล", exact: true }).click();
-  await expect(readiness.locator(".nr-readiness-breakdown-list dd")).toHaveText(["6 ตำบล", "24 ตำบล", "4 ตำบล", "255 ตำบล"]);
-  await readiness.getByRole("button", { name: "ดูความพร้อมบนแผนที่" }).click();
-  await expect(page.getByRole("heading", { name: "แผนที่ความพร้อมข้อมูลพื้นที่", exact: true })).toBeVisible();
   await expect(map).toHaveCount(1);
-  await expect(map).toHaveAttribute("data-same-map", "home");
-  await expect(page.locator(".nr-map-panel")).not.toHaveClass(/has-forecast-archive-map/);
-  await page.getByRole("button", { name: "กลับแผนที่พยากรณ์" }).click();
   await expect(page.locator(".nr-map-panel")).toHaveClass(/has-forecast-archive-map/);
-  await expect(map).toHaveAttribute("data-same-map", "home");
+  await expect(page.locator(".nr-home-readiness, .nr-prediction-readiness, .nr-readiness-map-action, .nr-return-forecast")).toHaveCount(0);
+  await expect(page.getByText(/ความพร้อมข้อมูล|ดูความพร้อมบนแผนที่/)).toHaveCount(0);
+  await expect(page.locator(".nr-home-support, .nr-home-archive")).toHaveCount(0);
+  await expect(summary.getByRole("link", { name: "ดูพยากรณ์ T+1–T+6", exact: true })).toHaveAttribute("href", /\/drought\?.*target=2015-06/);
   await expect(summary.locator(".metric-card-value")).toHaveText(["60 ตำบล", "32 ตำบล", "25 ตำบล", "172 ตำบล"]);
   await expect(page.locator(".nr-data-transparency, .nr-forecast-overview-source")).toHaveCount(0);
   await expect(page.getByText(/^(แหล่งข้อมูลและความสด|ข้อจำกัดสำคัญ|แหล่งข้อมูลและข้อจำกัด)$/)).toHaveCount(0);
   expect(page.url()).toBe(beforeURL);
-  await readiness.getByRole("button", { name: "ความพร้อมข้อมูล", exact: true }).click();
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-  await page.screenshot({ path: testInfo.outputPath("home-without-source-panels.png"), fullPage: true, scale: "css" });
+  await page.screenshot({ path: testInfo.outputPath("home-without-readiness.png"), fullPage: true, scale: "css" });
+  await page.goto("/?target=2025-12&horizon=1&district=3008&irrigation=rainfed");
+  await expect(summary).toContainText("อ.ด่านขุนทด");
+  await expect(page.getByText(/ความพร้อมข้อมูล|ดูความพร้อมบนแผนที่/)).toHaveCount(0);
+  await expect(page.locator(".nr-home-readiness, .nr-prediction-readiness")).toHaveCount(0);
 });
 
 test("home layout retains centered stats and usable map geometry at every breakpoint", async ({ page }, testInfo) => {

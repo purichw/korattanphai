@@ -348,8 +348,6 @@ export function DroughtForecastWorkspaceChart({
 export function DroughtForecastWorkspaceMapCard({
   irrigation,
   filteredSubdistrictCodes,
-  readinessMap = false,
-  onCloseReadinessMap,
   level,
   target,
   layer,
@@ -368,8 +366,6 @@ export function DroughtForecastWorkspaceMapCard({
 }: {
   irrigation?: ForecastMapIrrigation;
   filteredSubdistrictCodes?: string[];
-  readinessMap?: boolean;
-  onCloseReadinessMap?: () => void;
   level: DroughtForecastArchiveLevel;
   target: DroughtForecastWorkspaceTarget;
   layer: NakhonRatchasimaMapLayer;
@@ -399,28 +395,26 @@ export function DroughtForecastWorkspaceMapCard({
       <div className="nr-drought-workspace-card-heading nr-dashboard-map-header">
         <div>
           <p className="eyebrow">แผนที่</p>
-          <h3>{readinessMap ? "แผนที่ความพร้อมข้อมูลพื้นที่" : irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : `${title} (T+${forecastArchiveHorizon})`}</h3>
+          <h3>{irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : `${title} (T+${forecastArchiveHorizon})`}</h3>
           <span>
             เดือนที่พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon), "th")} · T+{forecastArchiveHorizon} จากเดือนตั้งต้น {issueMonthLabel}
           </span>
         </div>
         <DataProvenanceChip kind="REAL" />
       </div>
-      {readinessMap && <button type="button" className="secondary-button nr-return-forecast" onClick={onCloseReadinessMap}>กลับแผนที่พยากรณ์</button>}
       <NakhonRatchasimaLocalMap
         irrigation={irrigation}
         filteredSubdistrictCodes={filteredSubdistrictCodes}
         compactForecast
-        researchCriteriaEnabled={!readinessMap}
         target={target}
         layer={layer}
-        mapMode={readinessMap ? "prediction-readiness" : mapMode}
+        mapMode={mapMode}
         onMapModeChange={onMapModeChange}
         onNavigate={onNavigate}
         selectedMonth={selectedMonth}
         monthOptions={monthOptions}
         onMonthChange={onMonthChange}
-        forecastArchive={readinessMap ? undefined : forecastArchive}
+        forecastArchive={forecastArchive}
         forecastArchiveMonth={forecastArchiveMonth}
         forecastArchiveHorizon={forecastArchiveHorizon}
         forecastArchiveIssueMonth={forecastArchiveIssueMonth}
@@ -433,8 +427,6 @@ export function DroughtForecastWorkspaceMapCard({
 
 export function DroughtCompactForecastWorkspace({
   irrigation,
-  readinessMap = false,
-  onCloseReadinessMap,
   level,
   title,
   description,
@@ -457,8 +449,6 @@ export function DroughtCompactForecastWorkspace({
   onSelectedSubdistrictChange,
 }: {
   irrigation: ForecastMapIrrigation;
-  readinessMap?: boolean;
-  onCloseReadinessMap?: () => void;
   level: DroughtForecastArchiveLevel;
   title: string;
   description: string;
@@ -505,8 +495,6 @@ export function DroughtCompactForecastWorkspace({
       : undefined;
 
   const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, selectedTargetMonth.period, selectedHorizon, irrigation.value));
-  const changeHorizon = (horizon: ForecastArchiveHorizon) => { onCloseReadinessMap?.(); onHorizonChange(horizon); };
-  const changeMonth = (month: string) => { onCloseReadinessMap?.(); onMonthChange(month); };
   const attentionRecords = [...summary.recordsBySubdistrict.values()]
     .filter((record) => record.forecastRisk === 1 || record.forecastRisk === 2)
     .sort((a, b) => (b.forecastRisk ?? 0) - (a.forecastRisk ?? 0) || a.subdistrictCode.localeCompare(b.subdistrictCode));
@@ -517,11 +505,11 @@ export function DroughtCompactForecastWorkspace({
   </div>;
   const targetNote = <p className="nr-forecast-target-note">เดือนตั้งต้น {selectedTargetMonth.labelTh} · พยากรณ์ล่วงหน้า 1–6 เดือน: {trendMonths[0]?.labelTh} – {trendMonths.at(-1)?.labelTh}</p>;
   const horizonSelector = <div className="nr-drought-workspace-horizon">
-    <DroughtForecastArchiveHorizonSelector targetMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} onHorizonChange={changeHorizon} />
+    <DroughtForecastArchiveHorizonSelector targetMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} onHorizonChange={onHorizonChange} />
   </div>;
   const context = <DroughtForecastWorkspaceContext level={level} scopeLabel={scopeLabel} selectedMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} summary={summary} />;
   const guidance = <DroughtOperationalDisclosure className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
-    <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลังและความพร้อมข้อมูล</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
+    <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลัง</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
     <p>T+1 ถึง T+6 คือพยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
     {level !== "subdistrict" && <p>สัดส่วนคิดจากตำบลที่มีค่าพยากรณ์ 0, 1 หรือ 2 ในแต่ละเดือน ไม่รวมตำบลนอกขอบเขตและไม่มีข้อมูล ความเสี่ยงปานกลางและสูงแยกตามค่าต้นฉบับ ไม่ใช่ระดับความรุนแรงทั้งอำเภอหรือสัดส่วนเนื้อที่</p>}
     <p>เดือนตั้งต้น (T) คือเดือนของข้อมูลต้นทาง เดือนที่พยากรณ์คำนวณโดยบวกระยะ T+ ข้อมูลนี้ระบุเป็นรายเดือน ไม่ได้ระบุวันออกพยากรณ์</p>
@@ -530,8 +518,8 @@ export function DroughtCompactForecastWorkspace({
   return (
     <>
     <DroughtWorkspaceHeader target={target} archiveLabel={formatMonth(archive.meta.targetMonthEnd, "th")} onNavigate={navigateWithForecast} />
-    <DroughtWorkspaceFilters target={target} selectedMonth={selectedMonth} monthOptions={monthOptions} onMonthChange={changeMonth}
-      selectedHorizon={selectedHorizon} onHorizonChange={changeHorizon} onNavigate={navigateWithForecast} />
+    <DroughtWorkspaceFilters target={target} selectedMonth={selectedMonth} monthOptions={monthOptions} onMonthChange={onMonthChange}
+      selectedHorizon={selectedHorizon} onHorizonChange={onHorizonChange} onNavigate={navigateWithForecast} />
     <section className={`nr-drought-compact-workspace is-${level}${emptyIrrigationScope ? " is-empty-scope" : ""}`} aria-labelledby={`nr-drought-compact-workspace-${level}`}>
       {level !== "subdistrict" && <>{heading}{targetNote}</>}
 
@@ -559,10 +547,8 @@ export function DroughtCompactForecastWorkspace({
             />
           )}
           <DroughtForecastWorkspaceMapCard
-            irrigation={{ ...irrigation, onChange: (value) => { onCloseReadinessMap?.(); irrigation.onChange(value); } }}
+            irrigation={irrigation}
             filteredSubdistrictCodes={irrigation.value === "all" ? undefined : matchingCodes}
-            readinessMap={readinessMap}
-            onCloseReadinessMap={onCloseReadinessMap}
             level={level}
             target={target}
             layer={layer}
@@ -571,7 +557,7 @@ export function DroughtCompactForecastWorkspace({
             onNavigate={navigateWithForecast}
             selectedMonth={selectedMonth}
             monthOptions={monthOptions}
-            onMonthChange={changeMonth}
+            onMonthChange={onMonthChange}
             forecastArchive={archive}
             forecastArchiveMonth={selectedTargetMonth}
             forecastArchiveHorizon={selectedHorizon}

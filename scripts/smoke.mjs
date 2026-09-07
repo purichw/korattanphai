@@ -5,6 +5,7 @@ import { chromium, expect } from "@playwright/test";
 import { isDeepStrictEqual } from "node:util";
 import { buildForecastOverviewArchive } from "./generate-forecast-summary.mjs";
 import { forecastSlice } from "../tests/fixtures/forecast-slice.mjs";
+import { smokeExcelExport } from "./smoke-excel-export.mjs";
 
 const base = new URL(process.env.SMOKE_URL ?? "https://korattanphai.vercel.app");
 const local = ["localhost", "127.0.0.1"].includes(base.hostname);
@@ -97,6 +98,7 @@ try {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
         assert.equal(await page.locator(".nr-map-shape").count(), 289, `${name}: polygon count`);
+        await expect(page.locator('.nr-home-readiness, .nr-data-readiness-section, .nr-prediction-readiness, .nr-readiness-map-action, .nr-return-forecast')).toHaveCount(0);
         if (databaseMode) {
           const target = new URL(page.url()).searchParams.get("target");
           const horizon = Number(new URL(page.url()).searchParams.get("horizon"));
@@ -139,6 +141,7 @@ try {
             await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
             await page.locator(".nr-forecast-overview-map").screenshot({ path: path.join(output, `${name}-overview-month-filter.png`) });
             report.checks.push({ viewport: name, overviewMonthSync: "both directions", forecastHorizon: 1 });
+            report.checks.push(await smokeExcelExport({ page, viewport: name, output, archive: expectedArchive }));
           }
         }
         if (route.includes("target=")) {

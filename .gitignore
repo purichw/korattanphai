@@ -7,6 +7,7 @@ smoke-results
 tmp-snapshots
 artifacts/
 *.tsbuildinfo
+*.xlsx.inspect.ndjson
 .DS_Store
 .vercel
 .env

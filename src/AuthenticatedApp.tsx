@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { DatabaseWorkspaceProvider } from "./DatabaseWorkspaceProvider";
 import { WorkspaceBookmarks } from "./components/WorkspaceBookmarks";
+import { ForecastExcelExport } from "./components/ForecastExcelExport";
 import {
   AlertTriangle,
   BarChart3,
@@ -461,6 +462,7 @@ function AppShell({
               </div>
             );
           })}
+          <ForecastExcelExport onOpen={() => setIsMobileMenuOpen(false)} />
         </nav>
       </aside>
 

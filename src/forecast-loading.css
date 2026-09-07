@@ -40,7 +40,7 @@
 .nr-loading-attention { grid-area: attention; min-width: 0; padding: 4px 16px 12px; background: #fff; border-radius: 0 0 8px 8px; }
 .nr-loading-list-row { display: flex; align-items: center; gap: 10px; min-height: 56px; border-bottom: 1px solid #edf1ef; }
 .nr-loading-list-row > span:last-child { display: grid; gap: 7px; width: 65%; }
-.nr-loading-support { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.nr-loading-support { display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; }
 .nr-loading-support > div { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 14px; border-block: 1px solid #d8e3df; background: #fff; color: #8b9e97; }
 .nr-loading-forecast { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-areas: "heading heading" "horizon context" "map chart" "kpis kpis"; gap: 10px; padding-top: 10px; border-top: 1px solid #dce5e7; }
 .nr-loading-forecast.is-single { grid-template-areas: "heading heading" "horizon context" "kpis kpis" "map map"; }

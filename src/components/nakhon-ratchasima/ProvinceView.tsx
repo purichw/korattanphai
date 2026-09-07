@@ -1,6 +1,5 @@
 import { type NakhonRatchasimaDroughtForecastArchive, type NakhonRatchasimaMapLayer, type NakhonRatchasimaResearchPanelSummary } from "../../types";
-import { type ProvinceDashboardTab, type LocalMapMode, predictionReadinessSummaryForSubdistrictCodes } from "./workspaceModel";
-import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
+import { type ProvinceDashboardTab, type LocalMapMode } from "./workspaceModel";
 import { type AppSelectOption } from "../AppSelect";
 import { useDroughtForecastArchiveSelection } from "./forecastModel";
 import { DroughtCompactForecastWorkspace } from "./DroughtForecastWorkspace";
@@ -9,7 +8,6 @@ import {
   ResearchDroughtSituationPanel,
   ResearchDroughtDistrictPanel,
   AgricultureImpactPanel,
-  PredictionReadinessPanel,
 } from "./ResearchPanels";
 import { ProvinceForecastOverview } from "./ProvinceForecastOverview";
 import { useAppState } from "../../store";
@@ -19,7 +17,7 @@ import {
   getProvinceRecord,
   NAKHON_RATCHASIMA_ID,
 } from "../../domain";
-import { DroughtOperationalDisclosure, useDroughtReadinessMap } from "./DroughtOperationalWorkspace";
+import { DroughtOperationalDisclosure } from "./DroughtOperationalWorkspace";
 import { pathWithForecastSelection } from "./forecastModel";
 import { dataProvenanceChipKindFromText } from "../DataProvenanceChip";
 
@@ -53,17 +51,13 @@ export function ResearchProvinceDataView({
   const attentionRecords = research.droughtAttentionLatest;
   const attentionTitle = "ตำบลภัยแล้งที่ควรตรวจสอบ";
   const forecastArchive = useDroughtForecastArchiveSelection(droughtArchive);
-  const filteredCodes = forecastSubdistrictCodesForIrrigation(droughtArchive, forecastArchive.selectedIrrigation);
   const provinceRecord = getProvinceRecord(NAKHON_RATCHASIMA_ID, selectedMonth);
   const hasAgriculture = provinceRecord && dataProvenanceChipKindFromText(provinceRecord.provenance) === "REAL";
-  const { readinessMap, openReadinessMap, closeReadinessMap } = useDroughtReadinessMap();
   const navigateWithForecast = (path: string) => onNavigate(pathWithForecastSelection(path, forecastArchive.selectedMonth?.period ?? selectedMonth, forecastArchive.selectedHorizon, forecastArchive.selectedIrrigation));
 
   return (
     <section className={`nr-drought-dashboard nr-research-dashboard is-${activeTab}`}>
       <DroughtCompactForecastWorkspace
-        readinessMap={readinessMap}
-        onCloseReadinessMap={closeReadinessMap}
         level="province"
         title="เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6"
         description="ดูพยากรณ์ล่วงหน้า 6 เดือนจากเดือนตั้งต้นเดียวกันและแผนที่พยากรณ์"
@@ -91,10 +85,9 @@ export function ResearchProvinceDataView({
       </section>
       <ResearchDroughtDistrictPanel research={research} onNavigate={navigateWithForecast} />
       </DroughtOperationalDisclosure>}
-      <DroughtOperationalDisclosure title={hasAgriculture ? "พื้นที่เกษตรและความพร้อมข้อมูล" : "ความพร้อมข้อมูลพื้นที่"} description="หลักฐานพื้นที่และข้อจำกัดก่อนตัดสินใจ" icon="crop">
+      {hasAgriculture && <DroughtOperationalDisclosure title="พื้นที่เกษตร" description="ข้อมูลเกษตรระดับจังหวัด" icon="crop">
         <AgricultureImpactPanel provinceRecord={provinceRecord} />
-        {filteredCodes.length > 0 && <PredictionReadinessPanel readiness={predictionReadinessSummaryForSubdistrictCodes(filteredCodes)} onOpenMap={openReadinessMap} />}
-      </DroughtOperationalDisclosure>
+      </DroughtOperationalDisclosure>}
     </section>
   );
 }

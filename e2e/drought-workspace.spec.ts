@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-thot"], ["subdistrict", "/dan-khun-thot/t-300806"]]) {
-  test(`compact ${scope} shares filters, all stats, and a single map with scope-specific readiness`, async ({ page }, testInfo) => {
+  test(`compact ${scope} shares filters, all stats, and a single map without readiness`, async ({ page }, testInfo) => {
     await page.goto(`${path}?mapLayer=forecast-archive&target=2025-12&horizon=1`);
     const workspace = page.locator(`.nr-drought-compact-workspace.is-${scope}`);
     const filters = page.locator(".nr-operational-filters");
@@ -126,30 +126,17 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
 
     await expect(page.getByText(/67,347|8,081|พื้นที่ประเมินทั้งจังหวัด|ความเชื่อมั่นข้อมูลเกษตร/)).toHaveCount(0);
     await expect(page.locator(".nr-agri-impact-module")).toHaveCount(0);
-    const readinessDisclosure = page.locator(".nr-operational-disclosure > summary").filter({ hasText: /ความพร้อมข้อมูลพื้นที่|ความพร้อมข้อมูลของตำบล/ });
+    await expect(page.getByText(/ความพร้อมข้อมูล|ดูความพร้อมบนแผนที่/)).toHaveCount(0);
+    await expect(page.locator(".nr-data-readiness-section, .nr-prediction-readiness, .nr-readiness-map-action, .nr-return-forecast")).toHaveCount(0);
+    await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(1);
+    await expect(page.locator(".nr-map-svg")).toHaveCount(1);
+    await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
     if (scope === "subdistrict") {
-      await expect(readinessDisclosure).toHaveCount(0);
-      await expect(page.locator(".nr-data-readiness-section, .nr-prediction-readiness")).toHaveCount(0);
-      await expect(page.getByRole("button", { name: "ดูความพร้อมบนแผนที่" })).toHaveCount(0);
-      await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(1);
-      await expect(page.locator(".nr-map-svg")).toHaveCount(1);
       await expect(chart).toHaveCount(0);
-      await page.evaluate(() => window.scrollTo(0, 0));
-      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-      await page.screenshot({ path: testInfo.outputPath("subdistrict-without-count-trend.png"), fullPage: true, scale: "css" });
-    } else {
-      await map.evaluate((element) => element.setAttribute("data-instance-probe", "same-map"));
-      await readinessDisclosure.click();
-      await page.getByRole("button", { name: "ดูความพร้อมบนแผนที่" }).click();
-      await expect(workspace.getByRole("heading", { name: "แผนที่ความพร้อมข้อมูลพื้นที่" })).toBeVisible();
-      await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(0);
-      await expect(page.locator(".nr-map-svg")).toHaveCount(1);
-      await expect(map).toHaveAttribute("data-instance-probe", "same-map");
-      await page.getByRole("button", { name: "กลับแผนที่พยากรณ์" }).click();
-      await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(1);
-      await expect(map).toHaveAttribute("data-instance-probe", "same-map");
-      await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
     }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await page.screenshot({ path: testInfo.outputPath(`${scope}-without-readiness.png`), fullPage: true, scale: "css" });
   });
 }
 
