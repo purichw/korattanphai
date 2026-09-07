@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarDays, CircleAlert, Database, Leaf, Map, MapPin, RotateCcw, ShieldCheck, TrendingUp } from "lucide-react";
+import { CalendarDays, ChartColumn, CircleAlert, Database, Leaf, Map, MapPin, RotateCcw, ShieldCheck, TrendingUp } from "lucide-react";
 import { MetricGrid } from "../PageSummary";
 import { DroughtWorkspaceHeader } from "./DroughtOperationalWorkspace";
 import type { DroughtForecastWorkspaceTarget } from "./forecastModel";
@@ -60,7 +60,8 @@ function LoadingMap() {
 function LoadingChart() {
   return <div className="nr-loading-chart">
     <h3>ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ</h3>
-    <div className="nr-loading-chart-surface"><TrendingUp size={32} strokeWidth={1.25} aria-hidden="true" /></div>
+    <div className="nr-loading-chart-modes"><Skeleton /><Skeleton /></div>
+    <div className="nr-loading-chart-surface"><ChartColumn size={32} strokeWidth={1.25} aria-hidden="true" /></div>
     <Skeleton className="is-line" />
   </div>;
 }

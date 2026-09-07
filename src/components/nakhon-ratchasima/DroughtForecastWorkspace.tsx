@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   type NakhonRatchasimaDroughtForecastArchive,
   type NakhonRatchasimaDroughtForecastArchiveTargetMonth,
@@ -17,13 +17,14 @@ import {
   CalendarDays,
   Info,
   Sprout,
+  ChartColumn,
 } from "lucide-react";
-import { formatThaiNumber, type LocalMapMode, formatPercent, pathForSubdistrictCode, useMediaQuery } from "./workspaceModel";
+import { formatThaiNumber, type LocalMapMode, formatPercent, pathForSubdistrictCode } from "./workspaceModel";
+import { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
 import { DroughtWorkspaceHeader, DroughtWorkspaceFilters, DroughtOperationalDisclosure, DroughtOperationalSummary } from "./DroughtOperationalWorkspace";
 import {
   type DroughtForecastTrendMonth,
   type ForecastArchiveHorizon,
-  forecastRiskShare,
   type DroughtForecastArchiveLevel,
   forecastArchiveSummaryForSelection,
   type DroughtForecastArchiveSummary,
@@ -42,88 +43,7 @@ import { type AppSelectOption } from "../AppSelect";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
 import { MetricGrid, type SummaryMetric } from "../PageSummary";
 
-export function DroughtForecastTrendGraph({
-  months,
-  unit = "percent",
-  activeHorizon,
-}: {
-  months: DroughtForecastTrendMonth[];
-  unit?: "percent" | "count";
-  activeHorizon?: ForecastArchiveHorizon;
-}) {
-  const compactChart = useMediaQuery("(max-width: 720px)");
-  const width = compactChart ? 360 : 720;
-  const height = compactChart ? 230 : 300;
-  const padding = { top: 28, right: 8, bottom: 52, left: compactChart ? 40 : 56 };
-  const plotWidth = width - padding.left - padding.right;
-  const plotHeight = height - padding.top - padding.bottom;
-  const maximum = unit === "percent" ? 100 : Math.max(...months.map((month) => month.inScopeSubdistricts), 1);
-  const xStep = plotWidth / Math.max(months.length, 1);
-  const barWidth = Math.min(xStep * 0.55, 48);
-  const yForValue = (value: number) => padding.top + (1 - value / maximum) * plotHeight;
-  const valueFor = (count: number, month: DroughtForecastTrendMonth) => unit === "count"
-    ? count : (forecastRiskShare(count, month.inScopeSubdistricts) ?? 0) * 100;
-  const formatValue = (value: number) => unit === "percent" ? formatPercent(value, 1) : formatThaiNumber(value);
-  const zeroY = yForValue(0);
-  const guideValues = Array.from(new Set([0, .25, .5, .75, 1].map((share) => Math.round(maximum * share)))).sort(
-    (a, b) => a - b,
-  );
-  const descriptionFor = (month: DroughtForecastTrendMonth) => `T+${month.monthIndex} · ${month.labelTh} · ${month.inScopeSubdistricts === 0
-    ? "ไม่มีค่าพยากรณ์" : `เสี่ยงปานกลาง ${month.moderateRiskSubdistricts} ตำบล (${formatPercent(month.moderateRiskSubdistricts / month.inScopeSubdistricts * 100, 1)}) · เสี่ยงสูง ${month.highRiskSubdistricts} ตำบล (${formatPercent(month.highRiskSubdistricts / month.inScopeSubdistricts * 100, 1)})`}
-    · มีค่าพยากรณ์ ${month.inScopeSubdistricts}/${month.totalSubdistricts} ตำบล · นอกขอบเขต ${month.outOfScopeSubdistricts} · ไม่มีข้อมูล ${month.missingSubdistricts}`;
-  const title = `แนวโน้ม${unit === "percent" ? "สัดส่วน" : "จำนวน"}ตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า`;
-
-  return (
-    <figure className="nr-forecast-line-graph nr-drought-forecast-graph" data-unit={unit}>
-      <svg
-        className="nr-forecast-line-svg"
-        viewBox={`0 0 ${width} ${height}`}
-        role="img"
-        aria-label={title}
-      >
-        <title>{title}</title>
-        <desc>{months.map(descriptionFor).join("; ")}</desc>
-        {guideValues.map((value) => {
-          const y = yForValue(value);
-          return (
-            <g key={value} className="nr-forecast-graph-guide">
-              <line x1={padding.left} y1={y} x2={width - padding.right} y2={y} />
-              <text x={padding.left - 8} y={y + 4}>{formatValue(value)}</text>
-            </g>
-          );
-        })}
-        {months.map((month, index) => {
-          const x = padding.left + xStep * (index + .5);
-          const moderate = valueFor(month.moderateRiskSubdistricts, month);
-          const total = valueFor(month.riskSubdistricts, month);
-          const unavailable = month.inScopeSubdistricts === 0;
-          return <g key={month.period} className={`nr-forecast-point-group${activeHorizon === month.monthIndex ? " is-active" : ""}`}>
-            <title>{descriptionFor(month)}</title>
-            {activeHorizon === month.monthIndex && <rect className="nr-drought-forecast-active-column" x={x - xStep / 2 + 2} y={4} width={xStep - 4} height={zeroY + 4} rx={4} />}
-            {!unavailable && <>
-              {month.moderateRiskSubdistricts > 0 && <rect className="nr-drought-forecast-bar is-moderate" data-count={month.moderateRiskSubdistricts} x={x - barWidth / 2} y={yForValue(moderate)} width={barWidth} height={zeroY - yForValue(moderate)} />}
-              {month.highRiskSubdistricts > 0 && <rect className="nr-drought-forecast-bar is-high" data-count={month.highRiskSubdistricts} x={x - barWidth / 2} y={yForValue(total)} width={barWidth} height={yForValue(moderate) - yForValue(total)} />}
-              {total === 0 && <line className="nr-drought-forecast-zero" x1={x - barWidth / 2} x2={x + barWidth / 2} y1={zeroY} y2={zeroY} />}
-            </>}
-            <text className={`nr-drought-forecast-point-label${unavailable ? " is-unavailable" : ""}`} x={x} y={yForValue(total) - 10}>
-              {unavailable ? "ไม่มีค่า" : formatValue(total)}
-            </text>
-            <text className="nr-forecast-axis-date" x={x} y={height - 28}>
-              <tspan x={x}>T+{month.monthIndex}</tspan>
-              <tspan x={x} dy="16">{compactChart ? month.labelTh.replace(/\d{2}(\d{2})$/, "$1") : month.labelTh}</tspan>
-            </text>
-          </g>;
-        })}
-        <text className="nr-forecast-axis-unit" x={padding.left - 8} y={padding.top - 12}>{unit === "percent" ? "%" : "ตำบล"}</text>
-      </svg>
-      <figcaption className="nr-forecast-line-legend nr-drought-forecast-legend">
-        <span><i className="is-moderate" />เสี่ยงปานกลาง (1)</span>
-        <span><i className="is-high" />เสี่ยงสูง (2)</span>
-        <span><i className="is-normal" />ไม่พบสัญญาณเสี่ยง (0)</span>
-      </figcaption>
-    </figure>
-  );
-}
+export { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
 
 export function DroughtForecastArchivePanel({
   archive,
@@ -376,15 +296,16 @@ export function DroughtForecastWorkspaceChart({
   coverageRemark: string;
 }) {
   const [unit, setUnit] = useState<"percent" | "count">("percent");
+  const titleId = useId();
   const activeForecastMonth = trendMonths[selectedHorizon - 1] ?? trendMonths[0];
   const forecastHasData = trendMonths.some((month) => month.inScopeSubdistricts > 0);
 
   return (
-    <section className="nr-drought-workspace-chart-card" aria-labelledby="nr-drought-workspace-chart-title">
+    <section className="nr-drought-workspace-chart-card" aria-labelledby={titleId}>
       <div className="nr-drought-workspace-card-heading">
         <div>
           <p className="eyebrow">พยากรณ์ 6 เดือนข้างหน้า</p>
-          <h3 id="nr-drought-workspace-chart-title">ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ</h3>
+          <h3 id={titleId}>ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ</h3>
           <span>
             {activeForecastMonth
               ? `เน้น T+${selectedHorizon} · ${activeForecastMonth.labelTh} · ${scopeLabel}`
@@ -397,7 +318,8 @@ export function DroughtForecastWorkspaceChart({
         <div className="segmented nr-forecast-unit-control" role="group" aria-label="หน่วยของกราฟพยากรณ์">
           {(["percent", "count"] as const).map((value) => <button key={value} type="button"
             className={unit === value ? "active" : ""} aria-pressed={unit === value} onClick={() => setUnit(value)}>
-            {value === "percent" ? "เปอร์เซ็นต์" : "จำนวนตำบล"}
+            {value === "percent" ? <ShieldCheck size={17} aria-hidden="true" /> : <ChartColumn size={17} aria-hidden="true" />}
+            <span>{value === "percent" ? <>เปอร์เซ็นต์<span className="nr-chart-percent-suffix" aria-hidden="true"> (%)</span></> : "จำนวนตำบล"}</span>
           </button>)}
         </div>
         <span>{unit === "percent" ? "% ของตำบลที่มีค่าพยากรณ์ในแต่ละเดือน" : "จำนวนตำบลเสี่ยงปานกลาง + เสี่ยงสูง"}</span>
@@ -415,8 +337,9 @@ export function DroughtForecastWorkspaceChart({
           <span>ตำบลนอกขอบเขตหรือไม่มีข้อมูล ไม่สามารถสรุปว่าไม่มีความเสี่ยง</span>
         </div>
       )}
-      <p className="nr-compact-note">
-        {coverageRemark}
+      <p className="nr-compact-note nr-forecast-coverage-note">
+        <Info size={16} aria-hidden="true" />
+        <span>{coverageRemark}</span>
       </p>
     </section>
   );

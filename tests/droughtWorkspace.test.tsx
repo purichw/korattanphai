@@ -72,6 +72,37 @@ it.each([false, true])("reserves space below zero-value points for X-axis labels
   }
 });
 
+it("shares accessible monthly details across hover, focus and tap without changing the selected horizon", () => {
+  vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+  const month = archive.targetMonths.find(item => item.period === "2025-12")!;
+  const codes = archive.locations.filter(item => item.districtCode === "3003").map(item => item.subdistrictCode);
+  const months = forecastArchiveTrendMonthsForSelection(archive, month, codes);
+  const { container, rerender } = render(<DroughtForecastTrendGraph months={months} activeHorizon={1} />);
+  const targets = screen.getAllByRole("button", { name: /รายละเอียด T\+/ });
+  expect(targets).toHaveLength(6);
+  expect(container.querySelectorAll("figcaption > span")).toHaveLength(4);
+  fireEvent.pointerEnter(targets[4], { pointerType: "mouse" });
+  expect(screen.getByRole("tooltip")).toHaveTextContent("T+5");
+  expect(screen.getByRole("tooltip")).toHaveTextContent(`มีค่าพยากรณ์ ${months[4].inScopeSubdistricts}/6 ตำบล`);
+  fireEvent.pointerLeave(container.querySelector("figure")!);
+  expect(screen.queryByRole("tooltip")).toBeNull();
+  fireEvent.focus(targets[0]);
+  expect(targets[0]).toHaveAttribute("aria-describedby", screen.getByRole("tooltip").id);
+  fireEvent.keyDown(targets[0], { key: "ArrowRight" });
+  expect(targets[1]).toHaveFocus();
+  expect(screen.getByRole("tooltip")).toHaveTextContent("T+2");
+  fireEvent.keyDown(targets[1], { key: "Escape" });
+  expect(screen.queryByRole("tooltip")).toBeNull();
+  fireEvent.click(targets[5]);
+  expect(screen.getByRole("tooltip")).toHaveTextContent("T+6");
+  expect(container.querySelector(".nr-forecast-point-group.is-active")).toHaveTextContent("T+1");
+  fireEvent.pointerDown(document.body);
+  expect(screen.queryByRole("tooltip")).toBeNull();
+  fireEvent.click(targets[5]);
+  rerender(<DroughtForecastTrendGraph months={months} activeHorizon={1} unit="count" />);
+  expect(screen.queryByRole("tooltip")).toBeNull();
+});
+
 it("renders missing and out-of-scope as separate shared stat cards", () => {
   const month = archive.targetMonths.find((item) => item.period === "2025-12")!;
   const outside = archive.locations.find((item) => archive.packedRiskByTargetMonth[month.period][item.subdistrictCode][0] === null)!;

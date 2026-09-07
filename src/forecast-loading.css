@@ -27,7 +27,8 @@
 .nr-loading-overview-grid > .nr-loading-map { height: 530px; }
 .nr-loading-map, .nr-loading-chart { display: grid; grid-template-rows: auto auto minmax(0,1fr) auto; gap: 10px; min-width: 0; min-height: 0; height: 400px; padding: 12px; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; }
 .nr-loading-map { grid-area: map; }
-.nr-loading-chart { grid-area: chart; grid-template-rows: auto minmax(0,1fr) auto; }
+.nr-loading-chart { grid-area: chart; grid-template-rows: auto auto minmax(0,1fr) auto; }
+.nr-loading-chart-modes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; min-height: 40px; }
 .nr-forecast-loading-content h3 { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink); }
 .nr-loading-map-toolbar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 .nr-loading-map-toolbar .nr-skeleton { height: 32px; background: #eef2f0; }
@@ -74,7 +75,7 @@
 @media (max-width: 900px) {
   .nr-loading-forecast, .nr-loading-forecast.is-single { grid-template-columns: minmax(0,1fr); grid-template-areas: "heading" "horizon" "context" "kpis" "chart" "map"; }
   .nr-loading-forecast.is-single { grid-template-areas: "heading" "horizon" "context" "kpis" "map"; }
-  .nr-loading-chart { height: 310px; }
+  .nr-loading-chart { height: 400px; }
 }
 @media (max-width: 720px) {
   .nr-forecast-loading-content > div { gap: 10px; }
@@ -96,7 +97,7 @@
   .nr-loading-attention { padding: 12px; border-radius: 0; border-block: 1px solid #d8e3df; }
   .nr-loading-overview-grid > .nr-loading-map { height: 480px; }
   .nr-loading-map { height: 440px; padding: 10px; }
-  .nr-loading-chart { height: 270px; padding: 10px; }
+  .nr-loading-chart { height: 390px; padding: 8px; }
   .nr-loading-support { grid-template-columns: minmax(0,1fr); }
   .nr-loading-forecast-heading h2 { font-size: 16px; }
   .nr-loading-horizons > div { min-height: 60px; padding-inline: 2px; }

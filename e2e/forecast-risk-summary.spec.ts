@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { test, expect, seedAuthSession, type Locator } from "./fixtures";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
 import { forecastSlice } from "../tests/fixtures/forecast-slice.mjs";
@@ -32,6 +32,106 @@ test.beforeEach(async ({ page }) => {
     return route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) });
   });
   await seedAuthSession(page);
+});
+
+test("shared bar graph reference layout and details across six viewports", async ({ page }, testInfo) => {
+  test.setTimeout(90_000);
+  const mobile = testInfo.project.name === "mobile";
+  const sizes = mobile ? [[390, 844], [393, 852], [430, 932]] : [[1366, 768], [1440, 900], [1920, 1080]];
+  const errors: string[] = [];
+  let requests = 0;
+  page.on("pageerror", error => errors.push(error.message));
+  page.on("request", request => { if (request.url().includes("ktp_load_forecast_slice")) requests++; });
+  await page.goto("/soeng-sang?target=2025-12&horizon=1");
+  const chart = page.locator(".nr-drought-workspace-chart-card");
+  const codes = archive.locations.filter(location => location.districtCode === "3003").map(location => location.subdistrictCode);
+  await expectSeries(chart, codes, "percent");
+  const loadedRequests = requests;
+  const initialUrl = page.url();
+  const mapClasses = await page.locator(".nr-map-shape").evaluateAll(shapes => shapes.map(shape => shape.getAttribute("class")));
+  mkdirSync("artifacts/bar-graph-v1", { recursive: true });
+  for (const [width, height] of sizes) {
+    await page.setViewportSize({ width, height });
+    await chart.scrollIntoViewIfNeeded();
+    await page.evaluate(() => document.fonts.ready);
+    await expect(chart.locator("figcaption > span")).toHaveCount(4);
+    await expect.poll(() => chart.locator(".nr-forecast-bar-plot").evaluate(plot => Math.abs(plot.clientWidth - plot.querySelector("svg")!.viewBox.baseVal.width))).toBeLessThan(2);
+    const layout = await chart.evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      const toggle = element.querySelector(".nr-forecast-unit-control")!.getBoundingClientRect();
+      const plot = element.querySelector(".nr-forecast-bar-plot")!.getBoundingClientRect();
+      const legend = element.querySelector("figcaption")!.getBoundingClientRect();
+      const note = element.querySelector(".nr-forecast-coverage-note")!.getBoundingClientRect();
+      const labels = [...element.querySelectorAll(".nr-forecast-axis-date, .nr-drought-forecast-point-label")].map(label => label.getBoundingClientRect());
+      return { overflow: element.scrollWidth > element.clientWidth, toggleRatio: toggle.width / (rect.width - 20), plotHeight: plot.height,
+        overlap: labels.some(label => label.left < plot.left || label.right > plot.right || label.bottom > legend.top), footerInside: note.bottom <= rect.bottom,
+        documentOverflow: document.documentElement.scrollWidth > innerWidth };
+    });
+    expect(layout).toMatchObject({ overflow: false, overlap: false, footerInside: true, documentOverflow: false });
+    expect(layout.toggleRatio).toBeGreaterThan(.97);
+    expect(layout.plotHeight).toBeGreaterThan(180);
+    expect(await chart.locator("figcaption > span").evaluateAll(items => items.every(item =>
+      getComputedStyle(item.querySelector(".nr-legend-short")!).display === "none" ||
+      getComputedStyle(item.querySelector(".nr-legend-full")!).position === "absolute",
+    ))).toBe(true);
+    expect(await chart.locator(".nr-drought-forecast-point-label").evaluateAll(labels => labels.slice(1).every((label, index) =>
+      labels[index].getBoundingClientRect().right < label.getBoundingClientRect().left,
+    ))).toBe(true);
+    await chart.screenshot({ path: `artifacts/bar-graph-v1/${width}-chart.png` });
+    if (width === 1440 || width === 390) {
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.screenshot({ path: `artifacts/bar-graph-v1/${width}-page.png`, fullPage: true });
+      await chart.scrollIntoViewIfNeeded();
+    }
+    const column = chart.getByRole("button", { name: /รายละเอียด T\+6/ });
+    if (mobile) await column.tap();
+    else {
+      await column.focus(); await column.press("Enter");
+      expect(await column.evaluate(element => getComputedStyle(element).outlineStyle)).toBe("solid");
+    }
+    const tooltip = chart.getByRole("tooltip");
+    await expect(tooltip).toContainText("T+6");
+    await expect(tooltip).toContainText("มีค่าพยากรณ์ 4/6 ตำบล");
+    const bounds = await tooltip.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+    await tooltip.screenshot({ path: `artifacts/bar-graph-v1/${width}-detail.png` });
+    if (mobile) await chart.getByRole("heading").tap();
+    else await page.keyboard.press("Escape");
+    await expect(tooltip).toHaveCount(0);
+    await chart.getByRole("button", { name: "จำนวนตำบล", exact: true }).click();
+    await expectSeries(chart, codes, "count");
+    await chart.getByRole("button", { name: "เปอร์เซ็นต์", exact: true }).click();
+    await expectSeries(chart, codes, "percent");
+  }
+  expect(requests).toBe(loadedRequests);
+  expect(page.url()).toBe(initialUrl);
+  expect(await page.locator(".nr-map-shape").evaluateAll(shapes => shapes.map(shape => shape.getAttribute("class")))).toEqual(mapClasses);
+  expect(errors).toEqual([]);
+});
+
+test("shared bar graph preserves loading and unavailable states", async ({ page }, testInfo) => {
+  let release!: () => void;
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  await page.route("https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice", async route => {
+    await pending;
+    await route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) });
+  });
+  try {
+    await page.goto("/chok-chai?target=2025-12&horizon=1");
+    const loading = page.locator(".nr-loading-chart");
+    await expect(loading).toBeVisible();
+    const height = (await loading.boundingBox())!.height;
+    await expect(loading.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
+    mkdirSync("artifacts/bar-graph-v1", { recursive: true });
+    await loading.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-loading.png` });
+    release();
+    const chart = page.locator(".nr-drought-workspace-chart-card");
+    await expect(chart.getByRole("status")).toContainText("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
+    await expect(chart.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
+    expect((await chart.boundingBox())!.height).toBeCloseTo(height, 0);
+    await chart.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-empty.png` });
+  } finally { release(); }
 });
 
 for (const [level, path] of [["province", "/drought"], ["district", "/dan-khun-thot"]] as const) {

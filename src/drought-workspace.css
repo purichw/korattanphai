@@ -60,20 +60,49 @@
 .is-drought-route .nr-drought-workspace-chart-card,
 .is-drought-route .nr-drought-workspace-map-card { min-height: 0; height: 400px; padding: 10px; gap: 6px; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; box-shadow: none; }
 .is-drought-route .nr-drought-workspace-chart-card { grid-template-rows: auto auto minmax(0,1fr) auto; }
-.nr-forecast-chart-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-width: 0; }
+.nr-forecast-chart-toolbar { display: grid; grid-template-columns: minmax(0,1fr); gap: 6px; min-width: 0; }
+.nr-forecast-chart-toolbar > span { grid-row: 1; }
 .nr-forecast-chart-toolbar > span { font-size: 11px; line-height: 1.45; color: var(--muted); }
-.nr-forecast-unit-control { flex: 0 0 auto; padding: 2px; border: 1px solid #d9e3e7; border-radius: 6px; background: #f3f6f7; }
-.nr-forecast-unit-control button { min-height: 36px; padding: 4px 12px; border: 1px solid transparent; border-radius: 4px; color: #52636a; font-size: 12px; }
-.nr-forecast-unit-control button.active { color: #205b85; border-color: #b8ccd9; background: #fff; box-shadow: none; }
+.nr-forecast-unit-control { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); width: 100%; padding: 2px; border: 1px solid #d9e3e7; border-radius: 6px; background: #eef3f6; }
+.nr-forecast-unit-control button { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; min-height: 36px; padding: 4px 8px; border: 1px solid transparent; border-radius: 4px; color: #52636a; font-size: 12px; line-height: 1.4; }
+.nr-forecast-unit-control button.active { color: #086794; border-color: #76ade0; background: #f7fbfe; box-shadow: none; }
 .nr-forecast-unit-control button:focus-visible { outline: 2px solid #205b85; outline-offset: 2px; }
-.nr-drought-forecast-active-column { fill: #edf4f8; }
+.nr-drought-forecast-active-column { fill: #eff7fb; }
 .nr-drought-forecast-bar.is-moderate { fill: #f1b84b; stroke: #b86100; stroke-width: 1; }
 .nr-drought-forecast-bar.is-high { fill: #d95d59; stroke: #a83937; stroke-width: 1; }
 .nr-drought-forecast-zero { stroke: #41a76d; stroke-width: 3; }
-.nr-drought-forecast-graph .nr-drought-forecast-point-label { fill: #32484f; font-size: 13px; font-weight: 700; }
+.nr-drought-forecast-graph .nr-forecast-point-group .nr-drought-forecast-point-label { fill: #21363f; font-size: 14px; font-weight: 700; }
 .nr-drought-forecast-graph .nr-drought-forecast-point-label.is-unavailable { fill: var(--muted); font-size: 10px; }
-.nr-drought-forecast-legend .is-high { background: #d95d59; border-radius: 0; }
-.nr-drought-forecast-legend .is-moderate { background: #f1b84b; border-radius: 0; }
+.nr-drought-forecast-graph .is-high { background: #d95d59; }
+.nr-drought-forecast-graph .is-moderate { background: #f1b84b; }
+.nr-drought-forecast-graph .is-normal { background: #5dae79; }
+.nr-drought-forecast-graph .is-out-of-scope { background: repeating-linear-gradient(45deg,#e2e9e5 0 4px,#b7c5be 4px 6px); }
+.nr-drought-forecast-graph { container-type: inline-size; }
+.nr-forecast-bar-plot { position: relative; min-height: 0; min-width: 0; }
+.nr-drought-forecast-graph .nr-forecast-axis-date,
+.nr-drought-forecast-graph .nr-forecast-graph-guide text { font-size: 12px; font-weight: 600; }
+.nr-drought-forecast-graph .nr-forecast-axis-date { fill: #52636a; }
+.nr-drought-forecast-graph .is-active .nr-forecast-axis-date { fill: #21363f; font-weight: 700; }
+.nr-forecast-bar-plot .nr-forecast-bar-target { position: absolute; top: 0; bottom: 0; min-width: 0; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 4px; background: transparent; box-shadow: none; cursor: pointer; }
+.nr-forecast-bar-plot .nr-forecast-bar-target:focus-visible { outline: 2px solid #086794; outline-offset: -2px; }
+.nr-forecast-bar-tooltip { position: absolute; z-index: 2; top: 4px; left: 8px; width: 260px; max-width: calc(100% - 16px); padding: 10px; border: 1px solid #cad9e1; border-radius: 6px; background: #fff; color: #21363f; box-shadow: 0 4px 16px #20354020; font-size: 12px; line-height: 1.5; }
+.nr-forecast-bar-tooltip.is-right { left: auto; right: 8px; }
+.nr-forecast-bar-tooltip > strong { display: block; margin-bottom: 6px; font-size: 13px; }
+.nr-forecast-bar-tooltip dl { display: grid; gap: 5px; margin: 0; }
+.nr-forecast-bar-tooltip dl > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 8px; }
+.nr-forecast-bar-tooltip dt { display: flex; align-items: center; gap: 6px; }
+.nr-forecast-bar-tooltip dd { margin: 0; font-weight: 600; }
+.nr-forecast-bar-tooltip dd span { font-weight: 400; }
+.nr-forecast-bar-tooltip p { margin: 8px 0 0; padding-top: 6px; border-top: 1px solid #e3e9ec; color: #52636a; }
+.nr-drought-forecast-legend i,
+.nr-forecast-bar-tooltip i { display: inline-block; flex: 0 0 auto; width: 12px; height: 12px; border-radius: 4px; }
+.nr-drought-forecast-legend .nr-legend-short { display: none; }
+.nr-forecast-coverage-note { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 6px 8px; border: 1px solid #e1eef8; border-radius: 5px; background: #f0f7fc; color: #52636a; }
+.nr-forecast-coverage-note > svg { flex: 0 0 auto; color: #0878bf; }
+@container (max-width: 540px) {
+  .nr-drought-forecast-legend .nr-legend-full { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .nr-drought-forecast-legend .nr-legend-short { display: inline; }
+}
 .is-drought-route .nr-drought-workspace-card-heading { min-height: 0; margin: 0; padding: 0; }
 .is-drought-route .nr-drought-workspace-map-card .nr-dashboard-map-header { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 6px; border: 0; background: none; }
 .is-drought-route .nr-drought-workspace-map-card .nr-dashboard-map-header .data-provenance-chip { margin: 0; }
@@ -285,13 +314,16 @@
   .is-drought-route .nr-drought-workspace-kpis strong { font-size: 17px; }
   .is-drought-route .nr-drought-workspace-kpis dt { font-size: 11px; }
   .is-drought-route .nr-drought-workspace-kpis small { font-size: 10px; }
-  .is-drought-route .nr-drought-workspace-chart-card { height: 340px; padding: 8px; }
+  .is-drought-route .nr-drought-workspace-chart-card { height: 390px; padding: 8px; }
   .nr-forecast-chart-toolbar { display: grid; grid-template-columns: minmax(0,1fr); }
   .nr-forecast-unit-control { justify-self: start; }
   .nr-forecast-unit-control button { min-height: 44px; }
+  .nr-forecast-chart-toolbar > span { grid-row: 2; }
+  .nr-forecast-unit-control button > svg,
+  .nr-chart-percent-suffix { display: none; }
   .is-drought-route .nr-drought-workspace-map-card { height: 440px; padding: 8px; }
-  .is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-legend { font-size: 10px; }
-  .is-drought-route .nr-drought-workspace-chart-card .nr-compact-note { font-size: 10px; }
+  .is-drought-route .nr-drought-workspace-chart-card .nr-forecast-line-legend { font-size: 11px; }
+  .is-drought-route .nr-drought-workspace-chart-card .nr-compact-note { font-size: 11px; }
   .is-drought-route .nr-drought-workspace-card-heading h3 { font-size: 13px; }
   .is-drought-route .nr-drought-workspace-map-card .nr-map-controls { grid-template-columns: 36px; width: 36px; gap: 4px; top: 6px; }
   .is-drought-route .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 36px; height: 36px; }
