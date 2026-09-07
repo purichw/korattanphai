@@ -733,7 +733,8 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.locator(".data-provenance-chip.is-real:visible").first()).toBeVisible();
   await expect(page.locator(".nr-forecast-overview .metric-card .data-provenance-chip.is-synthetic")).toHaveCount(0);
   await expect(page.locator(".nr-home-agriculture")).toHaveCount(0);
-  await expect(page.locator(".data-provenance-chip.is-derived:visible").first()).toBeVisible();
+  await expect(page.locator(".nr-home-readiness, .nr-prediction-readiness")).toHaveCount(0);
+  await expect(page.locator(".nr-forecast-overview-summary .data-provenance-chip.is-real")).toHaveCount(4);
   await expect(page.locator(".nr-forecast-overview .data-provenance-chip.is-proxy")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
