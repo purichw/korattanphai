@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { test, expect, seedAuthSession, type Locator } from "./fixtures";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
+import { forecastSlice } from "../tests/fixtures/forecast-slice.mjs";
 
 const archive = JSON.parse(readFileSync("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", "utf8")) as NakhonRatchasimaDroughtForecastArchive;
 const source = archive.packedRiskByTargetMonth["2025-12"];
@@ -25,7 +26,13 @@ async function expectSeries(chart: Locator, codes: string[], unit: "count" | "pe
   }
 }
 
-test.beforeEach(async ({ page }) => { await seedAuthSession(page); });
+test.beforeEach(async ({ page }) => {
+  await page.route("https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice", route => {
+    expect(route.request().postDataJSON().p_horizon_count).toBe(6);
+    return route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) });
+  });
+  await seedAuthSession(page);
+});
 
 for (const [level, path] of [["province", "/drought"], ["district", "/dan-khun-thot"]] as const) {
   test(`${level} graph separates source risk levels in both units and retains scope`, async ({ page }) => {
