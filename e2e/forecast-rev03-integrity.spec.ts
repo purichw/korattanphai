@@ -29,7 +29,7 @@ for (const scope of [
       await page.goto(`${scope.path}?target=${period}&horizon=1`);
       const codes = runtime.locations.filter((l: any) => l.subdistrictCode.startsWith(scope.code));
       for (const horizon of [1, 2, 3, 4, 5, 6]) {
-        await page.locator('.nr-forecast-archive-horizon-tabs').getByRole('tab', { name: new RegExp(`T\\+${horizon}(?:\\s|$)`) }).click();
+        await page.locator('.nr-forecast-archive-horizon-tabs').getByRole('tab', { name: new RegExp(`^ล่วงหน้า ${horizon} เดือน`) }).click();
         await expect(page).toHaveURL(new RegExp(`target=${period}&horizon=${horizon}`));
         const expected = Object.fromEntries(codes.map((l: any) => {
           const risk = source.packedRiskBySourceMonth[period][l.sourceId][horizon - 1];
