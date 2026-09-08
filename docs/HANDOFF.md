@@ -20,6 +20,54 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Exclusive forecast-action accordion release (2026-09-08):
+
+- Pushed runtime `eabcefa3c54971fd78a7eb62ddf9df2af4f6cf19` on
+  `fix/nr-map-zoom-performance`. This release includes only the six files for
+  this task: shared operational/workspace components, styles, focused unit
+  and browser tests, and shared-component documentation.
+- Province/district action cards share `DroughtOperationalDisclosureGroup`:
+  at most one section opens, the other two collapsed cards stay side by side
+  above it, and the expanded section occupies the full row. Desktop/mobile,
+  keyboard focus, close-all, mounted content and conditional item removal
+  are covered. Subdistrict standalone guidance retains its existing behavior.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34243218988)
+  passed for the exact runtime commit: 185 unit tests, 11 isolated
+  migration/integrity/RLS checks, 129 built-browser tests (31 conditional
+  skips), 38 database-browser tests, protected builds, exposure/bundle limits
+  and generated-data drift. The clean protected build also passed all six
+  focused accordion browser cases locally. CI took 19m47s against its
+  20-minute limit; no workflow changes are included in this release.
+- Deployment used clean Git archive `artifacts/accordion-release-3tfjTc`,
+  excluding unrelated working-tree changes. Verified Supabase Preview:
+  `dpl_FgxAUauCp3ajd3og5TZDPf9WsU7m`,
+  `https://korattanphai-mymdk1zye-purichwc-1517s-projects.vercel.app`.
+  Preview received existing public browser Auth configuration per build;
+  the automatic static-backend Preview was not used as release evidence.
+- Production is Ready at `dpl_BmFJqbxy4eE66KdXiV16yxQCULV1`,
+  `https://korattanphai-lv08sk5n0-purichwc-1517s-projects.vercel.app`.
+  Deployment inspection confirms `https://korattanphai.vercel.app` points to
+  this exact artifact with the Supabase backend and no static forecast assets.
+- Preview and primary production each passed 32 authenticated smoke checks
+  plus four province/district accordion checks across Chromium desktop/mobile.
+  These verify exclusivity, the collapsed pair above the expanded card,
+  keyboard focus, close-all, stable map dimensions and unchanged URLs.
+  Existing checks retain login/logout, scoped RPC/source equality, map colors,
+  month sync, percent/count charts, irrigation/empty/reset states, saved reads,
+  assets/API/headers and no browser errors or horizontal overflow. Real Excel
+  downloads retain 289 tambons, 32 district summaries and 1,734 source-equal
+  values on desktop; mobile verifies six tambons, one district and 36 values,
+  plus native chart/PivotTable parts.
+- Evidence: `smoke-results/accordion-{preview,production}/report.json`,
+  `accordion-report.json` and `*-{province,district}-attention-open.png`.
+  No forecast/normalized changes, remote migrations, application-data writes,
+  Auth/protection changes or credentials saved in reports. Unrelated pending
+  model-input API, collection scripts, migration and configuration edits are
+  deliberately uncommitted and excluded from the production snapshot.
+- Limits: Chromium only; Safari, Firefox, physical devices and native Excel
+  were not retested. Recovery: promote prior verified deployment
+  `dpl_DLXCqgLHJvL46SyupsdkjnQ7Jrmr`; leave Supabase schema/data unchanged.
+
 Combined irrigation-layout and forecast-terminology release (2026-09-08):
 
 - Pushed runtime `5f1e62550cfd0eca75579eb5032f2c56bae3f005` and test-only
