@@ -20,6 +20,53 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Combined irrigation-layout and forecast-terminology release (2026-09-08):
+
+- Pushed runtime `5f1e62550cfd0eca75579eb5032f2c56bae3f005` and test-only
+  follow-up `b7b40b5b9a467827de31c99e2633e7108605f457` on
+  `fix/nr-map-zoom-performance`, combining the two authorized tasks. The
+  follow-up only updates an obsolete archive-test tab selector to the new
+  accessible label; all source-value and map-color assertions remain intact.
+- Empty irrigation results now keep the district/province map in its existing
+  desktop grid column instead of expanding across the chart. Overview and
+  drought workspaces share `IrrigationEmptyState` and already share the map,
+  month/status filters and irrigation selector. Their distinct outer layouts,
+  subdistrict layout and mobile stacking remain intentional.
+- Shared forecast labels use `ล่วงหน้า N เดือน`, with compact `N เดือน` tabs
+  and chart axes. Mobile horizon dates consistently wrap month/year. Numeric
+  horizons, forward-month calculations, source keys, URLs, user-authored saved
+  names and Excel T+1-T+6 fields/formulas are unchanged.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34238131931)
+  passed for `b7b40b5`: 183 unit tests, 11 isolated migration/integrity/RLS
+  checks, 123 built-browser tests (31 conditional skips), 38 database-browser
+  tests, protected builds, exposure/bundle limits and generated-data drift.
+  The corrected source-integrity browser spec also passed all eight cases
+  locally against a protected build before the successful CI rerun.
+- Clean Git archive candidate `dpl_DLXCqgLHJvL46SyupsdkjnQ7Jrmr` was built
+  from `5f1e625` using Production settings and `--prod --skip-domain`.
+  Candidate URL: `https://korattanphai-fsz1waxeh-purichwc-1517s-projects.vercel.app`.
+  The later promotion request reported that this was already current
+  production (409); deployment inspection and alias listing independently
+  confirmed `https://korattanphai.vercel.app` points to this exact artifact.
+  The test-only follow-up does not change deployed runtime bytes.
+- Candidate and primary-production authenticated smoke each passed 32 checks
+  on Chromium desktop/mobile. Coverage includes scoped RPC/source equality,
+  map colors, month synchronization, percent/count charts, irrigation states
+  and empty/reset frame stability across Overview/district/subdistrict,
+  saved-workspace reads, login/logout, API/assets/headers, and no browser
+  errors or horizontal overflow. Real Excel downloads verify 289 tambons,
+  32 district summaries and 1,734 source-equal values on desktop; mobile
+  verifies six tambons, one district and 36 values, plus chart/PivotTable parts.
+- Evidence: `smoke-results/irrigation-terminology-{candidate,production}/report.json`
+  and screenshots, including `desktop-empty-irrigation-district.png` and
+  `mobile-empty-irrigation-district.png`. No forecast/normalized edits, remote
+  migration, application-data writes or Auth/protection changes. Credentials
+  and deployment-access cookies are not saved in reports. Unrelated
+  `scripts/__pycache__/` remains untouched and uncommitted.
+- Limits: Chromium only; Safari, Firefox, physical devices and native Excel
+  were not retested. Recovery: promote previous verified deployment
+  `dpl_2ssjqfeeLknkTUxL9Fi3Ud1YULfs`, without changing Supabase schema/data.
+
 Inline forecast month-loading production release (2026-09-08):
 
 - Pushed and released runtime `e6611d95e312379d219a4075db3f540a79ef2786`
