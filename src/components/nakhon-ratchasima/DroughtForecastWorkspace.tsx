@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { formatThaiNumber, type LocalMapMode, formatPercent, pathForSubdistrictCode } from "./workspaceModel";
 import { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
-import { DroughtWorkspaceHeader, DroughtWorkspaceFilters, DroughtOperationalDisclosure, DroughtOperationalSummary } from "./DroughtOperationalWorkspace";
+import { DroughtWorkspaceHeader, DroughtWorkspaceFilters, DroughtOperationalDisclosure, DroughtOperationalDisclosureGroup, DroughtOperationalSummary } from "./DroughtOperationalWorkspace";
 import {
   type DroughtForecastTrendMonth,
   type ForecastArchiveHorizon,
@@ -510,7 +510,7 @@ export function DroughtCompactForecastWorkspace({
     <DroughtForecastArchiveHorizonSelector targetMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} onHorizonChange={onHorizonChange} />
   </div>;
   const context = <DroughtForecastWorkspaceContext level={level} scopeLabel={scopeLabel} selectedMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} summary={summary} />;
-  const guidance = <DroughtOperationalDisclosure className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
+  const guidance = <DroughtOperationalDisclosure key="guidance" className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
     <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลัง</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
     <p>พยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
     {level !== "subdistrict" && <p>สัดส่วนคิดจากตำบลที่มีค่าพยากรณ์ 0, 1 หรือ 2 ในแต่ละเดือน ไม่รวมตำบลนอกขอบเขตและไม่มีข้อมูล ความเสี่ยงปานกลางและสูงแยกตามค่าต้นฉบับ ไม่ใช่ระดับความรุนแรงทั้งอำเภอหรือสัดส่วนเนื้อที่</p>}
@@ -569,11 +569,11 @@ export function DroughtCompactForecastWorkspace({
         {level === "subdistrict" && guidance}
       </div>
     </section>
-    <div className="nr-operational-forecast-actions">
-      {level !== "subdistrict" && !emptyIrrigationScope && <DroughtOperationalSummary
+    {level !== "subdistrict" && <DroughtOperationalDisclosureGroup>
+      {!emptyIrrigationScope && <DroughtOperationalSummary key="risk-summary"
         horizon={selectedHorizon} summary={summary}
       />}
-      {level !== "subdistrict" && attentionRecords.length > 0 && <DroughtOperationalDisclosure title="ตำบลภัยแล้งที่ควรตรวจสอบ" icon="map"
+      {attentionRecords.length > 0 && <DroughtOperationalDisclosure key="attention" title="ตำบลภัยแล้งที่ควรตรวจสอบ" icon="map"
         description={`เสี่ยงสูง ${formatThaiNumber(summary.highRiskSubdistricts)} · ปานกลาง ${formatThaiNumber(summary.moderateRiskSubdistricts)} ตำบล`}>
         <ul className="nr-operational-attention-list">{attentionRecords.map((record) => <li key={record.subdistrictCode}>
           <button type="button" onClick={() => { const path = pathForSubdistrictCode(record.subdistrictCode); if (path) navigateWithForecast(path); }}>
@@ -582,8 +582,8 @@ export function DroughtCompactForecastWorkspace({
         </li>)}</ul>
         <p>เรียงตามระดับพยากรณ์ แล้วตามรหัสตำบล ไม่ใช่การจัดอันดับความเสียหาย</p>
       </DroughtOperationalDisclosure>}
-      {level !== "subdistrict" && guidance}
-    </div>
+      {guidance}
+    </DroughtOperationalDisclosureGroup>}
     </>
   );
 }

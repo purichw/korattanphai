@@ -8,25 +8,68 @@ import { DroughtForecastTrendGraph, DroughtForecastWorkspaceKpiStrip, DroughtFor
 import { PredictionReadinessPanel, ResearchDroughtSituationPanel, ResearchAreaHeading, ResearchAreaSituationPanel, ResearchSubdistrictDataGapPanel, ResearchAreaAgricultureImpactPanel, ResearchAreaAttentionPanel } from "../src/components/nakhon-ratchasima/ResearchPanels";
 import { localResearchPeriodForSelectedMonth, predictionReadinessSummaryForSubdistrictCodes, summarizeResearchAreaRecords } from "../src/components/nakhon-ratchasima/workspaceModel";
 import { DroughtForecastArchiveSummaryMetrics } from "../src/components/nakhon-ratchasima/ForecastControls";
-import { DroughtOperationalDisclosure, DroughtOperationalSummary } from "../src/components/nakhon-ratchasima/DroughtOperationalWorkspace";
+import { DroughtOperationalDisclosure, DroughtOperationalDisclosureGroup, DroughtOperationalSummary } from "../src/components/nakhon-ratchasima/DroughtOperationalWorkspace";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const archive = archiveJson as unknown as NakhonRatchasimaDroughtForecastArchive;
 
 it.each([
-  [142, 142, "is-default", "100%"],
-  [0, 4, "is-default", "0%"],
+  [142, 142, "", "100%"],
+  [0, 4, "", "0%"],
   [0, 0, "has-no-data", "ไม่มีค่าพยากรณ์ในรอบนี้"],
-] as const)("shares the operational MetricCard without changing risk/availability (%i/%i)", (risk, inScope, state, value) => {
+] as const)("shares the operational disclosure without changing risk/availability (%i/%i)", (risk, inScope, state, value) => {
   const summary = { ...forecastArchiveSummaryForSelection(archive, archive.targetMonths[0], 4),
     riskSubdistricts: risk, inScopeSubdistricts: inScope, riskPercent: forecastRiskShare(risk, inScope) };
   const { container } = render(<DroughtOperationalSummary horizon={4} summary={summary} />);
-  expect(container.firstChild).toHaveClass("metric-card", "nr-operational-card-heading", state);
+  expect(container.firstChild).toHaveClass("nr-operational-disclosure", "nr-operational-forecast-summary");
+  expect(container.querySelector("summary")).toHaveClass("nr-operational-card-heading");
+  expect(container.firstChild).not.toHaveAttribute("open");
+  if (state) expect(container.firstChild).toHaveClass(state);
   expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("ตำบลที่พบความเสี่ยง (ล่วงหน้า 4 เดือน)");
   expect(screen.getByText(value)).toHaveClass("metric-card-value");
   expect(screen.getByText(`มีค่าพยากรณ์ ${inScope}/289 ตำบลทั้งหมด`).parentElement).toHaveClass("metric-card-detail");
   expect(container.firstChild).not.toHaveClass("has-risk", "is-danger");
   expect(screen.queryByRole("button")).toBeNull();
+});
+
+it("opens only one action, moves it after the collapsed cards and preserves focus and content", () => {
+  const summary = forecastArchiveSummaryForSelection(archive, archive.targetMonths[0], 4);
+  const { container } = render(<DroughtOperationalDisclosureGroup>
+    <DroughtOperationalSummary key="risk" horizon={4} summary={summary} />
+    <DroughtOperationalDisclosure key="attention" title="ตรวจสอบ"><input aria-label="บันทึกทดสอบ" defaultValue="" /></DroughtOperationalDisclosure>
+    <DroughtOperationalDisclosure key="guidance" title="คำแนะนำ"><p>ข้อควรระวัง</p></DroughtOperationalDisclosure>
+  </DroughtOperationalDisclosureGroup>);
+  const group = container.firstElementChild!;
+  const initialCards = [...group.children];
+  const input = container.querySelector("input")!;
+  fireEvent.change(input, { target: { value: "คงข้อความเดิม" } });
+  for (const card of [initialCards[1], initialCards[0], initialCards[2], initialCards[1]]) {
+    const trigger = card.querySelector("summary")!;
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(group.querySelectorAll("details[open]")).toHaveLength(1);
+    expect(group.lastElementChild).toBe(card);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(trigger).toHaveFocus();
+    expect(input).toHaveValue("คงข้อความเดิม");
+  }
+  fireEvent.click(initialCards[1].querySelector("summary")!);
+  expect(group.querySelectorAll("details[open]")).toHaveLength(0);
+  expect([...group.children]).toEqual(initialCards);
+});
+
+it("clears a removed action without opening it again when the filtered data returns", () => {
+  const actions = (showAttention: boolean) => <DroughtOperationalDisclosureGroup>
+    {showAttention && <DroughtOperationalDisclosure key="attention" title="ตรวจสอบ"><p>รายชื่อตำบล</p></DroughtOperationalDisclosure>}
+    <DroughtOperationalDisclosure key="guidance" title="คำแนะนำ"><p>ข้อควรระวัง</p></DroughtOperationalDisclosure>
+  </DroughtOperationalDisclosureGroup>;
+  const { container, rerender } = render(actions(true));
+  fireEvent.click(screen.getByText("ตรวจสอบ"));
+  expect(container.querySelectorAll("details[open]")).toHaveLength(1);
+  rerender(actions(false));
+  expect(container.querySelectorAll("details[open]")).toHaveLength(0);
+  rerender(actions(true));
+  expect(container.querySelectorAll("details[open]")).toHaveLength(0);
 });
 
 it("centers short operational disclosure copy and supports explicit long-description alignment", () => {

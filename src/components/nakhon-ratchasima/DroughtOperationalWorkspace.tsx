@@ -1,9 +1,8 @@
-import { type ReactNode } from "react";
+import { Children, cloneElement, isValidElement, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, ShieldCheck, Sprout, TrendingUp } from "lucide-react";
 import { AppSelect, type AppSelectOption } from "../AppSelect";
 import { ForecastMonthSelect } from "../ForecastArchiveRequest";
 import { forecastHorizonLabel } from "../../forecastPeriod";
-import { MetricCard } from "../PageSummary";
 import { type DroughtForecastWorkspaceTarget, type DroughtForecastArchiveSummary, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
 import { districtOptionsForProvince, formatThaiNumber, formatPercent, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
 
@@ -56,35 +55,73 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
   </section>;
 }
 
-export function DroughtOperationalSummary({ horizon, summary }: {
-  horizon: ForecastArchiveHorizon;
-  summary: DroughtForecastArchiveSummary;
-}) {
-  const { riskPercent, riskSubdistricts, inScopeSubdistricts, totalSubdistricts } = summary;
-  const state = riskPercent === null ? " has-no-data" : "";
-  return <MetricCard
-    className={`nr-operational-card-heading nr-operational-forecast-summary${state}`}
-    label={<span role="heading" aria-level={3}>ตำบลที่พบความเสี่ยง ({forecastHorizonLabel(horizon)})</span>}
-    value={riskPercent === null ? "ไม่มีค่าพยากรณ์ในรอบนี้" : formatPercent(riskPercent * 100, 1)}
-    detail={<>
-      {riskPercent !== null && <span>เสี่ยง {formatThaiNumber(riskSubdistricts)} จาก {formatThaiNumber(inScopeSubdistricts)} ตำบลที่มีค่าพยากรณ์</span>}
-      <span>มีค่าพยากรณ์ {formatThaiNumber(inScopeSubdistricts)}/{formatThaiNumber(totalSubdistricts)} ตำบลทั้งหมด</span>
-    </>}
-    icon={<TrendingUp size={22} />}
-  />;
+type DisclosureState = {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function DroughtOperationalDisclosureGroup({ children }: { children: ReactNode }) {
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const focusTarget = useRef<HTMLElement | null>(null);
+  const items = Children.toArray(children).filter(isValidElement<DisclosureState>);
+  const hasActiveItem = items.some(item => String(item.key) === activeKey);
+
+  useEffect(() => {
+    if (activeKey !== null && !hasActiveItem) setActiveKey(null);
+  }, [activeKey, hasActiveItem]);
+  useLayoutEffect(() => {
+    // Moving a keyed card can unset native focus; keep keyboard users on its trigger.
+    if (focusTarget.current?.isConnected) focusTarget.current.focus({ preventScroll: true });
+    focusTarget.current = null;
+  }, [activeKey]);
+
+  const orderedItems = [...items.filter(item => String(item.key) !== activeKey),
+    ...items.filter(item => String(item.key) === activeKey)];
+  return <div className={`nr-operational-forecast-actions${hasActiveItem ? " has-open-disclosure" : ""}`}>
+    {orderedItems.map(item => cloneElement(item, {
+      open: String(item.key) === activeKey,
+      onOpenChange: (open: boolean) => {
+        focusTarget.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        setActiveKey(open ? String(item.key) : null);
+      },
+    }))}
+  </div>;
 }
 
-export function DroughtOperationalDisclosure({ title, description, descriptionAlign = "center", icon = "activity", children, className = "" }: {
-  title: string;
-  description?: string;
+export function DroughtOperationalSummary({ horizon, summary, ...disclosureState }: {
+  horizon: ForecastArchiveHorizon;
+  summary: DroughtForecastArchiveSummary;
+} & DisclosureState) {
+  const { riskPercent, riskSubdistricts, inScopeSubdistricts, totalSubdistricts } = summary;
+  const state = riskPercent === null ? " has-no-data" : "";
+  return <DroughtOperationalDisclosure
+    {...disclosureState}
+    className={`nr-operational-forecast-summary${state}`}
+    title={<span role="heading" aria-level={3}>ตำบลที่พบความเสี่ยง ({forecastHorizonLabel(horizon)})</span>}
+    description={<span className="metric-card-value">{riskPercent === null ? "ไม่มีค่าพยากรณ์ในรอบนี้" : formatPercent(riskPercent * 100, 1)}</span>}
+    icon="trend"
+  >
+    <p className="metric-card-detail">
+      {riskPercent !== null && <span>เสี่ยง {formatThaiNumber(riskSubdistricts)} จาก {formatThaiNumber(inScopeSubdistricts)} ตำบลที่มีค่าพยากรณ์</span>}
+      <span>มีค่าพยากรณ์ {formatThaiNumber(inScopeSubdistricts)}/{formatThaiNumber(totalSubdistricts)} ตำบลทั้งหมด</span>
+    </p>
+  </DroughtOperationalDisclosure>;
+}
+
+export function DroughtOperationalDisclosure({ title, description, descriptionAlign = "center", icon = "activity", children, className = "", open, onOpenChange }: {
+  title: ReactNode;
+  description?: ReactNode;
   descriptionAlign?: "center" | "start";
-  icon?: "activity" | "data" | "crop" | "map";
+  icon?: "activity" | "data" | "crop" | "map" | "trend";
   children: ReactNode;
   className?: string;
-}) {
-  const Icon = icon === "data" ? Database : icon === "crop" ? Sprout : icon === "map" ? MapPin : Activity;
-  return <details className={`nr-operational-disclosure ${className}`}>
-    <summary className="nr-operational-card-heading"><Icon size={22} aria-hidden="true" /><span className="nr-operational-card-copy"><strong>{title}</strong>{description && <small className={`nr-operational-card-description is-${descriptionAlign}`}>{description}</small>}</span><ChevronRight size={18} aria-hidden="true" /></summary>
+} & DisclosureState) {
+  const Icon = icon === "data" ? Database : icon === "crop" ? Sprout : icon === "map" ? MapPin : icon === "trend" ? TrendingUp : Activity;
+  return <details className={`nr-operational-disclosure ${className}`} open={open}>
+    <summary className="nr-operational-card-heading" aria-expanded={open} onClick={onOpenChange ? event => {
+      event.preventDefault();
+      onOpenChange(!open);
+    } : undefined}><Icon size={22} aria-hidden="true" /><span className="nr-operational-card-copy"><strong>{title}</strong>{description && <small className={`nr-operational-card-description is-${descriptionAlign}`}>{description}</small>}</span><ChevronRight size={18} aria-hidden="true" /></summary>
     <div className="nr-operational-disclosure-body">{children}</div>
   </details>;
 }
