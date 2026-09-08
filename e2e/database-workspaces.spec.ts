@@ -66,12 +66,12 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await page.getByRole('tab', { name: 'ตัวกรองที่บันทึก', exact: true }).click();
   await page.getByRole('button', { name: /^บ้านเก่า พยากรณ์ T\+4/ }).click();
   await expect(page).toHaveURL(/target=2025-12&horizon=4&mapRisk=forecast-high/);
-  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('4 เดือน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
   await expect(page.locator('.nr-drought-workspace-context .is-issue strong')).toHaveText('ธ.ค. 2568');
   await page.reload();
   await expect(page.locator('.nr-map-panel .nr-irrigation-filter')).toContainText('พึ่งน้ำฝน');
-  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+4');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('4 เดือน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('เม.ย. 2569');
   await expect(page.locator('.nr-drought-workspace-context .is-issue strong')).toHaveText('ธ.ค. 2568');
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
@@ -97,7 +97,7 @@ test('database failure shows retry without static fallback and retains the reque
   await page.goto('/drought?target=2025-11&horizon=3');
   const retry = page.getByRole('button', { name: /ลองใหม่/ });
   await expect(retry).toBeVisible(); failed = false; await retry.click();
-  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('T+3');
+  await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('3 เดือน');
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"] span')).toHaveText('ก.พ. 2569');
   await expect(page).toHaveURL(/target=2025-11&horizon=3/);
   expect(assets).toEqual([]);

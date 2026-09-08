@@ -36,6 +36,7 @@ files.
 | `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, option badges support `good`, `watch`, `danger`, and `muted`, and `align="start"` only when scan-left text is intentionally needed. |
 | `ForecastMonthSelect` | `src/components/ForecastArchiveRequest.tsx` | Forecast source-month dropdowns in page filters, Home mobile editor and map toolbars | Reuses `AppSelect.loadingLabel` for an in-place, reduced-motion-aware spinner while the shared request changes month. The loaded month stays selected until success; controls remain usable for a later selection. `ForecastArchiveRequest` announces pending changes to assistive technology without adding a visible top paragraph. Background revision checks stay quiet; error/retry and Supabase freshness behavior are unchanged. |
 | `IrrigationStatusSelect` | `src/components/IrrigationStatusSelect.tsx` | Location irrigation filter inside Home/drought/district/subdistrict maps | Reuses `AppSelect`; all/irrigated/rainfed/unknown labels and matching come from `src/irrigation.ts`. Lives in the shared map toolbar, not page filters or the Home editor. Selection updates the whole page without changing URL. Unknown irrigation never implies missing or zero-risk forecasts. |
+| `IrrigationEmptyState` | `src/components/IrrigationEmptyState.tsx` | Zero matching irrigation areas in Home and all drought workspaces | Shared status message and reset button; `onReset` clears irrigation through the existing selection owner. Optional `className` places it in the caller's grid. Never represents zero matching areas as zero risk. |
 | `MetricCard` | `src/components/PageSummary.tsx` | Individual stat-only cards | Centered content by default; use `tone`, `icon`, `detail`, and `provenance` instead of one-off stat tile classes. |
 | `MetricGrid` | `src/components/PageSummary.tsx` | Groups of stat cards | Variants: `default`, `segmented`, `compact`; use for repeated KPI/stat groups instead of custom grids. |
 | `PageSummary` | `src/components/PageSummary.tsx` | Top summary panels with copy plus metrics | Use for high-level overview summaries where a short narrative and metrics share one surface. |
@@ -62,6 +63,14 @@ Helper exports:
 | `provinceOptionsForMonth` | `src/components/OperationalFilters.tsx` | Province option list helper for operational filters. |
 
 ## Local Shared Primitives
+
+Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
+labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`
+through `6 เดือน`. Tab accessible names retain the full lead time and actual
+target month. Headings, dropdowns, map previews, loading, bookmark-generated
+copy and the export dialog use the same Thai terminology. This is presentation
+only: numeric horizons, URL/saved keys, source `T+` fields and Excel workbook
+formulas/labels remain unchanged. User-authored saved names are not rewritten.
 
 The workspace loads the full archive on demand with `useForecastArchive` and
 passes it to the existing province/district/subdistrict forecast views. Pending
@@ -224,6 +233,14 @@ recovery feedback. Neither resets persisted state automatically.
   controls, a projection/zoom-aware approximate distance scale, preview clearance
   and explicit geometry-load recovery. Archive/default consumers keep their own
   layout and interaction behavior.
+  Home and drought already share `NakhonRatchasimaLocalMap`,
+  `DroughtForecastArchiveMapFilters`, and `IrrigationStatusSelect`. Their outer
+  cards remain separate because Home has an overview summary and distance scale,
+  while drought composes the horizon chart and area context. When irrigation has
+  no matching areas, both use `IrrigationEmptyState`. In two-column drought
+  layouts, the empty state occupies the chart slot and preserves the map frame;
+  it must not expand the map across both columns. Subdistrict and stacked layouts
+  retain their existing composition.
 - **Provenance:** use `DataProvenanceChip` and `DataProvenanceLegend`. Missing
   evidence must not be rendered as normal, green, or low-risk.
 - **Section shells:** use `DashboardSection` or `DashboardAccordionSection`

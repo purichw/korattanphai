@@ -131,6 +131,16 @@ export function formatMonth(month: string, language: Language) {
   return language === "th" ? monthFormatter.format(date) : monthFormatterEn.format(date);
 }
 
+export function formatMonthParts(month: string, language: Language) {
+  const [year, monthIndex] = month.split("-").map(Number);
+  const date = new Date(year, monthIndex - 1, 1);
+  const parts = (language === "th" ? monthFormatter : monthFormatterEn).formatToParts(date);
+  return {
+    month: parts.find((part) => part.type === "month")?.value ?? "",
+    year: parts.find((part) => part.type === "year")?.value ?? "",
+  };
+}
+
 export function displayAll(language: Language) {
   return t("all", language);
 }

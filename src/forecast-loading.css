@@ -101,7 +101,7 @@
   .nr-loading-support { grid-template-columns: minmax(0,1fr); }
   .nr-loading-forecast-heading h2 { font-size: 16px; }
   .nr-loading-horizons > div { min-height: 60px; padding-inline: 2px; }
-  .nr-loading-horizons strong { font-size: 13px; }
+  .nr-loading-horizons strong { font-size: 12px; font-weight: 700; }
   .nr-loading-context { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .nr-loading-context:not(.is-single) > div:nth-child(3) { display: none; }
   .nr-loading-context > div { min-height: 54px; }

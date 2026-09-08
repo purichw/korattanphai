@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, ShieldCheck, Sprout, TrendingUp } from "lucide-react";
 import { AppSelect, type AppSelectOption } from "../AppSelect";
 import { ForecastMonthSelect } from "../ForecastArchiveRequest";
+import { forecastHorizonLabel } from "../../forecastPeriod";
 import { MetricCard } from "../PageSummary";
 import { type DroughtForecastWorkspaceTarget, type DroughtForecastArchiveSummary, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
 import { districtOptionsForProvince, formatThaiNumber, formatPercent, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
@@ -50,7 +51,7 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
         if (path) onNavigate(path);
       }} />
     <AppSelect className="nr-operational-horizon-filter" label="ระยะพยากรณ์" icon={<TrendingUp size={20} />} value={String(selectedHorizon)}
-      options={forecastArchiveHorizonValues.map((horizon) => ({ value: String(horizon), label: `T+${horizon}` }))}
+      options={forecastArchiveHorizonValues.map((horizon) => ({ value: String(horizon), label: forecastHorizonLabel(horizon) }))}
       onChange={(value) => onHorizonChange(Number(value) as ForecastArchiveHorizon)} />
   </section>;
 }
@@ -63,7 +64,7 @@ export function DroughtOperationalSummary({ horizon, summary }: {
   const state = riskPercent === null ? " has-no-data" : "";
   return <MetricCard
     className={`nr-operational-card-heading nr-operational-forecast-summary${state}`}
-    label={<span role="heading" aria-level={3}>ตำบลที่พบความเสี่ยง (T+{horizon})</span>}
+    label={<span role="heading" aria-level={3}>ตำบลที่พบความเสี่ยง ({forecastHorizonLabel(horizon)})</span>}
     value={riskPercent === null ? "ไม่มีค่าพยากรณ์ในรอบนี้" : formatPercent(riskPercent * 100, 1)}
     detail={<>
       {riskPercent !== null && <span>เสี่ยง {formatThaiNumber(riskSubdistricts)} จาก {formatThaiNumber(inScopeSubdistricts)} ตำบลที่มีค่าพยากรณ์</span>}

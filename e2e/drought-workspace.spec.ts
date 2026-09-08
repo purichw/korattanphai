@@ -113,13 +113,13 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       expect(geometry.chart.bottom).toBeLessThan(geometry.map.top);
     }
     await filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ }).click();
-    await page.getByRole("option", { name: "T+4", exact: true }).click();
+    await page.getByRole("option", { name: "ล่วงหน้า 4 เดือน", exact: true }).click();
     await expect(page).toHaveURL(/horizon=4/);
-    await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
+    await expect(workspace.getByRole("tab", { name: /ล่วงหน้า 4 เดือน/ })).toHaveAttribute("aria-selected", "true");
     await expect(workspace.locator(".nr-drought-workspace-context .is-issue strong")).toHaveText("ธ.ค. 2568");
     await expect(workspace.locator(".nr-drought-workspace-context .is-target strong")).toHaveText("เม.ย. 2569");
     if (scope !== "subdistrict") {
-      await expect(workspace.locator(".nr-forecast-point-group.is-active")).toContainText("T+4");
+      await expect(workspace.locator(".nr-forecast-point-group.is-active")).toContainText("4 เดือน");
     }
 
     await expect(workspace.locator(".nr-drought-workspace-details, .nr-forecast-archive-mode-section")).toHaveCount(0);
@@ -130,7 +130,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(page.locator(".nr-data-readiness-section, .nr-prediction-readiness, .nr-readiness-map-action, .nr-return-forecast")).toHaveCount(0);
     await expect(workspace.locator(".has-forecast-archive-map")).toHaveCount(1);
     await expect(page.locator(".nr-map-svg")).toHaveCount(1);
-    await expect(workspace.getByRole("tab", { name: /T\+4/ })).toHaveAttribute("aria-selected", "true");
+    await expect(workspace.getByRole("tab", { name: /ล่วงหน้า 4 เดือน/ })).toHaveAttribute("aria-selected", "true");
     if (scope === "subdistrict") {
       await expect(chart).toHaveCount(0);
     }
@@ -173,8 +173,8 @@ for (const boundary of [
     const map = workspace.locator(".nr-drought-workspace-map-card");
     for (const [index, horizon] of [1, 4, 6].entries()) {
       const forecast = boundary.forecasts[horizon - 1];
-      await tabs.filter({ hasText: `T+${horizon}` }).click();
-      await expect(tabs.filter({ hasText: `T+${horizon}` })).toHaveAttribute("aria-selected", "true");
+      await tabs.filter({ hasText: `${horizon} เดือน` }).click();
+      await expect(tabs.filter({ hasText: `${horizon} เดือน` })).toHaveAttribute("aria-selected", "true");
       await expect(page).toHaveURL(new RegExp(`target=${boundary.source}&horizon=${horizon}`));
       await expect(sourceSelect).toContainText(boundary.label);
       await expect(context.locator(".is-issue dt")).toHaveText("เดือนตั้งต้น (T)");
@@ -195,7 +195,7 @@ for (const boundary of [
       const preview = map.locator(".nr-map-preview-card");
       await expect(preview).toBeVisible();
       await expect(preview.locator("dl > div").filter({ has: page.getByText("เดือนที่พยากรณ์", { exact: true }) }).locator("dd")).toHaveText(forecast);
-      await expect(preview.locator("dl > div").filter({ has: page.getByText("เดือนตั้งต้น (T)", { exact: true }) }).locator("dd")).toHaveText(`${boundary.label} · T+${horizon}`);
+      await expect(preview.locator("dl > div").filter({ has: page.getByText("เดือนตั้งต้น (T)", { exact: true }) }).locator("dd")).toHaveText(`${boundary.label} · ล่วงหน้า ${horizon} เดือน`);
     }
   });
 }
@@ -231,11 +231,11 @@ test("area navigation retains the selected vintage and offers sibling subdistric
   await expect(filters.getByRole("combobox", { name: /^ตำบล/ })).toContainText("บ้านเก่า");
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();
   await expect(page).toHaveURL(/dan-khun-thot\?mapLayer=forecast-archive&target=2025-09&horizon=4/);
-  await expect(filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ })).toContainText("T+4");
+  await expect(filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ })).toContainText("4 เดือน");
   await page.getByRole("button", { name: "กลับจังหวัด", exact: true }).click();
   await expect(page).toHaveURL(/\/drought\?mapLayer=forecast-archive&target=2025-09&horizon=4$/);
   await expect(page.locator(".nr-drought-compact-workspace.is-province")).toBeVisible();
-  await expect(filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ })).toContainText("T+4");
+  await expect(filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ })).toContainText("4 เดือน");
 
   await page.goto("/khon-buri?target=2025-12&horizon=4");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*ครบุรี/, level: 1 })).toBeVisible();
@@ -244,7 +244,7 @@ test("area navigation retains the selected vintage and offers sibling subdistric
   await expect(page.locator(".nr-drought-compact-workspace.is-province")).toBeVisible();
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
   await expect(filters.getByRole("combobox", { name: /^อำเภอ/ })).toContainText("ทุกอำเภอ");
-  await expect(filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ })).toContainText("T+4");
+  await expect(filters.getByRole("combobox", { name: /^ระยะพยากรณ์/ })).toContainText("4 เดือน");
   await page.screenshot({ path: testInfo.outputPath("district-back-to-drought.png"), scale: "css" });
   await page.getByRole("button", { name: "ภาพรวมจังหวัด", exact: true }).click();
   await expect(page).toHaveURL((url) => url.pathname === "/");

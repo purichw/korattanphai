@@ -59,7 +59,7 @@ export function ResearchProvinceDataView({
     <section className={`nr-drought-dashboard nr-research-dashboard is-${activeTab}`}>
       <DroughtCompactForecastWorkspace
         level="province"
-        title="เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6"
+        title="เปรียบเทียบพยากรณ์ภัยแล้งล่วงหน้า 6 เดือน"
         description="ดูพยากรณ์ล่วงหน้า 6 เดือนจากเดือนตั้งต้นเดียวกันและแผนที่พยากรณ์"
         scopeLabel="จ.นครราชสีมา"
         archive={droughtArchive}

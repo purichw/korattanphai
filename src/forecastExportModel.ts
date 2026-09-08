@@ -29,7 +29,7 @@ export function buildForecastExport(archive: Archive, options: ExportOptions, ex
   const packed = archive.packedRiskByTargetMonth[options.originPeriod];
   if (!month || !packed || archive.meta.horizonCount !== 6
     || (archive.loadedSelection && (archive.loadedSelection.originPeriod !== options.originPeriod || archive.loadedSelection.horizonCount !== 6))) {
-    throw new Error('ไม่พบข้อมูลครบ T+1–T+6 สำหรับเดือนตั้งต้นที่เลือก กรุณาลองใหม่');
+    throw new Error('ไม่พบข้อมูลครบ 6 เดือนล่วงหน้าสำหรับเดือนตั้งต้นที่เลือก กรุณาลองใหม่');
   }
   const scope = new Set(forecastScopeCodes(options.areaCode));
   const locations = archive.locations.filter(row => scope.has(row.subdistrictCode));

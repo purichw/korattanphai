@@ -30,7 +30,7 @@ test("home information stays passive without readiness panels or map actions", a
   await expect(page.locator(".nr-home-readiness, .nr-prediction-readiness, .nr-readiness-map-action, .nr-return-forecast")).toHaveCount(0);
   await expect(page.getByText(/ความพร้อมข้อมูล|ดูความพร้อมบนแผนที่/)).toHaveCount(0);
   await expect(page.locator(".nr-home-support, .nr-home-archive")).toHaveCount(0);
-  await expect(summary.getByRole("link", { name: "ดูพยากรณ์ T+1–T+6", exact: true })).toHaveAttribute("href", /\/drought\?.*target=2015-06/);
+  await expect(summary.getByRole("link", { name: "ดูพยากรณ์ล่วงหน้า 6 เดือน", exact: true })).toHaveAttribute("href", /\/drought\?.*target=2015-06/);
   await expect(summary.locator(".metric-card-value")).toHaveText(["60 ตำบล", "32 ตำบล", "25 ตำบล", "172 ตำบล"]);
   await expect(page.locator(".nr-data-transparency, .nr-forecast-overview-source")).toHaveCount(0);
   await expect(page.getByText(/^(แหล่งข้อมูลและความสด|ข้อจำกัดสำคัญ|แหล่งข้อมูลและข้อจำกัด)$/)).toHaveCount(0);
@@ -79,7 +79,7 @@ test("home mobile filter sheet restores focus and keeps fixed context passive", 
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("combobox")).toHaveCount(2);
   await expect(sheet).toContainText("ภัยแล้ง");
-  await expect(sheet).toContainText("T+1");
+  await expect(sheet).toContainText("1 เดือน");
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
   await expect(edit).toBeFocused();

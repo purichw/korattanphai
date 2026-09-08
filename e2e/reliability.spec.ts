@@ -5,7 +5,7 @@ test("login restores a deep link including month, horizon and hash", async ({ pa
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
-  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("T+4");
+  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("4 เดือน");
   await expect(page).toHaveURL(/target=2025-12&horizon=4#forecast/);
 });
 

@@ -58,11 +58,11 @@ describe('shared saved workspace controls', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'ติดตามพื้นที่นี้' })).toBeEnabled());
     fireEvent.keyDown(screen.getByRole('tab', { name: 'พื้นที่ติดตาม' }), { key: 'ArrowRight' });
     expect(screen.getByRole('tab', { name: 'ตัวกรองที่บันทึก' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText('เดือนตั้งต้น ธ.ค. 2568 → เม.ย. 2569 (T+4)', { exact: false })).toBeVisible();
+    expect(screen.getByText('เดือนตั้งต้น ธ.ค. 2568 → เม.ย. 2569 (ล่วงหน้า 4 เดือน)', { exact: false })).toBeVisible();
     fireEvent.change(screen.getByLabelText('ชื่อตัวกรอง'), { target: { value: 'บ้านเก่า T+4' } });
     fireEvent.click(screen.getByRole('button', { name: 'บันทึก', exact: true }));
     await screen.findByText('บันทึกตัวกรองแล้ว');
-    expect(screen.getByRole('button', { name: /^บ้านเก่า T\+4/ })).toHaveTextContent('เดือนตั้งต้น ธ.ค. 2568 → เม.ย. 2569 (T+4)');
+    expect(screen.getByRole('button', { name: /^บ้านเก่า T\+4/ })).toHaveTextContent('เดือนตั้งต้น ธ.ค. 2568 → เม.ย. 2569 (ล่วงหน้า 4 เดือน)');
     expect(f.context.saved.saveFilter).toHaveBeenCalledWith('บ้านเก่า T+4', {
       area_code: '300806', dataset_id: FORECAST_DATASET_ID, target_period: '2025-12-01', horizon: 4, risk_criterion: 'forecast-high', view_name: 'drought',
     }, expect.any(AbortSignal));

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CalendarDays, ChartColumn, CircleAlert, Leaf, Map, MapPin, RotateCcw, ShieldCheck, TrendingUp } from "lucide-react";
+import { forecastHorizonLabel } from "../../forecastPeriod";
 import { MetricGrid } from "../PageSummary";
 import { DroughtWorkspaceHeader } from "./DroughtOperationalWorkspace";
 import type { DroughtForecastWorkspaceTarget } from "./forecastModel";
@@ -38,7 +39,7 @@ function LoadingFilters({ overview = false, target }: { overview?: boolean; targ
     <LoadingField label="ภัย" value="ภัยแล้ง" icon={<ShieldCheck size={20} />} />
     <LoadingField label="พืช" value="ข้าว" icon={<Leaf size={20} />} />
     <LoadingField label={!target || target.level === "province" ? "อำเภอ" : "ตำบล"} value={area} icon={<MapPin size={20} />} />
-    <div className="nr-loading-horizon-field"><LoadingField label="ระยะพยากรณ์" value={overview ? "T+1" : undefined} icon={<TrendingUp size={20} />} /></div>
+    <div className="nr-loading-horizon-field"><LoadingField label="ระยะพยากรณ์" value={overview ? "ล่วงหน้า 1 เดือน" : undefined} icon={<TrendingUp size={20} />} /></div>
   </div>;
 }
 
@@ -97,8 +98,8 @@ export function DroughtWorkspaceLoading({ target, failed, retry, onNavigate }: L
     <ForecastLoadState failed={failed} retry={retry} message="กำลังโหลดข้อมูลพยากรณ์ภัยแล้ง">
       <LoadingFilters target={target} />
       <div className={`nr-loading-forecast${single ? " is-single" : ""}`}>
-        <div className="nr-loading-forecast-heading"><h2>{single ? "พยากรณ์ภัยแล้งรายตำบล" : "เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6"}</h2><Skeleton className="is-line" /></div>
-        <div className="nr-loading-horizons">{[1, 2, 3, 4, 5, 6].map((horizon) => <div key={horizon}><strong>T+{horizon}</strong><Skeleton /></div>)}</div>
+        <div className="nr-loading-forecast-heading"><h2>{single ? "พยากรณ์ภัยแล้งรายตำบล" : "เปรียบเทียบพยากรณ์ภัยแล้งล่วงหน้า 6 เดือน"}</h2><Skeleton className="is-line" /></div>
+        <div className="nr-loading-horizons">{[1, 2, 3, 4, 5, 6].map((horizon) => <div key={horizon}><strong>{forecastHorizonLabel(horizon, "short")}</strong><Skeleton /></div>)}</div>
         <div className={`nr-loading-context${single ? " is-single" : ""}`}>
           {(single ? ["เดือนตั้งต้น (T)", "เดือนที่พยากรณ์", "พืชที่ประเมิน"] : ["เดือนตั้งต้น (T)", "เดือนที่พยากรณ์", "มีค่าพยากรณ์", "พืชที่ประเมิน"]).map((label) => <div key={label}><small>{label}</small><Skeleton className="is-value" /></div>)}
         </div>

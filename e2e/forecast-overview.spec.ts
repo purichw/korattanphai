@@ -43,7 +43,7 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   await expect(summary).toContainText("อ.ด่านขุนทด");
   await overview.locator(".nr-forecast-overview-details").click();
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
-  await expect(page.locator(".nr-drought-workspace-horizon [aria-selected=true]")).toContainText("T+1");
+  await expect(page.locator(".nr-drought-workspace-horizon [aria-selected=true]")).toContainText("1 เดือน");
   expect(fullArchiveRequests).toBe(1);
   await page.goBack();
   await selectArea(page, "ทุกอำเภอ");
@@ -69,7 +69,7 @@ test("overview failures remain empty and retry preserves the requested target", 
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
   await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ธ.ค. 2568");
   await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) พ.ย. 2568");
-  await expect(page.locator(".nr-forecast-overview-context")).toContainText("(T+1)");
+  await expect(page.locator(".nr-forecast-overview-context")).toContainText("ล่วงหน้า 1 เดือน");
   await expect(page.locator(".nr-forecast-overview-details")).toHaveAttribute("href", /target=2025-11&horizon=1/);
 });
 

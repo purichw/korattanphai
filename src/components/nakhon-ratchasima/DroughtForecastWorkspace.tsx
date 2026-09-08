@@ -6,6 +6,7 @@ import {
   type NakhonRatchasimaMapLayer,
 } from "../../types";
 import { formatMonth } from "../../i18n";
+import { forecastHorizonLabel } from "../../forecastPeriod";
 import {
   TrendingUp,
   Database,
@@ -38,6 +39,7 @@ import { DashboardSection, EmptyLocalEvidence } from "./SharedPanels";
 import { DroughtForecastArchiveHorizonSelector, DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import type { ForecastMapIrrigation } from "../IrrigationStatusSelect";
+import { IrrigationEmptyState } from "../IrrigationEmptyState";
 import { type DataProvenanceChipKind, DataProvenanceChip } from "../DataProvenanceChip";
 import { type AppSelectOption } from "../AppSelect";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
@@ -71,7 +73,7 @@ export function DroughtForecastArchivePanel({
       ? "พยากรณ์ย้อนหลังระดับอำเภอ"
       : "คำพยากรณ์ที่ใช้วาดแผนที่ย้อนหลัง";
   const sectionDescription = isSubdistrict
-    ? "เลือกเดือนตั้งต้นและระยะพยากรณ์ T+ โดยแสดงเฉพาะข้อมูลของตำบลนี้"
+    ? "เลือกเดือนตั้งต้นและระยะพยากรณ์ โดยแสดงเฉพาะข้อมูลของตำบลนี้"
     : isDistrict
       ? "ใช้เดือนตั้งต้นจากตัวเลือกของแผนที่ และรวมผลเฉพาะตำบลที่มีข้อมูลในรอบเดียวกัน"
       : "เลือกเดือนตั้งต้นจากคลังพยากรณ์ แล้วอ่านผลล่วงหน้า 1 ถึง 6 เดือนบนแผนที่";
@@ -122,7 +124,7 @@ export function DroughtForecastArchivePanel({
           <span>เดือนที่พยากรณ์บนแผนที่</span>
           <strong>{formatMonth(summary.targetMonth, "th")}</strong>
           <small>
-            T+{selectedHorizon} · เดือนตั้งต้น {issueMonthLabel}
+            {forecastHorizonLabel(selectedHorizon)} · เดือนตั้งต้น {issueMonthLabel}
           </small>
         </aside>
       </div>
@@ -166,7 +168,7 @@ export function DroughtForecastWorkspaceContext({
       icon: <MapPin size={17} />,
       label: "เดือนที่พยากรณ์",
       value: formatMonth(summary.targetMonth, "th"),
-      detail: `ล่วงหน้า ${selectedHorizon} เดือน (T+${selectedHorizon})`,
+      detail: forecastHorizonLabel(selectedHorizon),
     },
     {
       id: "crop",
@@ -308,7 +310,7 @@ export function DroughtForecastWorkspaceChart({
           <h3 id={titleId}>ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ</h3>
           <span>
             {activeForecastMonth
-              ? `เน้น T+${selectedHorizon} · ${activeForecastMonth.labelTh} · ${scopeLabel}`
+              ? `เน้น${forecastHorizonLabel(selectedHorizon)} · ${activeForecastMonth.labelTh} · ${scopeLabel}`
               : `ยังไม่มีเดือนพยากรณ์สำหรับ ${scopeLabel}`}
           </span>
         </div>
@@ -395,9 +397,9 @@ export function DroughtForecastWorkspaceMapCard({
       <div className="nr-drought-workspace-card-heading nr-dashboard-map-header">
         <div>
           <p className="eyebrow">แผนที่</p>
-          <h3>{irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : `${title} (T+${forecastArchiveHorizon})`}</h3>
+          <h3>{irrigation?.colorMode === "irrigation" ? "แผนที่สถานะชลประทาน" : `${title} (${forecastHorizonLabel(forecastArchiveHorizon)})`}</h3>
           <span>
-            เดือนที่พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon), "th")} · T+{forecastArchiveHorizon} จากเดือนตั้งต้น {issueMonthLabel}
+            เดือนที่พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon), "th")} · {forecastHorizonLabel(forecastArchiveHorizon)} จากเดือนตั้งต้น {issueMonthLabel}
           </span>
         </div>
         <DataProvenanceChip kind="REAL" />
@@ -488,7 +490,7 @@ export function DroughtCompactForecastWorkspace({
   const summary = forecastArchiveSummaryForSelection(archive, selectedTargetMonth, selectedHorizon, matchingCodes);
   const trendMonths = forecastArchiveTrendMonthsForSelection(archive, selectedTargetMonth, matchingCodes);
   const emptyIrrigationScope = matchingCodes.length === 0;
-  const forecastCoverageRemark = `T+${selectedHorizon}: มีค่าพยากรณ์ ${formatThaiNumber(summary.inScopeSubdistricts)}/${formatThaiNumber(summary.totalSubdistricts)} ตำบล · นอกขอบเขต ${formatThaiNumber(summary.outOfScopeSubdistricts)} · ไม่มีข้อมูล ${formatThaiNumber(summary.missingSubdistricts)} ตำบล`;
+  const forecastCoverageRemark = `${forecastHorizonLabel(selectedHorizon)}: มีค่าพยากรณ์ ${formatThaiNumber(summary.inScopeSubdistricts)}/${formatThaiNumber(summary.totalSubdistricts)} ตำบล · นอกขอบเขต ${formatThaiNumber(summary.outOfScopeSubdistricts)} · ไม่มีข้อมูล ${formatThaiNumber(summary.missingSubdistricts)} ตำบล`;
   const selectedRecord =
     level === "subdistrict" && expectedSubdistrictCodes?.[0]
       ? summary.recordsBySubdistrict.get(expectedSubdistrictCodes[0])
@@ -510,9 +512,9 @@ export function DroughtCompactForecastWorkspace({
   const context = <DroughtForecastWorkspaceContext level={level} scopeLabel={scopeLabel} selectedMonth={selectedTargetMonth} selectedHorizon={selectedHorizon} summary={summary} />;
   const guidance = <DroughtOperationalDisclosure className="nr-operational-guidance" title="คำแนะนำและข้อควรระวัง" description="ตรวจสอบข้อมูลพื้นที่ก่อนตัดสินใจ">
     <ul><li>ตรวจสอบพื้นที่ที่มีสัญญาณเสี่ยงกับข้อมูลภาคสนาม</li><li>เทียบพยากรณ์กับข้อมูลย้อนหลัง</li><li>ประสานหน่วยงานในพื้นที่ก่อนวางแผนจัดการน้ำ</li></ul>
-    <p>T+1 ถึง T+6 คือพยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
+    <p>พยากรณ์ล่วงหน้า 1 ถึง 6 เดือนจากเดือนตั้งต้นที่เลือก แม้เลือกเดือนตั้งต้นในอดีต เดือนที่พยากรณ์ก็ยังเดินไปข้างหน้า ไม่ใช่การยืนยันความเสียหายทางการ</p>
     {level !== "subdistrict" && <p>สัดส่วนคิดจากตำบลที่มีค่าพยากรณ์ 0, 1 หรือ 2 ในแต่ละเดือน ไม่รวมตำบลนอกขอบเขตและไม่มีข้อมูล ความเสี่ยงปานกลางและสูงแยกตามค่าต้นฉบับ ไม่ใช่ระดับความรุนแรงทั้งอำเภอหรือสัดส่วนเนื้อที่</p>}
-    <p>เดือนตั้งต้น (T) คือเดือนของข้อมูลต้นทาง เดือนที่พยากรณ์คำนวณโดยบวกระยะ T+ ข้อมูลนี้ระบุเป็นรายเดือน ไม่ได้ระบุวันออกพยากรณ์</p>
+    <p>เดือนตั้งต้น (T) คือเดือนของข้อมูลต้นทาง เดือนที่พยากรณ์คำนวณโดยบวกจำนวนเดือนล่วงหน้า ข้อมูลนี้ระบุเป็นรายเดือน ไม่ได้ระบุวันออกพยากรณ์</p>
   </DroughtOperationalDisclosure>;
 
   return (
@@ -527,15 +529,13 @@ export function DroughtCompactForecastWorkspace({
         {level === "subdistrict" ? <div className="nr-subdistrict-forecast-intro">{heading}{targetNote}{horizonSelector}</div> : horizonSelector}
 
         {level === "subdistrict" ? <section className="nr-subdistrict-forecast-context" aria-labelledby="nr-subdistrict-context-title">
-          <h3 id="nr-subdistrict-context-title">ข้อมูลคาดการณ์ (T+{selectedHorizon})</h3>
+          <h3 id="nr-subdistrict-context-title">ข้อมูลคาดการณ์ ({forecastHorizonLabel(selectedHorizon)})</h3>
           {context}
           <p className="nr-subdistrict-forecast-note"><Info size={18} aria-hidden="true" /><span>พยากรณ์ {formatMonth(summary.targetMonth, "th")}<small>ล่วงหน้า {selectedHorizon} เดือน จากเดือนตั้งต้น {selectedTargetMonth.labelTh}</small></span></p>
         </section> : context}
 
-        {emptyIrrigationScope ? <div className="nr-drought-workspace-kpis nr-irrigation-empty" role="status">
-          <p>ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้</p>
-          <button type="button" className="secondary-button" onClick={() => irrigation.onChange("all")}>แสดงทุกสถานะชลประทาน</button>
-        </div> : <DroughtForecastWorkspaceKpiStrip level={level} summary={summary} selectedRecord={selectedRecord} />}
+        {emptyIrrigationScope ? <IrrigationEmptyState className="nr-drought-workspace-kpis" onReset={() => irrigation.onChange("all")} />
+          : <DroughtForecastWorkspaceKpiStrip level={level} summary={summary} selectedRecord={selectedRecord} />}
 
         <div className="nr-drought-workspace-main">
           {level !== "subdistrict" && !emptyIrrigationScope && (

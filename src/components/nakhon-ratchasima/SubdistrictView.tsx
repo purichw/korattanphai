@@ -54,7 +54,7 @@ export function SubdistrictView({
       <DroughtCompactForecastWorkspace
         level="subdistrict"
         title={`คาดการณ์ภัยแล้งของตำบล${subdistrict.nameTh}`}
-        description="เลือก T+ เพื่ออ่านพยากรณ์ล่วงหน้า 1–6 เดือนจากเดือนตั้งต้นของตำบลและแสดงผลบนแผนที่"
+        description="เลือกระยะพยากรณ์ล่วงหน้า 1–6 เดือนจากเดือนตั้งต้นของตำบลและแสดงผลบนแผนที่"
         scopeLabel={`ต.${subdistrict.nameTh} · อ.${district.nameTh}`}
         singleSubdistrict
         archive={droughtArchive}

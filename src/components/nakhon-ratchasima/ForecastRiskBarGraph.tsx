@@ -1,4 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { forecastHorizonLabel } from "../../forecastPeriod";
 import { forecastRiskShare, type DroughtForecastTrendMonth, type ForecastArchiveHorizon } from "./forecastModel";
 import { formatPercent, formatThaiNumber, useMediaQuery } from "./workspaceModel";
 
@@ -71,7 +72,7 @@ export function DroughtForecastTrendGraph({ months, unit = "percent", activeHori
   const zeroY = yForValue(0);
   const guideValues = Array.from(new Set([0, .25, .5, .75, 1].map(share => Math.round(maximum * share)))).sort((a, b) => a - b);
   const coverageFor = (month: DroughtForecastTrendMonth) => `มีค่าพยากรณ์ ${month.inScopeSubdistricts}/${month.totalSubdistricts} ตำบล · นอกขอบเขต ${month.outOfScopeSubdistricts} · ไม่มีข้อมูล ${month.missingSubdistricts}`;
-  const descriptionFor = (month: DroughtForecastTrendMonth) => `T+${month.monthIndex} · ${month.labelTh} · ${categories.map(category => `${category.label} ${month[category.key]} ตำบล (${shareFor(month[category.key], month)})`).join(" · ")} · ${coverageFor(month)}`;
+  const descriptionFor = (month: DroughtForecastTrendMonth) => `${forecastHorizonLabel(month.monthIndex)} · ${month.labelTh} · ${categories.map(category => `${category.label} ${month[category.key]} ตำบล (${shareFor(month[category.key], month)})`).join(" · ")} · ${coverageFor(month)}`;
   const title = `แนวโน้ม${unit === "percent" ? "สัดส่วน" : "จำนวน"}ตำบลเสี่ยงภัยแล้ง 6 เดือนข้างหน้า`;
   const detailMonth = detail ? months[detail.index] : undefined;
 
@@ -105,14 +106,14 @@ export function DroughtForecastTrendGraph({ months, unit = "percent", activeHori
               {unavailable ? "ไม่มีค่า" : formatValue(total)}
             </text>
             <text className="nr-forecast-axis-date" x={x} y={height - 28}>
-              <tspan x={x}>T+{month.monthIndex}</tspan>
+              <tspan x={x}>{forecastHorizonLabel(month.monthIndex, "short")}</tspan>
               <tspan x={x} dy="16">{compactChart || width < 520 ? month.labelTh.replace(/\d{2}(\d{2})$/, "$1") : month.labelTh}</tspan>
             </text>
           </g>;
         })}
       </svg>
       {months.map((month, index) => <button key={month.period} ref={node => { buttons.current[index] = node; }}
-        type="button" className="nr-forecast-bar-target" aria-label={`รายละเอียด T+${month.monthIndex} · ${month.labelTh}`}
+        type="button" className="nr-forecast-bar-target" aria-label={`รายละเอียด${forecastHorizonLabel(month.monthIndex)} · ${month.labelTh}`}
         aria-describedby={detail?.index === index ? tooltipId : undefined}
         style={{ left: `${(padding.left + xStep * index) / width * 100}%`, width: `${xStep / width * 100}%` }}
         onPointerEnter={event => { if (event.pointerType !== "touch") setDetail(current => current?.pinned ? current : { index, pinned: false }); }}
@@ -123,7 +124,7 @@ export function DroughtForecastTrendGraph({ months, unit = "percent", activeHori
           if (next !== null) { event.preventDefault(); buttons.current[next]?.focus(); }
         }} />)}
       {detailMonth && <div id={tooltipId} role="tooltip" className={`nr-forecast-bar-tooltip${detail!.index < months.length / 2 ? " is-right" : ""}`}>
-        <strong>T+{detailMonth.monthIndex} · {detailMonth.labelTh}</strong>
+        <strong>{forecastHorizonLabel(detailMonth.monthIndex)} · {detailMonth.labelTh}</strong>
         <dl>{categories.map(category => <div key={category.key}>
           <dt><i className={category.className} aria-hidden="true" />{category.short}</dt>
           <dd>{formatThaiNumber(detailMonth[category.key])} ตำบล <span>({shareFor(detailMonth[category.key], detailMonth)})</span></dd>

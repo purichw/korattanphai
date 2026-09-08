@@ -292,9 +292,9 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.getByRole("heading", { name: "บริบทความเสี่ยงภัยแล้ง" })).toHaveCount(0);
   const archiveEntry = page.locator(".nr-forecast-overview");
   await expect(archiveEntry).toBeVisible();
-  await expect(archiveEntry).toContainText("T+1–T+6");
+  await expect(archiveEntry).toContainText("ดูพยากรณ์ล่วงหน้า 6 เดือน");
   await expect(archiveEntry).toContainText("117/289 ตำบล");
-  await expect(archiveEntry).toContainText("T+1");
+  await expect(archiveEntry).toContainText("1 เดือน");
   await expect(archiveEntry.locator(".nr-forecast-overview-details")).toHaveAttribute(
     "href",
     "/drought?mapLayer=forecast-archive&target=2025-12&horizon=1",
@@ -325,14 +325,14 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page.getByRole("button", { name: "กลับภาพรวมจังหวัด" })).toHaveCount(0);
   await expect(page.locator(".nr-drought-page-header")).toBeVisible();
   await expect(page.locator(".nr-route-bar")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "เปรียบเทียบพยากรณ์ภัยแล้ง T+1 ถึง T+6" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "เปรียบเทียบพยากรณ์ภัยแล้งล่วงหน้า 6 เดือน" })).toBeVisible();
   await closePrimaryNav(page);
   await expect(page.locator(".nr-drought-dashboard")).toBeVisible();
   const droughtWorkspace = page.locator(".nr-drought-compact-workspace.is-province").first();
   const horizonTabs = droughtWorkspace.locator(".nr-drought-workspace-horizon .nr-forecast-archive-horizon-tabs");
   await expect(droughtWorkspace).toBeVisible();
   await expect(horizonTabs.getByRole("tab")).toHaveCount(6);
-  await expect(horizonTabs.getByRole("tab", { name: /T\+1/ })).toHaveAttribute("aria-selected", "true");
+  await expect(horizonTabs.getByRole("tab", { name: /ล่วงหน้า 1 เดือน/ })).toHaveAttribute("aria-selected", "true");
   await expect(droughtWorkspace.getByRole("heading", { name: "ตำบลเสี่ยงในแต่ละเดือน แยกตามระดับ" })).toBeVisible();
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group")).toHaveCount(6);
   await expect(droughtWorkspace.locator(".nr-drought-workspace-chart-card .nr-forecast-point-group.is-active")).toHaveCount(1);
@@ -363,8 +363,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
   await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
-  await horizonTabs.getByRole("tab", { name: /T\+2/ }).click();
-  await expect(horizonTabs.getByRole("tab", { name: /T\+2/ })).toHaveAttribute("aria-selected", "true");
+  await horizonTabs.getByRole("tab", { name: /ล่วงหน้า 2 เดือน/ }).click();
+  await expect(horizonTabs.getByRole("tab", { name: /ล่วงหน้า 2 เดือน/ })).toHaveAttribute("aria-selected", "true");
   await expect(archiveMode).toContainText("117/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง116 ตำบล");
   await mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" }).click();
@@ -826,7 +826,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.getByText("สถานการณ์ภัยแล้งตามข้อมูลพื้นที่", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "ช่องว่างของตำบล" })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล (T+1)", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล (ล่วงหน้า 1 เดือน)", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await page.getByRole("button", { name: "กลับอำเภอ" }).click();

@@ -44,7 +44,7 @@ for (const scope of [
   await expect(month).toContainText('พ.ย. 2568');
   await expect(page).toHaveURL(/target=2025-11.*horizon=4/);
   await expect(page.locator('.nr-forecast-archive-horizon-tabs [aria-selected="true"]')).toContainText('มี.ค. 2569');
-  await page.getByRole('tab', { name: /T\+6/ }).click();
+  await page.getByRole('tab', { name: /ล่วงหน้า 6 เดือน/ }).click();
   await expect(page).toHaveURL(/horizon=6/);
   expect(requests).toHaveLength(3);
   const headerTop = await page.locator('.nr-drought-page-header').evaluate(el => el.getBoundingClientRect().top + scrollY);

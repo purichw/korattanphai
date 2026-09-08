@@ -22,7 +22,7 @@ it.each([
     riskSubdistricts: risk, inScopeSubdistricts: inScope, riskPercent: forecastRiskShare(risk, inScope) };
   const { container } = render(<DroughtOperationalSummary horizon={4} summary={summary} />);
   expect(container.firstChild).toHaveClass("metric-card", "nr-operational-card-heading", state);
-  expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("ตำบลที่พบความเสี่ยง (T+4)");
+  expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("ตำบลที่พบความเสี่ยง (ล่วงหน้า 4 เดือน)");
   expect(screen.getByText(value)).toHaveClass("metric-card-value");
   expect(screen.getByText(`มีค่าพยากรณ์ ${inScope}/289 ตำบลทั้งหมด`).parentElement).toHaveClass("metric-card-detail");
   expect(container.firstChild).not.toHaveClass("has-risk", "is-danger");
@@ -65,7 +65,7 @@ it.each([false, true])("reserves space below zero-value points for X-axis labels
   expect(labels).toHaveLength(6);
   for (const [index, label] of [...labels].entries()) {
     const [horizonLabel, monthLabel] = label.querySelectorAll("tspan");
-    expect(horizonLabel.textContent).toBe(`T+${index + 1}`);
+    expect(horizonLabel.textContent).toBe(`${index + 1} เดือน`);
     expect(Number(label.getAttribute("y")) - zeroY).toBeGreaterThanOrEqual(24);
     expect(Number(label.getAttribute("y")) + Number(monthLabel.getAttribute("dy")) - zeroY).toBeGreaterThanOrEqual(40);
     expect(monthLabel.textContent).toContain(months[index].labelTh.slice(0, 4));
@@ -78,11 +78,11 @@ it("shares accessible monthly details across hover, focus and tap without changi
   const codes = archive.locations.filter(item => item.districtCode === "3003").map(item => item.subdistrictCode);
   const months = forecastArchiveTrendMonthsForSelection(archive, month, codes);
   const { container, rerender } = render(<DroughtForecastTrendGraph months={months} activeHorizon={1} />);
-  const targets = screen.getAllByRole("button", { name: /รายละเอียด T\+/ });
+  const targets = screen.getAllByRole("button", { name: /รายละเอียดล่วงหน้า / });
   expect(targets).toHaveLength(6);
   expect(container.querySelectorAll("figcaption > span")).toHaveLength(4);
   fireEvent.pointerEnter(targets[4], { pointerType: "mouse" });
-  expect(screen.getByRole("tooltip")).toHaveTextContent("T+5");
+  expect(screen.getByRole("tooltip")).toHaveTextContent("5 เดือน");
   expect(screen.getByRole("tooltip")).toHaveTextContent(`มีค่าพยากรณ์ ${months[4].inScopeSubdistricts}/6 ตำบล`);
   fireEvent.pointerLeave(container.querySelector("figure")!);
   expect(screen.queryByRole("tooltip")).toBeNull();
@@ -90,12 +90,12 @@ it("shares accessible monthly details across hover, focus and tap without changi
   expect(targets[0]).toHaveAttribute("aria-describedby", screen.getByRole("tooltip").id);
   fireEvent.keyDown(targets[0], { key: "ArrowRight" });
   expect(targets[1]).toHaveFocus();
-  expect(screen.getByRole("tooltip")).toHaveTextContent("T+2");
+  expect(screen.getByRole("tooltip")).toHaveTextContent("2 เดือน");
   fireEvent.keyDown(targets[1], { key: "Escape" });
   expect(screen.queryByRole("tooltip")).toBeNull();
   fireEvent.click(targets[5]);
-  expect(screen.getByRole("tooltip")).toHaveTextContent("T+6");
-  expect(container.querySelector(".nr-forecast-point-group.is-active")).toHaveTextContent("T+1");
+  expect(screen.getByRole("tooltip")).toHaveTextContent("6 เดือน");
+  expect(container.querySelector(".nr-forecast-point-group.is-active")).toHaveTextContent("1 เดือน");
   fireEvent.pointerDown(document.body);
   expect(screen.queryByRole("tooltip")).toBeNull();
   fireEvent.click(targets[5]);
@@ -151,7 +151,7 @@ it("distinguishes no risk from unavailable horizons without drawing invented val
   const unavailable = container.querySelectorAll(".nr-forecast-point-group")[1];
   expect(unavailable.querySelector("rect, line")).toBeNull();
   expect(screen.getByText("ไม่มีค่า")).toBeInTheDocument();
-  expect(container.textContent).not.toContain("T+1 · T+1");
+  expect(container.textContent).not.toContain("ล่วงหน้า 1 เดือน · ล่วงหน้า 1 เดือน");
 });
 
 it("uses six in-scope tambons, not all sixteen, without upgrading moderate risk to high", () => {
@@ -185,7 +185,7 @@ it("switches percentage/count without changing the scope, selected horizon or ca
   expect(container.querySelector(".is-active .is-high")).toHaveAttribute("data-count", "1");
   rerender(<DroughtForecastWorkspaceChart trendMonths={months} selectedHorizon={5} scopeLabel="อำเภอ" coverageRemark="มีค่าพยากรณ์ 3/5 ตำบล" />);
   expect(screen.getByRole("button", { name: "จำนวนตำบล", exact: true })).toHaveAttribute("aria-pressed", "true");
-  expect(container.querySelector(".is-active")).toHaveTextContent("T+5");
+  expect(container.querySelector(".is-active")).toHaveTextContent("5 เดือน");
 });
 
 it.each([0, 1, 2, null, undefined])("shows one status, not population counts, for a tambon with risk %s", (risk) => {

@@ -34,8 +34,8 @@ describe('forecast Excel data contract', () => {
     expect(district.districts).toHaveLength(1);
     const filtered = buildForecastExport(archive, { ...options, irrigation: 'rainfed' });
     expect(filtered.rows.every(row => row.irrigationStatus.toLowerCase() === 'rainfed')).toBe(true);
-    expect(() => buildForecastExport({ ...archive, meta: { ...archive.meta, horizonCount: 1 } }, options)).toThrow('T+1');
-    expect(() => buildForecastExport(archive, { ...options, originPeriod: '2099-01' })).toThrow('T+1');
+    expect(() => buildForecastExport({ ...archive, meta: { ...archive.meta, horizonCount: 1 } }, options)).toThrow('ครบ 6 เดือนล่วงหน้า');
+    expect(() => buildForecastExport(archive, { ...options, originPeriod: '2099-01' })).toThrow('ครบ 6 เดือนล่วงหน้า');
     expect(() => buildForecastExport({ ...archive, locations: archive.locations.slice(1) }, options)).toThrow('พื้นที่ไม่ครบ');
   });
   it('creates typed filterable tables, cached live formulas, native charts and native pivot records', async () => {

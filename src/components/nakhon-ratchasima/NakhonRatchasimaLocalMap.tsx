@@ -131,6 +131,7 @@ import {
 } from "lucide-react";
 import { DroughtForecastArchiveMapFilters } from "./ForecastControls";
 import { formatMonth } from "../../i18n";
+import { forecastHorizonLabel } from "../../forecastPeriod";
 import { MapPreviewFooter } from "../MapPreviewFooter";
 import { irrigationColors, irrigationLabels, irrigationStatusFromSource } from "../../irrigation";
 import { IrrigationStatusSelect, type ForecastMapIrrigation } from "../IrrigationStatusSelect";
@@ -1637,7 +1638,7 @@ export function NakhonRatchasimaLocalMap({
                       forecastArchiveIssueMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1),
                     "th",
                   )}{" "}
-                  · T+{forecastArchiveHorizon ?? 1}
+                  · {forecastHorizonLabel(forecastArchiveHorizon ?? 1)}
                 </dd>
               </div>
             )}

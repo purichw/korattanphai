@@ -5,13 +5,13 @@ import { savedWorkspaceError, type FollowedArea, type SavedFilter, type SavedFor
 import { readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../savedWorkspaceRoutes';
 import { formatMonth } from '../i18n';
 import { irrigationLabels } from '../irrigation';
-import { forecastTargetPeriod } from '../forecastPeriod';
+import { forecastHorizonLabel, forecastTargetPeriod } from '../forecastPeriod';
 import '../saved-workspaces.css';
 
 function selectionPeriodLabel(selection: SavedForecastSelection) {
   // target_period is the persisted source-row key, retained for existing saves.
   const origin = selection.target_period.slice(0, 7);
-  return `เดือนตั้งต้น ${formatMonth(origin, 'th')} → ${formatMonth(forecastTargetPeriod(origin, selection.horizon), 'th')} (T+${selection.horizon})`;
+  return `เดือนตั้งต้น ${formatMonth(origin, 'th')} → ${formatMonth(forecastTargetPeriod(origin, selection.horizon), 'th')} (${forecastHorizonLabel(selection.horizon)})`;
 }
 
 export function WorkspaceBookmarks({ onNavigate }: { onNavigate: (path: string) => void }) {
@@ -43,7 +43,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
   const [message, setMessage] = useState('');
   const [confirm, setConfirm] = useState<string | null>(null);
   const area = selection ? savedAreaInfo(selection.area_code) : null;
-  const [name, setName] = useState(selection && area ? `${area.label.split(' · ')[0]} ตั้งต้น ${formatMonth(selection.target_period.slice(0,7), 'th')} T+${selection.horizon}` : '');
+  const [name, setName] = useState(selection && area ? `${area.label.split(' · ')[0]} ตั้งต้น ${formatMonth(selection.target_period.slice(0,7), 'th')} ${forecastHorizonLabel(selection.horizon)}` : '');
 
   async function refresh(signal: AbortSignal) {
     const nextAreas = await services.saved.listAreas(signal);

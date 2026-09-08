@@ -13,3 +13,8 @@ export function forecastTargetPeriod(originPeriod: string, horizon: number) {
   if (!target) throw new Error("Invalid forecast origin month");
   return target;
 }
+
+/** Product copy only; source keys and persisted horizon values stay unchanged. */
+export function forecastHorizonLabel(horizon: number, style: "full" | "short" = "full") {
+  return `${style === "full" ? "ล่วงหน้า " : ""}${horizon} เดือน`;
+}

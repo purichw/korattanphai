@@ -7,7 +7,7 @@ import {
   type DroughtForecastArchiveSummary,
   forecastArchiveRecordLabel,
 } from "./forecastModel";
-import { formatMonth } from "../../i18n";
+import { formatMonth, formatMonthParts } from "../../i18n";
 import { type SummaryMetric, MetricGrid } from "../PageSummary";
 import { formatThaiNumber, type LocalRiskCriterion, forecastArchiveRiskCriterionOptions } from "./workspaceModel";
 import {
@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { type AppSelectOption, AppSelect } from "../AppSelect";
 import { ForecastMonthSelect } from "../ForecastArchiveRequest";
+import { forecastHorizonLabel } from "../../forecastPeriod";
 import { IrrigationStatusSelect, type ForecastMapIrrigation } from "../IrrigationStatusSelect";
 
 export function DroughtForecastArchiveHorizonSelector({
@@ -35,12 +36,14 @@ export function DroughtForecastArchiveHorizonSelector({
     <div className="nr-forecast-archive-horizon-tabs" role="tablist" aria-label="เลือกกรอบพยากรณ์ภัยแล้ง">
       {forecastArchiveHorizonValues.map((horizon) => {
         const forecastMonth = forecastArchiveTargetMonthForSelection(targetMonth, horizon);
+        const dateParts = formatMonthParts(forecastMonth, "th");
         const isSelected = selectedHorizon === horizon;
         return (
           <button
             key={horizon}
             type="button"
             role="tab"
+            aria-label={`${forecastHorizonLabel(horizon)} · ${formatMonth(forecastMonth, "th")}`}
             aria-selected={isSelected}
             tabIndex={isSelected ? 0 : -1}
             className={isSelected ? "active" : ""}
@@ -56,8 +59,8 @@ export function DroughtForecastArchiveHorizonSelector({
               event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[nextIndex]?.focus();
             }}
           >
-            <strong>T+{horizon}</strong>
-            <span>{formatMonth(forecastMonth, "th")}</span>
+            <strong>{forecastHorizonLabel(horizon, "short")}</strong>
+            <span>{dateParts.month}{" "}<br className="nr-forecast-horizon-date-break" />{dateParts.year}</span>
           </button>
         );
       })}
@@ -136,7 +139,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       value: selectedRecord
         ? forecastArchiveRecordLabel(selectedRecord)
         : "ไม่มีข้อมูลในรอบนี้",
-      detail: selectedRecord ? `${selectedRecord.horizonLabel} · พยากรณ์ ${formatMonth(selectedRecord.targetMonth, "th")} · เดือนตั้งต้น (T) ${formatMonth(selectedRecord.issueMonth, "th")}` : "ไม่แปลงเป็นไม่มีความเสี่ยง",
+      detail: selectedRecord ? `${forecastHorizonLabel(selectedRecord.horizon)} · พยากรณ์ ${formatMonth(selectedRecord.targetMonth, "th")} · เดือนตั้งต้น (T) ${formatMonth(selectedRecord.issueMonth, "th")}` : "ไม่แปลงเป็นไม่มีความเสี่ยง",
       icon: <TrendingUp size={18} />,
       tone: selectedRecord
         ? selectedRecord.forecastRisk === 2

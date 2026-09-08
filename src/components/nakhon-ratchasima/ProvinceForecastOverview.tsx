@@ -14,6 +14,7 @@ import { forecastArchiveSummaryForSelection, pathWithForecastSelection, useDroug
 import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, type LocalMapMode } from "./workspaceModel";
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import { ForecastOverviewLoading } from "./ForecastArchiveLoading";
+import { IrrigationEmptyState } from "../IrrigationEmptyState";
 
 type OverviewProps = {
   layer: NakhonRatchasimaMapLayer;
@@ -86,7 +87,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         <div>
           <p className="eyebrow">ภาพรวมสถานการณ์</p>
           <h1>จังหวัดนครราชสีมา</h1>
-          <p className="nr-forecast-overview-context"><strong>พยากรณ์ {formatMonth(summary.targetMonth, "th")}</strong><span>ล่วงหน้า 1 เดือน (T+1) · เดือนตั้งต้น (T) {formatMonth(summary.issueMonth, "th")}</span></p>
+          <p className="nr-forecast-overview-context"><strong>พยากรณ์ {formatMonth(summary.targetMonth, "th")}</strong><span>ล่วงหน้า 1 เดือน · เดือนตั้งต้น (T) {formatMonth(summary.issueMonth, "th")}</span></p>
         </div>
         <p><DataProvenanceChip kind="REAL" />เดือนตั้งต้นล่าสุดในคลัง {formatMonth(archive.meta.targetMonthEnd, "th")} · ไม่ใช่ข้อมูลสด</p>
       </header>
@@ -100,7 +101,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
         areaValue={districtCode}
         areaOptions={[{ value: "", label: "ทุกอำเภอ" }, ...getNakhonRatchasimaDistricts().map((area) => ({ value: area.districtCode, label: area.nameTh ?? area.name }))]}
         onAreaChange={changeDistrict}
-        contextChips={[{ label: "ระยะพยากรณ์", value: "T+1" }]}
+        contextChips={[{ label: "ระยะพยากรณ์", value: "ล่วงหน้า 1 เดือน" }]}
         ariaLabel="ตัวกรองภาพรวมพยากรณ์"
       />
       <MetricGrid className={`nr-home-situation${hasAgriculture ? "" : " is-forecast-only"}`} variant="segmented" ariaLabel="สถานการณ์ในภาพรวม" metrics={[
@@ -142,10 +143,10 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
               <p>อยู่ในขอบเขต {formatThaiNumber(summary.inScopeSubdistricts)}/{formatThaiNumber(summary.totalSubdistricts)} ตำบล</p>
             </div>
             <a className="primary-button nr-forecast-overview-details" href={detailsHref}>
-              ดูพยากรณ์ T+1–T+6{district ? ` · ${scopeLabel}` : ""}<ArrowRight size={16} />
+              ดูพยากรณ์ล่วงหน้า 6 เดือน{district ? ` · ${scopeLabel}` : ""}<ArrowRight size={16} />
             </a>
           </div>
-          {codes.length === 0 ? <div className="nr-irrigation-empty" role="status"><p>ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้</p><button type="button" className="secondary-button" onClick={() => forecast.changeIrrigation("all")}>แสดงทุกสถานะชลประทาน</button></div>
+          {codes.length === 0 ? <IrrigationEmptyState onReset={() => forecast.changeIrrigation("all")} />
             : <DroughtForecastArchiveSummaryMetrics level={district ? "district" : "province"} summary={summary} variant="overview" />}
           {codes.length > 0 && summary.matchedSubdistricts === 0 && <p role="status">ยังไม่มีข้อมูลสำหรับรอบนี้ · เลือกเดือนอื่นหรือดูคลังพยากรณ์ย้อนหลัง</p>}
           <p className="nr-forecast-overview-scope-note">นอกขอบเขตการศึกษา คือไม่มีค่าพยากรณ์ในชุดข้อมูลสำหรับตำบลนั้น</p>

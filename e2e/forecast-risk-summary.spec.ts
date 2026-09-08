@@ -83,14 +83,14 @@ test("shared bar graph reference layout and details across six viewports", async
       await page.screenshot({ path: `artifacts/bar-graph-v1/${width}-page.png`, fullPage: true });
       await chart.scrollIntoViewIfNeeded();
     }
-    const column = chart.getByRole("button", { name: /รายละเอียด T\+6/ });
+    const column = chart.getByRole("button", { name: /รายละเอียดล่วงหน้า 6/ });
     if (mobile) await column.tap();
     else {
       await column.focus(); await column.press("Enter");
       expect(await column.evaluate(element => getComputedStyle(element).outlineStyle)).toBe("solid");
     }
     const tooltip = chart.getByRole("tooltip");
-    await expect(tooltip).toContainText("T+6");
+    await expect(tooltip).toContainText("6 เดือน");
     await expect(tooltip).toContainText("มีค่าพยากรณ์ 4/6 ตำบล");
     const bounds = await tooltip.boundingBox();
     expect(bounds!.x).toBeGreaterThanOrEqual(0);
@@ -172,9 +172,9 @@ for (const [level, path] of [["province", "/drought"], ["district", "/dan-khun-t
     expect(page.url()).toBe(initialUrl);
     expect(await page.evaluate(() => history.length)).toBe(historyLength);
     expect(await page.locator(".nr-map-shape").evaluateAll(shapes => shapes.map(shape => shape.getAttribute("class")))).toEqual(mapClasses);
-    await page.getByRole("tab", { name: /T\+4/ }).click();
+    await page.getByRole("tab", { name: /ล่วงหน้า 4 เดือน/ }).click();
     await expect(countButton).toHaveAttribute("aria-pressed", "true");
-    await expect(chart.locator(".nr-forecast-point-group.is-active")).toContainText("T+4");
+    await expect(chart.locator(".nr-forecast-point-group.is-active")).toContainText("4 เดือน");
     const horizonUrl = page.url();
     await page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox").click();
     await page.getByRole("option", { name: "พึ่งน้ำฝน (ไม่มีชลประทาน)", exact: true }).click();

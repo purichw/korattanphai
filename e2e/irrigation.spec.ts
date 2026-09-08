@@ -43,7 +43,7 @@ test("irrigation filters map, totals and horizons and survives district navigati
   await page.getByRole("button", { name: "รีเซ็ต", exact: true }).click();
   await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(20);
   await expect(select).toContainText("เข้าถึงชลประทาน");
-  await page.getByRole("tab", { name: /T\+4/ }).click();
+  await page.getByRole("tab", { name: /ล่วงหน้า 4 เดือน/ }).click();
   await expect(page).not.toHaveURL(/irrigation=/);
   await expect(page).toHaveURL(/horizon=4/);
   await page.reload();
@@ -112,6 +112,126 @@ test("overview map owns irrigation; Collecting keeps its forecast and gray categ
   await expect(page).toHaveURL(/\/drought\?.*irrigation=unknown/);
   await expect(page.locator(".nr-local-map-filter-status")).toContainText("แสดง 172 จาก 289 ตำบล");
 });
+
+test("empty district irrigation keeps the map frame stable and restores its chart", async ({ page }, testInfo) => {
+  test.setTimeout(60_000);
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  const widths = testInfo.project.name === "desktop" ? [1440, 1024, 850] : [390];
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: 960 });
+    await page.goto("/soeng-sang?target=2025-12&horizon=5");
+    const map = page.locator(".nr-drought-workspace-map-card");
+    const chart = page.locator(".nr-drought-workspace-chart-card");
+    await expect(chart).toBeVisible();
+    const initialUrl = page.url();
+    const original = await map.boundingBox();
+    const chartFrame = await chart.boundingBox();
+    expect(original).not.toBeNull();
+    expect(chartFrame).not.toBeNull();
+    await page.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง", exact: true }).click();
+    await page.getByRole("option", { name: "เสี่ยงสูง", exact: true }).click();
+    const irrigation = page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox");
+    await irrigation.click();
+    await page.getByRole("option", { name: "เข้าถึงชลประทาน", exact: true }).click();
+    const empty = page.locator(".nr-irrigation-empty");
+    await expect(empty).toContainText("ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้");
+    await expect(chart).toHaveCount(0);
+    await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
+    await expect(page.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(0);
+    await map.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: testInfo.outputPath(`empty-irrigation-${width}.png`), fullPage: true });
+    const filtered = await map.boundingBox();
+    expect(filtered!.width).toBeCloseTo(original!.width, 1);
+    expect(filtered!.height).toBeCloseTo(original!.height, 1);
+    expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+    if (width > 900) {
+      const emptyFrame = await empty.boundingBox();
+      expect(emptyFrame!.width).toBeCloseTo(chartFrame!.width, 1);
+      expect(emptyFrame!.height).toBeCloseTo(chartFrame!.height, 1);
+      expect(emptyFrame!.y).toBeCloseTo(filtered!.y, 1);
+      expect(emptyFrame!.x).toBeGreaterThan(filtered!.x + filtered!.width);
+    }
+    await page.getByRole("button", { name: "แสดงทุกสถานะชลประทาน", exact: true }).click();
+    await expect(chart).toBeVisible();
+    await expect(irrigation).toContainText("ชลประทาน: ทุกสถานะ");
+    await page.getByRole("button", { name: "รีเซ็ต", exact: true }).click();
+    await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(6);
+    const restored = await map.boundingBox();
+    expect(restored!.width).toBeCloseTo(original!.width, 1);
+    expect(restored!.height).toBeCloseTo(original!.height, 1);
+    expect(page.url()).toBe(initialUrl);
+    await expect(page.locator('.nr-forecast-archive-horizon-tabs [aria-selected="true"]')).toContainText("5 เดือน");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  expect(errors).toEqual([]);
+});
+
+for (const scope of [
+  { name: "overview province", path: "/", code: "30", query: "" },
+  { name: "overview district", path: "/", code: "3003", query: "&district=3003" },
+  { name: "drought province", path: "/drought", code: "30", query: "" },
+  { name: "district with irrigated areas", path: "/mueang-nakhon-ratchasima", code: "3001", query: "" },
+  { name: "district without irrigated areas", path: "/soeng-sang", code: "3003", query: "" },
+  { name: "subdistrict", path: "/dan-khun-thot/t-300803", code: "300803", query: "" },
+]) {
+  test(`irrigation map frame stays stable: ${scope.name}`, async ({ page }, testInfo) => {
+    test.setTimeout(60_000);
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    const locations = archive.locations.filter((location: any) => location.subdistrictCode.startsWith(scope.code));
+    await page.goto(`${scope.path}?target=2025-12&horizon=1${scope.query}`);
+    const map = page.locator(".nr-dashboard-map-card");
+    const shapes = page.locator(".nr-map-shape:not(.is-criteria-filtered)");
+    await expect(shapes).toHaveCount(locations.length);
+    const original = (await map.boundingBox())!;
+    const initialUrl = page.url();
+    const irrigation = map.locator(".nr-irrigation-filter").getByRole("combobox");
+    const expectStableFrame = async () => {
+      const current = (await map.boundingBox())!;
+      expect(current.width).toBeCloseTo(original.width, 1);
+      expect(current.height).toBeCloseTo(original.height, 1);
+      expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    };
+    for (const [status, label] of [
+      ["Irrigation", "เข้าถึงชลประทาน"],
+      ["RainFed", "พึ่งน้ำฝน (ไม่มีชลประทาน)"],
+      ["Collecting", "ยังไม่มีข้อมูลชลประทาน"],
+    ]) {
+      const matches = locations.filter((location: any) => location.irrigationStatus === status);
+      await irrigation.click();
+      await page.getByRole("option", { name: label, exact: true }).click();
+      await expect(shapes).toHaveCount(matches.length);
+      await expectStableFrame();
+      expect(page.url()).toBe(initialUrl);
+      if (matches.length === 0) {
+        await expect(page.locator(".nr-irrigation-empty")).toBeVisible();
+      }
+      await page.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง", exact: true }).click();
+      await page.getByRole("option", { name: "เสี่ยงสูง", exact: true }).click();
+      const highCount = matches.filter((location: any) => archive.packedRiskByTargetMonth["2025-12"][location.subdistrictCode][0] === 2).length;
+      await expect(shapes).toHaveCount(highCount);
+      await expectStableFrame();
+      if (status === "Irrigation") {
+        await map.scrollIntoViewIfNeeded();
+        await page.screenshot({ path: testInfo.outputPath("irrigation-filter-context.png") });
+      }
+      await page.getByRole("button", { name: "รีเซ็ต", exact: true }).click();
+      await expect(shapes).toHaveCount(matches.length);
+      if (matches.length === 0) {
+        await page.getByRole("button", { name: "แสดงทุกสถานะชลประทาน", exact: true }).click();
+      } else {
+        await irrigation.click();
+        await page.getByRole("option", { name: "ทุกสถานะ", exact: true }).click();
+      }
+      await expect(shapes).toHaveCount(locations.length);
+      await expectStableFrame();
+      expect(page.url()).toBe(initialUrl);
+    }
+    expect(errors).toEqual([]);
+  });
+}
 
 test("subdistrict mismatch is an empty filter, not zero risk or missing evidence", async ({ page }, testInfo) => {
   await page.goto("/dan-khun-thot/t-300803?target=2025-12&horizon=4&irrigation=irrigated");

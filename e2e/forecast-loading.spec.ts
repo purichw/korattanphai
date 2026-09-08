@@ -99,7 +99,7 @@ test("failed archive loads can retry without losing target or horizon", async ({
   await page.screenshot({ path: testInfo.outputPath("archive-load-error.png"), fullPage: true });
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
-  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("T+4");
+  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("4 เดือน");
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).locator("span")).toHaveText("เม.ย. 2569");
   await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงสูง");
   await expect(page).toHaveURL(/target=2025-12&horizon=4/);
@@ -128,7 +128,7 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await expect(page.locator(".nr-forecast-overview-summary")).toBeVisible();
   await page.goBack();
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
-  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("T+6");
+  await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("6 เดือน");
   expect(requests).toBe(1);
   expect(geometryRequests).toHaveLength(3);
 });

@@ -27,7 +27,7 @@ test("subdistrict duplicate controls stay synchronized without replacing the map
   const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย."];
   for (let index = 0; index < 6; index += 1) {
     await tabs.nth(index).click();
-    await expect(pageHorizon).toHaveText(`T+${index + 1}`);
+    await expect(pageHorizon).toHaveText(`ล่วงหน้า ${index + 1} เดือน`);
     await expect(context.locator(".is-issue strong")).toHaveText("ธ.ค. 2568");
     await expect(context.locator(".is-target strong")).toHaveText(`${months[index]} 2569`);
     const risk = archive.packedRiskByTargetMonth["2025-12"]["300806"][index];
@@ -36,12 +36,12 @@ test("subdistrict duplicate controls stay synchronized without replacing the map
     await expect(map).toHaveAttribute("data-instance-probe", "same-map");
   }
   await pageHorizon.click();
-  await page.getByRole("option", { name: "T+4", exact: true }).click();
+  await page.getByRole("option", { name: "ล่วงหน้า 4 เดือน", exact: true }).click();
   await expect(tabs.nth(3)).toHaveAttribute("aria-selected", "true");
   await tabs.nth(3).focus();
   await tabs.nth(3).press("ArrowRight");
   await expect(tabs.nth(4)).toBeFocused();
-  await expect(pageHorizon).toHaveText("T+5");
+  await expect(pageHorizon).toHaveText("ล่วงหน้า 5 เดือน");
   await tabs.nth(4).press("Home");
   await expect(tabs.nth(0)).toBeFocused();
   await tabs.nth(0).press("End");
@@ -84,7 +84,7 @@ test("subdistrict duplicate controls stay synchronized without replacing the map
   await page.getByRole("button", { name: "ออกจากเต็มจอ", exact: true }).click();
   await expect(map).toHaveAttribute("data-instance-probe", "same-map");
   await page.reload();
-  await expect(pageHorizon).toHaveText("T+6");
+  await expect(pageHorizon).toHaveText("ล่วงหน้า 6 เดือน");
   await expect(pageMonth).toHaveText("ธ.ค. 2568");
   await page.getByRole("button", { name: "กลับอำเภอ", exact: true }).click();
   await expect(page).toHaveURL(url => url.pathname === "/dan-khun-thot" && url.searchParams.get("target") === "2025-12" && url.searchParams.get("horizon") === "6");

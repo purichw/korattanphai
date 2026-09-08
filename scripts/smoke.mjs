@@ -146,7 +146,9 @@ try {
         }
         if (route.includes("target=")) {
           await page.locator(".nr-drought-compact-workspace").waitFor();
-          assert.match(await page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).innerText(), route.includes("horizon=4") ? /T\+4/ : /T\+1/);
+          assert.match(await page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).innerText(), route.includes("horizon=4") ? /4 เดือน/ : /1 เดือน/);
+          await expect(page.locator('.nr-forecast-archive-horizon-tabs strong')).toHaveText([1, 2, 3, 4, 5, 6].map(horizon => `${horizon} เดือน`));
+          await expect(page.locator('.nr-forecast-horizon-date-break').first()).toHaveCSS('display', name === 'mobile' ? 'inline' : 'none');
           const forecastMonth = route.includes("horizon=4") ? "เม.ย. 2569" : "ม.ค. 2569";
           await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true }).locator("span")).toHaveText(forecastMonth);
           await expect(page.locator(".nr-drought-workspace-context .is-issue dt")).toHaveText("เดือนตั้งต้น (T)");
@@ -227,6 +229,7 @@ try {
           await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
           const select = page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox");
           await expect(select).toBeVisible();
+          const mapFrame = await page.locator('.nr-dashboard-map-card').boundingBox();
           const initialUrl = page.url();
           const initialHistoryLength = await page.evaluate(() => history.length);
           await select.click();
@@ -237,6 +240,8 @@ try {
           const codes = expectedArchive.locations.filter(location => location.irrigationStatus === status).map(location => location.subdistrictCode).sort();
           const shapes = page.locator(".nr-map-shape:not(.is-criteria-filtered)");
           await expect(shapes).toHaveCount(codes.length);
+          const filteredFrame = await page.locator('.nr-dashboard-map-card').boundingBox();
+          assert.ok(Math.abs(filteredFrame.width - mapFrame.width) < 1 && Math.abs(filteredFrame.height - mapFrame.height) < 1, `${name}: irrigation preserves the map frame`);
           assert.deepEqual(await shapes.evaluateAll(nodes => nodes.map(node => node.getAttribute("data-nr-subdistrict-code")).sort()), codes, `${name}: ${criterion} matches source locations`);
           await expect.poll(() => shapes.evaluateAll((nodes, expected) => nodes.every(node => getComputedStyle(node).fill === expected), color)).toBe(true);
           const high = codes.filter(code => expectedArchive.packedRiskByTargetMonth["2025-12"][code][0] === 2).length;
@@ -251,15 +256,35 @@ try {
           await expect(shapes).toHaveCount(codes.length);
           report.checks.push({ viewport: name, irrigation: criterion, matched: codes.length, highRisk: high, sourceMatch: true, categoricalColor: color, unchangedUrl: true, reloadPreserved: true });
         }
-        await page.goto(new URL("/dan-khun-thot/t-300803?target=2025-12&horizon=4&irrigation=irrigated", base).href, { waitUntil: "domcontentloaded" });
-        await page.locator(".nr-irrigation-empty").waitFor();
-        await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
-        await expect(page.locator(".nr-drought-workspace-kpis .metric-card, .nr-drought-workspace-chart-card")).toHaveCount(0);
-        const emptyUrl = page.url();
-        await page.getByRole("button", { name: "แสดงทุกสถานะชลประทาน", exact: true }).click();
-        await expect(page.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
-        assert.equal(page.url(), emptyUrl);
-        report.checks.push({ viewport: name, irrigationEmptyReset: true });
+        for (const [scope, route, count] of [
+          ['overview-district', '/?target=2025-12&horizon=1&district=3003', 6],
+          ['district', '/soeng-sang?target=2025-12&horizon=4', 6],
+          ['subdistrict', '/dan-khun-thot/t-300803?target=2025-12&horizon=4', 1],
+        ]) {
+          await page.goto(new URL(route, base).href, { waitUntil: 'domcontentloaded' });
+          const shapes = page.locator('.nr-map-shape:not(.is-criteria-filtered)');
+          await expect(shapes).toHaveCount(count);
+          const map = page.locator('.nr-dashboard-map-card');
+          const original = await map.boundingBox();
+          const emptyUrl = page.url();
+          await map.locator('.nr-irrigation-filter').getByRole('combobox').click();
+          await page.getByRole('option', { name: 'เข้าถึงชลประทาน', exact: true }).click();
+          await page.locator('.nr-irrigation-empty').waitFor();
+          await expect(shapes).toHaveCount(0);
+          await expect(page.locator('.nr-drought-workspace-kpis .metric-card, .nr-drought-workspace-chart-card')).toHaveCount(0);
+          const filtered = await map.boundingBox();
+          assert.ok(Math.abs(filtered.width - original.width) < 1 && Math.abs(filtered.height - original.height) < 1, `${name}: empty ${scope} preserves map dimensions`);
+          assert.equal(await page.evaluate(() => document.fullscreenElement), null);
+          assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+          await map.scrollIntoViewIfNeeded();
+          await page.screenshot({ path: path.join(output, `${name}-empty-irrigation-${scope}.png`) });
+          await page.getByRole('button', { name: 'แสดงทุกสถานะชลประทาน', exact: true }).click();
+          await expect(shapes).toHaveCount(count);
+          if (scope === 'district') await expect(page.locator('.nr-drought-workspace-chart-card')).toBeVisible();
+          if (scope === 'subdistrict') await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงปานกลาง');
+          assert.equal(page.url(), emptyUrl);
+          report.checks.push({ viewport: name, scope, irrigationEmptyReset: true, stableMapFrame: true });
+        }
         await page.getByRole("button", { name: "รายการที่บันทึก", exact: true }).click();
         const dialog = page.getByRole("dialog");
         await dialog.waitFor();

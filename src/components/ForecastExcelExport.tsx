@@ -71,7 +71,7 @@ function ExportDialog({ services, initial, onClose }: { services: Services; init
   function close() { live.current = false; dialog.current?.close(); onClose(); }
   async function download() {
     if (running.current) return;
-    running.current = true; setBusy(true); setError(''); setMessage('กำลังตรวจรุ่นข้อมูลและเตรียม T+1–T+6');
+    running.current = true; setBusy(true); setError(''); setMessage('กำลังตรวจรุ่นข้อมูลและเตรียมพยากรณ์ล่วงหน้า 6 เดือน');
     try {
       // load() revalidates the Supabase revision even when this scope is cached.
       const archive = await services.full.load({ areaCode: options.areaCode, originPeriod: options.originPeriod });
@@ -89,7 +89,7 @@ function ExportDialog({ services, initial, onClose }: { services: Services; init
       const link = document.createElement('a'); link.href = url; link.download = report.filename;
       document.body.appendChild(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 30_000);
-      setMessage(`ส่งออกแล้ว ${report.districts.length} อำเภอ · ${report.rows.length} ตำบล · T+1–T+6`);
+      setMessage(`ส่งออกแล้ว ${report.districts.length} อำเภอ · ${report.rows.length} ตำบล · ล่วงหน้า 6 เดือน`);
     } catch (cause) {
       if (live.current) {
         setMessage('');
@@ -110,7 +110,7 @@ function ExportDialog({ services, initial, onClose }: { services: Services; init
         <AppSelect label="พื้นที่" ariaLabel="พื้นที่ของไฟล์ Excel" value={options.areaCode} options={districts} onChange={areaCode => { setOptions({ ...options, areaCode }); setMessage(''); }} icon={<MapPin size={19} />} />
         <AppSelect label="สถานะชลประทาน" ariaLabel="ชลประทานของไฟล์ Excel" value={options.irrigation} options={irrigationCriteria.map(value => ({ value, label: irrigationLabels[value] }))} onChange={irrigation => { setOptions({ ...options, irrigation: irrigation as ExportOptions['irrigation'] }); setMessage(''); }} icon={<Droplets size={19} />} />
       </fieldset>
-      {options.originPeriod && <div className="nr-export-period"><CalendarDays size={18} aria-hidden="true" /><span><strong>T+1–T+6</strong><span>{formatMonth(forecastTargetPeriod(options.originPeriod, 1), 'th')} – {formatMonth(forecastTargetPeriod(options.originPeriod, 6), 'th')}</span></span></div>}
+      {options.originPeriod && <div className="nr-export-period"><CalendarDays size={18} aria-hidden="true" /><span><strong>พยากรณ์ล่วงหน้า 6 เดือน</strong><span>{formatMonth(forecastTargetPeriod(options.originPeriod, 1), 'th')} – {formatMonth(forecastTargetPeriod(options.originPeriod, 6), 'th')}</span></span></div>}
       <dl className="nr-export-contents">
         <div><dt>ขอบเขต</dt><dd>ทุกระดับความเสี่ยงของตำบลในพื้นที่ที่เลือก</dd></div>
         <div><dt>ตาราง</dt><dd>สรุปอำเภอ · รายตำบล · สถิติรายเดือน</dd></div>
