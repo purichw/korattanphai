@@ -20,6 +20,44 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Inline forecast month-loading production release (2026-09-08):
+
+- Pushed and released runtime `e6611d95e312379d219a4075db3f540a79ef2786`
+  on `fix/nr-map-zoom-performance`. Only the month-loading UI, shared-component
+  documentation and focused regressions changed; unrelated lock/cache files
+  remain untouched and uncommitted.
+- Shared `ForecastMonthSelect` shows an in-place spinner in page/map month
+  controls, including the Home mobile editor. The long top paragraph is now
+  an assistive-technology announcement outside the busy content. Loaded dates,
+  map and metrics stay synchronized until success; late responses, retry,
+  reduced motion and background Supabase revision checks remain supported.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34220940871)
+  passed for the exact runtime commit: 177 unit tests, isolated database checks,
+  109 built-browser tests (31 conditional skips), 38 database-browser tests,
+  protected builds, exposure/bundle limits and generated-data drift checks.
+  The unchanged local implementation also passed 12 focused unit/lifecycle
+  tests and 10 desktop/mobile scoped-loading browser tests before release.
+- Built clean Git archive candidate `dpl_2ssjqfeeLknkTUxL9Fi3Ud1YULfs` with
+  Production settings and `--prod --skip-domain`, then promoted that same
+  artifact after CI and candidate smoke passed. Primary alias inspection
+  confirms `https://korattanphai.vercel.app` serves this deployment.
+  Candidate: `https://korattanphai-3hohrvn3z-purichwc-1517s-projects.vercel.app`.
+- Candidate and production each passed 28 existing authenticated smoke checks
+  plus four targeted Home/district month-change checks across desktop/mobile.
+  Targeted checks delay only delivery of an unchanged, source-equal live
+  Supabase response: no heading movement, old values/colors retained while
+  pending, and spinner/announcement cleared once the new month is loaded.
+  Full smoke retains five route scopes, source-equal map/RPC/Excel checks,
+  login/logout, irrigation, saved-workspace reads, assets/API/headers and
+  no browser errors or horizontal overflow.
+- Evidence: `smoke-results/month-loading-{candidate,production}/report.json`,
+  `month-loading-report.json`, and `*-home-pending.png` / `*-district-pending.png`.
+  No forecast/normalized changes, migrations, application-data writes,
+  credentials in reports, or Auth/protection-setting changes. Chromium only;
+  Safari, Firefox and physical devices were not retested for this UI release.
+  Recovery: promote previous verified deployment
+  `dpl_GvGMGxBQEKgn74xbmwvdhDWhnKjy`; leave Supabase schema/data unchanged.
+
 Forecast Excel export and overview cleanup production release (2026-09-07):
 
 - Released runtime `ccf506c0b2a382e7a69281e1258f3dc0bf18b21c` and pushed
