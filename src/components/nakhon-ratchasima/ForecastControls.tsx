@@ -19,6 +19,7 @@ import {
   Droplets,
 } from "lucide-react";
 import { type AppSelectOption, AppSelect } from "../AppSelect";
+import { ForecastMonthSelect } from "../ForecastArchiveRequest";
 import { IrrigationStatusSelect, type ForecastMapIrrigation } from "../IrrigationStatusSelect";
 
 export function DroughtForecastArchiveHorizonSelector({
@@ -194,7 +195,7 @@ export function DroughtForecastArchiveMapFilters({
         <button type="button" aria-pressed={irrigation.colorMode === "irrigation"} onClick={() => irrigation.onColorModeChange("irrigation")}><Droplets size={16} />ชลประทาน</button>
       </div>}
       <div className="nr-map-filter-fields">
-      {showMonthFilter && <AppSelect
+      {showMonthFilter && <ForecastMonthSelect
         className="nr-local-map-select"
         ariaLabel="เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง"
         value={selectedMonth}

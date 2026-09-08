@@ -3,8 +3,51 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { getNakhonRatchasimaDistrictByCode } from "../src/domain";
 import { ForecastOverviewLoading, DroughtWorkspaceLoading } from "../src/components/nakhon-ratchasima/ForecastArchiveLoading";
 import type { DroughtForecastWorkspaceTarget } from "../src/components/nakhon-ratchasima/forecastModel";
+import { ForecastArchiveRequest, ForecastMonthSelect } from "../src/components/ForecastArchiveRequest";
+import { AppSelect } from "../src/components/AppSelect";
 
 afterEach(cleanup);
+
+it("keeps month-change feedback inside month controls and clears it on completion", () => {
+  const request = { archive: null, pending: true, changingPeriod: true, failed: false, retry: vi.fn(), requestPeriod: vi.fn() };
+  const options = [{ value: "2025-12", label: "ธ.ค. 2568" }];
+  const content = <>
+    <ForecastMonthSelect ariaLabel="เดือนตั้งต้น" value="2025-12" options={options} onChange={vi.fn()} />
+    <ForecastMonthSelect ariaLabel="เดือนตั้งต้นบนแผนที่" value="2025-12" options={options} onChange={vi.fn()} />
+    <AppSelect ariaLabel="สถานะ" value="all" options={[{ value: "all", label: "ทุกสถานะ" }]} onChange={vi.fn()} />
+  </>;
+  const { container, rerender } = render(<ForecastArchiveRequest request={request}>{content}</ForecastArchiveRequest>);
+  const status = screen.getByRole("status");
+  expect(status).toHaveClass("sr-only");
+  expect(status).toHaveTextContent("ขณะนี้ยังแสดงรอบเดิม");
+  expect(status.closest('[aria-busy="true"]')).toBeNull();
+  for (const name of ["เดือนตั้งต้น", "เดือนตั้งต้นบนแผนที่"]) {
+    const month = screen.getByRole("combobox", { name, exact: true });
+    expect(month).toHaveAttribute("aria-busy", "true");
+    expect(month).toHaveAccessibleDescription("กำลังโหลดเดือนที่เลือก · ขณะนี้ยังแสดงรอบเดิม");
+    expect(month).toHaveTextContent("ธ.ค. 2568");
+    expect(month).toBeEnabled();
+  }
+  expect(screen.getByRole("combobox", { name: "สถานะ" })).not.toHaveAttribute("aria-busy");
+  expect(container.querySelectorAll(".app-select-spinner")).toHaveLength(2);
+
+  rerender(<ForecastArchiveRequest request={{ ...request, pending: false, changingPeriod: false }}>{content}</ForecastArchiveRequest>);
+  expect(status).toBeEmptyDOMElement();
+  expect(container.querySelectorAll(".app-select-spinner, [aria-busy=true], [aria-describedby]")).toHaveLength(0);
+
+  // Same-period freshness checks do not look like a user-requested month change.
+  rerender(<ForecastArchiveRequest request={{ ...request, changingPeriod: false }}>{content}</ForecastArchiveRequest>);
+  expect(status).toBeEmptyDOMElement();
+  expect(container.querySelector(".app-select-spinner")).toBeNull();
+});
+
+it("leaves static month controls unchanged outside a forecast request", () => {
+  const { container } = render(<ForecastMonthSelect ariaLabel="เดือน" value="2025-12"
+    options={[{ value: "2025-12", label: "ธ.ค. 2568" }]} onChange={vi.fn()} />);
+  expect(screen.getByRole("combobox")).not.toHaveAttribute("aria-busy");
+  expect(container.querySelector(".app-select-spinner")).toBeNull();
+});
+
 const district = getNakhonRatchasimaDistrictByCode("3008")!;
 const targets: DroughtForecastWorkspaceTarget[] = [
   { valid: true, level: "province", tab: "drought" },

@@ -47,13 +47,19 @@ for (const scope of [
   await page.getByRole('tab', { name: /T\+6/ }).click();
   await expect(page).toHaveURL(/horizon=6/);
   expect(requests).toHaveLength(3);
+  const headerTop = await page.locator('.nr-drought-page-header').evaluate(el => el.getBoundingClientRect().top + scrollY);
   await selectMonth('ต.ค. 2568');
-  await expect(page.getByRole('status').filter({ hasText: 'กำลังโหลดรอบที่เลือก' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'กำลังโหลดรอบที่เลือก' })).toHaveClass('sr-only');
+  await expect(month).toHaveAttribute('aria-busy', 'true');
+  await expect(month.locator('.app-select-spinner')).toBeVisible();
   await expect(month).toContainText('พ.ย. 2568');
+  expect(await page.locator('.nr-drought-page-header').evaluate(el => el.getBoundingClientRect().top + scrollY)).toBeCloseTo(headerTop, 0);
   if (scope.area === '300806') await page.screenshot({ path: testInfo.outputPath('changing-month-keeps-previous-data.png') });
   // A later selection must win even if the older network response arrives last.
   await selectMonth('ธ.ค. 2568');
   await expect(month).toContainText('ธ.ค. 2568');
+  await expect(month).not.toHaveAttribute('aria-busy');
+  await expect(page.locator('.app-select-spinner')).toHaveCount(0);
   const lateResponse = page.waitForResponse(r => r.url().includes('ktp_load_forecast_slice') && r.request().postDataJSON().p_origin_period === '2025-10');
   releaseOctober!();
   await (await lateResponse).finished();
@@ -68,9 +74,12 @@ for (const scope of [
 
 test('overview map and top month filters stay synchronized with scoped T+1 data', async ({ page }, testInfo) => {
   const requests: any[] = [];
-  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
+  let releaseNovember!: () => void;
+  const november = new Promise<void>(resolve => { releaseNovember = resolve; });
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', async route => {
     const query = route.request().postDataJSON(); requests.push(query);
     expect(query.p_area_code).toBe('30'); expect(query.p_horizon_count).toBe(1);
+    if (query.p_origin_period === '2025-11') await november;
     return route.fulfill({ json: forecastSlice(overview, query) });
   });
   await seedAuthSession(page);
@@ -78,11 +87,32 @@ test('overview map and top month filters stay synchronized with scoped T+1 data'
   await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText(['0 ตำบล', '117 ตำบล', '0 ตำบล', '172 ตำบล']);
   const mapMonth = page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true });
   await expect(mapMonth).toContainText('ธ.ค. 2568');
+  const heading = page.locator('.nr-forecast-overview-heading');
+  const headerTop = await heading.evaluate(el => el.getBoundingClientRect().top + scrollY);
   await mapMonth.click();
   await expect(page.getByRole('option', { name: 'พ.ย. 2568', exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('overview-map-month-menu.png') });
   await page.getByRole('option', { name: 'พ.ย. 2568', exact: true }).click();
+  await expect(mapMonth).toHaveAttribute('aria-busy', 'true');
+  await expect(mapMonth.locator('.app-select-spinner')).toBeVisible();
+  await expect(mapMonth).toContainText('ธ.ค. 2568');
+  await expect(page).toHaveURL(/target=2025-12/);
+  await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText(['0 ตำบล', '117 ตำบล', '0 ตำบล', '172 ตำบล']);
+  expect(await heading.evaluate(el => el.getBoundingClientRect().top + scrollY)).toBeCloseTo(headerTop, 0);
+  await expect(page.getByRole('status').filter({ hasText: 'กำลังโหลดรอบที่เลือก' })).toHaveCSS('position', 'absolute');
+  if (testInfo.project.name === 'desktop') {
+    await expect(page.getByRole('combobox', { name: /^เดือนตั้งต้น / })).toHaveAttribute('aria-busy', 'true');
+    await page.screenshot({ path: testInfo.outputPath('overview-changing-month-inline.png') });
+  } else {
+    await page.locator('.nr-forecast-overview-map').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: testInfo.outputPath('overview-changing-month-inline.png') });
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(mapMonth.locator('.app-select-spinner')).toHaveCSS('animation-name', 'none');
+  releaseNovember();
   await expect(mapMonth).toContainText('พ.ย. 2568');
+  await expect(page.locator('.app-select-spinner')).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'กำลังโหลดรอบที่เลือก' })).toHaveCount(0);
   await expect(page).toHaveURL(/target=2025-11.*horizon=1/);
   await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText(['0 ตำบล', '48 ตำบล', '69 ตำบล', '172 ตำบล']);
   await expect(page.locator('.nr-forecast-overview-context strong')).toHaveText('พยากรณ์ ธ.ค. 2568');

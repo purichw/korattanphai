@@ -853,8 +853,20 @@ textarea {
   transition: transform 160ms ease;
 }
 
-.app-select-field.is-open .app-select-trigger svg {
+.app-select-field.is-open .app-select-trigger svg:not(.app-select-spinner) {
   transform: rotate(180deg);
+}
+
+.app-select-spinner {
+  animation: app-select-spin 1s linear infinite;
+}
+
+@keyframes app-select-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-select-spinner { animation: none; }
 }
 
 .app-select-value {

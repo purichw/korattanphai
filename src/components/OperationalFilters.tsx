@@ -2,6 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "rea
 import { CalendarDays, Edit3, Leaf, MapPin, ShieldAlert, TrendingUp, X } from "lucide-react";
 import type { AppSelectOption } from "./AppSelect";
 import { AppSelect } from "./AppSelect";
+import { ForecastMonthSelect } from "./ForecastArchiveRequest";
 import { months, provinces } from "../data/catalog";
 import { getProvinceRecord } from "../domain";
 import { formatMonth, t } from "../i18n";
@@ -192,7 +193,7 @@ export function OperationalFilters({
       aria-label={ariaLabel}
     >
       <div className="operational-filter-fields">
-        <AppSelect
+        <ForecastMonthSelect
           label={resolvedMonthFieldLabel}
           icon={compactOverview ? <CalendarDays size={20} /> : undefined}
           compactValue={compactOverview}
@@ -294,7 +295,7 @@ export function OperationalFilters({
             <div className="operational-filter-sheet-fields">
               <div className="operational-filter-sheet-row">
                 <span>{resolvedMonthFieldLabel}</span>
-                <AppSelect
+                <ForecastMonthSelect
                   ariaLabel={`เลือก${resolvedMonthFieldLabel}`}
                   value={selectedMonth}
                   onChange={changeMonth}

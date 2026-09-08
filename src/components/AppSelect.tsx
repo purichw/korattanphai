@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, LoaderCircle, X } from "lucide-react";
 
 export type AppSelectOption = {
   value: string;
@@ -23,6 +23,7 @@ type AppSelectProps = {
   menuClassName?: string;
   compactValue?: boolean;
   align?: "center" | "start";
+  loadingLabel?: string;
 };
 
 function normalizeSearch(value: string) {
@@ -40,6 +41,7 @@ export function AppSelect({
   menuClassName,
   compactValue = false,
   align = "center",
+  loadingLabel,
 }: AppSelectProps) {
   const generatedId = useId().replaceAll(":", "");
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -54,6 +56,7 @@ export function AppSelect({
   const listboxId = `${generatedId}-listbox`;
   const labelId = `${generatedId}-label`;
   const valueId = `${generatedId}-value`;
+  const loadingId = `${generatedId}-loading`;
   const activeOptionId = activeIndex >= 0 ? `${generatedId}-option-${activeIndex}` : undefined;
   const enabledIndexes = useMemo(
     () => options.map((option, index) => (option.disabled ? -1 : index)).filter((index) => index >= 0),
@@ -215,14 +218,18 @@ export function AppSelect({
         aria-activedescendant={isOpen ? activeOptionId : undefined}
         aria-labelledby={label ? `${labelId} ${valueId}` : undefined}
         aria-label={label ? undefined : ariaLabel}
+        aria-busy={Boolean(loadingLabel) || undefined}
+        aria-describedby={loadingLabel ? loadingId : undefined}
+        title={loadingLabel}
         onClick={() => (isOpen ? closeMenu() : openMenu())}
         onKeyDown={handleKeyDown}
       >
         <span id={valueId} className="app-select-value">
           {(compactValue ? selectedOption?.triggerLabel : undefined) ?? selectedOption?.label ?? ""}
         </span>
-        <ChevronDown size={17} aria-hidden="true" />
+        {loadingLabel ? <LoaderCircle size={17} className="app-select-spinner" aria-hidden="true" /> : <ChevronDown size={17} aria-hidden="true" />}
       </button>
+      {loadingLabel && <span id={loadingId} className="sr-only">{loadingLabel}</span>}
       {isOpen && (
         <>
           <div
