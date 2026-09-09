@@ -39,6 +39,9 @@ test('a stalled forecast times out and recovers the same source month and horizo
   let release: () => void = () => {};
   const held = new Promise<void>(resolve => { release = resolve; });
   await page.route(/drought_forecast_archive_rev03(?:-[\w-]+)?\.json(?:\?.*)?$/, async route => {
+    // Vite also imports this filename as a JavaScript URL module (?import&url).
+    // Stall only the archive fetch; blocking that module prevents the app from mounting.
+    if (route.request().resourceType() !== 'fetch') return route.continue();
     attempts++;
     if (attempts === 1) await held;
     await route.continue().catch(() => {});
