@@ -20,23 +20,58 @@ const document = new JSDOM(await fs.readFile(path.join(distDir, "index.html"), "
 const initialFiles = [...document.querySelectorAll('script[type="module"][src], link[rel="modulepreload"][href]')]
   .map((element) => path.basename(element.getAttribute("src") ?? element.getAttribute("href")));
 const startup = new Set();
+const workerFiles = [...sources.keys()].filter(file => /^forecastExcelWorker-[\w-]+\.js$/.test(file));
+const workerGraph = new Set();
+const workerReferences = new Set();
+const syntaxTrees = new Map();
+function syntaxTree(file) {
+  if (!syntaxTrees.has(file)) syntaxTrees.set(file, ts.createSourceFile(file, sources.get(file).toString(), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS));
+  return syntaxTrees.get(file);
+}
+function followWorker(file) {
+  if (workerGraph.has(file)) return;
+  if (!sources.has(file)) throw new Error(`Missing Excel worker dependency: ${file}`);
+  workerGraph.add(file);
+  for (const node of syntaxTree(file).statements) {
+    if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
+      const target = node.moduleSpecifier.text;
+      if (target.startsWith('.') || target.startsWith('/assets/')) followWorker(path.basename(target));
+    }
+  }
+}
+for (const file of workerFiles) followWorker(file);
 function checkChunk(file, initial = false) {
   const source = sources.get(file);
   if (!source) throw new Error(`Missing referenced JavaScript chunk: ${file}`);
   if (initial && startup.has(file)) return;
   if (initial) startup.add(file);
-  const ast = ts.createSourceFile(file, source.toString(), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const ast = syntaxTree(file);
   for (const node of ast.statements) {
     if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
       const target = node.moduleSpecifier.text;
       if (target.startsWith(".") || target.startsWith("/assets/")) {
         const dependency = path.basename(target);
-        if (/^forecastExcelWriter-[\w-]+\.js$/.test(dependency)) throw new Error('Excel writer must remain a user-action-only dynamic import.');
+        if (!workerGraph.has(file) && (/^forecastExcel(?:Writer|Job|Worker)-[\w-]+\.js$/.test(dependency) || workerGraph.has(dependency))) throw new Error('Excel generation must remain a user-action-only dynamic import with an isolated worker.');
         if (!sources.has(dependency)) throw new Error(`Broken chunk reference: ${file} -> ${target}`);
         if (initial) checkChunk(dependency, true);
       }
     }
   }
+  function visit(node) {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      const target = node.text;
+      // Protect-build renames worker assets as well as entry chunks. Verify the
+      // URL literal in the on-demand client still points to an emitted asset.
+      if (/^(?:\.\.?\/|\/assets\/).*forecastExcelWorker-[\w-]+\.js$/.test(target)) {
+        const dependency = path.basename(target);
+        if (!sources.has(dependency)) throw new Error(`Broken Excel worker URL: ${file} -> ${target}`);
+        workerReferences.add(dependency);
+        if (initial) throw new Error('Excel worker must not be constructed by a startup chunk.');
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(ast);
 }
 for (const file of sources.keys()) checkChunk(file);
 for (const file of initialFiles) checkChunk(file, true);
@@ -48,10 +83,14 @@ const authChunks = [...sources.entries()].filter(([file]) => /^supabaseClient-[\
 const authGzipBytes = authChunks.reduce((sum, [, source]) => sum + gzipSync(source).length, 0);
 if (authChunks.length > 1 || authGzipBytes > 105_000) throw new Error(`Supabase SDK exceeds 105000 gzip bytes: ${authGzipBytes}`);
 // Native XLSX charts/pivots are loaded only after Download, never on page load.
-const exportChunks = [...sources.entries()].filter(([file]) => /^forecastExcelWriter-[\w-]+\.js$/.test(file));
+if (workerFiles.length !== 1 || workerReferences.size !== 1 || !workerReferences.has(workerFiles[0])) throw new Error('Expected one referenced, on-demand Excel worker asset.');
+if ([...sources.keys()].some(file => /^forecastExcelWriter-[\w-]+\.js$/.test(file) && !workerGraph.has(file))) throw new Error('Excel writer was emitted outside its worker.');
+const exportChunks = [...sources.entries()].filter(([file]) => workerGraph.has(file));
 const exportBytes = exportChunks.reduce((sum, [, source]) => sum + source.length, 0);
 const exportGzipBytes = exportChunks.reduce((sum, [, source]) => sum + gzipSync(source).length, 0);
-if (exportChunks.length > 1 || exportBytes > 2_500_000 || exportGzipBytes > 650_000) throw new Error(`Excel export chunk exceeds its isolated budget: ${exportBytes} / ${exportGzipBytes}`);
+// The portable XML parser and bilingual workbook dictionary live only here.
+// Measured protected worker: ~2.49 MB raw / 662 kB gzip; main budgets stay fixed.
+if (exportBytes > 2_650_000 || exportGzipBytes > 700_000) throw new Error(`Excel export worker exceeds its isolated budget: ${exportBytes} / ${exportGzipBytes}`);
 if (!jsBytes || jsBytes - exportBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes > 370_000) {
   throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes} app gzip bytes (limits 3500000 / 370000 plus bounded SDK).`);
 }

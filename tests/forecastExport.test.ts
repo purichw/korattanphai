@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import ExcelJS from '@protobi/exceljs';
 import JSZip from 'jszip';
-import { describe, it, expect } from 'vitest';
-import { buildForecastExport, summarizeExportRisks, exportRiskLabel } from '../src/forecastExportModel';
-import { createForecastWorkbook } from '../src/forecastExcelWriter';
+import { describe, it, expect, vi } from 'vitest';
+import { buildForecastExport, summarizeExportRisks, exportRiskLabel, withForecastExportComparison } from '../src/forecastExportModel';
+import { createForecastWorkbook, forecastExportSheetNames, FORECAST_TEMPLATE_VERSION } from '../src/forecastExcelWriter';
 import type { NakhonRatchasimaDroughtForecastArchive as Archive } from '../src/types';
 
 const archive: Archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
@@ -43,7 +43,7 @@ describe('forecast Excel data contract', () => {
     const bytes = await createForecastWorkbook(report, new Uint8Array(input).buffer);
     const book = new ExcelJS.Workbook();
     await book.xlsx.load(bytes);
-    expect(book.worksheets.map(sheet => sheet.name)).toEqual(['วิเคราะห์', 'สรุปอำเภอ', 'รายตำบล', 'สถิติรายเดือน', 'PivotTable', 'ฐาน Pivot', 'ที่มาและนิยาม']);
+    expect(book.worksheets.map(sheet => sheet.name)).toEqual(['วิเคราะห์', 'สรุปอำเภอ', 'รายตำบล', 'สถิติรายเดือน', 'PivotTable', 'ฐาน Pivot', 'ที่มาและนิยาม', forecastExportSheetNames.machine, forecastExportSheetNames.dictionary]);
     const raw = book.getWorksheet('รายตำบล')!;
     expect(raw.getCell('H4').value).toBe('T+1 ม.ค. 2569');
     for (const [index, row] of report.rows.entries()) {
@@ -59,6 +59,7 @@ describe('forecast Excel data contract', () => {
     expect(sheet.getCell('H9').numFmt).toBe('0.0%');
     expect(sheet.getCell('A1').font.size).toBe(17);
     expect(sheet.getCell('A1').fill).not.toEqual(sheet.getCell('B4').fill);
+    expect(sheet.getCell('I8').value).toBe('ตำบลตาม\nตัวกรอง');
     expect(book.getWorksheet('ฐาน Pivot')!.rowCount).toBe(1735);
     const zip = await JSZip.loadAsync(bytes);
     for (const [name, entry] of Object.entries(zip.files)) {
@@ -84,5 +85,80 @@ describe('forecast Excel data contract', () => {
     const cache = new DOMParser().parseFromString(await zip.file(cacheName)!.async('string'), 'application/xml');
     expect(cache.documentElement.getAttribute('recordCount')).toBe('1734');
     expect(book.getWorksheet('ที่มาและนิยาม')!.getSheetValues().flat().join(' ')).toContain(report.meta.sourceWorkbookSha256);
+    expect(book.getWorksheet('ที่มาและนิยาม')!.getSheetValues().flat()).toContain(FORECAST_TEMPLATE_VERSION);
+    const machine = book.getWorksheet(forecastExportSheetNames.machine)!;
+    expect(machine.rowCount).toBe(report.machineRows.length + 4);
+    const definitions = report.dictionary.filter(item => item.table === 'machineRows');
+    expect(machine.getRow(4).values.slice(1)).toEqual(definitions.map(item => item.field));
+    for (const [index, record] of report.machineRows.entries()) {
+      for (const [column, definition] of definitions.entries()) {
+        expect(machine.getCell(index + 5, column + 1).value).toEqual(record[definition.field as keyof typeof record]);
+      }
+    }
+    const dictionary = book.getWorksheet(forecastExportSheetNames.dictionary)!;
+    const dictFields = dictionary.getColumn(1).values.slice(5);
+    expect(dictFields).toEqual(expect.arrayContaining(definitions.map(item => item.field)));
+    expect(dictFields).toEqual(expect.arrayContaining(['forecastRiskDisplay', 'highestForecastRiskDisplay', 'riskShare', 'pivotLocationHorizonCount', 'sourceTambonEn', 'metadataDetail']));
+    const descriptions = dictionary.getSheetValues().slice(5) as unknown[][];
+    for (const row of descriptions) {
+      expect(row[2]).toMatch(/[ก-๙]/); expect(row[3]).toMatch(/[a-z]/i);
+      expect(row[5]).toMatch(/^[MCO]$/); expect(row[8]).toBeDefined();
+      expect(row[9]).toMatch(/[ก-๙]/); expect(row[10]).toMatch(/[a-z]/i); expect(row[11]).toBeTruthy();
+    }
+    const drawing = await zip.file('xl/drawings/drawing1.xml')!.async('string');
+    expect(drawing).toContain('descr='); expect(drawing).toContain('Six-month drought forecast');
+  }, 30_000);
+
+  it('keeps machine blanks numeric-only with explicit missing states and builds without browser DOM globals', async () => {
+    const selected = structuredClone(archive);
+    const locations = selected.locations.filter(row => row.districtCode === '3003');
+    selected.packedRiskByTargetMonth['2025-12'][locations[0].subdistrictCode] = [0, null, 1, 2, null, 0];
+    delete selected.packedRiskByTargetMonth['2025-12'][locations[1].subdistrictCode];
+    const report = buildForecastExport(selected, { ...options, areaCode: '3003' });
+    const stages: string[] = [];
+    vi.stubGlobal('DOMParser', undefined); vi.stubGlobal('XMLSerializer', undefined);
+    let bytes: Uint8Array;
+    try { bytes = await createForecastWorkbook(report, new Uint8Array(readFileSync('src/assets/forecast-export-template.xlsx')).buffer, { onProgress: stage => stages.push(stage) }); }
+    finally { vi.unstubAllGlobals(); }
+    expect(stages).toEqual(['template', 'workbook', 'packaging']);
+    const book = new ExcelJS.Workbook(); await book.xlsx.load(bytes!);
+    const sheet = book.getWorksheet(forecastExportSheetNames.machine)!;
+    const fields = report.dictionary.filter(item => item.table === 'machineRows').map(item => item.field);
+    const value = (index: number, field: string) => sheet.getCell(index + 5, fields.indexOf(field) + 1).value;
+    expect(value(0, 'forecastRisk')).toBe(0); expect(value(0, 'forecastStatus')).toBe('VALID');
+    expect(value(1, 'forecastRisk')).toBeNull(); expect(value(1, 'forecastStatus')).toBe('OUT_OF_SCOPE');
+    expect(value(6, 'forecastRisk')).toBeNull(); expect(value(6, 'forecastStatus')).toBe('MISSING');
+    for (let i = 0; i < report.machineRows.length; i++) expect(value(i, 'forecastRisk') === null || typeof value(i, 'forecastRisk') === 'number').toBe(true);
+  }, 30_000);
+
+  it('adds a readable same-target comparison while keeping numeric codes, statuses and provenance', async () => {
+    const current = buildForecastExport(archive, { ...options, areaCode: '3003' });
+    const baseline = buildForecastExport(archive, { ...options, areaCode: '3003', originPeriod: '2025-11' });
+    const comparison = withForecastExportComparison(current, baseline);
+    const bytes = await createForecastWorkbook(comparison, new Uint8Array(readFileSync('src/assets/forecast-export-template.xlsx')).buffer);
+    const book = new ExcelJS.Workbook(); await book.xlsx.load(bytes);
+    expect(book.worksheets).toHaveLength(10);
+    const sheet = book.getWorksheet(forecastExportSheetNames.comparison)!;
+    const headers = sheet.getRow(4).values.slice(1) as string[];
+    expect(headers.filter(header => !/[ก-๙]/.test(header) || !header.includes('\n'))).toEqual([]);
+    const fields = headers.map(header => header.split('\n')[1]);
+    expect(fields.slice(0, 7)).toEqual(['targetPeriod', 'subdistrictCode', 'subdistrictNameTh', 'baselineRiskLabelTh', 'currentRiskLabelTh', 'comparisonLabelTh', 'riskDelta']);
+    expect(sheet.getCell('A3').value).toContain('รอบที่เลือก − รอบอ้างอิง');
+    expect(sheet.getCell('A3').value).toContain('เทียบระดับไม่ได้ ≠ ระดับเท่าเดิม');
+    expect(sheet.getRow(4).height).toBeGreaterThanOrEqual(60);
+    expect(sheet.views[0]).toMatchObject({ state: 'frozen', ySplit: 4, xSplit: 3 });
+    expect(sheet.pageSetup.fitToPage).toBe(false);
+    for (const [index, record] of comparison.comparison!.rows.entries()) {
+      for (const [field, expected] of Object.entries(record)) expect(sheet.getCell(index + 5, fields.indexOf(field) + 1).value).toEqual(expected);
+      if (record.comparisonStatus === 'NOT_COMPARABLE') {
+        expect(sheet.getCell(index + 5, fields.indexOf('comparisonLabelTh') + 1).value).toBe('เทียบระดับไม่ได้');
+        expect(sheet.getCell(index + 5, fields.indexOf('riskDelta') + 1).value).toBeNull();
+      }
+    }
+    const dictionary = book.getWorksheet(forecastExportSheetNames.dictionary)!;
+    expect(dictionary.getColumn(1).values).toEqual(expect.arrayContaining(['baselineRiskLabelTh', 'currentRiskLabelTh', 'comparisonLabelTh', 'baselineSourceDisplay']));
+    const notes = book.getWorksheet('ที่มาและนิยาม')!.getSheetValues().flat();
+    expect(notes).toContain('2025-11 → 2025-12');
+    expect(notes).toContain(comparison.comparison!.baselineMeta.sourceWorkbookSha256);
   }, 30_000);
 });

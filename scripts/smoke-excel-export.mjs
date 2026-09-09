@@ -15,12 +15,14 @@ export async function smokeExcelExport({ page, viewport, output, archive }) {
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
   const downloadButton = dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' });
-  await expect(downloadButton).toBeEnabled();
+  await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   if (districtCode !== '30') {
     await dialog.getByRole('combobox', { name: /^พื้นที่ / }).click();
     await page.getByRole('option', { name: 'อำเภอเสิงสาง', exact: true }).click();
   }
   await expect(dialog).toContainText('ม.ค. 2569 – มิ.ย. 2569');
+  await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
+  await expect(downloadButton).toBeEnabled();
   await page.screenshot({ path: path.join(output, `${viewport}-excel-export.png`), fullPage: true });
   assert.equal(await dialog.evaluate(node => node.scrollWidth > node.clientWidth), false, 'Export dialog overflow');
   const event = page.waitForEvent('download', { timeout: 60_000 });
@@ -29,10 +31,11 @@ export async function smokeExcelExport({ page, viewport, output, archive }) {
   const file = path.join(output, `${viewport}-forecast.xlsx`);
   await download.saveAs(file);
   assert.equal(await download.failure(), null);
-  assert.equal(download.suggestedFilename(), `Korat_Drought_${origin}_${districtCode}_all_T1-T6.xlsx`);
+  assert.ok(download.suggestedFilename().startsWith(`Korat_Drought_${origin}_${districtCode}_all_T1-T6_`));
+  assert.ok(download.suggestedFilename().endsWith('.xlsx'));
   const book = new ExcelJS.Workbook();
   await book.xlsx.readFile(file);
-  assert.equal(book.worksheets.length, 7);
+  assert.ok(book.worksheets.length >= 9);
   const tambons = book.getWorksheet('รายตำบล');
   const summary = book.getWorksheet('สรุปอำเภอ');
   const rowsByCode = new Map();

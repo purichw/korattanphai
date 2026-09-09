@@ -318,6 +318,9 @@ When committing, pushing, or deploying, follow `docs/RELEASE_RUNBOOK.md`.
 `ForecastExcelExport` is the shared navigation action for overview, province,
 district and tambon routes on desktop/mobile. Its dialog uses `AppSelect` and
 the existing button styles. It keeps export month/area/irrigation independent of
-map state, requests a freshly validated Supabase slice on Download, and imports
-the XLSX writer only on demand. See `docs/FORECAST_EXCEL_EXPORT.md` for workbook
+map state. Prepare shows scope/coverage counts; Download revalidates the preview
+and requires review again if data changed. Optional comparisons align the same
+target month and administrative code across origins. The dialog owns cancellable
+loaders and starts its XLSX worker only on Download; Cancel retains options for
+retry while Close/Escape discard them. See `docs/FORECAST_EXCEL_EXPORT.md` for workbook
 semantics, native chart/PivotTable support, provenance and regression checks.

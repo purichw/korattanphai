@@ -12,7 +12,7 @@ test('Excel export filters, real download and fresh revision gate', async ({ pag
   const downloads: string[] = [];
   let offline = false;
   let current = archive;
-  page.on('request', request => { if (request.url().includes('forecastExcelWriter')) downloads.push(request.url()); });
+  page.on('request', request => { if (/forecastExcel(Writer|Worker)/.test(request.url())) downloads.push(request.url()); });
   await page.route('**/rest/v1/rpc/ktp_latest_forecast_revision', route => route.fulfill(offline
     ? { status: 503, json: { message: 'offline' } } : { json: { ...forecastRevision(current), publishedAt: current === archive ? '2026-09-06T10:00:00Z' : '2026-09-07T10:00:00Z' } }));
   await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
@@ -27,10 +27,14 @@ test('Excel export filters, real download and fresh revision gate', async ({ pag
   if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
-  await expect(dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' })).toBeEnabled();
+  await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   await dialog.getByRole('combobox', { name: /^พื้นที่ / }).click();
   await page.getByRole('option', { name: 'อำเภอเสิงสาง', exact: true }).click();
   await expect(dialog).toContainText('ม.ค. 2569 – มิ.ย. 2569');
+  await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
+  await expect(dialog.getByRole('heading', { name: 'ตรวจข้อมูลก่อนดาวน์โหลด' })).toBeVisible();
+  await expect(dialog.locator('.nr-export-preview')).toContainText('36 รายการพยากรณ์');
+  expect(downloads).toHaveLength(0);
   await page.screenshot({ path: testInfo.outputPath('excel-export-filters.png') });
   expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
   const event = page.waitForEvent('download');
@@ -58,6 +62,9 @@ test('Excel export filters, real download and fresh revision gate', async ({ pag
   current.meta.datasetVersion = 'test-only-export-new-publication';
   current.meta.sourceWorkbookSha256 = 'b'.repeat(64);
   current.packedRiskByTargetMonth['2025-12']['300301'][0] = 2;
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  await expect(dialog.getByRole('status')).toContainText('ข้อมูลเปลี่ยนจากที่ตรวจไว้');
+  await expect(dialog.locator('.nr-export-preview')).toContainText('test-only-export-new-publication');
   const nextEvent = page.waitForEvent('download');
   await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
   const next = await nextEvent;
@@ -85,14 +92,14 @@ test('Excel export from tambon defaults to its district, supports month/irrigati
   if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
-  await expect(dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' })).toBeEnabled();
+  await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   await expect(dialog.getByRole('combobox', { name: /^พื้นที่ / })).toContainText('อำเภอเสิงสาง');
   await dialog.getByRole('combobox', { name: /^เดือนตั้งต้น/ }).click();
   await page.getByRole('option', { name: 'พ.ย. 2568', exact: true }).click();
   await expect(dialog).toContainText('ธ.ค. 2568 – พ.ค. 2569');
   await dialog.getByRole('combobox', { name: /^สถานะชลประทาน/ }).click();
   await page.getByRole('option', { name: 'เข้าถึงชลประทาน', exact: true }).click();
-  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
   await expect(dialog.getByRole('alert')).toContainText('ไม่มีตำบลตรงกับตัวกรอง');
   expect(downloads).toBe(0);
   await dialog.getByRole('combobox', { name: /^สถานะชลประทาน/ }).click();
@@ -105,11 +112,101 @@ test('Excel export from tambon defaults to its district, supports month/irrigati
     const query = route.request().postDataJSON(); await gate;
     return route.fulfill({ json: forecastSlice(archive, query) });
   });
-  const response = page.waitForResponse(r => r.url().includes('ktp_load_forecast_slice') && r.request().postDataJSON().p_origin_period === '2025-10');
-  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  const request = page.waitForRequest(r => r.url().includes('ktp_load_forecast_slice') && r.postDataJSON().p_origin_period === '2025-10');
+  await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
+  await request;
   await dialog.getByRole('button', { name: 'ยกเลิก', exact: true }).click();
-  await expect(dialog).not.toBeVisible();
-  release(); await (await response).finished();
+  await expect(dialog.getByRole('status')).toContainText('ยกเลิกแล้ว');
+  await expect(dialog.getByRole('combobox', { name: /^เดือนตั้งต้น/ })).toContainText('ต.ค. 2568');
+  release();
   expect(downloads).toBe(0);
   await expect(page).toHaveURL(/target=2025-12&horizon=6/);
+});
+
+test('Excel export compares the same target month and cancels a live workbook worker before retry', async ({ page }, testInfo) => {
+  test.setTimeout(60_000);
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
+    const query = route.request().postDataJSON();
+    return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 ? overview : archive, query) });
+  });
+  await seedAuthSession(page);
+  await page.goto('/?target=2025-12&horizon=1');
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
+  if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
+  await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
+  await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
+  await dialog.getByRole('combobox', { name: /^พื้นที่ / }).click();
+  await page.getByRole('option', { name: 'อำเภอเสิงสาง', exact: true }).click();
+  await dialog.getByRole('combobox', { name: /^รอบตั้งต้นที่ใช้เปรียบเทียบ/ }).click();
+  await page.getByRole('option', { name: 'พ.ย. 2568', exact: true }).click();
+  await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
+  await expect(dialog.locator('.nr-export-preview')).toContainText('เทียบได้ 5 เดือน · 30 คู่');
+  let released!: () => void;
+  const gate = new Promise<void>(resolve => { released = resolve; });
+  let held = false;
+  const holdTemplate = async (route: import('@playwright/test').Route) => {
+    held = true; await gate;
+    try { await route.continue(); } catch { /* Cancellation can close the worker request first. */ }
+  };
+  await page.route('**/*forecast-export-template*.xlsx*', holdTemplate);
+  const workers: import('@playwright/test').Worker[] = [];
+  page.on('worker', worker => workers.push(worker));
+  let downloaded = 0; page.on('download', () => { downloaded++; });
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  await expect.poll(() => held).toBe(true);
+  expect(workers.length).toBe(1);
+  const closed = workers[0].waitForEvent('close');
+  await dialog.getByRole('button', { name: 'ยกเลิก', exact: true }).click();
+  await closed;
+  await expect(dialog.getByRole('status')).toContainText('ยกเลิกแล้ว');
+  await expect(dialog.getByRole('combobox', { name: /^รอบตั้งต้นที่ใช้เปรียบเทียบ/ })).toContainText('พ.ย. 2568');
+  expect(downloaded).toBe(0);
+  released(); await page.unroute('**/*forecast-export-template*.xlsx*', holdTemplate);
+  const downloadEvent = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  const download = await downloadEvent;
+  const output = testInfo.outputPath('comparison.xlsx'); await download.saveAs(output);
+  expect(download.suggestedFilename()).toContain('_vs_2025-11_');
+  const book = new ExcelJS.Workbook(); await book.xlsx.readFile(output);
+  const comparison = book.getWorksheet('เปรียบเทียบรอบ')!;
+  expect(comparison).toBeTruthy();
+  expect(book.getWorksheet('ข้อมูลสำหรับระบบ')).toBeTruthy();
+  expect(book.getWorksheet('พจนานุกรมข้อมูล')).toBeTruthy();
+  await expect(dialog.getByRole('status')).toContainText('ส่งออกแล้ว');
+  expect(downloaded).toBe(1);
+  await page.screenshot({ path: testInfo.outputPath('excel-export-comparison.png') });
+  expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+});
+
+test('Excel export province preserves all 1734 source values through the workbook worker', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'One full-province payload check supplements the cross-browser district cases');
+  test.setTimeout(60_000);
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
+    const query = route.request().postDataJSON();
+    return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 ? overview : archive, query) });
+  });
+  await seedAuthSession(page);
+  await page.goto('/?target=2025-12&horizon=1');
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
+  await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
+  await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
+  await expect(dialog.locator('.nr-export-preview')).toContainText('32 อำเภอ');
+  await expect(dialog.locator('.nr-export-preview')).toContainText('289 ตำบล');
+  const event = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
+  const download = await event;
+  const output = testInfo.outputPath('province.xlsx'); await download.saveAs(output);
+  const book = new ExcelJS.Workbook(); await book.xlsx.readFile(output);
+  const raw = book.getWorksheet('รายตำบล')!;
+  expect(raw.rowCount).toBe(293);
+  for (let index = 5; index <= raw.rowCount; index++) {
+    const code = raw.getCell(index, 4).value as string;
+    for (let h = 0; h < 6; h++) expect(raw.getCell(index, 8 + h).value).toBe(archive.packedRiskByTargetMonth['2025-12'][code][h] ?? 'นอกขอบเขตการศึกษา');
+  }
+  expect(book.getWorksheet('ข้อมูลสำหรับระบบ')!.rowCount).toBe(1738);
+  expect(book.getWorksheet('สรุปอำเภอ')!.rowCount).toBe(36);
+  expect(book.getWorksheet('ฐาน Pivot')!.rowCount).toBe(1735);
+  await expect(dialog.getByRole('status')).toContainText('ส่งออกแล้ว 32 อำเภอ · 289 ตำบล');
 });
