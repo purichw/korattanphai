@@ -10,14 +10,14 @@ The legacy advisory, approval and notification workflows below remain
 simulated. Supabase login, forecast reads and personal saved workspaces have
 separate real persistence; the simulated personas do not grant permissions.
 
-The new machine-authenticated model-input API and legacy collector are locally
-testable; see [API.md](API.md#model-inputs-local-system-bridge) for setup,
-source mappings, immutable batch reads and the prepared Supabase migration.
-Source-scoped quotas, request correlation, health probes, opt-in telemetry,
-resumable input jobs and bounded backup/restore tools are now implemented.
-No actual local/ThaiWater feed, provider dashboard, remote monitoring destination,
-notification recipient or ingest schedule has been activated by this work.
-Prepared migrations and environment settings still need operator activation.
+The NFR handlers were deployed to [production](https://korattanphai.vercel.app)
+on 2026-09-09. Public health returns 200; model-input ingestion and private
+readiness remain unconfigured (503); telemetry POST returns 204 while disabled.
+The collector and resumable job/backup/restore tools remain operator-run.
+See [release evidence](HANDOFF.md) and [API setup](API.md#model-inputs-local-system-bridge).
+No remote migration, actual local/ThaiWater feed, provider dashboard, scheduler,
+monitoring, notification recipient or remote log store was activated. Prepared migrations and
+environment settings still need operator activation. V2 remains proposed.
 
 ## Actual NFR Ownership / ผู้รับผิดชอบงานระบบจริง
 

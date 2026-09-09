@@ -5,9 +5,12 @@ database owner and PO/BA. This runbook operates the implemented NFR tools. It
 does not authorize deployment, production writes or remote migrations.
 
 The website already has real Supabase authentication, forecast reads and saved
-personal workspaces. New model-input/health/telemetry code and prepared quota
-migrations are local implementation until separately activated. Scientific model
-execution and V2 forecast publication remain the team's future integration.
+personal workspaces. The NFR handlers were deployed to
+[production](https://korattanphai.vercel.app) on 2026-09-09: public health returns
+200; model-input ingestion and private readiness remain unconfigured (503);
+telemetry POST returns 204 while disabled. No remote migration, live feed/scheduler,
+monitoring, notification recipient or remote log store was activated. Scientific model execution
+and V2 forecast publication remain proposed. See [release evidence](HANDOFF.md).
 
 ## What Each Signal Proves / อ่านสัญญาณให้ตรงขอบเขต
 

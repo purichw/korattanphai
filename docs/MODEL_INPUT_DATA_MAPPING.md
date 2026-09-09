@@ -431,6 +431,12 @@ Coverage: section 2 covers every allowed collector config key, including nested 
 <a id="nfr-controls"></a>
 ## 11. NFR Environment and Identity Parameters — Implemented, Activation Required
 
+Handlers were deployed to [production](https://korattanphai.vercel.app) on
+2026-09-09: public health 200, input/readiness 503 while unconfigured, and
+telemetry POST 204 while disabled. No remote migration, live feed/scheduler,
+monitoring, notification recipient or remote log store was activated; V2 remains proposed.
+See [release evidence](HANDOFF.md). Deployment alone does not enable ingestion.
+
 Environment and CLI values are **strings on input**, even when they represent
 booleans or integers. JSON objects/policies use actual JSON types. None of these
 settings becomes an observation field. Samples are deliberately fictional;
@@ -447,8 +453,8 @@ explicit JSON null; an omitted/empty optional flag takes its documented default.
 | `MODEL_INPUT_CLIENTS_JSON` | string(JSON) → array<object> | O | N | `"[{\"id\":\"weather-feed\",\"role\":\"writer\",\"sourceId\":\"korat-model-team\",\"tokens\":[\"example-feed-key-2222222222222222\"]}]"` | คู่เชื่อมต่อแบบมีชื่อ ใช้ร่วมกับหรือแทนคีย์เดิมได้ / Named clients may coexist with or replace legacy variables; max 32 clients / 32 KiB text. |
 | `MODEL_INPUT_RATE_LIMIT_PER_MINUTE` | string(integer) → integer | O | N | `"60"` (default) | จำนวนคำขอที่ยืนยันตัวตนแล้วต่อนาที UTC / Per-identity fixed-minute limit, 1–60000. |
 | `MODEL_INPUT_DAILY_QUOTA` | string(integer) → integer | O | N | `"10000"` (default) | จำนวนคำขอรวมต่อวัน UTC / Per-identity daily allowance, 1–10000000. |
-| `MODEL_INPUT_SUPABASE_URL` | string → HTTPS origin | C for deployed API | N | `"https://example.supabase.co"` | ฐานข้อมูลรับ input และนับ quota / Durable input/quota database; origin only, no path/query/userinfo. |
-| `MODEL_INPUT_SUPABASE_SECRET_KEY` | string → secret string | C for deployed API | N | `"example-server-secret-333333333333"` | คีย์ฝั่ง server เท่านั้น ใช้ migrations ที่เตรียมไว้ / Server-only database key; requires prepared migrations. |
+| `MODEL_INPUT_SUPABASE_URL` | string → HTTPS origin | C to enable ingestion | N | `"https://example.supabase.co"` | ฐานข้อมูลรับ input และนับ quota / Durable input/quota database; origin only, no path/query/userinfo. |
+| `MODEL_INPUT_SUPABASE_SECRET_KEY` | string → secret string | C to enable ingestion | N | `"example-server-secret-333333333333"` | คีย์ฝั่ง server เท่านั้น ใช้ migrations ที่เตรียมไว้ / Server-only database key; requires prepared migrations. |
 | `VITE_OPERATIONAL_TELEMETRY_ENABLED` | string(boolean) → boolean | O | N | `"false"` (default) | เปิดตัวส่งเหตุการณ์ใน build เมื่อเป็นข้อความ true เท่านั้น / Only exact `true` enables browser reporting; not a secret. |
 | `OPERATIONAL_TELEMETRY_ENABLED` | string(boolean) → boolean | O | N | `"false"` (default) | เปิด endpoint รับ log เมื่อเป็น true เท่านั้น / Server collection opt-in; disabled POST returns silent 204. |
 | `OPERATIONAL_TELEMETRY_ORIGINS` | string(CSV origins) → array<string> | C when telemetry enabled | N | `"https://korattanphai.vercel.app"` | รายการ origin ที่เชื่อถือคั่น comma ไม่มี slashท้าย/path / Exact origins; HTTPS, or loopback HTTP for local checks. |

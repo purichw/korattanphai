@@ -20,6 +20,54 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Operational hardening production release (2026-09-09):
+
+- Pushed runtime `abfa101233f6ccba87e78f2700c3b9a7b13a1ea8` and test-only
+  follow-up `88512c9b993c0737c4ee40761279f23d28967ccf` on
+  `fix/nr-map-zoom-performance`. The only follow-up difference is the forecast
+  fault-injection test: it lets Vite's `?import&url` module load while holding
+  the actual data fetch. Timeout/error/retry/selection assertions remain intact.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34333473547)
+  passed all four jobs and the `regression` aggregate on the follow-up commit:
+  197 unit, 104 model-input/API/jobs, 9 operations, 11 SQL/integrity/RLS checks,
+  135 built Chromium cases (31 conditional skips), 38 database-browser cases
+  and 6 WebKit/Firefox cases. The first CI attempt exposed the Vite import
+  interception issue and was superseded; it is not counted as a pass.
+- Created the protected Supabase candidate from clean Git archive
+  `artifacts/nfr-release-2ojt6rlh`, excluding the incidental Python cache and
+  local artifacts. Vercel Node24 build/exposure/bundle checks passed with no
+  static forecast archive assets. The tested follow-up has identical runtime,
+  dependency, build and deployment files, so the verified artifact was reused.
+- Deployment `dpl_CV1XnFCt3p3wgyaw1A252DtLAEkJ` is Ready at
+  `https://korattanphai-438zljgad-purichwc-1517s-projects.vercel.app`.
+  Promoted that exact artifact after CI and candidate verification. Direct
+  deployment lookup and the alias listing confirm
+  `https://korattanphai.vercel.app` resolves to this deployment.
+- Candidate and primary production each passed 32 authenticated desktop/mobile
+  smoke checks plus 7 hosted operational endpoint cases. Login/logout, scoped
+  source equality, map colors, month/T+, irrigation/reset, saved reads, assets,
+  security/cache headers and real Excel exports passed with no failures.
+  Excel checks retained 1,734 source-equal values on desktop and 36 on mobile,
+  including native chart/PivotTable parts. Desktop/mobile screenshots reviewed.
+- Hosted status: public `/api/health` returns 200; invalid/method checks return
+  their expected 400/405; private readiness returns 503 `not_configured`;
+  `/api/model-inputs` returns 503 `service_not_configured`; disabled telemetry
+  POST returns 204 and GET returns 405. These prove deployed handlers and
+  disabled configuration boundaries, not an activated live data pipeline.
+- Evidence is in `artifacts/nfr-regression/`: `release-metadata.json`,
+  `quality-release.json`, `quality-release-full.log`, `deploy-candidate.json`,
+  `production-inspection-confirmed.json`, and `release-{candidate,production}/`
+  with `report.json`, `operational-endpoints.json` and screenshots.
+- No migrations, live feed/scheduler, monitoring/recipient/log-store activation,
+  forecast changes or application-data writes. Browser telemetry remains off.
+  GitHub smoke secrets/variables are absent; preview-event smoke workflows were
+  skipped and production verification used the local authorized harness.
+  No passwords or Vercel session cookies were saved to source or reports.
+- Recovery: promote prior verified `dpl_BmFJqbxy4eE66KdXiV16yxQCULV1`, then
+  smoke the primary origin; no database rollback is required by this release.
+  Field performance/SLA, physical-device/assistive-technology coverage,
+  independent-connection capacity and whole-database restore remain unverified.
+
 Local NFR implementation and regression (2026-09-09; not deployed):
 
 - Added operational health/readiness, request IDs/log summaries, opt-in bounded

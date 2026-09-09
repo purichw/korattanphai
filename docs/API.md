@@ -4,8 +4,12 @@
 
 The repo contains the read-only risk-fusion route, a machine-authenticated
 model-input ingestion route, health probes and opt-in operational telemetry.
-The new integration/operational routes are locally testable implementations;
-no live local-system/ThaiWater connection or production migration is claimed.
+The integration/operational handlers were deployed to
+[production](https://korattanphai.vercel.app) on 2026-09-09. Public health returns
+200; model-input ingestion returns 503 `service_not_configured`; private
+readiness returns 503 `not_configured`; telemetry POST returns 204 while disabled.
+No remote migration, live feed/scheduler, monitoring, notification recipient or remote log
+store was activated. See [release evidence](HANDOFF.md).
 Supabase Auth, scoped forecast reads and personal saved workspaces already have
 separate contracts in [AUTH_SETUP.md](AUTH_SETUP.md) and
 [FORECAST_SCOPED_LOADING.md](FORECAST_SCOPED_LOADING.md).
@@ -350,7 +354,8 @@ response bodies are not echoed in API errors.
 
 `api/model-inputs.js` uses Supabase persistence only. It fails closed with 503
 if configuration is missing; it never falls back to ephemeral local storage.
-After a separately authorized migration/deployment, configure the server-only
+Before enabling ingestion on the deployed handler, apply the separately
+authorized migrations and configure the server-only
 `MODEL_INPUT_SUPABASE_URL`, `MODEL_INPUT_SUPABASE_SECRET_KEY`, source ID and
 integration tokens. The new migration
 `supabase/migrations/20260909010000_model_input_batches.sql` creates an isolated
@@ -555,8 +560,9 @@ Future responses should include:
 ## NFR Integration Controls — 2026-09-09
 
 The observation envelope, POST receipt and GET bodies above remain V1.
-New controls add headers, named credentials and quotas. **Implementation is
-present; no deployment/migration is claimed.** [Typed environment and identity
+New controls add headers, named credentials and quotas. **Handlers were deployed
+on 2026-09-09; ingestion remains unconfigured and the prepared migrations were
+not applied.** See [release evidence](HANDOFF.md). [Typed environment and identity
 tables](MODEL_INPUT_DATA_MAPPING.md#nfr-controls) include samples and M/C/O rules.
 
 `MODEL_INPUT_CLIENTS_JSON` optionally defines up to 32 identities, each with

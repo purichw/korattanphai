@@ -1,5 +1,11 @@
 # NFR implementation and regression — 2026-09-09
 
+Release follow-up: the reviewed runtime was subsequently pushed and deployed on
+2026-09-09. [HANDOFF.md](HANDOFF.md#recent-changes) records the successful CI,
+exact production artifact, 32 authenticated and 7 operational checks per target,
+and inactive integrations. The report below preserves the earlier local
+pre-release evidence and its original verification boundary.
+
 ปรับปรุงโค้ด NFR และทดสอบใน working tree ของ `/Users/point/korattanphai`
 บน branch `fix/nr-map-zoom-performance` แล้ว เอกสารนี้แยกหลักฐานที่ตรวจแล้ว
 ออกจากการตั้งค่าบนระบบจริง ซึ่งยังไม่ได้ deploy หรือ apply migration ในรอบนี้

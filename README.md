@@ -56,9 +56,12 @@ Verified Thai source fields and research are in
 
 Operational hardening, measurable requirements and activation status are in
 [Non-functional requirements](docs/NON_FUNCTIONAL_REQUIREMENTS.md) and the
-[NFR operations runbook](docs/NFR_OPERATIONS_RUNBOOK.md). The new health checks,
-telemetry, named integration quotas, durable collector jobs and local restore
-tools are implemented in this checkout; their production activation is separate.
+[NFR operations runbook](docs/NFR_OPERATIONS_RUNBOOK.md). The NFR handlers were
+deployed to [production](https://korattanphai.vercel.app) on 2026-09-09: public
+health returns 200; model-input ingestion and private readiness return 503
+because they remain unconfigured; telemetry POST returns 204 while disabled.
+No remote migration, live feed/scheduler, monitoring, notification recipient or remote log
+store was activated. V2 remains proposed; see [release evidence](docs/HANDOFF.md).
 `npm run check:health` checks the existing public web/API without modifying data.
 `npm run test:operations` verifies operational endpoint contracts locally.
 `npm run model-inputs:job`, `model-inputs:backup`, and `model-inputs:restore`

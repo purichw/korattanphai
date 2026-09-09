@@ -18,12 +18,13 @@ The proposed next architecture for Thai satellite/DOAE inputs, team-run models
 and live T+ publication is [docs/MODEL_PIPELINE_DESIGN.md](docs/MODEL_PIPELINE_DESIGN.md).
 It is a future-state v2 design, not the current runtime contract.
 
-NFR hardening in this checkout adds `api/health.js`, `api/telemetry.js`,
-`server/operations/`, privacy-safe browser instrumentation, bounded/retryable
-map and forecast loads, named integration identities and durable quotas, and
-one-shot job/backup/restore commands. Operational activation is default-off or
-requires explicit server configuration; no live-source schedule or remote quota
-migration is implied. See [NFR operations](docs/NFR_OPERATIONS_RUNBOOK.md).
+NFR handlers were deployed to [production](https://korattanphai.vercel.app) on
+2026-09-09. Public health returns 200; model-input ingestion and private
+readiness remain unconfigured (503); telemetry POST returns 204 while disabled.
+Bounded/retryable map and forecast loads are deployed. Job/backup/restore tools
+remain operator-run; no remote migration, live feed/scheduler, monitoring,
+notification recipient or remote log store was activated. V2 remains proposed. See
+[release evidence](docs/HANDOFF.md) and [NFR operations](docs/NFR_OPERATIONS_RUNBOOK.md).
 
 ## Current State
 
@@ -59,7 +60,8 @@ migration is implied. See [NFR operations](docs/NFR_OPERATIONS_RUNBOOK.md).
   `public/geodata/nakhon-ratchasima-subdistricts.geojson`
 - Drought forecast archive builder:
   `scripts/build-nr-drought-forecast-archive.py`
-- Read-only production endpoint: `api/risk-fusion.ts`
+- Read-only production endpoints: `api/risk-fusion.ts` and public liveness in
+  `api/health.js`; private readiness remains unconfigured (503).
 - Model-input API: `api/model-inputs.js`; legacy collector/schema/storage in
   `server/model-inputs/`; local commands and demo in `scripts/*model-inputs.mjs`.
   Inputs are separate from the published forecast archive and browser provider.
@@ -422,6 +424,7 @@ npm run test:e2e:managed
 ## Next Actions
 
 - Keep the docs in `docs/` updated with each product or release change.
-- Add automated production smoke tooling if production becomes operational.
+- Confirm existing production smoke workflow secrets, deployment-event triggers
+  and notification recipients before relying on automated release follow-up.
 - Split large JSON imports or add lazy loading if bundle size becomes a user
   problem.
