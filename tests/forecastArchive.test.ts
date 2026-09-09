@@ -42,7 +42,7 @@ describe("forecast archive loading", () => {
     })).mockResolvedValue({ ok: true, json: async () => archiveJson });
     vi.stubGlobal("fetch", fetchMock);
     const { loadForecastArchive } = await import("../src/data/forecastArchive");
-    const failure = expect(loadForecastArchive()).rejects.toThrow("Aborted");
+    const failure = expect(loadForecastArchive()).rejects.toThrow("Load timed out");
     await vi.advanceTimersByTimeAsync(30_000);
     await failure;
     await expect(loadForecastArchive()).resolves.toEqual(archiveJson);
@@ -58,6 +58,23 @@ describe("forecast archive loading", () => {
     await expect(loadForecastArchive()).rejects.toThrow("Invalid database forecast archive");
     expect(getCachedForecastArchive()).toBeNull();
     await expect(loadForecastArchive()).resolves.toEqual(archiveJson);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('never caches a late body after the deadline or replaces a successful retry with it', async () => {
+    vi.useFakeTimers();
+    let finish!: (value: unknown) => void;
+    const fetchMock = vi.fn().mockResolvedValueOnce({ ok: true, json: () => new Promise(resolve => { finish = resolve; }) })
+      .mockResolvedValue({ ok: true, json: async () => archiveJson });
+    vi.stubGlobal('fetch', fetchMock);
+    const { loadForecastArchive, getCachedForecastArchive } = await import('../src/data/forecastArchive');
+    const waiting = expect(loadForecastArchive()).rejects.toThrow('Load timed out');
+    await vi.advanceTimersByTimeAsync(30_000); await waiting;
+    expect(getCachedForecastArchive()).toBeNull();
+    const fresh = await loadForecastArchive();
+    finish({ ...archiveJson, meta: { ...archiveJson.meta, sourceWorkbookSha256: 'unapproved' } });
+    await Promise.resolve(); await Promise.resolve();
+    expect(getCachedForecastArchive()).toBe(fresh);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

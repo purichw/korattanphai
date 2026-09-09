@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "local-demo",
+  "source": {
+    "type": "http",
+    "url": "https://replace-with-authorized-local-source.invalid/observations",
+    "timeoutMs": 15000,
+    "headers": { "X-API-Key": { "env": "LOCAL_SOURCE_API_KEY" } }
+  },
+  "format": { "type": "json", "encoding": "utf-8", "dataPath": "data.observations" },
+  "fields": { "stationId": "station_code", "observedAt": "observed_at" },
+  "timestamp": { "format": "iso" },
+  "missingValues": ["", "-9999", "NULL"],
+  "measurements": [
+    { "metric": "rainfall", "valueColumn": "rain_mm", "unit": "mm", "aggregation": "sum", "periodMinutes": 60 }
+  ]
+}

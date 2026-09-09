@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "crop",
+  "sourceId": "korat-model-team",
+  "source": { "type": "file", "path": "doae-crop-yield.csv" },
+  "format": { "type": "csv", "encoding": "utf-8", "delimiter": "," },
+  "fields": {
+    "subdistrictCode": "tambon_code",
+    "cropCode": "crop",
+    "seasonId": "series",
+    "periodType": "period_type",
+    "periodStart": "period_start",
+    "periodEnd": "period_end",
+    "availableAt": "available_at",
+    "plantedAreaRai": "planted_rai",
+    "harvestedAreaRai": "harvested_rai",
+    "productionTonnes": "production_tonnes",
+    "yieldKgPerRai": "yield_kg_per_rai",
+    "yieldAreaBasis": "yield_area_basis",
+    "quality": "quality"
+  },
+  "constants": { "agency": "DOAE", "datasetVersion": "synthetic-demo-v1" },
+  "missingValues": ["", "-9999", "NULL"]
+}

@@ -26,9 +26,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run smoke
         env:
-          SMOKE_URL: ${{ inputs.url || github.event.deployment_status.environment_url }}
+          SMOKE_URL: ${{ inputs.url || 'https://korattanphai.vercel.app' }}
+          SMOKE_ALLOWED_PREVIEW_ORIGINS: ${{ vars.SMOKE_ALLOWED_PREVIEW_ORIGINS }}
           SMOKE_AUTH_EMAIL: ${{ secrets.SMOKE_AUTH_EMAIL }}
           SMOKE_AUTH_PASSWORD: ${{ secrets.SMOKE_AUTH_PASSWORD }}
+          SMOKE_DATA_BACKEND: supabase
       - uses: actions/upload-artifact@v7
         if: always()
         with:

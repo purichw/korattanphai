@@ -10737,3 +10737,17 @@ textarea {
     font-weight: 950;
   }
 }
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  padding: 12px 16px;
+  background: var(--surface, #fff);
+  color: var(--ink, #15271e);
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  transform: translateY(calc(-100% - 16px));
+}
+
+.skip-link:focus { transform: translateY(0); }

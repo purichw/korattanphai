@@ -9,7 +9,7 @@ concurrency:
   group: quality-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  regression:
+  contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -25,12 +25,53 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - run: npm test
+      - run: npm run test:model-inputs
+      - run: npm run test:operations
+      - run: npm audit --omit=dev --audit-level=moderate
       - run: npm run test:database
+  built-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: https://ktp-auth-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only
+      VITE_OPERATIONAL_TELEMETRY_ENABLED: 'true'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm run build:protected
       - run: git diff --exit-code -- src/data/generated/
       - run: npm run test:e2e:built
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: built-browser-failures
+          path: test-results/
+          retention-days: 7
+  database-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: https://ktp-auth-test.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e:database
       - run: npm run build:protected
         env:
@@ -39,6 +80,36 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: regression-failures
+          name: database-browser-failures
           path: test-results/
           retention-days: 7
+  browser-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps webkit firefox
+      - run: npm run test:e2e:compat
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: compatibility-failures
+          path: test-results/
+          retention-days: 7
+  regression:
+    if: always()
+    needs: [contracts, built-browser, database-browser, browser-compatibility]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Require every regression job to pass
+        env:
+          RESULTS: ${{ join(needs.*.result, ',') }}
+        run: test "$RESULTS" = 'success,success,success,success'

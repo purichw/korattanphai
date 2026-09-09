@@ -2,6 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NakhonRatchasimaDroughtForecastArchive } from '../types';
 import { forecastTargetPeriod } from '../forecastPeriod';
 import { forecastQueryPeriod, forecastScopeCodes, projectForecastScope, type ForecastQuery } from './forecastScope';
+import { withLoadDeadline, LoadTimeoutError } from './loadDeadline';
+import { reportOperationalEvent } from '../operationalTelemetry';
 
 export const FORECAST_DATASET_ID = 'a3be4448-6c8e-4039-b574-4674e261ee9b';
 export const FORECAST_DATASET_VERSION = 'drought-rev03-a3be44486c8e';
@@ -89,7 +91,7 @@ export function createSupabaseForecastLoader(userId: string, horizonCount: 1 | 6
     getCached,
     clear() {
       generation++;
-      controllers.forEach((controller) => controller.abort());
+      controllers.forEach((controller) => controller.abort(new Error('Session changed')));
       controllers.clear(); cache.clear(); pending.clear();
       activeRevision = null;
     },
@@ -101,9 +103,10 @@ export function createSupabaseForecastLoader(userId: string, horizonCount: 1 | 6
       const epoch = generation;
       const request = new AbortController();
       controllers.add(request);
-      const timer = setTimeout(() => request.abort(), 30_000);
-      const task = (async () => {
+      const startedAt = performance.now();
+      const task = withLoadDeadline(request, async () => {
         const client = await getClient();
+        if (request.signal.aborted) throw request.signal.reason;
         if (!client) throw new Error('Database unavailable');
         const { data: { session }, error: sessionError } = await client.auth.getSession();
         if (sessionError || session?.user.id !== userId || request.signal.aborted) throw new Error('Session changed');
@@ -134,8 +137,14 @@ export function createSupabaseForecastLoader(userId: string, horizonCount: 1 | 6
         // Bound per-account memory; do not persist protected predictions to disk.
         while (cache.size > 16) cache.delete(cache.keys().next().value!);
         return validated;
-      })().finally(() => {
-        clearTimeout(timer);
+      }).then((archive) => {
+        reportOperationalEvent({ event: 'forecast_load', code: 'LOAD_OK', durationMs: performance.now() - startedAt });
+        return archive;
+      }).catch((error: unknown) => {
+        // Logout cancellation is expected, and must not be counted as a source outage.
+        if (epoch === generation) reportOperationalEvent({ event: 'forecast_load', code: error instanceof LoadTimeoutError ? 'LOAD_TIMEOUT' : 'LOAD_FAILED', durationMs: performance.now() - startedAt });
+        throw error;
+      }).finally(() => {
         controllers.delete(request);
         if (epoch === generation) pending.delete(key);
       });

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "mode": "operational",
+  "maxObservationAgeSeconds": 7200,
+  "maxFetchAgeSeconds": 3600
+}

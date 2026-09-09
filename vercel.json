@@ -1,5 +1,10 @@
 {
   "buildCommand": "npm run build:protected",
+  "functions": {
+    "api/model-inputs.js": {
+      "includeFiles": "src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

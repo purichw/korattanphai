@@ -1,3 +1,6 @@
+import { withLoadDeadline, LoadTimeoutError } from './loadDeadline';
+import { reportOperationalEvent } from '../operationalTelemetry';
+
 const localMapUrls = [
   "/geodata/nakhon-ratchasima-subdistricts.geojson",
   "/geodata/thailand-adm1.geojson",
@@ -9,13 +12,20 @@ const requests = new Map<string, Promise<unknown>>();
 export function loadLocalMapGeometry<T>(url: typeof localMapUrls[number]): Promise<T> {
   const cached = requests.get(url);
   if (cached) return cached as Promise<T>;
-  const request = fetch(url)
+  const controller = new AbortController();
+  const startedAt = performance.now();
+  const request = withLoadDeadline(controller, () => fetch(url, { signal: controller.signal })
     .then((response) => {
       if (!response.ok) throw new Error("Local map geometry unavailable");
       return response.json();
+    }))
+    .then((geometry) => {
+      reportOperationalEvent({ event: 'map_load', code: 'LOAD_OK', durationMs: performance.now() - startedAt });
+      return geometry;
     })
     .catch((error: unknown) => {
       requests.delete(url);
+      reportOperationalEvent({ event: 'map_load', code: error instanceof LoadTimeoutError ? 'LOAD_TIMEOUT' : 'LOAD_FAILED', durationMs: performance.now() - startedAt });
       throw error;
     });
   requests.set(url, request);

@@ -1,0 +1,2 @@
+tambon_code,crop,series,period_type,period_start,period_end,available_at,planted_rai,harvested_rai,production_tonnes,yield_kg_per_rai,yield_area_basis,quality,note
+300806,rice,2025-annual,calendar_year,2025-01-01,2025-12-31,2026-03-01T09:00:00+07:00,100,90,45,500,unspecified,reported,"ข้อมูลจำลองสรุปรายปีเพื่อทดสอบ รูปแบบคอลัมน์สมมติ ไม่ใช่ไฟล์หรือข้อมูลจริงจากกรมส่งเสริมการเกษตร"

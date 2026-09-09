@@ -19,6 +19,20 @@ function fixture(data: unknown = slice) {
   return { getSession, abortSignal, revisionSignal, rpc, client };
 }
 describe('Supabase archive loader', () => {
+  it('times out session discovery that ignores abort and retries without accepting its late result', async () => {
+    vi.useFakeTimers();
+    const f = fixture(); let finish!: (value: unknown) => void;
+    f.getSession.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    const loader = createSupabaseForecastLoader('a', 6, async () => f.client);
+    const waiting = expect(loader.load()).rejects.toThrow('Load timed out');
+    await vi.advanceTimersByTimeAsync(30_000); await waiting;
+    expect(loader.getCached()).toBeNull();
+    await expect(loader.load()).resolves.toEqual(slice);
+    finish({ data: { session: { user: { id: 'a' } } }, error: null });
+    await Promise.resolve(); await Promise.resolve();
+    expect(f.revisionSignal).toHaveBeenCalledTimes(1);
+    expect(f.abortSignal).toHaveBeenCalledTimes(1);
+  });
   it('reuses pending requests and caches only in the current account provider', async () => {
     const f = fixture(); const loader = createSupabaseForecastLoader('a', 6, async () => f.client);
     const first = loader.load(); expect(loader.load()).toBe(first);

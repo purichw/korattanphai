@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "satellite",
+  "sourceId": "korat-model-team",
+  "source": { "type": "file", "path": "satellite-features.json" },
+  "format": { "type": "json", "encoding": "utf-8", "dataPath": "features" },
+  "fields": {
+    "subdistrictCode": "tambon_code",
+    "period": "month",
+    "availableAt": "available_at",
+    "metric": "metric",
+    "value": "value",
+    "unit": "unit",
+    "quality": "quality",
+    "validPixelFraction": "valid_pixel_fraction",
+    "product": "product",
+    "resolutionMeters": "resolution_m",
+    "nativeSupportMeters": "native_support_m",
+    "spatialAggregation": "spatial_aggregation",
+    "temporalAggregation": "temporal_aggregation"
+  },
+  "constants": {
+    "productVersion": "synthetic-demo-v1",
+    "processingVersion": "synthetic-demo-v1",
+    "geometryVersion": "demo-boundary-v1",
+    "maskVersion": "demo-crop-mask-v1"
+  },
+  "missingValues": ["", "-9999", "NULL"]
+}

@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
+import { reportOperationalEvent } from "../operationalTelemetry";
 
 type Props = { children: ReactNode; onRetry?: () => void; resetKey?: string | number };
 
@@ -7,6 +8,10 @@ export class AppErrorBoundary extends Component<Props, { failed: boolean }> {
   state = { failed: false };
 
   static getDerivedStateFromError() { return { failed: true }; }
+
+  componentDidCatch() {
+    reportOperationalEvent({ event: 'runtime_error', code: 'RENDER_FAILED' });
+  }
 
   componentDidUpdate(previous: Props) {
     if (this.state.failed && previous.resetKey !== this.props.resetKey) this.setState({ failed: false });

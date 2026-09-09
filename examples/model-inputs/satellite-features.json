@@ -1,0 +1,50 @@
+{
+  "notice": "Synthetic demonstration only. These monthly subdistrict features are not downloaded satellite observations or raw imagery.",
+  "features": [
+    {
+      "tambon_code": "300806",
+      "month": "2026-08",
+      "available_at": "2026-09-02T09:00:00+07:00",
+      "metric": "ndvi",
+      "value": 0.6,
+      "unit": "1",
+      "quality": "reported",
+      "valid_pixel_fraction": 0.95,
+      "product": "SYNTHETIC-NDVI",
+      "resolution_m": 10,
+      "native_support_m": 10,
+      "spatial_aggregation": "area_weighted_mean",
+      "temporal_aggregation": "mean"
+    },
+    {
+      "tambon_code": "300806",
+      "month": "2026-08",
+      "available_at": "2026-09-02T09:00:00+07:00",
+      "metric": "land_surface_temperature",
+      "value": 33,
+      "unit": "degC",
+      "quality": "reported",
+      "valid_pixel_fraction": 0.92,
+      "product": "SYNTHETIC-LST",
+      "resolution_m": 1000,
+      "native_support_m": 1000,
+      "spatial_aggregation": "area_weighted_mean",
+      "temporal_aggregation": "mean"
+    },
+    {
+      "tambon_code": "300806",
+      "month": "2026-08",
+      "available_at": "2026-09-02T09:00:00+07:00",
+      "metric": "precipitation",
+      "value": 120,
+      "unit": "mm",
+      "quality": "reported",
+      "valid_pixel_fraction": 1,
+      "product": "SYNTHETIC-PRECIPITATION",
+      "resolution_m": 10000,
+      "native_support_m": 10000,
+      "spatial_aggregation": "coarse_grid_proxy",
+      "temporal_aggregation": "sum"
+    }
+  ]
+}

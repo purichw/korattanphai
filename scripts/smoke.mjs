@@ -6,12 +6,10 @@ import { isDeepStrictEqual } from "node:util";
 import { buildForecastOverviewArchive } from "./generate-forecast-summary.mjs";
 import { forecastSlice } from "../tests/fixtures/forecast-slice.mjs";
 import { smokeExcelExport } from "./smoke-excel-export.mjs";
+import { validateSmokeTarget } from './smoke-target.mjs';
 
-const base = new URL(process.env.SMOKE_URL ?? "https://korattanphai.vercel.app");
+const base = validateSmokeTarget(process.env.SMOKE_URL ?? "https://korattanphai.vercel.app", process.env.SMOKE_ALLOWED_PREVIEW_ORIGINS);
 const local = ["localhost", "127.0.0.1"].includes(base.hostname);
-if (!(local || (base.protocol === "https:" && /^korattanphai(?:-[a-z0-9-]+)?\.vercel\.app$/.test(base.hostname))) || base.username || base.password) {
-  throw new Error("SMOKE_URL must be this project's Vercel deployment or localhost.");
-}
 const output = path.resolve(process.env.SMOKE_OUTPUT_DIR ?? "smoke-results");
 const databaseMode = process.env.SMOKE_DATA_BACKEND === "supabase";
 const expectedArchive = databaseMode ? JSON.parse(await fs.readFile(new URL("../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", import.meta.url), "utf8")) : null;
@@ -43,6 +41,9 @@ try {
   browser = await chromium.launch();
   for (const [name, viewport] of Object.entries({ desktop: { width: 1440, height: 960 }, mobile: { width: 390, height: 844 } })) {
     const context = await browser.newContext({ viewport, reducedMotion: "reduce" });
+    const allowedOrigins = new Set([base.origin, 'https://dihchjflzhcekywarhxd.supabase.co', 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']);
+    await context.route('**/*', route => allowedOrigins.has(new URL(route.request().url()).origin)
+      ? route.continue() : route.abort('blockedbyclient'));
     if (protectionCookie) await context.addCookies([{
       name: "_vercel_jwt", value: protectionCookie, domain: base.hostname,
       path: "/", secure: true, httpOnly: true, sameSite: "Lax",

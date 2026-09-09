@@ -387,6 +387,10 @@ function AppShell({
 
   return (
     <div className={`app-shell${isDroughtSubNavActive ? " is-operational-drought" : ""}${isHomeOverview ? " is-home-overview" : ""}`} lang={language}>
+      <a className="skip-link" href="#workspace-content" onClick={(event) => {
+        event.preventDefault();
+        document.getElementById('workspace-content')?.focus();
+      }}>ข้ามไปเนื้อหาหลัก</a>
       <aside className={isMobileMenuOpen ? "sidebar mobile-menu-open" : "sidebar"} aria-label="เมนูหลัก">
         <div className="brand-lockup is-logo-only">
           <div className="brand-mark is-sidebar-logo">
@@ -435,6 +439,7 @@ function AppShell({
                 <button
                   type="button"
                   className={isMainItemActive ? "nav-item active" : "nav-item"}
+                  aria-current={isMainItemActive ? 'page' : undefined}
                   onClick={() => {
                     onNavigate("/");
                     dispatch({ type: "setSection", section });
@@ -449,6 +454,7 @@ function AppShell({
                     <button
                       type="button"
                       className={isDroughtSubNavActive ? "nav-subitem active" : "nav-subitem"}
+                      aria-current={isDroughtSubNavActive ? 'page' : undefined}
                       onClick={() => {
                         onNavigate(getNakhonRatchasimaProvinceTabPath("drought"));
                         dispatch({ type: "setSection", section });
@@ -504,7 +510,7 @@ function AppShell({
           </button>
         )}
 
-        <div className="content-area" onClick={(event) => {
+        <div className="content-area" id="workspace-content" tabIndex={-1} onClick={(event) => {
           if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
           const anchor = (event.target as Element).closest<HTMLAnchorElement>("a[href]");
           if (!anchor || anchor.hasAttribute("download") || (anchor.target && anchor.target !== "_self")) return;

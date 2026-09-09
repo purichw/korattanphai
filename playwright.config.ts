@@ -38,5 +38,9 @@ export default defineConfig({
         viewport: { width: 390, height: 844 },
       },
     },
+    ...(process.env.PLAYWRIGHT_COMPAT === "1" ? [
+      { name: "webkit-mobile", use: { ...devices["iPhone 13"], browserName: "webkit" as const } },
+      { name: "firefox-desktop", use: { ...devices["Desktop Firefox"], browserName: "firefox" as const } },
+    ] : []),
   ],
 });

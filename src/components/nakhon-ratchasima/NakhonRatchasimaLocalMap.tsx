@@ -191,6 +191,7 @@ export function NakhonRatchasimaLocalMap({
   const [provinceContextGeo, setProvinceContextGeo] = useState<ProvinceContextGeoCollection | null>(null);
   const [localProvinceBoundaryGeo, setLocalProvinceBoundaryGeo] = useState<LocalProvinceBoundaryGeoCollection | null>(null);
   const [error, setError] = useState(false);
+  const [geometryAttempt, setGeometryAttempt] = useState(0);
   const [transform, setTransform] = useState<LocalMapTransform>(localFitTransform);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedCode, setSelectedCode] = useState<string | null>(activeSelectedSubdistrictCode ?? null);
@@ -242,6 +243,7 @@ export function NakhonRatchasimaLocalMap({
 
   useEffect(() => {
     let active = true;
+    setError(false);
     loadLocalMapGeometry<NakhonRatchasimaGeoCollection>("/geodata/nakhon-ratchasima-subdistricts.geojson")
       .then((data: NakhonRatchasimaGeoCollection) => {
         if (active) {
@@ -255,7 +257,7 @@ export function NakhonRatchasimaLocalMap({
     return () => {
       active = false;
     };
-  }, []);
+  }, [geometryAttempt]);
 
   useEffect(() => {
     let active = true;
@@ -960,7 +962,7 @@ export function NakhonRatchasimaLocalMap({
   );
 
   if (error) {
-    return <div className="nr-map-loading" role="alert"><p>ไม่สามารถโหลดขอบเขตตำบลนครราชสีมาได้</p>{overviewLayout && <div className="nr-map-recovery-actions"><button type="button" className="secondary-button" onClick={() => window.location.reload()}>ลองโหลดแผนที่ใหม่</button><button type="button" className="secondary-button" onClick={() => onNavigate("/drought")}>ดูคลังพยากรณ์ย้อนหลัง</button></div>}</div>;
+    return <div className="nr-map-loading" role="alert"><p>ไม่สามารถโหลดขอบเขตตำบลนครราชสีมาได้</p><div className="nr-map-recovery-actions"><button type="button" className="secondary-button" onClick={() => setGeometryAttempt(value => value + 1)}>ลองโหลดแผนที่ใหม่</button>{overviewLayout && <button type="button" className="secondary-button" onClick={() => onNavigate("/drought")}>ดูคลังพยากรณ์ย้อนหลัง</button>}</div></div>;
   }
 
   if (!geo || !projection) {

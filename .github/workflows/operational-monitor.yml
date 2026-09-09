@@ -1,0 +1,28 @@
+name: Operational Monitor
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: operational-monitor
+  cancel-in-progress: false
+jobs:
+  probes:
+    if: vars.OPERATIONAL_MONITOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Check web, API and configured archive readiness
+        run: node scripts/check-operational-health.mjs
+        env:
+          OPERATIONAL_MONITOR_URL: https://korattanphai.vercel.app
+          OPERATIONAL_CHECK_READINESS: ${{ vars.OPERATIONAL_CHECK_READINESS }}
+          OPERATIONAL_HEALTH_TOKEN: ${{ secrets.OPERATIONAL_HEALTH_TOKEN }}

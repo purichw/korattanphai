@@ -47,6 +47,23 @@ checklist, test-only mocks, unverified backend prerequisites and SMTP limitation
 
 ## Commands
 
+For the new local-system JSON/CSV collector and model-input API, run
+`npm run model-inputs:demo` for a synthetic end-to-end example. Setup and the
+POST/GET contract live in [docs/API.md](docs/API.md#model-inputs-local-system-bridge).
+It has no live source or automatic forecast publication configured yet.
+Verified Thai source fields and research are in
+[docs/THAI_AGRICULTURAL_DATA_RESEARCH.md](docs/THAI_AGRICULTURAL_DATA_RESEARCH.md).
+
+Operational hardening, measurable requirements and activation status are in
+[Non-functional requirements](docs/NON_FUNCTIONAL_REQUIREMENTS.md) and the
+[NFR operations runbook](docs/NFR_OPERATIONS_RUNBOOK.md). The new health checks,
+telemetry, named integration quotas, durable collector jobs and local restore
+tools are implemented in this checkout; their production activation is separate.
+`npm run check:health` checks the existing public web/API without modifying data.
+`npm run test:operations` verifies operational endpoint contracts locally.
+`npm run model-inputs:job`, `model-inputs:backup`, and `model-inputs:restore`
+provide one-shot collection, source-scoped export and empty-local-target restore.
+
 ```bash
 npm install
 npm run dev
@@ -90,6 +107,8 @@ user task explicitly authorizes it.
 - [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
 - [docs/RAINFALL_SOURCE_AUDIT.md](docs/RAINFALL_SOURCE_AUDIT.md)
 - [docs/NON_FUNCTIONAL_REQUIREMENTS.md](docs/NON_FUNCTIONAL_REQUIREMENTS.md)
+- [docs/NFR_OPERATIONS_RUNBOOK.md](docs/NFR_OPERATIONS_RUNBOOK.md)
+- [docs/NFR_REGRESSION_2026-09-09.md](docs/NFR_REGRESSION_2026-09-09.md)
 - [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md)
 - [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
 - [docs/SHARED_COMPONENTS.md](docs/SHARED_COMPONENTS.md)

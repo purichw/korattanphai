@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "local-demo",
+  "source": { "type": "file", "path": "local-weather.json" },
+  "format": { "type": "json", "encoding": "utf-8", "dataPath": "data.observations" },
+  "fields": { "stationId": "station_code", "observedAt": "observed_at" },
+  "timestamp": { "format": "iso" },
+  "missingValues": ["", "-9999", "NULL"],
+  "measurements": [
+    { "metric": "rainfall", "valueColumn": "rain_mm", "unit": "mm", "aggregation": "sum", "periodMinutes": 60 },
+    { "metric": "air_temperature", "valueColumn": "temperature_c", "unit": "degC", "aggregation": "instant", "periodMinutes": 0 }
+  ]
+}

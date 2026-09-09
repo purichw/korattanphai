@@ -15,3 +15,9 @@ artifacts/
 .env.*
 !.env.example
 supabase/.temp/
+.local/model-inputs/
+.local/model-input-jobs/
+.local/input-jobs/
+.local/backups/
+.local/restore-drills/
+.local/policies/

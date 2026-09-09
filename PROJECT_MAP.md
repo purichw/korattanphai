@@ -7,11 +7,23 @@ Kaset Tan Phai public flood, drought, and water-risk alert prototype. Its
 visible first screen is the จังหวัดนครราชสีมา dashboard and local drill-down.
 
 FACT: The current implementation is a Vite + React + TypeScript single-page app
-with one read-only Vercel API endpoint for production risk-fusion explanation.
-It uses canonical local JSON data and browser `localStorage`. Supabase Email +
-Password authentication passed real-account production smoke on 2026-09-05.
-Database/RLS remain unaudited. No Supabase data provider, real notification delivery or live GIS/weather
-ingestion is implemented. See `docs/AUTH_SETUP.md` for backend prerequisites.
+with a read-only risk-fusion endpoint and a new machine-authenticated model-input
+API. Supabase Auth, scoped forecast reads and personal saved workspaces are
+implemented; see the latest `docs/HANDOFF.md` for deployment evidence. The legacy
+workflow still uses browser `localStorage`. The JSON/CSV collector and isolated
+input store are locally testable; no actual local-system/ThaiWater feed or
+ingest schedule is configured. See `docs/API.md` for the integration contract.
+
+The proposed next architecture for Thai satellite/DOAE inputs, team-run models
+and live T+ publication is [docs/MODEL_PIPELINE_DESIGN.md](docs/MODEL_PIPELINE_DESIGN.md).
+It is a future-state v2 design, not the current runtime contract.
+
+NFR hardening in this checkout adds `api/health.js`, `api/telemetry.js`,
+`server/operations/`, privacy-safe browser instrumentation, bounded/retryable
+map and forecast loads, named integration identities and durable quotas, and
+one-shot job/backup/restore commands. Operational activation is default-off or
+requires explicit server configuration; no live-source schedule or remote quota
+migration is implied. See [NFR operations](docs/NFR_OPERATIONS_RUNBOOK.md).
 
 ## Current State
 
@@ -48,6 +60,9 @@ ingestion is implemented. See `docs/AUTH_SETUP.md` for backend prerequisites.
 - Drought forecast archive builder:
   `scripts/build-nr-drought-forecast-archive.py`
 - Read-only production endpoint: `api/risk-fusion.ts`
+- Model-input API: `api/model-inputs.js`; legacy collector/schema/storage in
+  `server/model-inputs/`; local commands and demo in `scripts/*model-inputs.mjs`.
+  Inputs are separate from the published forecast archive and browser provider.
 - Source registry: `src/data/canonical/source_registry.json`
 - Map layer catalogue: `src/data/canonical/map_layer_catalog.json`
 

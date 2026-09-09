@@ -1,4 +1,5 @@
 // Test-only network fixture. Never import this module from src/.
+import { validateTelemetry } from '../../server/operations/telemetry.mjs';
 export const authTestUrl = "https://ktp-auth-test.supabase.co";
 export const authTestKey = "sb_publishable_test_only";
 export const authTestEmail = "operator@example.test";
@@ -37,7 +38,13 @@ export async function seedAuthSession(pageOrContext, expiresAt) {
 
 export async function mockSupabase(pageOrContext) {
   const requests = [];
-  const state = { passwordDelayMs: 0, passwordNetworkError: false, logoutError: false, requests };
+  const telemetry = [];
+  const state = { passwordDelayMs: 0, passwordNetworkError: false, logoutError: false, requests, telemetry };
+  await pageOrContext.route('**/api/telemetry', async route => {
+    if (!['localhost', '127.0.0.1'].includes(new URL(route.request().url()).hostname)) return route.abort('blockedbyclient');
+    telemetry.push(validateTelemetry(route.request().postDataJSON()));
+    return route.fulfill({ status: 204 });
+  });
   await pageOrContext.route("https://*.supabase.co/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());

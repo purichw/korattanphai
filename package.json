@@ -20,9 +20,21 @@
     "preview": "node scripts/run-vite.mjs preview --host 127.0.0.1",
     "test": "vitest run",
     "test:database": "node scripts/test-database-migration.mjs",
+    "model-inputs:serve": "node --env-file-if-exists=.env.model-inputs.local scripts/serve-model-inputs.mjs",
+    "model-inputs:collect": "node --env-file-if-exists=.env.model-inputs.local scripts/collect-model-inputs.mjs",
+    "model-inputs:demo": "node scripts/demo-model-inputs.mjs",
+    "model-inputs:prepare": "node scripts/prepare-model-request.mjs",
+    "test:model-inputs": "node --test tests/model-inputs/*.test.mjs",
+    "test:operations": "node --test tests/operations/*.test.mjs",
+    "check:health": "node scripts/check-operational-health.mjs",
+    "report:operations": "node scripts/summarize-operational-logs.mjs",
+    "model-inputs:job": "node --env-file-if-exists=.env.model-inputs.local scripts/run-model-input-job.mjs",
+    "model-inputs:backup": "node --env-file-if-exists=.env.model-inputs.local scripts/backup-model-inputs.mjs",
+    "model-inputs:restore": "node scripts/restore-model-inputs.mjs",
     "test:e2e:database": "node scripts/test-database-ui.mjs",
     "test:e2e": "node scripts/run-playwright.mjs",
     "test:e2e:built": "node scripts/test-built.mjs",
+    "test:e2e:compat": "node scripts/test-compatibility.mjs",
     "test:e2e:attached": "node scripts/run-playwright.mjs --attached",
     "test:e2e:managed": "node scripts/run-playwright.mjs --managed"
   },
@@ -32,7 +44,11 @@
     "jszip": "3.10.1",
     "lucide-react": "^0.468.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "web-vitals": "6.2.1"
+  },
+  "overrides": {
+    "@protobi/exceljs": { "uuid": "11.1.1" }
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

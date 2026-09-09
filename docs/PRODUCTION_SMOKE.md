@@ -10,8 +10,12 @@ edits application data, publishes advisories, resets demo state, changes account
 settings or saves reusable browser credentials. Login affects Supabase auth
 sessions/audit records but requires no application-data cleanup.
 
-The target is restricted to localhost or this project's `korattanphai*.vercel.app`
-deployments. Preview deployment protection must allow the runner; an access
+The target is restricted to localhost, the exact production origin, or preview
+origins explicitly listed in `SMOKE_ALLOWED_PREVIEW_ORIGINS` after their project
+ownership has been verified. A matching hostname prefix is not ownership proof.
+Browser requests are limited to that origin, the known project Supabase origin,
+and the two Google Fonts origins; cross-origin redirects cannot receive credentials.
+Preview deployment protection must allow the runner; an access
 denial is a failure, not evidence that the application passed. Do not disable
 protection or add production credentials to source files to make the test pass.
 
@@ -42,7 +46,7 @@ verification. Both scripts redact credentials and keep sessions in memory.
 
 ```bash
 npm run smoke
-SMOKE_URL=https://korattanphai-<deployment>.vercel.app npm run smoke
+SMOKE_URL='https://korattanphai-<verified-deployment>.vercel.app' SMOKE_ALLOWED_PREVIEW_ORIGINS='https://korattanphai-<verified-deployment>.vercel.app' npm run smoke
 ```
 
 Install the locked dependencies and Chromium first (`npm ci`,

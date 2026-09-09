@@ -20,6 +20,31 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Local NFR implementation and regression (2026-09-09; not deployed):
+
+- Added operational health/readiness, request IDs/log summaries, opt-in bounded
+  browser telemetry, scoped integration identities, key rotation and durable
+  quota SQL. Both opaque Supabase secret keys and legacy service-role JWTs are
+  supported by server adapters. New migrations remain prepared, not applied.
+- Added frozen resumable input jobs, deferred retries, source-specific freshness
+  reports, source-scoped backup/local restore and report-only retention. Synthetic
+  CLI restore retained exact receipts; this is not a whole-database recovery tool.
+- Forecast and map loads now have 30-second deadlines and retry recovery; map
+  retry preserves source month, T+ and selected area. Added skip navigation,
+  compatibility cases and separate CI jobs with a stable `regression` aggregate.
+- Local verification: 197 unit, 104 model-input, 9 operations, 11 SQL, 135 built
+  Chromium cases (31 conditional skips), 38 isolated database-browser cases and
+  6 selected WebKit/Firefox cases and 32 real-account checks against the new
+  local protected Supabase build passed.
+  Canonical/generated/geodata files (47) remain identical to HEAD.
+- Current outcome, browser/performance evidence and limits are in
+  [NFR_REGRESSION_2026-09-09.md](NFR_REGRESSION_2026-09-09.md). Operational activation,
+  real source scheduling, log recipients, whole-database recovery and hosted
+  verification follow [NFR_OPERATIONS_RUNBOOK.md](NFR_OPERATIONS_RUNBOOK.md).
+- No commit, push, deploy, remote migration or application-data write in this
+  checkpoint. Existing uncommitted integration work was preserved. The previous
+  production release below remains the deployed state.
+
 Exclusive forecast-action accordion release (2026-09-08):
 
 - Pushed runtime `eabcefa3c54971fd78a7eb62ddf9df2af4f6cf19` on

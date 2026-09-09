@@ -1,13 +1,66 @@
-# เกษตรทันภัย Non-Functional Requirements
+# โคราชทันภัย Non-Functional Requirements
+
+Updated: **2026-09-09**. This is the acceptance register for the website and its
+input integration. Business meaning is bilingual so PO/BA and operators can
+review the same requirements. **Implemented** means code is present; it does
+not mean that a remote service, migration, monitor, or notification is enabled.
+No deployment or remote migration is part of this NFR implementation.
+
+## NFR Register / ทะเบียนข้อกำหนด
+
+Owner names below are **roles to assign**, not a claim that a named person is on
+call. Targets marked **draft** require agreement and measured evidence before
+becoming a service commitment. See the [operations runbook](NFR_OPERATIONS_RUNBOOK.md)
+for commands, activation, incident response, and restore drills.
+
+| ID / Area | Business meaning — TH / EN | Accountable owner role | Measurable acceptance / เกณฑ์ตรวจรับ | Implementation and remaining evidence | Last verification |
+| --- | --- | --- | --- | --- | --- |
+| NFR-01 Availability | ทีมรู้เมื่อเว็บหรือฐานข้อมูลอ่านไม่ได้ / Detect loss of website or database access. | Platform operator | Monitor `/login` and risk API every 15 minutes when enabled; optional authenticated readiness verifies one published archive. **Draft:** monthly availability ≥99.5%, excluding agreed maintenance, after a complete observation window. | Bounded monitor and separate liveness/readiness routes implemented; schedule, secrets, external availability evidence and recipient delivery need activation. Process liveness alone is insufficient. | 2026-09-09 code review; remote activation unverified. |
+| NFR-02 Incident traceability | แจ้งรหัสเหตุการณ์แล้วทีมตามหาปัญหาได้ / Support can correlate an incident without exposing private data. | Platform operator | Every handled model-input/health request returns a generated request ID; completion logs contain only allowlisted fields. Inject storage/quota failure and correlate ID/status without token, payload, IP or exception leakage. | Structured API logs implemented; log drain, retention, alert destination and on-call assignment remain operator tasks. Not a business audit trail. | 2026-09-09 API targeted regression passed. |
+| NFR-03 Data timeliness | รู้ว่าข้อมูลเก่า ขาด หรือเป็นข้อมูลย้อนหลัง / Distinguish stale, missing and historical evidence. | Data steward + model lead | Source owner confirms period, timezone, expected arrival and age policy. Missing thresholds yield `unknown`; historical mode stays historical; any stale record is counted. Never convert missing values to zero or low risk. | Per-job freshness report implemented. Live source connection, provider latency agreement and dashboard binding remain unconfigured; reports do not automatically block submission or publish forecasts. | 2026-09-09 policy/code review; source-specific thresholds unconfirmed. |
+| NFR-04 Input integrity | ข้อมูลส่งซ้ำไม่ซ้ำซ้อนและแก้ไขย้อนหลังตรวจสอบได้ / Retries preserve one immutable batch and corrections stay identifiable. | Integration engineer + data steward | Identical batch ID/hash returns the existing receipt; changed content returns 409; malformed/oversized batches leave no partial data. Keep the original source evidence separately. | V1 validation, immutable file/Supabase adapters, 1 MiB/2,000-observation limits implemented; V2 raw-artifact pipeline and cross-batch model deduplication remain separate work. | 2026-09-09 API/storage targeted regression passed. |
+| NFR-05 Access and quotas | แยกสิทธิ์คู่เชื่อมต่อและควบคุมภาระระบบ / Separate integration permissions and bound resource use. | Security/platform operator | Reader cannot POST; wrong source is 403; rotation preserves client quota; revoked key fails after new config deploy. Per identity defaults 60/minute and 10,000/day; exhausted quota returns 429 and retry delay. | Durable Supabase quota RPC and role/source-scoped keys implemented with prepared migration. Independent-connection load, WAF limits and remote activation remain required. Defaults are starter limits, not measured capacity. | 2026-09-09 API/SQL tests passed in local PGlite; single-connection limitation. |
+| NFR-06 Job recovery | งานล้มแล้วตามต่อได้โดยไม่ต้องดึงหรือส่งข้อมูลใหม่มั่ว ๆ / Resume failures with the exact frozen input. | Integration operator | A run records its manifest, frozen batch/hash and attempts; successful receipt is required for completion. Resume preserves input and target. Same-host active lock prevents overlapping jobs; terminal errors stop retries. | Durable private local job history and resume implemented. A persistent worker host, scheduler and failure notification are not activated; not a distributed model-job service. | 2026-09-09 code review; operational schedule unverified. |
+| NFR-07 Recovery | กู้ข้อมูลกลับได้และรู้ว่าครอบคลุมอะไร / Restore known data with an explicit recovery boundary. | Database/platform operator | Verify archive and every batch checksum before writing; restore to empty local target, preserve original receipt times and report measured duration. **Draft:** normalized input RPO ≤24h / RTO ≤4h; actual production loss is unknown until a full drill. | Source-scoped API export/local restore implemented. Whole Supabase database, Auth, forecast data, Storage objects and raw assets require separate backups and isolated restore evidence. | 2026-09-09 code review; no production RPO/RTO claim. |
+| NFR-08 Performance and recovery | ผู้ใช้ไม่ติดหน้ารอไม่จบและกลับมาลองใหม่ได้ / Bound waits and offer recovery. | Frontend engineer | Critical forecast/geometry operations have a 30-second deadline covering fetch/SDK/body promises; failed result is retryable and old-session results cannot populate a new session. **Targets:** p75 LCP ≤2.5s, INP ≤200ms, CLS ≤0.1 with sufficient field samples. | Deadlines, load/error events and opt-in Web Vitals implemented. Historic lab evidence below is not current field evidence; no new speedup is claimed. | 2026-09-09 code review; current regression recorded in release evidence. |
+| NFR-09 Accessibility and compatibility | อ่านความเสี่ยงและใช้ทางหลักได้หลายอุปกรณ์ / Use core paths across input methods and browsers. | Frontend/QA owner | Login → area → forecast → export remains usable on keyboard and narrow viewport; visible focus, named controls and text alternatives for color. Run selected Chromium/Firefox/WebKit compatibility cases and record failures. | Existing semantics/focus and new recovery/compatibility coverage support the checks. Complete screen-reader, forced-colors and physical-device audits remain unverified. | 2026-09-09 source review; current browser results belong in handoff/run artifacts. |
+| NFR-10 Privacy-safe measurement | วัดปัญหาการใช้งานโดยไม่เก็บข้อมูลส่วนตัว / Measure technical failures without personal payloads. | Privacy/platform owner | Telemetry disabled by default on browser and server; DNT respected; allowlist rejects extra keys; no URLs/query/stack/user/IP/form values. Cap 20 events/document, four in flight, sample successful-load/vital events at 10%; server cap 1,000/minute, 50,000/day globally. | Opt-in same-origin telemetry endpoint implemented; approved origins, durable quota migration, log retention and privacy review need activation. Platform access logs have separate policy. | 2026-09-09 schema/code review; no remote event stream claimed. |
+| NFR-11 Release reliability | ปล่อยรุ่นที่ตรวจแล้วและย้อนกลับได้ / Release verified artifacts with a recovery path. | Release owner | Required regression aggregate covers unit/data/API/operations checks and protected build/browser checks; retain failures and artifact identity. Recheck successful deployment and rehearse rollback. | CI checks are repository code. Branch protection, hosting deploy enforcement and remote rollback drill must be confirmed separately; no workflow can be called enforced merely because YAML exists. | 2026-09-09 workflow review pending final current run evidence. |
+
+### Verification boundary
+
+Local regression evidence reported on **2026-09-09**: **197 unit tests in 23 files**,
+**104 model-input tests**, **9 operational endpoint/tool tests**, and **11 database SQL
+checks** passed. The separate API/quota suite is
+`tests/model-inputs/api-operations.test.mjs`; ingest/recovery tests are
+`tests/model-inputs/operations.test.mjs`. The protected static build with telemetry
+enabled also passed; its startup bundle was about 110 KiB gzip and application
+gzip 350,999 bytes. These are build measurements, not load-time improvements.
+Built Chromium regression passed 135 cases (31 conditional skips), isolated
+database-browser regression passed 38 cases, selected WebKit/Firefox checks
+passed all six cases, and the real-account smoke on the new local Supabase build
+passed 32 checks. Mobile-network lab medians were 1.35 seconds for login and
+14.79–14.96 seconds for map readiness; these are not field Web Vitals. See the dated
+[regression report](NFR_REGRESSION_2026-09-09.md) for scope and activation limits.
+
+The checks covered roles, rotation, quotas, SQL permissions, queued requests,
+immutable retries, payload boundaries and sanitized outages. PGlite executes PostgreSQL
+SQL through one connection; it does not prove independent production connection
+concurrency, traffic capacity, uptime, backup availability or notification
+delivery. Broader run results should be recorded in [HANDOFF.md](HANDOFF.md)
+and current test artifacts; this register does not turn pending checks into passes.
 
 ## Security
 
 Current facts:
 
-- Supabase Email + Password passed real-account production smoke on 2026-09-05;
-  self-signup is disabled. Database/RLS remain unaudited. No data provider or
-  privileged secrets are added.
-- One read-only Vercel endpoint exists for production risk-fusion explanation.
+- Supabase Email + Password is real authentication; self-signup is disabled.
+  Forecast reads and saved personal workspaces use separate database/RLS contracts.
+  See [HANDOFF.md](HANDOFF.md), [AUTH_SETUP.md](AUTH_SETUP.md) and
+  [SUPABASE_DATA_MIGRATION.md](SUPABASE_DATA_MIGRATION.md) for dated evidence.
+  Test credentials must stay out of docs, logs, fixtures and bundles.
+- The risk-fusion endpoint is read-only. Model-input, health and opt-in telemetry
+  endpoints now have implementation in the repo; this does not claim deployment.
 - Persona switching is not authentication.
 - Persona fixture data must not contain passwords.
 - `.env` and `.env.*` are ignored by git except placeholder `.env.example`.
@@ -31,9 +84,13 @@ Requirements before operational use:
 
 Current facts:
 
-- No real personal data should be stored.
-- Farmer data is demo fixture data.
-- Runtime state stays in local browser storage.
+- Authentication accounts and per-user saved workspaces have real persistence;
+  they need the platform's retention/access policies.
+- Farmer/demo workflow fixtures must not contain real contact details.
+- Legacy simulated workflow state remains in local browser storage; forecast
+  reads and saved workspaces have a different Supabase persistence boundary.
+- Operational telemetry projects only a fixed schema and honors browser DNT;
+  no user identity is attached. Hosting access logs are not covered by this claim.
 
 Requirements:
 
@@ -101,7 +158,8 @@ Set `NFR_MOBILE_NETWORK=1` to simulate 1.6 Mbps download, 0.75 Mbps upload and
 measure compressed transfer instead of Vite's uncompressed preview responses.
 It is a reproducible lab simulation, not a measurement on a physical phone.
 
-First archive-loading pass, 2026-09-05 baseline against `440b707`, three samples per route:
+**Historical evidence, not the 2026-09-09 build:** first archive-loading pass,
+2026-09-05 baseline against `440b707`, three samples per route:
 
 | Metric | Before | After |
 | --- | ---: | ---: |
@@ -123,7 +181,7 @@ the document. Other canonical data remains in the authenticated chunk; further
 splitting should be driven by route-specific measurements, not bundle warnings
 alone. The follow-up pass adds the login split and mobile-network harness above.
 
-### Follow-Up Measurements
+### Historical Follow-Up Measurements — 2026-09-05
 
 Combined non-functional work versus `440b707`, 2026-09-05, three fresh-browser
 samples per route: Chromium 390x844, CPU 4x, 1.6 Mbps download / 0.75 Mbps upload,
@@ -178,8 +236,11 @@ needs audit:
 
 Current facts:
 
-- All runtime workflow state is local to one browser.
-- No delivery retries or server persistence exist.
+- Legacy advisory/approval/notification workflow state remains local simulation.
+  Real Supabase account/forecast/personal workspace storage is separate.
+- Model-input retries, immutable server storage adapters and a resumable local
+  ingest job now exist. Delivery channels and V2 forecast publication remain
+  unimplemented; input receipt does not prove model readiness or publication.
 - Reset Demo Data returns to deterministic seed state.
 - Storage reads, writes and logout tolerate SecurityError and quota failures
   with a visible notice and in-memory fallback for the current document.
@@ -192,6 +253,9 @@ Current facts:
 - Root and content error boundaries provide recovery without clearing saved
   state. Failed lazy imports retry by reloading the current URL; render failures
   can retry within the page or recover by navigating from the shell.
+- Forecast and geometry loads have 30-second deadlines, retain explicit error
+  states and emit optional operational counters. Session changes cancel old
+  operations; a successful old-session response must not revive cleared state.
 
 Requirements before operational use:
 
@@ -204,7 +268,9 @@ Requirements before operational use:
 
 Current facts:
 
-- No analytics provider is configured.
+- No external product analytics provider or operational log destination is
+  claimed configured. Privacy-safe server/browser instrumentation now exists
+  and browser/server telemetry is off by default.
 - Outcome analytics shown in the UI is fixture data.
 
 Requirements:
@@ -219,15 +285,23 @@ See [ANALYTICS.md](ANALYTICS.md).
 
 Current facts:
 
-- Source code and fixtures are in git.
-- Local runtime state can be reset.
-- No production database exists.
+- Source code and fixtures are in git; uncommitted local work is not a remote backup.
+- A real Supabase database exists; plan/retention/PITR and whole-database restore
+  evidence must be verified by its operator.
+- The new backup CLI exports normalized batches visible through one source's
+  model-input API (at most 500 batches / 128 MiB). It excludes Auth, forecasts,
+  personal workspaces, database schema and raw satellite/Storage assets.
+- Restore verifies checksums in an empty local directory and preserves original
+  `receivedAt`. Export age is not measured data loss; local restore time is not
+  a production RTO. Retention inventory reports candidates and deletes nothing.
 
-Requirements before backend launch:
+Requirements before relying on recovery:
 
 - Define backup cadence for alert, advisory, source-ingest, and audit data.
 - Test restore before relying on live operations.
 - Keep rollback paths documented in [RELEASE_RUNBOOK.md](RELEASE_RUNBOOK.md).
+- Follow the bounded input drill and the separate database/asset recovery plan
+  in [NFR_OPERATIONS_RUNBOOK.md](NFR_OPERATIONS_RUNBOOK.md).
 
 ## Release Requirements
 

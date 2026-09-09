@@ -2,6 +2,8 @@ import archiveUrl from "./canonical/nakhon_ratchasima/drought_forecast_archive_r
 import overviewUrl from "./generated/forecast-overview-t1.json?url";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../types";
 import { validateDatabaseArchive } from "./supabaseForecastArchive";
+import { withLoadDeadline, LoadTimeoutError } from './loadDeadline';
+import { reportOperationalEvent } from '../operationalTelemetry';
 
 function createArchiveLoader(url: string, horizonCount: 1 | 6) {
   let cachedArchive: NakhonRatchasimaDroughtForecastArchive | null = null;
@@ -15,11 +17,12 @@ function createArchiveLoader(url: string, horizonCount: 1 | 6) {
     if (cachedArchive) return Promise.resolve(cachedArchive);
     if (pendingArchive) return pendingArchive;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30_000);
-    pendingArchive = fetch(url, { signal: controller.signal })
+    const startedAt = performance.now();
+    pendingArchive = withLoadDeadline(controller, () => fetch(url, { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("Forecast archive unavailable");
         const archive = await response.json() as NakhonRatchasimaDroughtForecastArchive;
+        if (controller.signal.aborted) throw controller.signal.reason;
         if (
           archive?.meta?.provinceCode !== "30" ||
           archive.meta.horizonCount !== horizonCount ||
@@ -31,12 +34,16 @@ function createArchiveLoader(url: string, horizonCount: 1 | 6) {
         ) throw new Error("Invalid forecast archive");
         cachedArchive = validateDatabaseArchive(archive, horizonCount);
         return cachedArchive;
+      }))
+      .then((archive) => {
+        reportOperationalEvent({ event: 'forecast_load', code: 'LOAD_OK', durationMs: performance.now() - startedAt });
+        return archive;
       })
       .catch((error: unknown) => {
         pendingArchive = null;
+        reportOperationalEvent({ event: 'forecast_load', code: error instanceof LoadTimeoutError ? 'LOAD_TIMEOUT' : 'LOAD_FAILED', durationMs: performance.now() - startedAt });
         throw error;
-      })
-      .finally(() => clearTimeout(timeout));
+      });
     return pendingArchive;
   }
   return { getCached, load };

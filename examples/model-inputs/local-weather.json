@@ -1,0 +1,9 @@
+{
+  "notice": "Synthetic demonstration only; not a ThaiWater response or real station data.",
+  "data": {
+    "observations": [
+      { "station_code": "DEMO-001", "observed_at": "2026-09-08T07:00:00+07:00", "rain_mm": 0, "temperature_c": 28.5 },
+      { "station_code": "DEMO-002", "observed_at": "2026-09-08T07:00:00+07:00", "rain_mm": null, "temperature_c": 29.1 }
+    ]
+  }
+}
