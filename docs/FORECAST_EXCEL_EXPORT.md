@@ -209,8 +209,29 @@ Do not use this exporter as a general-purpose untrusted workbook parser.
 
 Evidence is under `artifacts/excel-upgrade/` (local, ignored): `browser-final`,
 `built-browser`, `built-browser-comparison-final`, `protected-database`, and
-`reader`, `final-desktop-reading`, and `province-worker`. Source data and geodata were not changed. No deployment was performed
-for this export upgrade.
+`reader`, `final-desktop-reading`, and `province-worker`. Source data and geodata
+were not changed. These local checks preceded the production release below.
+
+### Production release — 2026-09-09
+
+Runtime `1404e49d55c8ca2062e35baf01c9c8c8018dca7a` is deployed at
+<https://korattanphai.vercel.app> as `dpl_6Tui6Ae7R5ZHrmM8sQGzVnxQyTji`.
+The follow-up `2b6bc4b12629aa9d2a352cd74372c0c112765923` only prebundles lazy
+worker dependencies in the database test runner to prevent a cold-cache Vite
+reload race; application code and the deployed artifact are unchanged.
+[CI passed](https://github.com/purichw/korattanphai/actions/runs/34346764768)
+all jobs, including 246 unit, 135 built-browser, 41 database-browser and six
+WebKit/Firefox cases.
+
+Candidate and primary production each passed 32 authenticated smoke checks and
+seven hosted endpoint checks. Downloads match all 1,734 province values and
+36 district values. Supplemental desktop/mobile downloads on both origins
+verify ten sheets, 36 typed machine rows, 30 same-target comparison pairs,
+82 dictionary definitions, revision reads and native chart/Pivot XML parts.
+Desktop/mobile production screenshots were reviewed. Evidence lives under
+`artifacts/excel-upgrade/release/`; deployment and recovery details are in
+[HANDOFF.md](HANDOFF.md). This hosted verification does not extend the Microsoft
+Excel platform compatibility coverage described above.
 
 ### Microsoft Excel acceptance pass when available
 

@@ -20,6 +20,53 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Excel export upgrade production release (2026-09-09):
+
+- Pushed runtime `1404e49d55c8ca2062e35baf01c9c8c8018dca7a` and test-runner
+  follow-up `2b6bc4b12629aa9d2a352cd74372c0c112765923` on
+  `fix/nr-map-zoom-performance`. Export now previews scope/revision before
+  download, supports real worker cancellation and bounded generation, adds
+  typed machine data and a TH/EN business dictionary, and compares different
+  origin rounds by the same tambon and target month. Original seven sheets,
+  native chart/Pivot parts and source-risk semantics remain intact.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34346764768)
+  passed all four jobs and the aggregate: 246 unit, 104 model-input/API/jobs,
+  9 operations, 11 SQL/integrity/RLS, 135 built-browser cases (35 conditional
+  skips), 41 database-browser cases (one mobile full-province duplicate skip),
+  and 6 WebKit/Firefox cases. Dependency audit reported no vulnerabilities.
+- The first CI run exposed a cold-cache Vite optimizer race: discovering lazy
+  Excel worker dependencies replaced React modules under a concurrent retry
+  test. The follow-up prebundles those three dependencies in the database test
+  runner only. All assertions remain; five concurrent fresh-cache cases passed,
+  then remote CI passed. Runtime/dependencies/build files are identical between
+  the two commits, so the verified deployment artifact was reused.
+- Built the production candidate from clean Git archive
+  `artifacts/excel-release-2f9i8ezz`, excluding local artifacts and Python cache.
+  Vercel protected build/exposure/bundle checks passed with Supabase configured
+  and no static forecast archive assets. Promoted the verified candidate after
+  CI passed: `dpl_6Tui6Ae7R5ZHrmM8sQGzVnxQyTji`,
+  `https://korattanphai-q7tf1zc1v-purichwc-1517s-projects.vercel.app`.
+  Primary-origin inspection confirms `https://korattanphai.vercel.app` serves
+  that deployment and entry `index-cbf7ae1fc5.js`.
+- Candidate and primary production each passed 32 authenticated desktop/mobile
+  smoke checks plus seven hosted endpoint cases, with no failures. Real Excel
+  downloads retain 1,734 source-equal province values and 36 district values.
+  Supplemental desktop/mobile exports on both origins verify 36 typed machine
+  rows, 30 same-target comparison pairs (60 source values), 82 dictionary
+  definitions, fresh revision reads, and native chart/Pivot/OOXML relationships.
+  Production desktop/mobile screenshots were reviewed.
+- Evidence: `artifacts/excel-upgrade/release/metadata.json`,
+  `quality-release.{json,log}`, `release-{candidate,production}/`,
+  `comparison-live-2026-09-09T11-30-52-815Z/` (candidate), and
+  `comparison-live-2026-09-09T11-52-37-287Z/` (production). Prior ONLYOFFICE
+  reading/recalculation evidence and Microsoft Excel platform limits remain
+  documented in [FORECAST_EXCEL_EXPORT.md](FORECAST_EXCEL_EXPORT.md).
+- No migrations, application-data writes, canonical/geodata edits, or live-feed
+  activation. Input/readiness remain unconfigured; telemetry remains off.
+  Credentials and Vercel cookies were held in process memory only. Recovery:
+  promote prior verified `dpl_CV1XnFCt3p3wgyaw1A252DtLAEkJ`, then smoke the
+  primary origin; no database rollback is required.
+
 Operational hardening production release (2026-09-09):
 
 - Pushed runtime `abfa101233f6ccba87e78f2700c3b9a7b13a1ea8` and test-only
