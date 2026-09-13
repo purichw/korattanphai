@@ -1,9 +1,37 @@
 # Nakhon Ratchasima Forecast Map Tools
 
-Implementation scope: local workspace, not yet a production release. These
+Released on 2026-09-14 at https://korattanphai.vercel.app. These
 features use the existing rev03/Supabase data and the 289 local administrative
 polygons only. They do not add ThaiWater, crop damage, observed drought,
 irrigation infrastructure, nationwide GIS layers or new forecast records.
+
+## Release Evidence
+
+- Production runtime: `e72fc201ce03151b56bbeae16b6b34a09afcc4d0`, deployment
+  `dpl_7hxc83Ya1pNNRsM2th89F4msMixq`. The deployment was built from a clean
+  Git archive, checked before promotion, then verified at the primary URL.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34775293679)
+  passed all jobs on `01d8f813f6b9f8ffa77630efd5c8005e8824c9d2`. Only two E2E
+  test files differ from the deployed runtime; no runtime/build/data difference.
+- Authenticated candidate and primary smoke each passed 32 existing checks
+  plus 14 map/loading checks on desktop and mobile. Evidence is gitignored at
+  `artifacts/forecast-map-tools/release/{verified-candidate,production}/`:
+  `report.json`, `map-loading-report.json`, screenshots and downloaded exports.
+- Primary Excel verification matched 1,734 forecast values across 289 tambons
+  and 32 district summaries; mobile district export matched all 36 values.
+  Live Supabase projections, categorical map colors and null semantics matched
+  canonical rev03. There were no production database writes or migrations.
+- Includes the authorized cold-entry loading work from the task
+  "โคราชทันภัย BE". Startup contains no account/forecast values; protected
+  application and analysis dependencies remain deferred.
+- `AppSelect` is the sole product combobox/listbox implementation. Source
+  regression checks reject native select/datalist or duplicate listboxes.
+  Desktop floating menus and mobile custom sheets share selection, keyboard,
+  nested Escape and focus-restoration behavior. Tool dialogs work in fullscreen
+  and lock background scrolling.
+- Physical iOS/Android devices were not tested. Browser automation covers
+  desktop/mobile Chromium gestures plus the existing WebKit/Firefox suite.
+  PDF output remains rasterized, not searchable text/vector GIS.
 
 ## User Flows
 
@@ -85,7 +113,7 @@ irrigation infrastructure, nationwide GIS layers or new forecast records.
   fullscreen. Closing tools/fullscreen retains the route and map instance; Reset
   returns the same fitted camera. These are automated browser gestures, not a
   claim of physical iOS/Android device coverage.
-- Map/tool frames grow with filter/status rows while preserving a minimum plot
+- Map/tool frames reserve filter/status space while preserving a minimum plot
   height; wide tambon plots reserve proportionate height. Adjacent desktop charts
   share the map's stable frame height. Tool dialogs lock background scrolling and restore focus
   without scrolling the document.

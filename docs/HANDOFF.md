@@ -20,6 +20,54 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Shared map tools, dynamic reports and loading production release (2026-09-14):
+
+- Released Nakhon Ratchasima-only shared map search/coordinate lookup,
+  six-horizon analysis, district comparison, same-target vintage comparison,
+  risk patterns, playback and dynamically paginated A4 PNG/PDF reports.
+  [Map tools](FORECAST_MAP_TOOLS.md) owns behavior, data boundaries and limits.
+- Included the authorized startup/loading work from "โคราชทันภัย BE".
+  No unrelated API UAT/research changes were included. The older local-only
+  loading checkpoint below describes its original verification, now superseded
+  by this combined release.
+- Shared `AppSelect` owns product dropdowns, including analysis/report tools.
+  Desktop menus and mobile sheets use consistent selection, nested Escape and
+  focus restoration. Dialogs lock background scroll and work within fullscreen.
+  Province/district map, chart, empty and loading frames share a stable height;
+  status/legend space prevents irrigation filters from resizing the map.
+- Runtime `e72fc201ce03151b56bbeae16b6b34a09afcc4d0` is pushed on
+  `fix/nr-map-zoom-performance`. Quality commit
+  `01d8f813f6b9f8ffa77630efd5c8005e8824c9d2` changes only two E2E test files
+  after that runtime: reserved empty-status assertions and explicit geodata
+  bootstrap readiness. The tested runtime/build/config/data are identical.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34775293679)
+  passed contracts, built-browser, database-browser, browser-compatibility and
+  aggregate regression jobs. Targeted checks also exercised mouse/touch
+  pan/zoom, dropdown scroll without camera movement, fullscreen, nested menus,
+  modal scroll lock/focus restoration, and empty-filter reset across route levels.
+- Built from clean archive `artifacts/map-loading-release-final-nXqhZj`,
+  excluding unrelated working-tree files. Protected production build passed
+  exposure checks and gzip budgets: core 369,431 B, login 117,515 B, lazy tools
+  458,734 B. Supabase mode emits no static forecast archive; CSP is unchanged.
+- Promoted verified deployment `dpl_7hxc83Ya1pNNRsM2th89F4msMixq` at
+  `https://korattanphai-g0r7luxo7-purichwc-1517s-projects.vercel.app`.
+  Primary inspection confirmed `https://korattanphai.vercel.app` serves it.
+  Authenticated candidate and primary smoke each passed 32 existing checks plus
+  14 map/loading checks. Evidence: gitignored
+  `artifacts/forecast-map-tools/release/{verified-candidate,production}/`.
+- Actual primary Excel export matched 1,734 values / 289 tambons / 32 district
+  summaries; mobile district export matched 36 values / 6 tambons. Database
+  projections, forecast/irrigation colors and blank-value semantics matched
+  canonical rev03. No forecast data, geometry, API, auth or Supabase migrations
+  changed; no production writes were performed.
+- Primary PNG/PDF downloads and screenshots were inspected. Long Thai metadata
+  and multi-page flow are covered by unit/browser stress tests. PDF is rasterized,
+  not searchable text/vector GIS. Physical iOS/Android testing was not performed;
+  mobile gestures use Chromium automation plus the existing compatibility suite.
+- Previous production deployment remains the rollback target:
+  `dpl_6Tui6Ae7R5ZHrmM8sQGzVnxQyTji` /
+  `https://korattanphai-q7tf1zc1v-purichwc-1517s-projects.vercel.app`.
+
 Cold-entry loading repair (2026-09-13, local only):
 
 - The reported “กำลังเปิดโคราชทันภัย...” screen was the outer `App.tsx`
