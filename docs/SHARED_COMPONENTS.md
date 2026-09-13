@@ -33,6 +33,9 @@ files.
 
 | Component | File | Use For | Current Contract |
 | --- | --- | --- | --- |
+| `AppStartup` | `src/components/AppStartup.tsx` | Cold entry and refresh before the authenticated application is ready | Eager presentation only: receives `path` and status `message`; Home reuses neutral overview loading primitives, other paths use an unnamed workspace placeholder. No account values, forecast data, interactive controls or data loaders. |
+| `SidebarBrand` | `src/components/SidebarBrand.tsx` | Shared logo in live and startup sidebars | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
+| `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Shared overview/data loading placeholders and startup shell | Lightweight rendering helpers and `ForecastOverviewLoading`; optional `message` defaults to the existing forecast status. No heavy runtime imports. `ForecastArchiveLoading` reexports the overview and retains the drought header separately. |
 | `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, option badges support `good`, `watch`, `danger`, and `muted`, and `align="start"` only when scan-left text is intentionally needed. |
 | `ForecastMonthSelect` | `src/components/ForecastArchiveRequest.tsx` | Forecast source-month dropdowns in page filters, Home mobile editor and map toolbars | Reuses `AppSelect.loadingLabel` for an in-place, reduced-motion-aware spinner while the shared request changes month. The loaded month stays selected until success; controls remain usable for a later selection. `ForecastArchiveRequest` announces pending changes to assistive technology without adding a visible top paragraph. Background revision checks stay quiet; error/retry and Supabase freshness behavior are unchanged. |
 | `IrrigationStatusSelect` | `src/components/IrrigationStatusSelect.tsx` | Location irrigation filter inside Home/drought/district/subdistrict maps | Reuses `AppSelect`; all/irrigated/rainfed/unknown labels and matching come from `src/irrigation.ts`. Lives in the shared map toolbar, not page filters or the Home editor. Selection updates the whole page without changing URL. Unknown irrigation never implies missing or zero-risk forecasts. |
@@ -324,3 +327,52 @@ target month and administrative code across origins. The dialog owns cancellable
 loaders and starts its XLSX worker only on Download; Cancel retains options for
 retry while Close/Escape discard them. See `docs/FORECAST_EXCEL_EXPORT.md` for workbook
 semantics, native chart/PivotTable support, provenance and regression checks.
+
+## Local Map Tools And Analysis
+
+All of these tools are **Nakhon Ratchasima only**. The shared
+`NakhonRatchasimaLocalMap` mounts `ForecastMapTools` inside the optional `tools`
+slot of `DroughtForecastArchiveMapFilters` across Home, province, district and
+tambon. Existing route/month/irrigation ownership, camera and polygon rendering
+remain in their original components. No legacy national page is enabled.
+
+- `WorkspaceDialog` owns native modal lifecycle, Escape and focus restoration;
+  it portals into the fullscreen target when one is active. Feature owners keep
+  their own queries, async jobs, errors and loading states.
+- `ForecastMapTools` owns local administrative search, WGS84 point lookup,
+  PNG/PDF download and an on-demand analysis entry point. Search and point results
+  focus the existing camera; they never navigate outside the route's area or
+  treat point coordinates as plot-level risk. The pin is transient, not saved.
+- `ForecastAnalysisDialog` shares the existing Excel model for all six horizon
+  values, district maxima, counts/denominators and same-calendar-target
+  comparisons. It uses its own cancellable Supabase loader and revalidates on
+  open, focus, visibility and every 60 seconds while open. New-revision data
+  cannot overlay an older map. There is no static fallback in database mode.
+- `ForecastRiskValue` renders source values consistently in tables and search
+  results. Null is out of study scope; undefined is missing, never zero.
+- `forecastAnalysis.ts` owns matching, district grouping and forecast-pattern
+  predicates. A missing/out-of-scope slot breaks a consecutive-risk run. A first
+  risk horizon is only established when every earlier horizon is known zero.
+- Table filters apply to the analysis rows first. The explicit map action shows
+  that set on the current map, resets the old map-only risk criterion and adds a
+  clearable analysis notice. It does not silently rewrite page KPIs. The overlay
+  is cleared by origin/horizon/revision/irrigation/color-mode changes.
+- Same-target comparison maps have a distinct increase/decrease/unchanged/not
+  comparable legend and preview fields. These are changes in ordinal forecasts,
+  not probabilities, observed changes, accuracy or damage estimates.
+- Timeline playback is opt-in through `onHorizonChange`, stopping at horizon 6,
+  on page/month/scope changes, opening a tool, or hiding the document. Home stays
+  T+1-only; merely rendering its tools never requests six-horizon data.
+- `mapImageExport.ts` snapshots SVG colors and the full legend, fitting the
+  route's complete area by default or preserving the camera on request. Export
+  labels use the existing geometry-based collision engine, independently of zoom.
+- `mapReport.ts` measures and draws the shared A4 report. `reportLayout.ts` owns
+  Thai word/grapheme wrapping, page flow and keep-with-next rules. Maps and legends
+  stay together; headings retain their first lines and continuation pages repeat
+  the header, scope and actual page count. PDF contains all pages; multiple PNG
+  pages are delivered as ZIP. Heavy writers load only during export. These are
+  snapshots of displayed data, not independent claims of latest publication.
+
+Styling uses existing tokens, `AppSelect`, button classes and forecast colors
+in `forecast-map-tools.css`. See [FORECAST_MAP_TOOLS.md](FORECAST_MAP_TOOLS.md)
+for feature scope, data boundaries and verification.

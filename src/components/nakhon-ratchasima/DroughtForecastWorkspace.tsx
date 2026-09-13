@@ -348,6 +348,7 @@ export function DroughtForecastWorkspaceChart({
 }
 
 export function DroughtForecastWorkspaceMapCard({
+  onHorizonChange,
   irrigation,
   filteredSubdistrictCodes,
   level,
@@ -366,6 +367,7 @@ export function DroughtForecastWorkspaceMapCard({
   selectedSubdistrictCode,
   onSelectedSubdistrictChange,
 }: {
+  onHorizonChange?: (horizon: ForecastArchiveHorizon) => void;
   irrigation?: ForecastMapIrrigation;
   filteredSubdistrictCodes?: string[];
   level: DroughtForecastArchiveLevel;
@@ -405,6 +407,7 @@ export function DroughtForecastWorkspaceMapCard({
         <DataProvenanceChip kind="REAL" />
       </div>
       <NakhonRatchasimaLocalMap
+        onHorizonChange={onHorizonChange}
         irrigation={irrigation}
         filteredSubdistrictCodes={filteredSubdistrictCodes}
         compactForecast
@@ -547,6 +550,7 @@ export function DroughtCompactForecastWorkspace({
             />
           )}
           <DroughtForecastWorkspaceMapCard
+            onHorizonChange={onHorizonChange}
             irrigation={irrigation}
             filteredSubdistrictCodes={irrigation.value === "all" ? undefined : matchingCodes}
             level={level}

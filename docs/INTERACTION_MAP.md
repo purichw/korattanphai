@@ -1,6 +1,28 @@
-# เกษตรทันภัย Interaction Map
+# Korat Tan Phai / โคราชทันภัย Interaction Map
 
-## Main User Journeys
+## Active Product Journeys
+
+Current navigation and ownership are in `APP_MAP.md`. The active experience is:
+
+1. Supabase login restores the requested internal route and forecast query.
+2. Home shows the selected origin's T+1 forecast and permits district filtering.
+3. Drought province/district/tambon pages preserve origin T while selecting
+   horizons 1-6, deriving actual target month as T+horizon.
+4. Shared map filters select month, risk and workbook irrigation; coloring can
+   show forecast risk or irrigation status. Area previews lead to district or
+   tambon routes. The locate-style icon returns to the area view, not device GPS.
+5. Province/district graphs switch percent/count; tambon pages show one status.
+   Risk-summary, attention and guidance disclosures open one at a time.
+6. Saved workspaces persist owner-only areas and named filters in Supabase.
+7. Excel export opens an isolated dialog, checks current revision and exports
+   all six horizons; optional comparison aligns the same target calendar months.
+   See `FORECAST_EXCEL_EXPORT.md` for workbook and cancellation behavior.
+
+Agriculture/research panels require actual records; cleared/synthetic datasets
+do not make them active. The nationwide, field-verification, farmer and delivery
+journeys below describe retained prototype contracts, not available services.
+
+## Retained Prototype Journeys
 
 ### Resident / Farmer Alert Journey
 
@@ -23,6 +45,10 @@ identity, acknowledgement receipt, or server audit exists.
 5. Operator opens field work or advisory workspace from the event.
 
 ### Nakhon Ratchasima Local Drill-Down Journey
+
+Historical prototype flow below. Current paths/controls are the active product
+journey above and `APP_MAP.md`; do not restore old data/readiness panels from
+this description.
 
 1. Operator opens `/nakhon-ratchasima` directly or from the nationwide map area
    profile.
@@ -98,14 +124,14 @@ Operator persona expectations:
 
 Field verification form:
 
-- File: `WorkflowSection` in `src/App.tsx`.
+- File: `WorkflowSection` in `src/AuthenticatedApp.tsx` (legacy).
 - Seed values come from `FieldTask.seedObservation`.
 - Submit action: `submitVerification`.
 - Disabled after task status is `Submitted`.
 
 Advisory action textareas:
 
-- File: `WorkflowSection` in `src/App.tsx`.
+- File: `WorkflowSection` in `src/AuthenticatedApp.tsx` (legacy).
 - Runtime list: `runtime.advisoryActions`.
 - Update action: `updateAdvisoryAction`.
 - Submit review enabled only when task is submitted and advisory is `Draft Ready`
@@ -113,7 +139,7 @@ Advisory action textareas:
 
 Publication channel checkboxes:
 
-- File: `AlertsSection` in `src/App.tsx`.
+- File: `AlertsSection` in `src/AuthenticatedApp.tsx` (legacy).
 - Runtime list: `runtime.selectedChannels`.
 - Disabled after publication.
 
@@ -192,10 +218,10 @@ needs audit:
   their existing no-data/action gating.
 - Nakhon Ratchasima breadcrumbs must remain usable on mobile and should not
   require the nationwide filter band.
-- Nakhon Ratchasima route bar exposes one deterministic hierarchy-back action:
-  province returns to the nationwide map with Nakhon Ratchasima selected,
-  district returns to the province workspace, and subdistrict returns to its
-  parent district. Do not use browser history for this hierarchy.
+- Active hierarchy-back actions are deterministic: province drought returns to
+  Home, district to province drought, and tambon to its parent district. Home
+  has no nationwide back action. Do not use arbitrary browser history for this
+  hierarchy.
 
 ## Emergency-Use Interaction Requirements
 

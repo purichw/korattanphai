@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
+import { SidebarBrand } from "./components/SidebarBrand";
 import { DatabaseWorkspaceProvider } from "./DatabaseWorkspaceProvider";
 import { WorkspaceBookmarks } from "./components/WorkspaceBookmarks";
 import { ForecastExcelExport } from "./components/ForecastExcelExport";
@@ -392,20 +393,7 @@ function AppShell({
         document.getElementById('workspace-content')?.focus();
       }}>ข้ามไปเนื้อหาหลัก</a>
       <aside className={isMobileMenuOpen ? "sidebar mobile-menu-open" : "sidebar"} aria-label="เมนูหลัก">
-        <div className="brand-lockup is-logo-only">
-          <div className="brand-mark is-sidebar-logo">
-            <picture>
-              <source media="(max-width: 720px)" srcSet={isDroughtSubNavActive || isHomeOverview ? "/brand/korat-tan-phai-sidebar-logo.webp" : "/brand/korat-tan-phai-emblem.webp"} />
-              <img
-                src="/brand/korat-tan-phai-sidebar-logo.webp"
-                width="640"
-                height="585"
-                alt={t("brand", language)}
-                decoding="async"
-              />
-            </picture>
-          </div>
-        </div>
+        <SidebarBrand compactMobileLogo={isDroughtSubNavActive || isHomeOverview} label={t("brand", language)} />
         <button
           type="button"
           className="mobile-menu-toggle"

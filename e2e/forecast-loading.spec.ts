@@ -17,6 +17,9 @@ for (const [name, path, request, title] of [
     await page.route(request, async (route) => { await held; await route.continue(); });
     try {
       await page.goto(path);
+      // The eager startup shell now uses the same visual primitives. This test
+      // owns the later archive request, after application code has loaded.
+      await expect(page.locator(".app-startup")).toHaveCount(0);
       const loading = page.locator(".nr-forecast-load-state");
       await expect(loading.getByRole("status")).toBeVisible();
       await expect(page.getByRole("heading", { name: new RegExp(title), level: 1 })).toBeVisible();

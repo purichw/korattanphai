@@ -1,8 +1,9 @@
 # Korat Tan Phai / โคราชทันภัย
 
-Nakhon Ratchasima-only subset of the Kaset Tan Phai public flood, drought, and
-agricultural water-risk alert prototype. The site brand is Korat Tan Phai /
-โคราชทันภัย; the data scope is จังหวัดนครราชสีมา.
+Authenticated drought-forecast archive dashboard for Nakhon Ratchasima, derived
+from the Kaset Tan Phai prototype. The current product covers source-backed
+forecast review, irrigation context, and Excel reporting, not live multi-hazard
+alerts. The site brand is Korat Tan Phai / โคราชทันภัย.
 
 ## Where To Start
 
@@ -19,15 +20,18 @@ agricultural water-risk alert prototype. The site brand is Korat Tan Phai /
 
 ## Main Surfaces
 
-The app is a Thai-only single-page application. For this subset, the primary
-sidebar starts with only the overview entry, and `/` opens the Nakhon Ratchasima
-workspace directly.
+The app is a Thai-only single-page application. Navigation exposes `ภาพรวม`,
+its `ภัยแล้ง` subitem, and `ส่งออก Excel` in database mode. `/` opens the
+Nakhon Ratchasima workspace after login.
 
 - Province overview: `/`
 - Province drought context: `/drought`
 - District: `/{district-slug}`
 - Subdistrict: `/{district-slug}/{subdistrict-slug}`
 - Legacy aliases under `/nakhon-ratchasima/...` are still accepted for old links.
+- Excel export and personal saved areas/filters open dialogs, not separate routes.
+- Inherited nationwide, farmer, approval and notification components are not
+  active product features. Their presence in source is not evidence of delivery.
 
 ## Login
 
@@ -106,6 +110,7 @@ user task explicitly authorizes it.
 - [PROJECT_MAP.md](PROJECT_MAP.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/APP_MAP.md](docs/APP_MAP.md)
+- [docs/AGRI_MAP_CAPABILITY_COMPARISON.md](docs/AGRI_MAP_CAPABILITY_COMPARISON.md)
 - [docs/INTERACTION_MAP.md](docs/INTERACTION_MAP.md)
 - [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
 - [docs/RAINFALL_SOURCE_AUDIT.md](docs/RAINFALL_SOURCE_AUDIT.md)
@@ -125,10 +130,9 @@ user task explicitly authorizes it.
 
 ## Data Contract Snapshot
 
-- Province-month coverage: 77 provinces x 22 months = 1,694 records.
-- Demo period: January 2025 through October 2026.
-- Main demo chain: `ARE-2026-0825-NE` -> `FV-0825-NE-01` ->
-  `ADV-2026-824` -> `FARM-001`.
+- Current forecast scope: 32 districts and 289 subdistricts in province code `30`.
+- The inherited 77-province/22-month fixtures and demo advisory chain are legacy
+  prototype context, not the forecast dataset shown in the current dashboard.
 - Source registry and map-layer provenance live in
   `src/data/canonical/source_registry.json` and
   `src/data/canonical/map_layer_catalog.json`.
@@ -142,13 +146,19 @@ user task explicitly authorizes it.
 - Nakhon Ratchasima local drill-down data lives under
   `src/data/canonical/nakhon_ratchasima/` and preserves `TH-P29` as the existing
   province with admin province code `30`, 32 districts, and 289 subdistricts.
-- Nakhon Ratchasima drought forecast archive lives in
-  `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`.
-  It is source-backed T+1 through T+6 archive data from
-  `Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx`: 289 mapped
-  Source_IDs, 127 target months from June 2015 through December 2025, and
-  220,218 canonical forecast vintages. The product treats `Source_YearMonth` as
-  the target month and computes `issueMonth = targetMonth - horizon`.
+- Database mode reads scoped, published rev03 forecasts through
+  `src/data/supabaseForecastArchive.ts`. The canonical verification/static-mode
+  artifact is `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`,
+  derived only from `Drought_T1-6_rev03.xlsx`. It contains 289 mapped Source_IDs,
+  127 origin months from June 2015 through December 2025, and 220,218 forecast
+  slots, including out-of-scope cells. `Source_YearMonth` is origin T;
+  `issueMonth = T` and `targetMonth = T + horizon`. December 2025 therefore
+  forecasts January-June 2026. Rev02 is retired, not a fallback or authority.
+- Supabase reads check the latest published revision before reusing cache;
+  database failures never fall back to static predictions or ThaiWater.
+- Irrigation comes from the same workbook: Collecting = unknown, RainFed =
+  rainfed/no irrigation, Irrigation = access to irrigation. It is not a live
+  water-level or irrigation-network dataset.
 - Archive risk values are semantic forecast values: `0` no forecast risk, `1`
   moderate forecast risk, `2` high forecast risk, and blank workbook cells are
   out of scope. Do not collapse blank/out-of-scope values into no-risk or
@@ -170,6 +180,7 @@ user task explicitly authorizes it.
   dataset refresh. Do not restore December 2025 historical map periods unless a
   new source-backed refresh explicitly asks for that.
 
-Province and local risk scores are synthetic prototype data unless explicitly
-labelled as official context. Public-safety wording must keep uncertainty,
-freshness, and recommended actions visible.
+Visible rev03 values are source-backed archived forecasts, not synthetic scores,
+current conditions, observed damage or a live prediction service. Synthetic
+agriculture and operational fixtures remain separate and must not be reintroduced
+as official data. Public-safety wording must retain uncertainty and source dates.

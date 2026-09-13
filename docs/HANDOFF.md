@@ -20,6 +20,34 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Cold-entry loading repair (2026-09-13, local only):
+
+- The reported “กำลังเปิดโคราชทันภัย...” screen was the outer `App.tsx`
+  Suspense fallback, shown after auth while the full `AuthenticatedApp` chunk
+  downloaded. Existing archive skeletons could only appear after that chunk.
+- Added an eager `AppStartup` with the shared sidebar brand and neutral Home
+  skeleton; session checking outside `/login` also uses it. Heavy application
+  imports and data access still wait for sign-in. Explicit login, denied access,
+  redirect/session restoration and the failed-chunk recovery path remain intact.
+- Split pure forecast loading presentation from the heavy drought header.
+  Existing overview and drought loaders use the same primitives. No forecast
+  values or user details appear in startup placeholders.
+- Auth unit checks: 27 passed; existing forecast-loading unit checks: 10 passed.
+  Browser evidence covers six startup cases, ten existing auth cases and eight
+  existing data-loading cases across desktop/mobile. Initial mobile test failures
+  were selector/timing issues: hidden toolbar placeholders and the transition
+  between startup and data-loading skeletons. Corrected tests pass.
+- Verified a protected build over HEAD `8501e40` plus the scoped startup files
+  in `artifacts/startup-loading-20260913/isolated-source`; startup gzip 117,293 B
+  remains below the 125,000 B budget. Exposure/chunk-reference checks passed.
+  The shared checkout initially had a concurrent, unrelated TypeScript error
+  in newly added `src/mapPoint.ts`; that work was preserved, not included in the
+  isolated verification or repaired here.
+- Screenshots/results live in `artifacts/startup-loading-20260913/`.
+  Evidence uses local static data with mocked auth and held/failed chunk requests;
+  it does not prove live network latency or Supabase integration. No commit,
+  push, deployment, production data write, or whole-site regression was done.
+
 Excel export upgrade production release (2026-09-09):
 
 - Pushed runtime `1404e49d55c8ca2062e35baf01c9c8c8018dca7a` and test-runner

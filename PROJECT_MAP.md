@@ -2,9 +2,11 @@
 
 ## Purpose / Current Goal
 
-`Korat Tan Phai / โคราชทันภัย` is the Nakhon Ratchasima-only subset of the
-Kaset Tan Phai public flood, drought, and water-risk alert prototype. Its
-visible first screen is the จังหวัดนครราชสีมา dashboard and local drill-down.
+`Korat Tan Phai / โคราชทันภัย` is an authenticated Nakhon Ratchasima drought
+forecast-archive dashboard derived from the Kaset Tan Phai prototype. Its
+current surfaces are overview, province/district/subdistrict forecasts, Excel
+reporting and personal saved workspaces. Legacy multi-hazard workflows are not
+the active product.
 
 FACT: The current implementation is a Vite + React + TypeScript single-page app
 with a read-only risk-fusion endpoint and a new machine-authenticated model-input
@@ -35,14 +37,17 @@ notification recipient or remote log store was activated. V2 remains proposed. S
 - Main app entry: `src/main.tsx` -> `src/App.tsx`
 - State/reducer: `src/store.tsx`
 - Domain selectors and workflow helpers: `src/domain.ts`
-- Static map component: `src/components/RiskMap.tsx`
+- Active local map: `src/components/nakhon-ratchasima/NakhonRatchasimaLocalMap.tsx`
+- Retained nationwide map component: `src/components/RiskMap.tsx`
 - Nakhon Ratchasima workspace: `src/components/NakhonRatchasimaWorkspace.tsx`
 - Shared select component: `src/components/AppSelect.tsx`
 - Shared metric components: `src/components/PageSummary.tsx`
 - Shared map preview footer: `src/components/MapPreviewFooter.tsx`
 - Canonical data imports: `src/data/catalog.ts`
-- On-demand forecast archive: `src/data/forecastArchive.ts` and
-  `src/useForecastArchive.ts`; the overview uses a generated summary.
+- On-demand forecast archive: `src/useForecastArchive.ts` and
+  `src/data/supabaseForecastArchive.ts` in database mode; scoped overview reads
+  one horizon and drought reads six. Static regression mode alone uses
+  `src/data/forecastArchive.ts` and the generated T+1 projection.
 - Canonical JSON package copy: `src/data/canonical/`
 - Nakhon Ratchasima local research/data patch:
   `src/data/canonical/nakhon_ratchasima/`
@@ -52,14 +57,14 @@ notification recipient or remote log store was activated. V2 remains proposed. S
   `rainfall_monthly_history.json`, and
   `subdistrict_rainfall_coverage.json`
 - Nakhon Ratchasima drought forecast archive:
-  `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
+  `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`
 - Static ADM1 GeoJSON: `public/geodata/thailand-adm1.geojson`
 - Static regional context GeoJSON:
   `public/geodata/thailand-neighbor-context.geojson`
 - Static Nakhon Ratchasima subdistrict GeoJSON:
   `public/geodata/nakhon-ratchasima-subdistricts.geojson`
-- Drought forecast archive builder:
-  `scripts/build-nr-drought-forecast-archive.py`
+- Rev03 normalization/cutover: `docs/DROUGHT_REV03_NORMALIZATION.md` and
+  `docs/DROUGHT_REV03_CUTOVER.md`. The rev02 builder is retired tooling.
 - Read-only production endpoints: `api/risk-fusion.ts` and public liveness in
   `api/health.js`; private readiness remains unconfigured (503).
 - Model-input API: `api/model-inputs.js`; legacy collector/schema/storage in
@@ -103,24 +108,25 @@ Production smoke checks after an authorized deploy:
 - Open `https://korattanphai.vercel.app`.
 - Confirm the visible product UI is Thai-only and the brand is Korat Tan Phai /
   โคราชทันภัย.
-- Confirm the primary sidebar shows only `ภาพรวม`.
+- Confirm navigation shows `ภาพรวม`, its `ภัยแล้ง` subitem and `ส่งออก Excel`
+  in database mode, with saved workspaces in the account toolbar.
 - Confirm `/`, `/wang-nam-khiao`, and `/wang-nam-khiao/t-302504` load after
   login, while legacy `/nakhon-ratchasima/...` links still resolve.
 - Confirm the Nakhon Ratchasima map loads and no network errors appear for
   `/geodata/nakhon-ratchasima-subdistricts.geojson` or
   `/geodata/thailand-neighbor-context.geojson`.
-- Confirm the Nakhon Ratchasima layer selector does not expose water, flood,
-  reservoir, weather, or rainfall layers; those raw catalog entries remain
-  parked for future ingest/prediction work only.
+- Confirm the active map offers forecast-risk and workbook irrigation coloring,
+  not water, flood, reservoir, weather or rainfall feeds. Raw catalog entries
+  remain parked for future ingest/prediction work only.
 - Confirm unseeded local areas say detailed local evidence is not yet available
   and do not render as normal/low-risk.
 - Confirm there is no visible EN version or TH/EN toggle; visible UI copy should
   be Thai except for necessary codes, acronyms, URLs, API terms, SMS, and LINE.
-- Confirm risk-event and crop pages have no horizontal overflow on desktop and
-  mobile.
+- Confirm overview, drought, area pages and the Excel/saved-workspace dialogs
+  have no horizontal overflow on desktop and mobile.
 - Confirm no visible route-back button points to a nationwide map on the root
   province overview.
-- Confirm no farmer alert exists before publication.
+- Do not count retained farmer/publication demos as an active alert service.
 - Confirm `/api/risk-fusion?eventId=ARE-2026-0825-NE` returns JSON in
   production.
 
@@ -142,7 +148,9 @@ Production smoke checks after an authorized deploy:
   model and future provider guardrails.
 - [docs/OPERATIONS.md](docs/OPERATIONS.md): operator/admin responsibilities and
   safe production work.
-- [docs/API.md](docs/API.md): current no-API fact and future endpoint contracts.
+- [docs/API.md](docs/API.md): current endpoint contracts and configuration limits.
+- [docs/AGRI_MAP_CAPABILITY_COMPARISON.md](docs/AGRI_MAP_CAPABILITY_COMPARISON.md):
+  source-based comparison with the supplied historical Agri-Map manual.
 - [docs/NON_FUNCTIONAL_REQUIREMENTS.md](docs/NON_FUNCTIONAL_REQUIREMENTS.md):
   security, privacy, performance, accessibility, reliability, observability.
 - [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md): checks, deploy, smoke,
@@ -197,8 +205,8 @@ Production smoke checks after an authorized deploy:
   `MetricGrid` components.
 - `src/components/MapPreviewFooter.tsx`: shared map preview footer for actions
   and centered fallback notes.
-- `scripts/build-nr-drought-forecast-archive.py`: converts the normalized
-  rev02 drought workbook into the packed forecast archive fixture.
+- `scripts/build-nr-drought-forecast-archive.py`: retired rev02 builder; do not
+  use it to replace or interpret the approved rev03 archive.
 - `src/data/catalog.ts`: typed imports and derived catalog lists.
 - `src/data/canonical/*.json`: product/spec data copied into source.
 - `src/data/canonical/nakhon_ratchasima/*.json`: incremental Nakhon Ratchasima province research
@@ -208,9 +216,9 @@ Production smoke checks after an authorized deploy:
   `subdistrict_rainfall_coverage.json`: rainfall source audit, station metadata,
   current-observation schema, monthly context, and 289-subdistrict direct/proxy
   coverage matrix.
-- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`:
-  packed source-backed T+1 through T+6 drought forecast archive used by
-  province, district, and subdistrict drought pages.
+- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`:
+  canonical verification/static-mode archive. Database pages read the published
+  equivalent from authenticated Supabase RPCs; no static fallback is allowed.
 - `public/geodata/thailand-adm1.geojson`: static map boundary data.
 - `public/geodata/thailand-neighbor-context.geojson`: non-interactive regional
   country orientation context from Natural Earth 1:110m Admin 0 countries.
@@ -223,8 +231,8 @@ Production smoke checks after an authorized deploy:
 ## Route / Surface Map
 
 This is a client-side routed SPA. Login and the Nakhon Ratchasima local
-workspace use browser paths. The initial Korat Tan Phai sidebar exposes only
-the province overview surface.
+workspace use browser paths. The sidebar exposes overview, drought and a
+database-only Excel export action.
 
 Routes:
 
@@ -234,6 +242,7 @@ Routes:
 - `/{district-slug}`: district workspace.
 - `/{district-slug}/{subdistrict-slug}`: subdistrict workspace.
 - `/nakhon-ratchasima/...`: legacy alias accepted for old Kaset Tan Phai links.
+- Excel export and saved workspaces are dialogs, not routes.
 
 Primary section surface:
 
@@ -254,7 +263,8 @@ sidebar:
 - `planning`: seasonal matrix and outcome metrics.
 - `models`: data/model registry and provenance limitations.
 
-The Farmer persona only sees the simplified farmer alert experience.
+The retained Farmer experience belongs to the legacy non-workspace branch;
+changing persona does not turn current workspace routes into a farmer service.
 
 ## Data / Auth / Storage / Deploy Flow
 
@@ -271,8 +281,12 @@ flowchart LR
   E --> K["public/geodata/thailand-neighbor-context.geojson"]
   D --> M["NakhonRatchasimaWorkspace"]
   M --> N["public/geodata/nakhon-ratchasima-subdistricts.geojson"]
-  M --> O["Nakhon Ratchasima rainfall station/coverage fixtures"]
-  M --> P["drought_forecast_archive_rev02.json"]
+  M --> P["useForecastArchive: scope + origin + horizons"]
+  P --> RPC["Supabase revision + scoped forecast RPCs"]
+  RPC --> Rows["Published rev03 forecast rows"]
+  D --> Saved["Owner-only followed areas and saved filters"]
+  D --> Export["Scoped Excel export + worker"]
+  Export --> RPC
   D --> I["Vite static build"]
   I --> J["Vercel production"]
   J --> L["/api/risk-fusion"]
@@ -316,13 +330,16 @@ FACT:
 - `rainfall_observations_24h.json` remains empty until a station-specific live
   ingest exists. Do not fill subdistrict gaps with zero, normal, or synthetic
   rainfall.
-- The rev02 drought forecast archive is historical forecast-vintage data, not
-  observed damage and not a live/current external forecast. Preserve target
-  month, issue month, and T+ horizon in UI, tooltips, tests, and docs.
-- The archive uses `Source_YearMonth` as target month and
-  `issueMonth = targetMonth - horizon`. Its record identity is
-  `subdistrictCode + targetMonth + horizon`, so equal numeric values across T+
-  horizons remain separate records.
+- The rev03 archive is historical forecast-vintage data, not observed damage
+  or a live/current external forecast. Rev02 is obsolete and must not supply
+  values or temporal assumptions.
+- `Source_YearMonth` is origin T; `issueMonth = T` and actual
+  `targetMonth = T + horizon`. Record identity is
+  `subdistrictCode + originMonth + horizon`. Legacy field names `targetMonths`,
+  `packedRiskByTargetMonth`, URL `target` and saved `target_period` still mean T.
+- Forecast scope is 289 tambons, 127 origins (2015-06 through 2025-12), six
+  horizons and 220,218 slots, including out-of-scope. All predictions trace to
+  the approved rev03 workbook; source ID 222 uses the confirmed Phimai mapping.
 - Archive risk values are `0` no forecast risk, `1` moderate forecast risk,
   `2` high forecast risk, and blank workbook cells as out of scope. Blank cells
   are not low-risk and not join failures.
@@ -362,8 +379,8 @@ FACT:
   seeded.
 - Do not turn missing district/subdistrict evidence into green, normal, or
   low-risk UI.
-- Do not collapse rev02 archive target month, issue month, and T+ horizon into a
-  single latest-risk value.
+- Do not collapse rev03 origin month, target month and horizon into one
+  latest-risk value, or restore the retired fixed-target interpretation.
 - Do not create farmer alerts before publication.
 - Do not silently convert synthetic prototype data into official public-safety
   language.
@@ -406,8 +423,9 @@ npm run test:e2e:managed
 
 ## Known Risks / Stale Notes
 
-- FACT: The build still emits a Vite chunk-size warning for other canonical JSON.
-  The forecast archive is a separate content-hashed asset loaded on demand.
+- Database builds exclude raw static forecast assets. Login, application and
+  export-worker bundles have separate budgets; current build results require
+  running the documented checks, not assuming an old chunk warning still applies.
 - FACT: Supabase auth passed real-account production smoke and self-signup is
   disabled. Archive and personal-workspace RLS are audited separately in the
   migration notes. There is no live external data ingestion or

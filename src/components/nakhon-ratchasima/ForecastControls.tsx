@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { type NakhonRatchasimaDroughtForecastArchiveTargetMonth, type NakhonRatchasimaDroughtForecastArchiveRecord } from "../../types";
 import {
   type ForecastArchiveHorizon,
@@ -178,6 +179,7 @@ export function DroughtForecastArchiveMapFilters({
   resetDisabled,
   statusText,
   compactValue,
+  tools,
 }: {
   irrigation?: ForecastMapIrrigation;
   showMonthFilter?: boolean;
@@ -190,6 +192,7 @@ export function DroughtForecastArchiveMapFilters({
   resetDisabled: boolean;
   statusText: string | null;
   compactValue: boolean;
+  tools?: ReactNode;
 }) {
   return (
     <div className={`nr-local-map-criteria is-forecast-archive-controls${irrigation ? " has-irrigation-filter" : ""}${showMonthFilter ? "" : " has-single-filter"}`} aria-label="ตัวกรองแผนที่พยากรณ์ภัยแล้ง">
@@ -227,6 +230,7 @@ export function DroughtForecastArchiveMapFilters({
         <span>รีเซ็ต</span>
       </button>
       </div>
+      {tools}
       {statusText && (
         <span className="nr-local-map-filter-status" role="status" aria-live="polite">
           {statusText}

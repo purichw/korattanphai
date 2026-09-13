@@ -21,10 +21,10 @@ export default defineConfig(({ mode }) => {
         this.emitFile({ type: "asset", fileName: "data-backend.json", source: '{"backend":"supabase"}' });
       },
     }] : [])],
-    // This is the legacy import in useForecastArchive; no source JSON is shipped
-    // when the authenticated database provider owns archive access.
+    // Cover root and nested consumers; the database build must not ship the
+    // static archive through a lazy analysis dialog either.
     resolve: { alias: backend === "supabase" ? [{
-      find: /^\.\/data\/forecastArchive$/,
+      find: /^(?:\.{1,2}\/)+data\/forecastArchive$/,
       replacement: fileURLToPath(new URL("./src/data/disabledStaticForecastArchive.ts", import.meta.url)),
     }] : [] },
     server: {

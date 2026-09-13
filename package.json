@@ -41,7 +41,9 @@
   "dependencies": {
     "@protobi/exceljs": "4.4.0-protobi.10",
     "@supabase/supabase-js": "^2.115.0",
+    "@turf/boolean-point-in-polygon": "7.4.0",
     "@xmldom/xmldom": "0.9.12",
+    "jspdf": "4.2.1",
     "jszip": "3.10.1",
     "lucide-react": "^0.468.0",
     "react": "^19.2.8",

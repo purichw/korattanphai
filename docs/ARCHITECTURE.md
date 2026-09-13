@@ -1,9 +1,11 @@
-# เกษตรทันภัย Architecture
+# Korat Tan Phai / โคราชทันภัย Architecture
 
 ## Current Architecture
 
-FACT: The app is primarily a static frontend prototype with one read-only
-serverless endpoint.
+FACT: The app is a Vite SPA with Supabase Auth, scoped published forecast reads
+and personal saved workspaces. Vercel also hosts risk-fusion, model-input,
+health and telemetry handlers. Implemented handlers do not imply configured
+live ingestion; see `API.md` and `NFR_OPERATIONS_RUNBOOK.md`.
 
 - Framework: Vite + React + TypeScript.
 - Rendering: client-side React mounted from `src/main.tsx`.
@@ -15,7 +17,7 @@ serverless endpoint.
 - API: `api/risk-fusion.ts` returns a sanitized risk-fusion explanation in
   production without importing browser-side JSON catalog modules into the
   serverless runtime.
-- Map: static Thailand ADM1 GeoJSON fetched from `/geodata/thailand-adm1.geojson`,
+- Legacy nationwide map: static Thailand ADM1 GeoJSON fetched from `/geodata/thailand-adm1.geojson`,
   with non-interactive regional-country context from
   `/geodata/thailand-neighbor-context.geojson`.
 - Local geography: Nakhon Ratchasima routes use static GISTDA subdistrict
@@ -28,10 +30,10 @@ serverless endpoint.
   current-observation schema, monthly-context, and 289-subdistrict coverage
   fixtures. No live rainfall readings or province water-provider snapshots are
   ingested into the app yet.
-- Drought forecast archive: `drought_forecast_archive_rev02.json` is a packed
-  source-backed T+1 through T+6 archive fixture generated from the normalized
-  rev02 workbook. It is consumed by the same Nakhon workspace at province,
-  district, and subdistrict levels as the public drought prediction source.
+- Drought forecast archive: published rev03 rows from `Drought_T1-6_rev03.xlsx`
+  are read through `src/data/supabaseForecastArchive.ts` in database mode.
+  `drought_forecast_archive_rev03.json` is the canonical verification/static-mode
+  artifact. Rev02 is retired and is not a runtime fallback.
 - Deployment: Vercel static build.
 - Backend/database: Supabase Auth, immutable published forecast tables and
   owner-only saved workspaces. See `SUPABASE_DATA_MIGRATION.md`; unrelated
@@ -56,23 +58,31 @@ flowchart TD
   NR --> NRGeo["/geodata/nakhon-ratchasima-subdistricts.geojson"]
   NR --> NRBoundary["/geodata/nakhon-ratchasima-boundary.geojson"]
   NR --> NRData["src/data/canonical/nakhon_ratchasima/*"]
-  NRData --> Rain["rainfall station/coverage fixtures"]
-  NRData --> Archive["drought forecast archive fixture"]
+  NR --> Loader["useForecastArchive + DatabaseWorkspaceProvider"]
+  Loader --> Revision["Latest publication revision"]
+  Loader --> Archive["Scoped Supabase rev03 archive RPC"]
+  App --> Saved["Owner-only areas and filters"]
+  App --> Excel["Excel dialog + worker"]
+  Excel --> Archive
 ```
+
+The diagram includes retained legacy RiskMap/risk-fusion branches; they are not
+primary product navigation. See `APP_MAP.md` for the active surfaces.
 
 Boundary rules:
 
 - `src/data/canonical/*.json` is read-only source fixture data.
 - `src/data/catalog.ts` casts JSON into typed application records and derives
   catalog lists.
-- `src/data/forecastArchive.ts` loads the forecast archive from a content-hashed
-  JSON asset only for drought, district, and subdistrict views. It shares pending
-  requests, caches validated results in memory, and permits retry after failure.
+- `src/data/forecastArchive.ts` loads content-hashed rev03 JSON in static mode
+  only. Database builds alias it to `disabledStaticForecastArchive.ts` and do
+  not emit raw archive assets or use them after a database failure.
 - `src/useForecastArchive.ts` owns the loading lifecycle. The workspace passes
-  the loaded archive into its existing forecast components; the overview uses
-  a generated T+1-only archive projection instead of loading all six horizons.
-  The overview projection has a separate loader cache and reuses the same map,
-  canonical-code joins and summary functions as the full archive.
+  the loaded archive into shared components. Database requests are scoped by
+  origin and area; overview requests one horizon and drought requests six.
+  Each load rechecks the server revision before cache reuse. Visible pages also
+  revalidate on focus/visibility and every 60 seconds. Static mode alone uses a
+  generated T+1 projection. See `FORECAST_SCOPED_LOADING.md`.
 - `src/data/localMapGeometry.ts` shares pending/parsed local geometry requests.
   Forecast routes prefetch geometry alongside the archive to avoid serial
   loading. Optional context failures do not block the subdistrict geometry.
@@ -88,6 +98,11 @@ Boundary rules:
 - `src/store.tsx` owns UI state, workflow transitions, and local persistence.
 - `src/App.tsx` owns lightweight login and browser history. It lazily imports
   `src/AuthenticatedApp.tsx` after login so canonical data is not in login startup.
+  Its eager `AppStartup` renders public branding and neutral placeholders while
+  a protected route checks its session or downloads the authenticated chunk.
+  `ForecastLoadingPrimitives` stays independent of workspace/catalog loaders;
+  the explicit login route keeps its login frame. No account data, protected
+  component, or forecast fetch is introduced before session resolution.
   Deep-link query parameters and hashes survive login redirects.
 - `src/AuthenticatedApp.tsx` owns the authenticated shell and remaining app
   surfaces. Ordinary internal content links use client navigation; modified
@@ -126,15 +141,16 @@ Boundary rules:
 FACT:
 
 - Frontend ownership is all user-facing behavior in this repo.
-- Backend ownership is limited to a read-only Vercel function for a public,
-  sanitized risk-fusion explanation.
-- API ownership currently exists only for `GET /api/risk-fusion`.
+- Vercel handlers are `api/risk-fusion.ts`, `api/model-inputs.js`,
+  `api/health.js` and `api/telemetry.js`. Model-input persistence is isolated
+  from published forecast data and cannot automatically replace it. Configuration
+  and deployment evidence are tracked separately from code in `API.md`/`HANDOFF.md`.
 - Supabase Email + Password authentication is managed by `src/useAuth.ts` and
   the shared lazy client in `src/supabase.ts`. See `docs/AUTH_SETUP.md` for
   implementation status and real-account verification prerequisites.
 - Personas from `src/data/canonical/users.json` are display context only,
   never authorization or evidence of an admin role.
-- Delivery and alerting are simulated in local runtime state.
+- Delivery and alerting are retained local demos, not active notification services.
 
 PROPOSAL:
 
@@ -176,10 +192,10 @@ Current external-data facts:
 - `src/data/canonical/nakhon_ratchasima/rainfall_observations_24h.json`
   currently has zero current observations by design because live station-specific
   access still needs audit.
-- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev02.json`
-  contains the source-backed rev02 T+1 through T+6 forecast archive. It was
-  generated from `Drought_T1-6_rev02_Normalized_ArchiveReady(1).xlsx` using
-  `scripts/build-nr-drought-forecast-archive.py`.
+- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`
+  is the approved source-backed T+1 through T+6 verification/static artifact.
+  See `DROUGHT_REV03_NORMALIZATION.md` and `DROUGHT_REV03_CUTOVER.md` for lineage;
+  older rev02 files/builders are not the current data contract.
 - Canonical risk data is local JSON in `src/data/canonical/`.
 - Documentation names the original local spec/data package path:
   `/Users/point/Downloads/agri_risk_codex_single_source`.
@@ -201,9 +217,9 @@ needs audit:
    `scripts/generate-forecast-summary.mjs`.
 2. Domain helpers in `src/domain.ts` compute records, summaries, workflow state,
    joins, delivery records, and map-related values.
-3. In production, `RisksSection` fetches the risk-fusion explanation from
-   `/api/risk-fusion`; the endpoint returns only the public explanation payload
-   and does not import the frontend catalog.
+3. The retained `RisksSection` can fetch `/api/risk-fusion`; it is not part of
+   primary workspace navigation. Current workspace data comes from scoped
+   Supabase reads, not this legacy explanation endpoint.
 4. `src/store.tsx` initializes Thai default UI state and runtime workflow state.
 5. User interactions dispatch reducer actions.
 6. Reducer writes app state to `localStorage` under
@@ -253,17 +269,16 @@ needs audit:
 FACT:
 
 - Browser auth uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
-- There is one read-only API route: `GET /api/risk-fusion`.
+- Current API routes and configuration boundaries are maintained in `API.md`.
 - There is no service worker, offline cache, or push notification registration.
-- Two additive SQL migrations, a pinned-source importer, isolated PostgreSQL
-  tests and real API verification cover the archive and personal workspaces.
+- SQL migrations, a pinned-source importer, isolated PostgreSQL tests and
+  recorded API verification cover the archive and personal workspaces.
   Production release evidence lives separately in `HANDOFF.md`.
 
 PROPOSAL:
 
-- Introduce a typed data-access layer before adding real APIs.
-- Move large province-month data behind lazy loading or an API if bundle size
-  becomes a performance problem.
+- Extend the existing typed/scoped data-access layer for any new approved
+  data families, without treating prototype catalogs as live sources.
 - Add append-only server audit logs before real admin/operator approvals.
 - Add provider-specific notification receipts before claiming delivery
   guarantees.

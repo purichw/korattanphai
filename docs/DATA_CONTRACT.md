@@ -1,4 +1,4 @@
-# เกษตรทันภัย Data Contract
+# Korat Tan Phai / โคราชทันภัย Data Contract
 
 ## Persistence Model
 
@@ -45,8 +45,10 @@ Static source files:
 - `src/data/canonical/nakhon_ratchasima/temporal_matrix.json`
 - `src/data/canonical/nakhon_ratchasima/validation.json`
 
-Typed imports and derived lists are in `src/data/catalog.ts`, except the full
-drought forecast archive, which is loaded on demand by `src/data/forecastArchive.ts`.
+Typed imports and derived lists are in `src/data/catalog.ts`, except forecasts.
+Database mode uses `src/data/supabaseForecastArchive.ts`; static regression mode
+alone uses `src/data/forecastArchive.ts`. Not every retained catalog is exposed
+in the product. See `APP_MAP.md` for active surfaces.
 
 ## Database Collections / Tables / Documents
 
@@ -442,9 +444,9 @@ Availability semantics:
 
 Never treat missing/null layer data as low risk.
 
-## Severity Taxonomy
+## Legacy Severity Taxonomy
 
-Current severity values:
+Retained multi-hazard prototype severity values (not the rev03 0/1/2 classes):
 
 - `Normal`
 - `Watch`
@@ -462,7 +464,8 @@ present severity as a guaranteed prediction.
 
 ## Hazard Taxonomy
 
-Current hazards in canonical data:
+Hazards retained in prototype canonical data; the active dashboard fixes hazard
+to drought and crop to rice:
 
 - Agricultural Water Stress
 - Crop Stress
@@ -600,10 +603,16 @@ Current code:
   a warning. It is not durable storage: reload may lose changes and require login.
   Neither error-boundary retry nor ordinary navigation clears persisted data.
 
-needs audit:
+Current forecast/map behavior:
 
-- Add explicit error UI for failed GeoJSON fetch.
-- Add live-data stale/fallback banners before production operations.
+- Critical loads have deadlines and retry/error states. The database archive
+  checks publication revision before cache reuse; scope/origin requests reject
+  stale responses. See `FORECAST_SCOPED_LOADING.md` and `loadDeadline.ts`.
+- Previously loaded same-scope forecasts may remain visible during revalidation
+  with request feedback. Failed Excel revalidation blocks download. Neither
+  path substitutes ThaiWater or static predictions for a failed database read.
+- Live-feed freshness policies remain future work, distinct from these archive
+  revision checks.
 
 ## Migration / Compatibility Rules
 

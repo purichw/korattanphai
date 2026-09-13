@@ -10,7 +10,7 @@ const port = Number(process.env.DATABASE_TEST_PORT ?? 5189);
 const server = await createServer({
   // Worker-only imports escape the initial crawl. Prebundle them before tests so
   // a late optimizer update cannot replace React under another open test page.
-  optimizeDeps: { include: ['@protobi/exceljs', '@xmldom/xmldom', 'jszip'] },
+  optimizeDeps: { include: ['@protobi/exceljs', '@xmldom/xmldom', 'jszip', 'jspdf', '@turf/boolean-point-in-polygon'] },
   server: {
     host: '127.0.0.1', port, strictPort: true, hmr: false,
     watch: { ignored: ['**/tmp-snapshots/**', '**/test-results/**', '**/artifacts/**'] },
@@ -18,7 +18,7 @@ const server = await createServer({
 });
 try {
   await server.listen();
-  const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', 'e2e/database-workspaces.spec.ts', 'e2e/bookmark-design.spec.ts', 'e2e/forecast-export.spec.ts', 'e2e/forecast-rev03-integrity.spec.ts', 'e2e/forecast-scoped-loading.spec.ts', 'e2e/forecast-risk-summary.spec.ts', '--workers=2', ...process.argv.slice(2)], {
+  const child = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', 'e2e/database-workspaces.spec.ts', 'e2e/bookmark-design.spec.ts', 'e2e/forecast-export.spec.ts', 'e2e/forecast-rev03-integrity.spec.ts', 'e2e/forecast-scoped-loading.spec.ts', 'e2e/forecast-risk-summary.spec.ts', 'e2e/forecast-map-tools.spec.ts', '--workers=2', ...process.argv.slice(2)], {
     stdio: 'inherit', env: { ...process.env, PLAYWRIGHT_BASE_URL: `http://127.0.0.1:${port}`, PLAYWRIGHT_DATA_BACKEND: 'supabase' },
   });
   process.exitCode = await new Promise((resolve, reject) => { child.on('error', reject); child.on('exit', (code) => resolve(code ?? 1)); });

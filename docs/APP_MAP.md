@@ -4,8 +4,8 @@
 
 FACT: The app is served by Vite/Vercel as a React single-page app with
 client-side route handling in `src/App.tsx`. In this Nakhon Ratchasima-only
-subset, `/` opens the local province workspace directly and the primary sidebar
-starts with only `ภาพรวม`.
+subset, `/` opens the local province workspace after login. Navigation exposes
+`ภาพรวม`, its `ภัยแล้ง` subitem and `ส่งออก Excel` in database mode.
 
 Routes:
 
@@ -25,16 +25,23 @@ Primary user-facing surface:
 
 - `NakhonRatchasimaWorkspace`: province -> district -> subdistrict operational
   drill-down for canonical province `TH-P29`, with 32 districts and 289
-  subdistricts. Its visible map selector is scoped to agriculture risk, drought,
-  planning, operations, and data-readiness layers; water, flood, reservoir,
-  weather, and rainfall catalog entries are retained in source but hidden from
-  the current product UI.
+  subdistricts. Active map coloring switches between archived forecast risk
+  and workbook irrigation status. Catalog entries for other data families are
+  not evidence of active map layers.
 - Drought pages at province, district, and subdistrict level include the shared
   source-backed forecast archive experience: origin/base month T selection, one T+
   horizon selector, archive summary metrics, shared map filters, the local
-  Nakhon map, trend context, readiness, and source/limitation disclosures. These
-  pages use the same archive fixture and semantics across all three geography
-  levels.
+  Nakhon map and source/limitation wording. Province/district pages have a
+  six-month percent/count bar graph; a tambon page shows its own forecast status,
+  not a multi-tambon aggregate. Supabase supplies scoped rev03 data using the
+  same semantics across all geography levels.
+- Home is a compact T+1 overview with district filtering, risk counts and links
+  to high-risk tambons. Agriculture panels require real source records and are
+  currently hidden; cleared research panels are not restored as placeholder data.
+- `ForecastExcelExport` opens a filtered workbook dialog. It includes all six
+  horizons, district/tambon sheets, formula-driven analysis, chart, PivotTable,
+  typed data/dictionary and optional same-target comparison across origin rounds.
+  See `FORECAST_EXCEL_EXPORT.md` for limits; it is not an online general BI tool.
 
 Inherited nationwide/workflow components remain in source for later extraction
 or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
@@ -42,7 +49,7 @@ or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
 Database mode adds a shared bookmark control in the desktop/mobile account
 toolbar, not a new route. Its modal lists followed areas and saved filters for
 the authenticated user. Restoring an item preserves source month T, horizon,
-area and map risk, including restoration on the same pathname. Existing and new
+area, map risk and irrigation, including restoration on the same pathname. Existing and new
 links/saved filters keep the same source-row values; legacy `target` query and
 saved `target_period` keys still identify T, with forward dates derived at runtime.
 
@@ -85,16 +92,17 @@ needs audit:
 
 ## Navigation Contracts
 
-- Sidebar/nav starts with only `ภาพรวม` for this subset.
+- Sidebar/nav exposes overview, drought and database-only Excel export.
 - Visible UI is Thai-only; there is no language switch in the product surface.
 - Reset Demo Data restores seed state through `resetDemo`.
 - Login redirects unauthenticated direct links to `/login`, then returns to the
-  requested path after accepted username entry.
+  requested path after successful Supabase email/password authentication.
 - Opening `/` hides the inherited nationwide filter band; the local workspace
   owns its layer selector and breadcrumbs.
-- Nakhon Ratchasima local controls mirror the nationwide select component:
-  province/district views show month, hazard, crop, and subdistrict filters;
-  subdistrict views show month, hazard, and crop only.
+- Shared local controls select origin month, area and horizon. Hazard `ภัยแล้ง`
+  and crop `ข้าว` are fixed context, not working multi-hazard/multi-crop selectors.
+  Province chooses districts; district/tambon views choose tambons in that district.
+  Map controls also filter risk and irrigation, with an independent color mode.
 - Drought archive controls use source/base month T + T+ horizon as the primary
   navigation state, following the user's 2026-09-06 confirmation that source
   rows are forecast origins. Changing T+ preserves T and changes the actual
@@ -103,33 +111,27 @@ needs audit:
   combination must remain visibly distinct from no-risk.
 - Nakhon Ratchasima route slugs are navigation-only. Data joins must use admin
   codes.
-- Nakhon Ratchasima rainfall layer navigation may open subdistrict detail for
-  both direct-station and nearest-station records. The detail screen must label
-  nearest-station data as representative context, not as a local gauge.
+- Rainfall helpers remain parked. Any future reactivation must distinguish
+  nearest-station context from a direct local gauge reading.
 - Legacy `/nakhon-ratchasima/...` links may load directly, but in-app route
   actions should generate the shorter Nakhon Ratchasima-only paths.
 
 ## Screens / Components By Surface
 
-- App shell: `AppShell` in `src/App.tsx`.
-- Navigation and filters: `AppShell` in `src/App.tsx`.
-- Overview: `OverviewSection`.
-- Risk events: `RisksSection`.
-- Map: `MapSection` plus `RiskMap` in `src/components/RiskMap.tsx`.
-- Forecast: `ForecastSection`.
-- Crops: `CropsSection`.
-- Field workflow: `WorkflowSection`.
-- Alerts and publication: `AlertsSection`.
-- Farmer view: `FarmerExperience`, `FarmerCard`.
-- Planning/analytics: `PlanningAnalyticsSection`.
-- Data/model registry: `DataModelsSection`.
+- Login/history: `src/App.tsx`; authenticated shell: `src/AuthenticatedApp.tsx`.
+- Home: `src/components/nakhon-ratchasima/ProvinceForecastOverview.tsx`.
+- Shared drought layout: `src/components/nakhon-ratchasima/DroughtForecastWorkspace.tsx`.
+- Shared controls: `ForecastControls.tsx` and `DroughtOperationalWorkspace.tsx`
+  in the same directory; graph: `ForecastRiskBarGraph.tsx`; map:
+  `NakhonRatchasimaLocalMap.tsx`.
+- Excel dialog: `src/components/ForecastExcelExport.tsx`; saved-workspace dialog:
+  `src/components/WorkspaceBookmarks.tsx`.
 - Nakhon Ratchasima workspace: `NakhonRatchasimaWorkspace` in
   `src/components/NakhonRatchasimaWorkspace.tsx`.
-- Drought forecast archive: `DroughtForecastArchivePanel`,
-  `DroughtForecastArchiveHorizonSelector`,
-  `DroughtForecastArchiveSummaryMetrics`, `DroughtForecastArchiveMapFilters`,
-  and `NakhonRatchasimaLocalMap` in
-  `src/components/NakhonRatchasimaWorkspace.tsx`.
+- Legacy `OverviewSection`, `RisksSection`, `MapSection`, `ForecastSection`,
+  `CropsSection`, `WorkflowSection`, `AlertsSection`, `FarmerExperience`,
+  `PlanningAnalyticsSection` and `DataModelsSection` remain in
+  `src/AuthenticatedApp.tsx`, but are not the current workspace route surfaces.
 
 ## Do Not Regress
 
