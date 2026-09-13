@@ -361,7 +361,9 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(mapToolbar.getByRole("combobox")).toHaveCount(3);
   await expect(mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" })).toBeVisible();
-  await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
+  const filterStatus = mapToolbar.locator(".nr-local-map-filter-status");
+  await expect(filterStatus).toHaveClass(/is-reserved/);
+  await expect(filterStatus).toHaveText("");
   await expect(mapToolbar).not.toContainText(/\/.*ตำบล/);
   await horizonTabs.getByRole("tab", { name: /ล่วงหน้า 2 เดือน/ }).click();
   await expect(horizonTabs.getByRole("tab", { name: /ล่วงหน้า 2 เดือน/ })).toHaveAttribute("aria-selected", "true");
@@ -375,7 +377,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await page.getByRole("option", { name: "ไม่มีความเสี่ยง" }).click();
   await expect(mapToolbar.locator(".nr-local-map-filter-status")).toContainText(/แสดง .* จาก .* ตำบล|ไม่พบตำบลที่ตรงกับตัวกรอง/);
   await mapToolbar.getByRole("button", { name: "รีเซ็ต" }).click();
-  await expect(mapToolbar.locator(".nr-local-map-filter-status")).toHaveCount(0);
+  await expect(filterStatus).toHaveText("");
   if ((viewport?.width ?? 0) >= 1180) {
     expect(horizonBox.y).toBeGreaterThanOrEqual(workspaceBox.y);
     expect(horizonBox.y).toBeLessThan(mapBox.y);

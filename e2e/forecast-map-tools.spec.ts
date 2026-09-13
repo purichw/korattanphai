@@ -12,7 +12,10 @@ async function setup(page: Page, path = '/soeng-sang?target=2025-12&horizon=1') 
     return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 ? overview : archive, query) });
   });
   await seedAuthSession(page);
+  // Cold dev-server/module loading is setup, not part of the gesture contract.
+  const geometry = page.waitForResponse(response => new URL(response.url()).pathname === '/geodata/nakhon-ratchasima-subdistricts.geojson');
   await page.goto(path);
+  expect((await geometry).ok()).toBe(true);
   await expect(page.getByRole('button', { name: 'ค้นหาพื้นที่บนแผนที่' })).toBeVisible();
   return requests;
 }
