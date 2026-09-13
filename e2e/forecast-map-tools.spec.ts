@@ -25,6 +25,122 @@ async function openAnalysis(page: Page) {
   await expect(page.locator('.nr-analysis-table tbody tr').first()).toBeVisible();
 }
 
+async function settledCamera(page: Page) {
+  const layer = page.locator('.nr-map-transform-layer');
+  let previous: string | null = null;
+  await expect.poll(async () => {
+    const next = await layer.getAttribute('transform');
+    const settled = next !== null && next === previous;
+    previous = next;
+    return settled;
+  }, { intervals: [100] }).toBe(true);
+  return previous!;
+}
+
+for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?target=2025-12', '/phimai/t-301503?target=2025-12']) {
+  test(`Korat shared map scroll, camera and fullscreen tools ${path}`, async ({ page }, info) => {
+    test.setTimeout(90_000);
+    await setup(page, path);
+    const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+    const panel = page.locator('.nr-map-panel');
+    const svg = page.locator('.nr-map-svg');
+    const layer = page.locator('.nr-map-transform-layer');
+    const url = page.url();
+    await panel.evaluate(element => element.setAttribute('data-interaction-probe', 'original'));
+    const fit = await settledCamera(page);
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.mouse.move(page.viewportSize()!.width - 5, 300);
+    await page.mouse.wheel(0, 240);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    await expect(layer).toHaveAttribute('transform', fit);
+    await panel.getByTitle('ขยายแผนที่', { exact: true }).click();
+    await expect(layer).not.toHaveAttribute('transform', fit);
+    const zoom = await settledCamera(page);
+    await svg.scrollIntoViewIfNeeded();
+    const point = await svg.evaluate(element => {
+      const box = element.getBoundingClientRect();
+      for (const xr of [.12, .25, .75, .88]) for (const yr of [.3, .5, .7]) {
+        const x = box.x + box.width * xr, y = box.y + box.height * yr;
+        const hit = document.elementFromPoint(x, y);
+        if (hit && element.contains(hit) && !hit.closest('.nr-map-shape')) return { x, y };
+      }
+      throw new Error('No reachable map background for a real pointer gesture');
+    });
+    if (info.project.name === 'mobile') {
+      const touch = await page.context().newCDPSession(page);
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ ...point, id: 0 }] });
+      await expect(panel).toHaveClass(/is-dragging/);
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: point.x + 48, y: point.y + 24, id: 0 }] });
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await touch.detach();
+    } else {
+      await page.mouse.move(point.x, point.y); await page.mouse.down();
+      await page.mouse.move(point.x + 48, point.y + 24, { steps: 6 }); await page.mouse.up();
+    }
+    await expect(layer).not.toHaveAttribute('transform', zoom);
+    const dragged = await settledCamera(page);
+    if (info.project.name === 'mobile') {
+      const touch = await page.context().newCDPSession(page);
+      const points = (spread: number) => [{ x: point.x - spread, y: point.y, id: 0 }, { x: point.x + spread, y: point.y, id: 1 }];
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: points(14) });
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: points(36) });
+      await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await touch.detach();
+    } else {
+      const scrollBefore = await page.evaluate(() => scrollY);
+      await page.mouse.move(point.x, point.y); await page.mouse.wheel(0, 40);
+      await expect(layer).not.toHaveAttribute('transform', dragged);
+      expect(await page.evaluate(() => scrollY)).toBe(scrollBefore);
+    }
+    await expect(layer).not.toHaveAttribute('transform', dragged);
+    const panned = await settledCamera(page);
+    await panel.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true }).click();
+    const options = page.locator('.app-select-options').last();
+    await options.hover(); await page.mouse.wheel(0, 220);
+    await expect.poll(() => options.evaluate(element => Math.max(element.scrollTop, element.closest('.app-select-menu')!.scrollTop))).toBeGreaterThan(0);
+    await expect(layer).toHaveAttribute('transform', panned);
+    await page.keyboard.press('Escape');
+    const opener = page.getByRole('button', { name: 'ค้นหาพื้นที่บนแผนที่' });
+    await opener.click();
+    const scroll = await page.evaluate(() => scrollY);
+    await page.mouse.move(3, page.viewportSize()!.height - 3);
+    await page.mouse.wheel(0, 240);
+    await page.getByRole('searchbox').fill('นครราชสีมา');
+    expect(await page.evaluate(() => scrollY)).toBe(scroll);
+    await expect(layer).toHaveAttribute('transform', panned);
+    await page.keyboard.press('Escape');
+    await expect(opener).toBeFocused();
+    await opener.click();
+    await page.mouse.click(2, 2);
+    await expect(page.locator('.nr-tool-dialog')).toHaveCount(0);
+    await expect(opener).toBeFocused();
+    await panel.getByTitle('เปิดแผนที่เต็มจอ', { exact: true }).click();
+    await expect.poll(() => panel.evaluate(element => document.fullscreenElement === element)).toBe(true);
+    await openAnalysis(page);
+    await expect(page.locator('.nr-tool-dialog')).toBeVisible();
+    expect(await page.locator('.nr-tool-dialog').evaluate(element => document.fullscreenElement?.contains(element))).toBe(true);
+    const pattern = page.getByRole('combobox', { name: 'รูปแบบความเสี่ยง 6 เดือน', exact: true });
+    await pattern.click();
+    await expect(page.getByRole('listbox')).toBeVisible();
+    await page.screenshot({ path: info.outputPath('custom-dropdown.png') });
+    await pattern.press('ArrowDown');
+    await pattern.press('Escape');
+    await expect(page.getByRole('listbox')).toHaveCount(0);
+    await expect(page.locator('.nr-tool-dialog')).toBeVisible();
+    await expect(pattern).toBeFocused();
+    await page.screenshot({ path: info.outputPath('fullscreen-analysis.png') });
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'ตาราง / วิเคราะห์', exact: true })).toBeFocused();
+    await panel.getByTitle('ออกจากเต็มจอ', { exact: true }).click();
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true);
+    await panel.getByTitle('กลับมุมมองพื้นที่นี้', { exact: true }).click();
+    await expect(layer).toHaveAttribute('transform', fit);
+    await expect(panel).toHaveAttribute('data-interaction-probe', 'original');
+    expect(page.url()).toBe(url);
+    expect(errors).toEqual([]);
+  });
+}
+
 for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?target=2025-12', '/phimai/t-301503?target=2025-12']) {
   test(`Korat map tools scope and on-demand table ${path}`, async ({ page }, info) => {
     const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
@@ -37,7 +153,7 @@ for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?
     expect(lazyRequests).toEqual([]);
     expect(requests).toHaveLength(1);
     await expect(page.locator('.nr-map-svg')).toBeVisible();
-    const plot = await page.locator('.nr-map-svg').boundingBox(); expect(plot!.height).toBeGreaterThan(170);
+    const plot = await page.locator('.nr-map-svg').boundingBox(); expect(plot!.height).toBeGreaterThanOrEqual(260);
     await page.getByRole('button', { name: 'ค้นหาพื้นที่บนแผนที่' }).click();
     await page.getByRole('searchbox', { name: 'ชื่อหรือรหัสพื้นที่นครราชสีมา' }).fill('เชียงใหม่');
     await expect(page.locator('.nr-area-search-results li')).toHaveCount(0);

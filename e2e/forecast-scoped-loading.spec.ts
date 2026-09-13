@@ -11,6 +11,9 @@ for (const scope of [
   { path: '/dan-khun-thot', area: '3008', count: 16 },
   { path: '/dan-khun-thot/t-300806', area: '300806', count: 1 },
 ]) test(`scoped loading ${scope.area}: atomic month change, retry and cached horizons`, async ({ page }, testInfo) => {
+  // This complete retry/race journey makes four requests and several route updates.
+  // Keep each assertion's deadline unchanged while allowing slower CI rendering.
+  test.setTimeout(60_000);
   const requests: any[] = []; const legacy: string[] = [];
   let failNovember = true;
   let releaseOctober: (() => void) | undefined;

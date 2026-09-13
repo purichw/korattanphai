@@ -56,6 +56,14 @@ files.
 
 Helper exports:
 
+All product dropdowns, including map tools, analysis and report dialogs, use
+`AppSelect`; do not introduce a native select or a parallel custom listbox.
+Escape dismisses an open menu first, then is left to the enclosing dialog when
+the menu is already closed. Selection and explicit menu dismissal return focus
+to the trigger without scrolling; outside clicks retain their intended target.
+`WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
+locks background scroll and restores the opener without moving the page.
+
 | Export | File | Use For |
 | --- | --- | --- |
 | `AppSelectOption` | `src/components/AppSelect.tsx` | Shared option shape for `AppSelect` and filter controls. |

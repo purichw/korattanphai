@@ -1,4 +1,22 @@
 .nr-map-tools { min-width: 0; width: 100%; }
+/* Tool/status rows grow independently of the usable map viewport. */
+:is(.is-home-overview .nr-overview-cockpit-map, .is-drought-route .nr-drought-compact-workspace) .nr-dashboard-map-card:has(.nr-map-tools) {
+  height: auto;
+  min-height: 440px;
+  grid-template-rows: auto minmax(min-content, 1fr);
+  container-type: inline-size;
+  --nr-tools-plot-height: 260px;
+}
+.is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card:has(.nr-map-tools) { min-height: 530px; }
+.is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-dashboard-map-card:has(.nr-map-tools) { min-height: 540px; --nr-tools-plot-height: max(280px, 34cqw); }
+:is(.is-home-overview .nr-overview-cockpit-map, .is-drought-route .nr-drought-compact-workspace) .nr-dashboard-map-card .nr-map-panel:has(.nr-map-tools):not(:fullscreen) {
+  height: auto;
+  grid-template-rows: auto minmax(var(--nr-tools-plot-height), 1fr) auto;
+}
+:is(.is-home-overview .nr-overview-cockpit-map, .is-drought-route .nr-drought-compact-workspace) .nr-dashboard-map-card .nr-map-panel:has(.nr-map-tools):not(:fullscreen) .nr-map-svg { min-height: 0; }
+@media (min-width: 901px) {
+  .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-drought-workspace-chart-card { height: 100%; }
+}
 .nr-map-tool-actions { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .nr-map-tool-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; border: 0; border-radius: 5px; background: var(--surface-muted); color: var(--primary); }
 .nr-map-tool-actions .icon-button { width: 36px; min-width: 36px; padding: 6px; }
@@ -12,6 +30,8 @@
 .nr-map-analysis-notice { flex-wrap: wrap; background: #edf5f9; padding: 6px; border-radius: 4px; }
 .nr-map-analysis-notice span { flex: 1 1 180px; }
 .nr-map-analysis-notice .secondary-button { min-height: 30px; padding: 4px 8px; font-size: 11px; }
+html:has(.nr-tool-dialog[open]), body:has(.nr-tool-dialog[open]) { overflow: hidden; }
+html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-tool-dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: 0 20px 64px #12281f30; }
 .nr-tool-dialog.is-wide { width: min(1180px, calc(100vw - 32px)); }
 .nr-tool-dialog::backdrop { background: #152b2466; }

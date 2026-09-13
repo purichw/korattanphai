@@ -79,6 +79,16 @@ irrigation infrastructure, nationwide GIS layers or new forecast records.
 - `e2e/forecast-map-tools.spec.ts`: isolated Supabase fixtures on desktop/mobile;
   four route levels, lazy loading, filters/map colors, same-target comparison,
   coordinates, playback, downloadable PNG/PDF, failures and new publications.
+  Shared interaction journeys exercise page scrolling, mouse zoom/drag, real
+  Chromium touch long-press/pan/pinch, month-menu scrolling without camera
+  movement, modal background scroll lock/focus restoration, and analysis inside
+  fullscreen. Closing tools/fullscreen retains the route and map instance; Reset
+  returns the same fitted camera. These are automated browser gestures, not a
+  claim of physical iOS/Android device coverage.
+- Map/tool frames grow with filter/status rows while preserving a minimum plot
+  height; wide tambon plots reserve proportionate height. Adjacent desktop charts
+  stretch with the map. Tool dialogs lock background scrolling and restore focus
+  without scrolling the document.
 - Existing model/export/map-interaction regression tests remain applicable.
 - PNG/PDF export is tested with production's `img-src 'self' data:` policy;
   rendering uses a self-contained data image without broadening CSP.

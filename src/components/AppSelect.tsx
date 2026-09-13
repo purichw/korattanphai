@@ -94,9 +94,10 @@ export function AppSelect({
     setIsOpen(true);
   };
 
-  const closeMenu = () => {
+  const closeMenu = (restoreFocus = false) => {
     setIsOpen(false);
     searchRef.current = "";
+    if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
   };
 
   const moveActive = (step: number) => {
@@ -113,7 +114,7 @@ export function AppSelect({
     if (!option || option.disabled) return;
     onChange(option.value);
     closeMenu();
-    window.requestAnimationFrame(() => triggerRef.current?.focus());
+    window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
   };
 
   const handleTypeahead = (key: string) => {
@@ -166,8 +167,9 @@ export function AppSelect({
     }
 
     if (event.key === "Escape") {
+      if (!isOpen) return;
       event.preventDefault();
-      if (isOpen) event.stopPropagation();
+      event.stopPropagation();
       closeMenu();
       return;
     }
@@ -237,7 +239,7 @@ export function AppSelect({
             aria-hidden="true"
             onPointerDown={(event) => {
               event.preventDefault();
-              closeMenu();
+              closeMenu(true);
             }}
           />
           <div
@@ -246,7 +248,7 @@ export function AppSelect({
           >
             <div className="app-select-menu-header" role="presentation">
               <span>{label ?? ariaLabel ?? "ตัวเลือก"}</span>
-              <button type="button" className="app-select-menu-close" aria-label="ปิดตัวเลือก" onClick={closeMenu}>
+              <button type="button" className="app-select-menu-close" aria-label="ปิดตัวเลือก" onClick={() => closeMenu(true)}>
                 <X size={16} aria-hidden="true" />
               </button>
             </div>

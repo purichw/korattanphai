@@ -493,11 +493,12 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
     const y = Math.min(bounds.bottom - 12, cardBottom + 18, innerHeight - 12);
     return {
       aboveLegend: Number(getComputedStyle(toolbar).zIndex) > Number(getComputedStyle(legend).zIndex),
-      extendsBeyondCard: y > cardBottom,
-      reachableBeyondCard: menu.contains(document.elementFromPoint(x, y)),
+      reachableAtBottom: menu.contains(document.elementFromPoint(x, y)),
     };
   });
-  expect(menuLayering).toEqual({ aboveLegend: true, extendsBeyondCard: true, reachableBeyondCard: true });
+  // Adaptive map frames can contain the menu; its visible bottom must still be
+  // hit-testable above the legend whether it ends inside or outside the frame.
+  expect(menuLayering).toEqual({ aboveLegend: true, reachableAtBottom: true });
 
   const transformBeforeDropdownWheel = await readMapTransform(localSvg, ".nr-map-transform-layer");
   const dropdownScrollBefore = await targetMonthMenu.evaluate((menu) => {
