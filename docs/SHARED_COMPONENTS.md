@@ -344,6 +344,12 @@ slot of `DroughtForecastArchiveMapFilters` across Home, province, district and
 tambon. Existing route/month/irrigation ownership, camera and polygon rendering
 remain in their original components. No legacy national page is enabled.
 
+Map toolbars reserve a status line (two in narrow cards) and narrow legends
+reserve space for both forecast and irrigation layers. Changing filters must
+not resize the frame. Province/district desktop maps, charts and their loading
+or empty replacements use `--nr-forecast-desktop-panel-height`; mobile maps keep
+a usable minimum plot height independently of the toolbar.
+
 - `WorkspaceDialog` owns native modal lifecycle, Escape and focus restoration;
   it portals into the fullscreen target when one is active. Feature owners keep
   their own queries, async jobs, errors and loading states.

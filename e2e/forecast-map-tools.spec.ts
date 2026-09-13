@@ -28,11 +28,16 @@ async function openAnalysis(page: Page) {
 async function settledCamera(page: Page) {
   const layer = page.locator('.nr-map-transform-layer');
   let previous: string | null = null;
+  let stableFrames = 0;
   await expect.poll(async () => {
-    const next = await layer.getAttribute('transform');
-    const settled = next !== null && next === previous;
+    // Observe rendered frames, not two timer reads while a busy CI browser has
+    // yet to advance the wheel animation.
+    const next = await layer.evaluate(element => new Promise<string | null>(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve(element.getAttribute('transform'))));
+    }));
+    stableFrames = next === previous ? stableFrames + 1 : 0;
     previous = next;
-    return settled;
+    return next !== null && stableFrames >= 3;
   }, { intervals: [100] }).toBe(true);
   return previous!;
 }

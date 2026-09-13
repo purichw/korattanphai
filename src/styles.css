@@ -25,6 +25,7 @@
   --green-soft: #e6efe6;
   --shadow: 0 18px 50px rgba(20, 38, 31, 0.12);
   --radius: 8px;
+  --nr-forecast-desktop-panel-height: 600px;
   --map-water: #eef4f0;
   --map-water-deep: #e4ece7;
   --map-grid-line: rgba(71, 104, 90, 0.025);

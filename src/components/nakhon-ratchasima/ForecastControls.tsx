@@ -231,8 +231,8 @@ export function DroughtForecastArchiveMapFilters({
       </button>
       </div>
       {tools}
-      {statusText && (
-        <span className="nr-local-map-filter-status" role="status" aria-live="polite">
+      {(statusText || tools) && (
+        <span className={`nr-local-map-filter-status${tools ? " is-reserved" : ""}`} role="status" aria-live="polite">
           {statusText}
         </span>
       )}

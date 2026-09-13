@@ -87,8 +87,12 @@ irrigation infrastructure, nationwide GIS layers or new forecast records.
   claim of physical iOS/Android device coverage.
 - Map/tool frames grow with filter/status rows while preserving a minimum plot
   height; wide tambon plots reserve proportionate height. Adjacent desktop charts
-  stretch with the map. Tool dialogs lock background scrolling and restore focus
+  share the map's stable frame height. Tool dialogs lock background scrolling and restore focus
   without scrolling the document.
+  The filter-status slot reserves one line in wide cards and two in narrow
+  cards, so selecting irrigation (including no matches) does not resize the map.
+  Narrow legends reserve space for either layer. The province/district desktop
+  map, chart, loading and empty replacements share the panel-height token.
 - Existing model/export/map-interaction regression tests remain applicable.
 - PNG/PDF export is tested with production's `img-src 'self' data:` policy;
   rendering uses a self-contained data image without broadening CSP.
