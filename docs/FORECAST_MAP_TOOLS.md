@@ -86,6 +86,11 @@ irrigation infrastructure, nationwide GIS layers or new forecast records.
   separately bounds the lazy analysis, Turf and report dependencies at 1.85 MB
   raw / 480 kB gzip. Static imports into those tools fail the gate. The database
   browser runner includes these cases and prebundles optional writers for tests.
+  CI also exercises optional telemetry: its deferred SDK has a separate 20 kB
+  raw / 6 kB gzip cap and cannot be statically imported. Application telemetry
+  wiring still counts against core. This does not enable telemetry in production.
+  Compare gzip budgets on Node 24, matching CI/Vercel; other Node/zlib versions
+  can report different compressed sizes for identical emitted JavaScript.
 - `tests/reportLayout.test.ts` covers Thai text, long identifiers, keep-with-next,
   flexible figure heights and lossless pagination. Browser stress tests exercise
   actual font metrics and multi-page PDF/PNG ZIP output with long metadata.
