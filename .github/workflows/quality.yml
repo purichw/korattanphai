@@ -58,7 +58,8 @@ jobs:
           retention-days: 7
   database-browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Browser coverage takes about 19 minutes before the protected build.
+    timeout-minutes: 30
     env:
       VITE_SUPABASE_URL: https://ktp-auth-test.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only

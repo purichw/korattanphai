@@ -32,6 +32,10 @@ forecast data, geometry, database migrations or authentication changes ship here
   visible header/close controls and background scroll containment. Native flex
   dialogs require `height: fit-content`; `auto` still stretches to the height cap.
   Empty-state bottom spacing is checked at 10-24px, with current screenshots.
+- CI run 34820715125 passed every browser assertion and every protected build
+  check, but the database job was cancelled at its 20-minute total limit just
+  after the final bundle check. Its budget is now 30 minutes to include browser
+  coverage plus the protected build; no test, assertion or gate is removed.
 - Unit suite: 272 tests passed after incorporating the new production baseline.
 - Protected build, exposure checks and deferred-tool boundaries passed on Node 24.
   Core gzip budget is 375 kB (current production baseline: 372 kB); measured about
