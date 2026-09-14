@@ -70,6 +70,8 @@ test('repeated names retain level, location, filtering and the exact forecast de
 });
 
 test('history is committed explicitly, survives reload and can be cleared without affecting another account', async ({ page }, info) => {
+  // Three full document loads share this budget on the slower CI browser.
+  test.setTimeout(60_000);
   await setup(page);
   await page.evaluate(() => localStorage.setItem('korat-tan-phai-search-history-v1:another-account', JSON.stringify(['ข้อมูลของบัญชีอื่น'])));
   let dialog = await open(page);

@@ -232,6 +232,14 @@ test('Korat empty irrigation retains compact map dimensions', async ({ page }) =
   const empty = (await map.boundingBox())!;
   expect(empty.width).toBeCloseTo(initial.width, 0);
   expect(empty.height).toBeCloseTo(initial.height, 0);
+  if (page.viewportSize()!.width > 900) {
+    await map.evaluate(element => { element.style.width = 'calc(100% - 16px)'; });
+    await expect.poll(async () => (await map.boundingBox())!.width).toBeLessThan(initial.width - 10);
+    await map.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await expect.poll(() => map.evaluate(element => Number.parseFloat(element.style.getPropertyValue('--nr-populated-map-height')))).toBeCloseTo(initial.height, 0);
+    await map.evaluate(element => element.style.removeProperty('width'));
+    await expect.poll(async () => (await map.boundingBox())!.height).toBeCloseTo(initial.height, 0);
+  }
   await page.getByRole('button', { name: 'แสดงทุกสถานะชลประทาน', exact: true }).click();
   await expect(page.locator('.nr-drought-workspace-chart-card')).toBeVisible();
   await expect.poll(async () => (await map.boundingBox())!.height).toBeCloseTo(initial.height, 0);

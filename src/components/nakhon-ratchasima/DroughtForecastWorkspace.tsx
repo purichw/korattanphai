@@ -399,18 +399,19 @@ export function DroughtForecastWorkspaceMapCard({
         : "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง";
   const issueMonthLabel = formatMonth(forecastArchiveIssueMonth, "th");
   const mapCard = useRef<HTMLElement>(null);
-  const populatedFrame = useRef<{ width: number; height: number } | null>(null);
+  const populatedFrame = useRef<{ viewportWidth: number; height: number } | null>(null);
   const filteredScope = Boolean(irrigation && irrigation.value !== "all") || filteredSubdistrictCodes?.length === 0;
   useLayoutEffect(() => {
     const card = mapCard.current;
     if (!card || level === "subdistrict" || typeof ResizeObserver === "undefined") return;
-    // Removing chart/KPI rows must not shrink the adjacent map. Width changes
-    // invalidate the measurement so a desktop frame never leaks into mobile.
+    // Only a real viewport resize invalidates the frame. Scrollbars and overlays
+    // can briefly change the card width without changing the responsive layout.
     const measure = () => {
       if (document.fullscreenElement) return;
-      const { width, height } = card.getBoundingClientRect();
-      if (!filteredScope) populatedFrame.current = { width, height };
-      else if (populatedFrame.current && Math.abs(populatedFrame.current.width - width) > 1) populatedFrame.current = null;
+      const { height } = card.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      if (!filteredScope) populatedFrame.current = { viewportWidth, height };
+      else if (populatedFrame.current && populatedFrame.current.viewportWidth !== viewportWidth) populatedFrame.current = null;
       if (filteredScope && populatedFrame.current && window.innerWidth > 900) {
         card.style.setProperty("--nr-populated-map-height", `${populatedFrame.current.height}px`);
       } else card.style.removeProperty("--nr-populated-map-height");

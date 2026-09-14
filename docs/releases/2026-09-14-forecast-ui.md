@@ -11,6 +11,8 @@ User authorization: push and deploy only this conversation's work.
 - Compact district/province charts with centered selected-month coverage and
   percentages; separately restored tambon map sizing; grouped playback period.
 - Cordia New workbook typography and centered short fields with wrapped metadata.
+- Irrigation empty results reuse the shared icon/heading/reset presentation on
+  overview, province, district and tambon pages, matching the analysis empty state.
 
 The initial isolated candidate started from `e5b056b`, the production baseline
 at release start. Before promotion, primary changed to deployment
@@ -34,8 +36,9 @@ forecast data, geometry, database migrations or authentication changes ship here
 - Map scroll tests use a 720px-high desktop viewport so compact tambon pages
   still exercise actual document scrolling, instead of requiring excess height.
 - Irrigation filters preserve the desktop map's populated frame, including empty
-  and all-out-of-study results, invalidating
-  the measurement on width changes. No remembered desktop height applies on mobile.
+  and all-out-of-study results, invalidating the measurement on actual viewport
+  width changes, not temporary scrollbar/overlay changes in the card width.
+  No remembered desktop height applies on mobile.
   The compact desktop plot has a stable 220px height, preventing intrinsic SVG
   dimensions from changing the chart/map row after reset. Both viewport tests pass.
 - Final protected static-build irrigation/layout suite: 38 tests passed, including
@@ -47,6 +50,11 @@ forecast data, geometry, database migrations or authentication changes ship here
   lacked their static data, and the report stress case imports development source.
   These cases are rerun in their intended static/development environments.
 - Physical devices are not tested; mobile evidence uses browser emulation.
+- CI identified a scrollbar-width invalidation missed on macOS overlay scrollbars;
+  regression coverage now changes the card width without resizing the viewport.
+  The Excel browser assertion follows the requested Cordia New 18pt heading.
+  The search-history test allows 60 seconds for three document loads while
+  retaining every history isolation and persistence assertion.
 
 ## Deployment
 

@@ -136,11 +136,22 @@ test("empty district irrigation keeps the map frame stable and restores its char
     await page.getByRole("option", { name: "เข้าถึงชลประทาน", exact: true }).click();
     const empty = page.locator(".nr-irrigation-empty");
     await expect(empty).toContainText("ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้");
+    await expect(empty.getByRole("heading", { name: "ไม่พบตำบลตามตัวกรองนี้" })).toBeVisible();
+    await expect(empty.locator(".nr-irrigation-empty-icon svg")).toBeVisible();
+    const heading = await empty.getByRole("heading").boundingBox();
+    const description = await empty.locator("p").boundingBox();
+    expect(description!.y).toBeGreaterThanOrEqual(heading!.y + heading!.height);
+    expect(description!.width).toBeGreaterThan(250);
+    expect(description!.height).toBeLessThan(80);
     await expect(chart).toHaveCount(0);
     await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
     await expect(page.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(0);
     await map.scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath(`empty-irrigation-${width}.png`), fullPage: true });
+    if (width === 1440 || width === 390) {
+      if (width === 390) await empty.evaluate(element => window.scrollBy(0, element.getBoundingClientRect().top - 140));
+      await empty.screenshot({ path: testInfo.outputPath(`irrigation-empty-state-${width}.png`) });
+    }
     const filtered = await map.boundingBox();
     expect(filtered!.width).toBeCloseTo(original!.width, 1);
     expect(filtered!.height).toBeCloseTo(original!.height, 1);

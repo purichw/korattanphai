@@ -46,7 +46,7 @@ test('Excel export filters, real download and fresh revision gate', async ({ pag
   expect(book.getWorksheet('รายตำบล')!.rowCount).toBe(10);
   expect(book.getWorksheet('สรุปอำเภอ')!.rowCount).toBe(5);
   expect(book.getWorksheet('ฐาน Pivot')!.rowCount).toBe(37);
-  expect(book.getWorksheet('วิเคราะห์')!.getCell('A1').font.size).toBe(17);
+  expect(book.getWorksheet('วิเคราะห์')!.getCell('A1').font).toMatchObject({ name: 'Cordia New', size: 18 });
   expect(book.getWorksheet('วิเคราะห์')!.getCell('C9').numFmt).toBe('#,##0');
   expect(book.getWorksheet('วิเคราะห์')!.getCell('H9').numFmt).toBe('0.0%');
   await expect(dialog.getByRole('status')).toContainText('1 อำเภอ · 6 ตำบล');
