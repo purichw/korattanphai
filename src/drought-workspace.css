@@ -280,8 +280,8 @@
     grid-template-columns: repeat(2,minmax(0,1fr));
     align-content: start;
   }
-  .nr-drought-kpi-summary { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: center; gap: 8px; }
-  .nr-drought-kpi-heading { display: block; text-align: center; white-space: nowrap; font-size: 14px; font-weight: 700; line-height: 1.4; }
+  .nr-drought-kpi-summary { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: center; gap: 8px; padding-bottom: 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .nr-drought-kpi-heading { display: block; text-align: center; white-space: nowrap; font-size: 20px; font-weight: 700; line-height: 1.4; }
   .is-drought-route .nr-drought-workspace-kpis .metric-card.is-coverage {
     display: grid; grid-template-columns: minmax(0,1fr); align-items: center; justify-items: center; gap: 3px;
     min-height: 0; padding: 0; border: 0; border-radius: 0; background: none;
