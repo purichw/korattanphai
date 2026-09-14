@@ -147,7 +147,9 @@ test("empty district irrigation keeps the map frame stable and restores its char
     await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
     await expect(page.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(0);
     await map.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: testInfo.outputPath(`empty-irrigation-${width}.png`), fullPage: true });
+    // Full-page Chromium capture temporarily changes the Linux viewport. Keep
+    // this geometry test at its chosen viewport while capturing the map state.
+    await page.screenshot({ path: testInfo.outputPath(`empty-irrigation-${width}.png`) });
     if (width === 1440 || width === 390) {
       if (width === 390) await empty.evaluate(element => window.scrollBy(0, element.getBoundingClientRect().top - 140));
       await empty.screenshot({ path: testInfo.outputPath(`irrigation-empty-state-${width}.png`) });

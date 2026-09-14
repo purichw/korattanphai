@@ -55,6 +55,10 @@ forecast data, geometry, database migrations or authentication changes ship here
   The Excel browser assertion follows the requested Cordia New 18pt heading.
   The search-history test allows 60 seconds for three document loads while
   retaining every history isolation and persistence assertion.
+- The map-frame test captures its actual viewport: CI traces show Chromium's
+  full-page capture invalidates the viewport-dependent height between filtering
+  and measurement. Dimension, reset, responsive and empty-state assertions remain
+  unchanged; the candidate runtime is unchanged by this test-only correction.
 
 ## Deployment
 
