@@ -222,6 +222,21 @@ test('Korat map tools table, pattern, district comparison and same-target map co
   await expect(page.locator('.nr-map-analysis-notice')).toHaveCount(0);
 });
 
+test('Korat empty irrigation retains compact map dimensions', async ({ page }) => {
+  await setup(page, '/soeng-sang?target=2025-12&horizon=4');
+  const map = page.locator('.nr-dashboard-map-card');
+  const initial = (await map.boundingBox())!;
+  await map.locator('.nr-irrigation-filter').getByRole('combobox').click();
+  await page.getByRole('option', { name: 'เข้าถึงชลประทาน', exact: true }).click();
+  await expect(page.locator('.nr-irrigation-empty')).toBeVisible();
+  const empty = (await map.boundingBox())!;
+  expect(empty.width).toBeCloseTo(initial.width, 0);
+  expect(empty.height).toBeCloseTo(initial.height, 0);
+  await page.getByRole('button', { name: 'แสดงทุกสถานะชลประทาน', exact: true }).click();
+  await expect(page.locator('.nr-drought-workspace-chart-card')).toBeVisible();
+  await expect.poll(async () => (await map.boundingBox())!.height).toBeCloseTo(initial.height, 0);
+});
+
 test('Korat playback period stays grouped and keeps the map frame stable', async ({ page }, info) => {
   await setup(page);
   const errors: string[] = [];

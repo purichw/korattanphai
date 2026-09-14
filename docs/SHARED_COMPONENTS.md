@@ -35,6 +35,7 @@ files.
 | --- | --- | --- | --- |
 | `AppStartup` | `src/components/AppStartup.tsx` | Cold entry and refresh before the authenticated application is ready | Eager presentation only: receives `path` and status `message`; Home reuses neutral overview loading primitives, other paths use an unnamed workspace placeholder. No account values, forecast data, interactive controls or data loaders. |
 | `SidebarBrand` | `src/components/SidebarBrand.tsx` | Shared logo in live and startup sidebars | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
+| `WorkspaceSearch` / `WorkspaceSearchTrigger` | `src/components/WorkspaceSearch.tsx` | Authenticated global search across geographic levels and active tools | Shared desktop/mobile dialog; loads `WorkspaceSearchContent` only on open, with dismissible loading and scoped recovery. Formal Thai, aliases/topics, contextual results, Contains/Exact, filters, explicit history commits and per-account clearing. Receives `userId`, `includeExport`, navigation/export/close callbacks. See `SEARCH_BEHAVIOR.md`. |
 | `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Shared overview/data loading placeholders and startup shell | Lightweight rendering helpers and `ForecastOverviewLoading`; optional `message` defaults to the existing forecast status. No heavy runtime imports. `ForecastArchiveLoading` reexports the overview and retains the drought header separately. |
 | `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support. Lists with 8+ options are searchable automatically; `searchable` explicitly enables/disables it. Search matches labels, codes, groups and optional `searchText`, including Thai digits, without committing selection. Option badges support `good`, `watch`, `danger`, and `muted`; `align="start"` is only for intentional scan-left text. |
 | `MonthSelect` | `src/components/MonthSelect.tsx` | Source/comparison month controls | Shared searchable `AppSelect` with full Thai/English month aliases and Buddhist/Gregorian years. Keeps existing labels and `YYYY-MM` values unchanged. Reused by `ForecastMonthSelect`, Excel export and analysis comparison; no forecast request/loading ownership of its own. |
@@ -72,6 +73,9 @@ long lists, including analysis patterns, use the shared
 threshold; short status, horizon, sort and view menus retain their compact form.
 `WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
 locks background scroll and restores the opener without moving the page.
+Its optional `closeLabel` defaults to the existing map-tool label; search supplies
+`ปิดการค้นหา`. `ForecastExcelExport` accepts an optional increasing `openRequest`
+number to open the same dialog from search, with its default navigation behavior unchanged.
 
 | Export | File | Use For |
 | --- | --- | --- |

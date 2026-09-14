@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import {
   type NakhonRatchasimaDroughtForecastArchive,
   type NakhonRatchasimaDroughtForecastArchiveTargetMonth,
@@ -398,9 +398,31 @@ export function DroughtForecastWorkspaceMapCard({
         ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้งระดับตำบล"
         : "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง";
   const issueMonthLabel = formatMonth(forecastArchiveIssueMonth, "th");
+  const mapCard = useRef<HTMLElement>(null);
+  const populatedFrame = useRef<{ width: number; height: number } | null>(null);
+  const emptyScope = filteredSubdistrictCodes?.length === 0;
+  useLayoutEffect(() => {
+    const card = mapCard.current;
+    if (!card || level === "subdistrict" || typeof ResizeObserver === "undefined") return;
+    // Removing chart/KPI rows must not shrink the adjacent map. Width changes
+    // invalidate the measurement so a desktop frame never leaks into mobile.
+    const measure = () => {
+      if (document.fullscreenElement) return;
+      const { width, height } = card.getBoundingClientRect();
+      if (!emptyScope) populatedFrame.current = { width, height };
+      else if (populatedFrame.current && Math.abs(populatedFrame.current.width - width) > 1) populatedFrame.current = null;
+      if (emptyScope && populatedFrame.current && window.innerWidth > 900) {
+        card.style.setProperty("--nr-populated-map-height", `${populatedFrame.current.height}px`);
+      } else card.style.removeProperty("--nr-populated-map-height");
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [emptyScope, level]);
 
   return (
-    <section className={`nr-dashboard-map-card nr-area-map-section nr-drought-workspace-map-card is-${level}`} aria-label={title}>
+    <section ref={mapCard} className={`nr-dashboard-map-card nr-area-map-section nr-drought-workspace-map-card is-${level}`} aria-label={title}>
       <div className="nr-drought-workspace-card-heading nr-dashboard-map-header">
         <div>
           <p className="eyebrow">แผนที่</p>

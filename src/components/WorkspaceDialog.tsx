@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 /** Shared modal shell; feature owners retain loading, filters and data state. */
-export function WorkspaceDialog({ title, children, onClose, wide = false, tall = false }: {
-  title: string; children: ReactNode; onClose: () => void; wide?: boolean; tall?: boolean;
+export function WorkspaceDialog({ title, children, onClose, wide = false, tall = false, closeLabel = 'ปิดเครื่องมือแผนที่' }: {
+  title: string; children: ReactNode; onClose: () => void; wide?: boolean; tall?: boolean; closeLabel?: string;
 }) {
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
@@ -19,7 +19,7 @@ export function WorkspaceDialog({ title, children, onClose, wide = false, tall =
     aria-labelledby={id} onCancel={event => { event.preventDefault(); close(); }}
     onClick={event => { if (event.target === event.currentTarget) close(); }}
     onKeyDown={event => { if (event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); close(); } }}>
-    <header><h2 id={id}>{title}</h2><button className="icon-button" type="button" title="ปิด" aria-label="ปิดเครื่องมือแผนที่" onClick={close}><X size={20} /></button></header>
+    <header><h2 id={id}>{title}</h2><button className="icon-button" type="button" title="ปิด" aria-label={closeLabel} onClick={close}><X size={20} /></button></header>
     <div className="nr-tool-dialog-content">{children}</div>
   </dialog>, document.fullscreenElement ?? document.body);
 }

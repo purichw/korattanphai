@@ -20,6 +20,25 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Global search implementation, local only (2026-09-14):
+
+- Added formal-Thai search across province/district/tambon identities and active
+  pages/tools, following Shane Thai's grouped results, Contains/Exact, contextual
+  labels, filters and explicitly committed recent searches. See `SEARCH_BEHAVIOR.md`.
+- Recent searches are browser-local, per authenticated account, limited to six;
+  clearing persists across reload without clearing other users' keys. No API or
+  database storage was added. Existing scoped map search remains unchanged.
+- Reuses `AppSelect`, `WorkspaceDialog` (optional `closeLabel`) and the existing
+  Excel dialog (optional `openRequest`). Mobile filters start collapsed and all
+  entry points restore keyboard focus. Geography navigation retains source
+  month/lead time/irrigation, with Home still constrained to one month ahead.
+- Verified 24 focused unit/auth/route tests and 8 desktop/mobile browser cases;
+  reran the 4 affected browser cases after mobile filter refinement and the mobile
+  menu-focus case after its fix. TypeScript and the isolated Vite build passed.
+- Evidence: `artifacts/workspace-search-20260914/`. The builds use synthetic test
+  auth configuration and are NOT deployment artifacts. No commit, push, deploy,
+  hosted migration, production write, or full-site regression was performed.
+
 Shared map tools, dynamic reports and loading production release (2026-09-14):
 
 - Released Nakhon Ratchasima-only shared map search/coordinate lookup,

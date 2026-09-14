@@ -95,24 +95,34 @@ function followEager(file) {
 for (const file of sources.keys()) if (/^AuthenticatedApp-[\w-]+\.js$/.test(file)) followEager(file);
 if (toolRoots.some(file => eagerProduct.has(file))) throw new Error('Map tools must remain user-action-only dynamic imports.');
 const toolGraph = new Set();
-function followTool(file) {
-  if (toolGraph.has(file) || eagerProduct.has(file) || workerGraph.has(file)) return;
-  toolGraph.add(file);
+function followTool(file, graph = toolGraph) {
+  if (graph.has(file) || eagerProduct.has(file) || workerGraph.has(file)) return;
+  graph.add(file);
   function visit(node) {
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
       const dependency = path.basename(node.text);
-      if (sources.has(dependency)) followTool(dependency);
+      if (sources.has(dependency)) followTool(dependency, graph);
     }
     ts.forEachChild(node, visit);
   }
   visit(syntaxTree(file));
 }
-toolRoots.forEach(followTool);
+toolRoots.forEach(file => followTool(file));
+// Search loads only after its dialog opens; keep the existing core/map limits.
+const searchRoot = [...sources.keys()].filter(file => /^WorkspaceSearchContent-[\w-]+\.js$/.test(file));
+if (searchRoot.length !== 1 || eagerProduct.has(searchRoot[0])) throw new Error('Expected one user-action-only search chunk.');
+const searchGraph = new Set();
+followTool(searchRoot[0], searchGraph);
+for (const file of toolGraph) searchGraph.delete(file);
+const searchBytes = [...searchGraph].reduce((sum, file) => sum + sources.get(file).length, 0);
+const searchGzipBytes = [...searchGraph].reduce((sum, file) => sum + gzipSync(sources.get(file)).length, 0);
+if (searchBytes > 100_000 || searchGzipBytes > 25_000) throw new Error(`Lazy search exceeds 100000 / 25000 bytes: ${searchBytes} / ${searchGzipBytes}`);
+console.log(`[bundle-budget] Search on demand: ${searchBytes} bytes / ${searchGzipBytes} gzip bytes; no eager imports.`);
 for (const file of sources.keys()) {
-  if (toolGraph.has(file)) continue;
+  if (toolGraph.has(file) || searchGraph.has(file)) continue;
   for (const node of syntaxTree(file).statements) {
     if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)
-      && toolGraph.has(path.basename(node.moduleSpecifier.text))) throw new Error(`Eager import of map-tool dependency in ${file}.`);
+      && (toolGraph.has(path.basename(node.moduleSpecifier.text)) || searchGraph.has(path.basename(node.moduleSpecifier.text)))) throw new Error(`Eager import of on-demand tool dependency in ${file}.`);
   }
 }
 const toolBytes = [...toolGraph].reduce((sum, file) => sum + sources.get(file).length, 0);
@@ -150,11 +160,13 @@ const exportGzipBytes = exportChunks.reduce((sum, [, source]) => sum + gzipSync(
 // The portable XML parser and bilingual workbook dictionary live only here.
 // Measured protected worker: ~2.49 MB raw / 662 kB gzip; main budgets stay fixed.
 if (exportBytes > 2_650_000 || exportGzipBytes > 700_000) throw new Error(`Excel export worker exceeds its isolated budget: ${exportBytes} / ${exportGzipBytes}`);
-// Shared searchable filters and compact forecast composition: ~371 kB on Node 24.
-if (!jsBytes || jsBytes - exportBytes - toolBytes - telemetryBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes > 375_000) {
-  throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes - toolBytes - telemetryBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes} app gzip bytes (limits 3500000 / 375000 plus bounded SDKs).`);
+// Existing search launchers keep their allowance; searchable dropdowns and
+// compact forecast composition add 3 kB. Search content remains separately lazy.
+const appGzipLimit = 372_000 + 3_000;
+if (!jsBytes || jsBytes - exportBytes - toolBytes - telemetryBytes - searchBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes > appGzipLimit) {
+  throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes - toolBytes - telemetryBytes - searchBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes} app gzip bytes (limits 3500000 / ${appGzipLimit} plus bounded SDKs).`);
 }
-console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; Excel on demand: ${exportGzipBytes}; application: ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes} gzip bytes.`);
+console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; Excel on demand: ${exportGzipBytes}; application: ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes} gzip bytes.`);
 const archiveAsset = assets.find((name) => /^drought_forecast_archive_rev03-[\w-]+\.json$/.test(name));
 let databaseBuild = false;
 try { databaseBuild = JSON.parse(await fs.readFile(path.join(distDir, "data-backend.json"), "utf8")).backend === "supabase"; }

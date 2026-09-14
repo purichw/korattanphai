@@ -23,6 +23,12 @@ navigation.
 
 Primary user-facing surface:
 
+- Global search: `WorkspaceSearch` opens a
+  shared dialog from navigation/mobile controls across all authenticated routes.
+  It finds repeated names across province/district/tambon levels and active tools,
+  with aliases, topics, filters and clearable per-account browser history.
+  See [Search behavior](SEARCH_BEHAVIOR.md). Existing scoped map search remains available.
+
 - `NakhonRatchasimaWorkspace`: province -> district -> subdistrict operational
   drill-down for canonical province `TH-P29`, with 32 districts and 289
   subdistricts. Active map coloring switches between archived forecast risk

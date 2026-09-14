@@ -1,9 +1,10 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { SidebarBrand } from "./components/SidebarBrand";
-import { DatabaseWorkspaceProvider } from "./DatabaseWorkspaceProvider";
+import { DatabaseWorkspaceProvider, useDatabaseWorkspace } from "./DatabaseWorkspaceProvider";
 import { WorkspaceBookmarks } from "./components/WorkspaceBookmarks";
 import { ForecastExcelExport } from "./components/ForecastExcelExport";
+import { WorkspaceSearch, WorkspaceSearchTrigger } from "./components/WorkspaceSearch";
 import {
   AlertTriangle,
   BarChart3,
@@ -372,6 +373,10 @@ function AppShell({
   const visibleSections: AppSection[] = ["overview"];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [savedSelectionVersion, setSavedSelectionVersion] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [exportRequest, setExportRequest] = useState(0);
+  const databaseWorkspace = useDatabaseWorkspace();
+  const openSearch = () => setSearchOpen(true);
   const restoreSavedWorkspace = (destination: string) => {
     setSavedSelectionVersion((version) => version + 1);
     onNavigate(destination);
@@ -405,6 +410,7 @@ function AppShell({
           {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div className="mobile-account-slot">
+          <WorkspaceSearchTrigger compact onOpen={openSearch} />
           <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
           <AccountControl
             compact
@@ -418,6 +424,7 @@ function AppShell({
           />
         </div>
         <nav id="primary-navigation" className="primary-nav">
+          <WorkspaceSearchTrigger onOpen={openSearch} />
           {visibleSections.map((section) => {
             const Icon = sectionIcons[section];
             const isOverviewSection = section === "overview";
@@ -456,7 +463,7 @@ function AppShell({
               </div>
             );
           })}
-          <ForecastExcelExport onOpen={() => setIsMobileMenuOpen(false)} />
+          <ForecastExcelExport openRequest={exportRequest} onOpen={() => setIsMobileMenuOpen(false)} />
         </nav>
       </aside>
 
@@ -520,6 +527,9 @@ function AppShell({
           </AppErrorBoundary>
         </div>
       </main>
+      {searchOpen && <WorkspaceSearch userId={loginUser.id} includeExport={Boolean(databaseWorkspace)}
+        onNavigate={destination => { setIsMobileMenuOpen(false); restoreSavedWorkspace(destination); }}
+        onExport={() => setExportRequest(value => value + 1)} onClose={() => setSearchOpen(false)} />}
     </div>
   );
 }

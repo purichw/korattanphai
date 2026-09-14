@@ -31,6 +31,8 @@
     grid-template-rows: auto minmax(0, 1fr);
   }
   .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-drought-workspace-chart-card { height: 100%; min-height: 370px; }
+  .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-forecast-bar-plot { height: 220px; }
+  .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict) .nr-dashboard-map-card:has(.nr-map-tools) { min-height: max(var(--nr-forecast-desktop-panel-height), var(--nr-populated-map-height, 0px)); }
   .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict):has(.nr-map-tools) .nr-irrigation-empty { height: var(--nr-forecast-desktop-panel-height); }
 }
 .nr-map-tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
