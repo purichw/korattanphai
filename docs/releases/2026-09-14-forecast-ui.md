@@ -73,7 +73,26 @@ forecast data, geometry, database migrations or authentication changes ship here
 
 ## Deployment
 
-Candidate and production verification are required before promotion/closeout.
+Production: https://korattanphai.vercel.app
+
+- Runtime commit: `44f98f7362e9aba002e948785b42b9a5e676289e`.
+- CI-only follow-up: `3c11691bb3c5bfa472a3414ec5bce6304a3890b4`.
+  Runtime source is unchanged from the deployed candidate.
+- Final Quality Gate: [34822656086](https://github.com/purichw/korattanphai/actions/runs/34822656086),
+  all four jobs and the required regression gate passed.
+- Deployment: `dpl_9Wp5AGxxb2q2ywmNSmgmRDcVYSrG`,
+  https://korattanphai-6bdcf8fgy-purich-w.vercel.app.
+- Promoted after candidate verification; inspecting the primary URL resolves
+  to this exact deployment ID in READY state.
+- Candidate and primary live Supabase checks both passed: 32 source/map/export
+  checks plus desktop/mobile content-sized empty results, scoped reset, internal
+  table scrolling, long graph scrolling, visible header and background scroll lock.
+- Current screenshots and reports are in the isolated release worktree's
+  `artifacts/candidate-modal-smoke/` and `artifacts/production-modal-smoke/`.
+- Only this conversation's release branch was pushed. Unrelated dirty checkout
+  files were neither committed nor deployed; current modal changes and the CI
+  timeout adjustment were mirrored back as narrow, checked patches.
+
 Previous primary: `dpl_FkUCpZxxxpX5Y5EzvzhFE8r2Yq2t`,
 `https://korattanphai-o8txvojte-purichwc-1517s-projects.vercel.app`.
 Keep the previous deployment available as a rollback target; no database rollback
