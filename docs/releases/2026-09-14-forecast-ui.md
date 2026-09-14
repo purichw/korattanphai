@@ -25,17 +25,24 @@ forecast data, geometry, database migrations or authentication changes ship here
 
 - Unit suite: 272 tests passed after incorporating the new production baseline.
 - Protected build, exposure checks and deferred-tool boundaries passed on Node 24.
-  Core gzip budget is 375 kB (current production baseline: 372 kB); measured about 371 kB.
+  Core gzip budget is 375 kB (current production baseline: 372 kB); measured about
+  371 kB for static mode and 373 kB for Supabase mode.
   Raw JavaScript, login, auth, Excel and map-tool caps are unchanged.
 - Targeted Supabase-fixture browser suite: 46 desktop/mobile cases passed.
   New analysis, searchable-select and tambon-layout cases now run in database CI.
 - Static protected-build layout suite: 16 desktop/mobile/tablet cases passed.
 - Map scroll tests use a 720px-high desktop viewport so compact tambon pages
   still exercise actual document scrolling, instead of requiring excess height.
-- Empty irrigation preserves the desktop map's populated frame, invalidating
+- Irrigation filters preserve the desktop map's populated frame, including empty
+  and all-out-of-study results, invalidating
   the measurement on width changes. No remembered desktop height applies on mobile.
   The compact desktop plot has a stable 220px height, preventing intrinsic SVG
   dimensions from changing the chart/map row after reset. Both viewport tests pass.
+- Final protected static-build irrigation/layout suite: 38 tests passed, including
+  overview, province, districts with/without irrigated areas, tambon and mobile.
+- Candidate live Supabase smoke: 32 checks plus scoped analysis/search/empty-state
+  checks on desktop and mobile passed. Exported province workbook contains 1,734
+  values matching the source, native chart/PivotTable, Cordia New and centered styles.
 - Initial mixed-mode local run was not release evidence: static-workspace cases
   lacked their static data, and the report stress case imports development source.
   These cases are rerun in their intended static/development environments.

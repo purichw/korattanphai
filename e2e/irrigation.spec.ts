@@ -148,7 +148,8 @@ test("empty district irrigation keeps the map frame stable and restores its char
     if (width > 900) {
       const emptyFrame = await empty.boundingBox();
       expect(emptyFrame!.width).toBeCloseTo(chartFrame!.width, 1);
-      expect(emptyFrame!.height).toBeCloseTo(chartFrame!.height, 1);
+      // The replacement spans both compact chart and KPI rows beside the map.
+      expect(emptyFrame!.height).toBeCloseTo(filtered!.height, 1);
       expect(emptyFrame!.y).toBeCloseTo(filtered!.y, 1);
       expect(emptyFrame!.x).toBeGreaterThan(filtered!.x + filtered!.width);
     }

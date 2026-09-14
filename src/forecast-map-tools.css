@@ -27,13 +27,12 @@
 @media (min-width: 901px) {
   .is-drought-route .nr-drought-compact-workspace:not(.is-subdistrict) .nr-dashboard-map-card:has(.nr-map-tools) {
     height: auto;
-    min-height: var(--nr-forecast-desktop-panel-height);
+    min-height: max(var(--nr-forecast-desktop-panel-height), var(--nr-populated-map-height, 0px));
     grid-template-rows: auto minmax(0, 1fr);
   }
   .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-drought-workspace-chart-card { height: 100%; min-height: 370px; }
   .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-forecast-bar-plot { height: 220px; }
-  .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict) .nr-dashboard-map-card:has(.nr-map-tools) { min-height: max(var(--nr-forecast-desktop-panel-height), var(--nr-populated-map-height, 0px)); }
-  .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict):has(.nr-map-tools) .nr-irrigation-empty { height: var(--nr-forecast-desktop-panel-height); }
+  .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict):has(.nr-map-tools) .nr-irrigation-empty { height: 100%; }
 }
 .nr-map-tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
 .nr-map-tool-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; border: 0; border-radius: 5px; background: var(--surface-muted); color: var(--primary); }

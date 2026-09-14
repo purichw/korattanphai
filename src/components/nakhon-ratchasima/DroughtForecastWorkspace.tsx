@@ -400,7 +400,7 @@ export function DroughtForecastWorkspaceMapCard({
   const issueMonthLabel = formatMonth(forecastArchiveIssueMonth, "th");
   const mapCard = useRef<HTMLElement>(null);
   const populatedFrame = useRef<{ width: number; height: number } | null>(null);
-  const emptyScope = filteredSubdistrictCodes?.length === 0;
+  const filteredScope = Boolean(irrigation && irrigation.value !== "all") || filteredSubdistrictCodes?.length === 0;
   useLayoutEffect(() => {
     const card = mapCard.current;
     if (!card || level === "subdistrict" || typeof ResizeObserver === "undefined") return;
@@ -409,9 +409,9 @@ export function DroughtForecastWorkspaceMapCard({
     const measure = () => {
       if (document.fullscreenElement) return;
       const { width, height } = card.getBoundingClientRect();
-      if (!emptyScope) populatedFrame.current = { width, height };
+      if (!filteredScope) populatedFrame.current = { width, height };
       else if (populatedFrame.current && Math.abs(populatedFrame.current.width - width) > 1) populatedFrame.current = null;
-      if (emptyScope && populatedFrame.current && window.innerWidth > 900) {
+      if (filteredScope && populatedFrame.current && window.innerWidth > 900) {
         card.style.setProperty("--nr-populated-map-height", `${populatedFrame.current.height}px`);
       } else card.style.removeProperty("--nr-populated-map-height");
     };
@@ -419,7 +419,7 @@ export function DroughtForecastWorkspaceMapCard({
     const observer = new ResizeObserver(measure);
     observer.observe(card);
     return () => observer.disconnect();
-  }, [emptyScope, level]);
+  }, [filteredScope, level]);
 
   return (
     <section ref={mapCard} className={`nr-dashboard-map-card nr-area-map-section nr-drought-workspace-map-card is-${level}`} aria-label={title}>
