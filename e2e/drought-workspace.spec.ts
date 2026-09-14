@@ -24,6 +24,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       await expect(page.locator(".nr-operational-forecast-summary, .nr-operational-attention-list")).toHaveCount(0);
     } else {
       await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage")).toContainText(scope === "province" ? "117/289" : "6/16");
+      await expect(workspace.locator(".nr-drought-workspace-kpis .is-coverage .metric-card-detail")).toHaveText(scope === "province" ? "40% ของจำนวนตำบลทั้งหมด" : "38% ของจำนวนตำบลทั้งหมด");
       await expect(workspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toBeVisible();
       await expect(page.locator(".nr-operational-forecast-summary .metric-card-value")).toHaveText("100%");
       await expect(page.locator(".nr-operational-forecast-summary")).not.toHaveClass(/has-risk|is-danger/);
@@ -104,10 +105,14 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
       }
       expect(geometry.firstKpi.width).toBeCloseTo(geometry.kpis.width, 0);
       expect(geometry.kpis.bottom).toBeLessThan(geometry.map.top);
-    } else if (page.viewportSize()!.width > 1180) {
+    } else if (page.viewportSize()!.width > 900) {
       expect(geometry.chart.top).toBe(geometry.map.top);
-      expect(geometry.chart.height).toBe(geometry.map.height);
-      expect(geometry.kpis.top).toBeGreaterThan(geometry.map.bottom);
+      expect(geometry.map.height).toBeGreaterThanOrEqual(600);
+      expect(geometry.chart.height).toBeLessThan(450);
+      expect(geometry.kpis.top).toBeGreaterThan(geometry.chart.bottom);
+      expect(geometry.kpis.left).toBe(geometry.chart.left);
+      expect(geometry.kpis.bottom).toBeCloseTo(geometry.map.bottom, 0);
+      await expect(workspace.locator(".nr-drought-kpi-heading")).toHaveText("สรุปเดือน ม.ค. 2569");
     } else {
       expect(geometry.kpis.bottom).toBeLessThan(geometry.chart.top);
       expect(geometry.chart.bottom).toBeLessThan(geometry.map.top);
@@ -120,6 +125,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/dan-khun-t
     await expect(workspace.locator(".nr-drought-workspace-context .is-target strong")).toHaveText("เม.ย. 2569");
     if (scope !== "subdistrict") {
       await expect(workspace.locator(".nr-forecast-point-group.is-active")).toContainText("4 เดือน");
+      await expect(workspace.locator(".nr-drought-kpi-heading")).toHaveText("สรุปเดือน เม.ย. 2569");
     }
 
     await expect(workspace.locator(".nr-drought-workspace-details, .nr-forecast-archive-mode-section")).toHaveCount(0);

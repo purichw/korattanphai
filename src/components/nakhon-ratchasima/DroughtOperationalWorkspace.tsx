@@ -43,7 +43,7 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
       compactValue options={monthOptions} onChange={onMonthChange} />
     <div className="nr-fixed-filter"><ShieldCheck size={20} aria-hidden="true" /><span>ภัย<strong>ภัยแล้ง</strong></span></div>
     <div className="nr-fixed-filter"><Sprout size={20} aria-hidden="true" /><span>พืช<strong>ข้าว</strong></span></div>
-    <AppSelect className="nr-operational-area-filter" label={isProvince ? "อำเภอ" : "ตำบล"} icon={<MapPin size={20} />}
+    <AppSelect searchable className="nr-operational-area-filter" label={isProvince ? "อำเภอ" : "ตำบล"} icon={<MapPin size={20} />}
       value={target.level === "subdistrict" ? target.subdistrict.subdistrictCode : ""} options={areaOptions}
       onChange={(code) => {
         const path = isProvince ? pathForDistrictCode(code) : code ? pathForSubdistrictCode(code) : pathForDistrictCode(target.district.districtCode);

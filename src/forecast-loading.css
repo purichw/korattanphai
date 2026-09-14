@@ -28,9 +28,6 @@
 .nr-loading-map, .nr-loading-chart { display: grid; grid-template-rows: auto auto minmax(0,1fr) auto; gap: 10px; min-width: 0; min-height: 0; height: 400px; padding: 12px; border: 1px solid #dce5e7; border-radius: 8px; background: #fff; }
 .nr-loading-map { grid-area: map; }
 .nr-loading-chart { grid-area: chart; grid-template-rows: auto auto minmax(0,1fr) auto; }
-@media (min-width: 901px) {
-  .nr-loading-forecast:not(.is-single) > :is(.nr-loading-map, .nr-loading-chart) { height: var(--nr-forecast-desktop-panel-height); }
-}
 .nr-loading-chart-modes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; min-height: 40px; }
 .nr-forecast-loading-content h3 { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink); }
 .nr-loading-map-toolbar { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
@@ -61,6 +58,7 @@
 .nr-loading-context small { text-align: center; font-size: 11px; color: var(--muted); }
 .nr-loading-forecast > .nr-loading-metrics { grid-area: kpis; grid-template-columns: repeat(5,minmax(0,1fr)); }
 .nr-loading-forecast > .nr-loading-metrics.is-single { grid-template-columns: minmax(0,1fr); }
+.nr-loading-kpi-heading { display: none; }
 .nr-forecast-load-error { display: flex; align-items: center; gap: 14px; padding: 20px; border: 1px solid #d9e3df; border-radius: 8px; background: #fff; }
 .nr-forecast-load-error > svg { flex-shrink: 0; color: #7d6650; }
 .nr-forecast-load-error > div { flex: 1; min-width: 0; }
@@ -74,6 +72,26 @@
   .nr-loading-overview-grid { grid-template-columns: minmax(0,1.3fr) minmax(285px,1fr); }
   .nr-loading-forecast { grid-template-areas: "heading heading" "horizon horizon" "context context" "map chart" "kpis kpis"; }
   .nr-loading-forecast.is-single { grid-template-areas: "heading heading" "horizon horizon" "context context" "kpis kpis" "map map"; }
+}
+@media (min-width: 901px) {
+  .nr-loading-forecast:not(.is-single) {
+    grid-template-areas: "heading heading" "horizon context" "map chart" "map kpis";
+    grid-template-rows: auto auto minmax(370px,1fr) auto;
+  }
+  .nr-loading-forecast:not(.is-single) > .nr-loading-map { height: auto; min-height: var(--nr-forecast-desktop-panel-height); }
+  .nr-loading-forecast:not(.is-single) > .nr-loading-chart { height: 100%; min-height: 370px; }
+  .nr-loading-forecast > .nr-loading-metrics.is-population { grid-template-columns: repeat(2,minmax(0,1fr)); align-content: start; }
+  .nr-loading-kpi-heading { display: block; grid-column: 1; grid-row: 1; align-self: center; }
+  .nr-loading-kpi-heading .nr-skeleton { margin-inline: 0; }
+  .nr-loading-metrics.is-population > .metric-card:first-child { grid-column: 2; grid-row: 1; min-height: 56px; padding: 0; border: 0; border-radius: 0; background: none; }
+  .nr-loading-metrics.is-population > .metric-card:first-child .metric-card-icon { display: none; }
+  .nr-loading-metrics.is-population > .metric-card:first-child :is(.metric-card-label,.metric-card-value) { grid-column: 1 / -1; }
+}
+@media (min-width: 901px) and (max-width: 1180px) {
+  .nr-loading-forecast:not(.is-single) {
+    grid-template-areas: "heading heading" "horizon horizon" "context context" "map chart" "map kpis";
+    grid-template-rows: auto auto auto minmax(370px,1fr) auto;
+  }
 }
 @media (max-width: 900px) {
   .nr-loading-forecast, .nr-loading-forecast.is-single { grid-template-columns: minmax(0,1fr); grid-template-areas: "heading" "horizon" "context" "kpis" "chart" "map"; }

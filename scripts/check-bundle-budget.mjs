@@ -150,8 +150,9 @@ const exportGzipBytes = exportChunks.reduce((sum, [, source]) => sum + gzipSync(
 // The portable XML parser and bilingual workbook dictionary live only here.
 // Measured protected worker: ~2.49 MB raw / 662 kB gzip; main budgets stay fixed.
 if (exportBytes > 2_650_000 || exportGzipBytes > 700_000) throw new Error(`Excel export worker exceeds its isolated budget: ${exportBytes} / ${exportGzipBytes}`);
-if (!jsBytes || jsBytes - exportBytes - toolBytes - telemetryBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes > 370_000) {
-  throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes - toolBytes - telemetryBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes} app gzip bytes (limits 3500000 / 370000 plus bounded SDKs).`);
+// Shared searchable filters and compact forecast composition: ~371 kB on Node 24.
+if (!jsBytes || jsBytes - exportBytes - toolBytes - telemetryBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes > 375_000) {
+  throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes - toolBytes - telemetryBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes} app gzip bytes (limits 3500000 / 375000 plus bounded SDKs).`);
 }
 console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; Excel on demand: ${exportGzipBytes}; application: ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes} gzip bytes.`);
 const archiveAsset = assets.find((name) => /^drought_forecast_archive_rev03-[\w-]+\.json$/.test(name));

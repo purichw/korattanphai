@@ -1253,7 +1253,7 @@ export function NakhonRatchasimaLocalMap({
           compactValue={isMobileMap}
           tools={forecastArchive && forecastArchiveMonth && <>
             <ForecastMapTools archive={forecastArchive} originPeriod={forecastArchiveMonth.period} horizon={forecastArchiveHorizon ?? 1}
-              areaCode={toolAreaCode} irrigation={irrigation?.value ?? "all"} features={geo.features} onFocus={focusToolArea}
+              areaCode={toolAreaCode} scopeName={toolScopeName} irrigation={irrigation?.value ?? "all"} features={geo.features} onFocus={focusToolArea}
               onPin={setPin} pin={pin} onHorizonChange={onHorizonChange} onClearFocus={clearFeatureSelection}
               onOverlay={next => { changeForecastRisk("all"); setAnalysisOverlay(next); }}
               exportMap={() => svgRef.current ? ({ svg: svgRef.current, context: {

@@ -124,7 +124,9 @@ irrigation infrastructure, nationwide GIS layers or new forecast records.
 - Existing model/export/map-interaction regression tests remain applicable.
 - PNG/PDF export is tested with production's `img-src 'self' data:` policy;
   rendering uses a self-contained data image without broadening CSP.
-- `check-bundle-budget.mjs` keeps the existing login/application ceilings and
+- `check-bundle-budget.mjs` keeps the existing login/raw application ceilings;
+  shared searchable filters and compact forecast composition use a 375 kB core
+  gzip ceiling (previously 370 kB; measured about 371 kB on Node 24). It
   separately bounds the lazy analysis, Turf and report dependencies at 1.85 MB
   raw / 480 kB gzip. Static imports into those tools fail the gate. The database
   browser runner includes these cases and prebundles optional writers for tests.

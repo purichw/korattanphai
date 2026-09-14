@@ -36,7 +36,8 @@ files.
 | `AppStartup` | `src/components/AppStartup.tsx` | Cold entry and refresh before the authenticated application is ready | Eager presentation only: receives `path` and status `message`; Home reuses neutral overview loading primitives, other paths use an unnamed workspace placeholder. No account values, forecast data, interactive controls or data loaders. |
 | `SidebarBrand` | `src/components/SidebarBrand.tsx` | Shared logo in live and startup sidebars | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
 | `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Shared overview/data loading placeholders and startup shell | Lightweight rendering helpers and `ForecastOverviewLoading`; optional `message` defaults to the existing forecast status. No heavy runtime imports. `ForecastArchiveLoading` reexports the overview and retains the drought header separately. |
-| `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, option badges support `good`, `watch`, `danger`, and `muted`, and `align="start"` only when scan-left text is intentionally needed. |
+| `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support. Lists with 8+ options are searchable automatically; `searchable` explicitly enables/disables it. Search matches labels, codes, groups and optional `searchText`, including Thai digits, without committing selection. Option badges support `good`, `watch`, `danger`, and `muted`; `align="start"` is only for intentional scan-left text. |
+| `MonthSelect` | `src/components/MonthSelect.tsx` | Source/comparison month controls | Shared searchable `AppSelect` with full Thai/English month aliases and Buddhist/Gregorian years. Keeps existing labels and `YYYY-MM` values unchanged. Reused by `ForecastMonthSelect`, Excel export and analysis comparison; no forecast request/loading ownership of its own. |
 | `ForecastMonthSelect` | `src/components/ForecastArchiveRequest.tsx` | Forecast source-month dropdowns in page filters, Home mobile editor and map toolbars | Reuses `AppSelect.loadingLabel` for an in-place, reduced-motion-aware spinner while the shared request changes month. The loaded month stays selected until success; controls remain usable for a later selection. `ForecastArchiveRequest` announces pending changes to assistive technology without adding a visible top paragraph. Background revision checks stay quiet; error/retry and Supabase freshness behavior are unchanged. |
 | `IrrigationStatusSelect` | `src/components/IrrigationStatusSelect.tsx` | Location irrigation filter inside Home/drought/district/subdistrict maps | Reuses `AppSelect`; all/irrigated/rainfed/unknown labels and matching come from `src/irrigation.ts`. Lives in the shared map toolbar, not page filters or the Home editor. Selection updates the whole page without changing URL. Unknown irrigation never implies missing or zero-risk forecasts. |
 | `IrrigationEmptyState` | `src/components/IrrigationEmptyState.tsx` | Zero matching irrigation areas in Home and all drought workspaces | Shared status message and reset button; `onReset` clears irrigation through the existing selection owner. Optional `className` places it in the caller's grid. Never represents zero matching areas as zero risk. |
@@ -61,6 +62,14 @@ All product dropdowns, including map tools, analysis and report dialogs, use
 Escape dismisses an open menu first, then is left to the enclosing dialog when
 the menu is already closed. Selection and explicit menu dismissal return focus
 to the trigger without scrolling; outside clicks retain their intended target.
+Search fields stay above the independently scrolling options. Arrow keys/Enter
+choose from visible enabled results; Escape dismisses without changing the value,
+and reopening clears the query. Desktop focuses search on open; mobile leaves the
+keyboard closed until requested and fits the sheet above the visual viewport's
+keyboard inset. Text editing and IME composition do not accidentally select.
+Area controls are explicitly searchable even with fewer than 8 options. Other
+long lists, including analysis patterns, use the shared
+threshold; short status, horizon, sort and view menus retain their compact form.
 `WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
 locks background scroll and restores the opener without moving the page.
 
@@ -152,9 +161,9 @@ recovery feedback. Neither resets persisted state automatically.
 | `DroughtOperationalDisclosureGroup` | Shared province/district forecast-action group. Accepts direct, stably keyed `DroughtOperationalDisclosure`/`DroughtOperationalSummary` children; owns at most one open item, initially none. Clicking the active trigger closes it. Places closed cards before the full-width open card in both DOM and visual order, with two closed cards side by side even on mobile. Restores trigger focus after reordering, keeps mounted content, and clears selection when a filtered-out item disappears. Subdistrict guidance stays standalone and no aggregate/self-link cards are introduced. |
 | `ResearchStatGrid` | Local grid wrapper for research metric groups. |
 | `DroughtForecastTrendGraph` | Owned by `ForecastRiskBarGraph.tsx`, re-exported by `DroughtForecastWorkspace.tsx`. Six stacked columns for forward calendar months T+1-T+6 from one selected origin month T. `unit="percent"` (default) or `"count"` changes the scale only. Amber segments count source risk 1 and red segments source risk 2; totals never determine severity color. Percentages divide by each month's in-scope 0/1/2 count. Null/out-of-scope and missing are excluded, never converted to green zero bars. Valid zero risk has a green baseline marker. Container-sized SVG preserves legible labels; the four-item legend uses short labels in narrow cards. Hover/focus/tap exposes category counts, percentages and coverage without selecting a horizon. Arrow keys/Home/End move between columns; Escape, outside pointer or blur dismiss details. SVG descriptions also expose all values. Selected T+ is highlighted. No 50% severity threshold. |
-| `DroughtCompactForecastWorkspace` | Owns one selected source month/horizon for context, chart, map and KPIs; actual target month follows T+horizon. No duplicate archive detail panel. Subdistrict omits aggregate chart, repeated summary and self-link attention list. Attention lists exist only for actual risk records. |
+| `DroughtCompactForecastWorkspace` | Owns one selected source month/horizon for context, chart, map and KPIs; actual target month follows T+horizon. Desktop province/district composition keeps a map at least 600px tall on the left, with a compact chart and the existing selected-month KPI group stacked on the right. No duplicated KPIs or empty equal-height chart surface. Extra missing-data cards and wrapped copy may grow the map/summary rows rather than clip. At 900px and below, the existing KPI/chart/map order remains. Loading placeholders follow the same composition. No duplicate archive detail panel. Subdistrict omits aggregate chart, repeated summary and self-link attention list. Attention lists exist only for actual risk records. |
 | `DroughtForecastWorkspaceContext` | Shared origin/base month T, actual target month T+horizon, crop and in-scope forecast coverage. Single-area variant omits the population coverage count. Dates follow the user-confirmed forward meaning; they do not use the legacy manifest's backwards reference month. |
-| `DroughtForecastWorkspaceKpiStrip` | Adapter onto `MetricGrid`/`MetricCard`. Province/district show administrative coverage separately from distinct risk/out-of-scope/missing counts. Risk-category details give percentages of tambons with values 0/1/2, not all administrative tambons. An all-unavailable scope is neutral, never green. `level="subdistrict"` consumes `selectedRecord` and shows one status, not 0/1 population counts. Its `is-forecast-status` card uses green/amber/red tinted surfaces for no-risk/moderate/high, neutral gray for out-of-scope, and a dashed neutral border for a missing record. Text and icons accompany color. |
+| `DroughtForecastWorkspaceKpiStrip` | Adapter onto `MetricGrid`/`MetricCard`. Province/district show administrative coverage separately from distinct risk/out-of-scope/missing counts. Desktop adds an unframed selected forecast-month heading beside coverage, then two columns of individual risk cards. Coverage retains both x/y tambons and its percentage of all tambons in the selected area/irrigation scope. Risk-category details give percentages of tambons with values 0/1/2, not all administrative tambons. An all-unavailable scope is neutral, never green. `level="subdistrict"` consumes `selectedRecord` and shows one status, not 0/1 population counts. Its `is-forecast-status` card uses green/amber/red tinted surfaces for no-risk/moderate/high, neutral gray for out-of-scope, and a dashed neutral border for a missing record. Text and icons accompany color. |
 | `DroughtForecastWorkspaceChart` | Shared by province and every district; forward forecast from one source month T, highlighting the selected T+ and its actual target month. Owns a full-width local percent/count segmented control, defaulting to percent; changing units does not navigate, refetch data or change map/T+/irrigation state. Selected unit survives in-place horizon/filter changes. Shows a compact coverage strip beneath the graph. Helper text is above the control on desktop and below it on mobile. Availability is derived across all six points, independently of the active horizon. An entirely unavailable series shows a neutral status instead of a zero graph. Subdistrict pages still omit the aggregate chart. |
 | `DroughtForecastWorkspaceMapCard` | Shared local map card for province, district, and subdistrict forecast archive views. Keeps the existing `NakhonRatchasimaLocalMap` behavior and forecast archive map filters. |
 | `DroughtForecastArchivePanel` | Retained archive detail design, no longer composed into the product because it repeats the primary context and totals. |
@@ -352,7 +361,10 @@ a usable minimum plot height independently of the toolbar.
 
 - `WorkspaceDialog` owns native modal lifecycle, Escape and focus restoration;
   it portals into the fullscreen target when one is active. Feature owners keep
-  their own queries, async jobs, errors and loading states.
+  their own queries, async jobs, errors and loading states. Its opt-in `tall`
+  variant gives analysis a stable viewport-bound height; other tools retain
+  content-sized dialogs. The analysis shell stays mounted through lazy loading,
+  with its scope name supplied by the map's existing administrative label.
 - `ForecastMapTools` owns local administrative search, WGS84 point lookup,
   PNG/PDF download and an on-demand analysis entry point. Search and point results
   focus the existing camera; they never navigate outside the route's area or
@@ -362,11 +374,21 @@ a usable minimum plot height independently of the toolbar.
   comparisons. It uses its own cancellable Supabase loader and revalidates on
   open, focus, visibility and every 60 seconds while open. New-revision data
   cannot overlay an older map. There is no static fallback in database mode.
+  A matching complete page slice remains visible during revalidation, with a
+  compact checking indicator and the map action disabled until verification.
+  Local search/pattern/view changes do not refetch; comparison changes retain
+  current results without showing a previous baseline under a new month label.
+  Empty results share a centered icon/message across all analysis views. Their
+  reset action clears only local search, district and risk-pattern filters,
+  returns focus to search, and preserves the parent area, month and irrigation.
 - `ForecastRiskValue` renders source values consistently in tables and search
   results. Null is out of study scope; undefined is missing, never zero.
 - `forecastAnalysis.ts` owns matching, district grouping and forecast-pattern
   predicates. A missing/out-of-scope slot breaks a consecutive-risk run. A first
   risk horizon is only established when every earlier horizon is known zero.
+  Monthly `risk-N` filters select level 1 or 2 at that horizon independently of
+  onset. They are separate from `first-N`, which means the first risky horizon
+  within this six-month forecast, not when a real-world drought started.
 - Table filters apply to the analysis rows first. The explicit map action shows
   that set on the current map, resets the old map-only risk criterion and adds a
   clearable analysis notice. It does not silently rewrite page KPIs. The overlay
@@ -377,6 +399,9 @@ a usable minimum plot height independently of the toolbar.
 - Timeline playback is opt-in through `onHorizonChange`, stopping at horizon 6,
   on page/month/scope changes, opening a tool, or hiding the document. Home stays
   T+1-only; merely rendering its tools never requests six-horizon data.
+  Play/Pause and the current horizon/month form one fixed-size control group.
+  Its period remains visible while paused; narrow map cards place the group on
+  its own centered row. Starting/stopping playback must not resize the map.
 - `mapImageExport.ts` snapshots SVG colors and the full legend, fitting the
   route's complete area by default or preserving the camera on request. Export
   labels use the existing geometry-based collision engine, independently of zoom.

@@ -1,11 +1,12 @@
 import { exportHorizons, summarizeExportRisks, type ExportLocation, type ExportRisk, type ForecastExportComparisonRow } from './forecastExportModel';
 
-export type RiskPattern = 'all' | 'high' | 'consecutive3' | `first-${number}`;
+export type RiskPattern = 'all' | 'high' | 'consecutive3' | `first-${number}` | `risk-${number}`;
 export const riskPatternOptions = [
   { value: 'all', label: 'ทุกรูปแบบพยากรณ์' },
-  { value: 'high', label: 'เสี่ยงสูงอย่างน้อย 1 เดือน' },
-  { value: 'consecutive3', label: 'เสี่ยงต่อเนื่องอย่างน้อย 3 เดือน' },
-  ...exportHorizons.map(h => ({ value: `first-${h}`, label: `เริ่มพบความเสี่ยงที่ T+${h}` })),
+  ...exportHorizons.map(h => ({ value: `risk-${h}`, label: `มีความเสี่ยงใน T+${h}`, group: 'ความเสี่ยงรายเดือน' })),
+  { value: 'high', label: 'เสี่ยงสูงอย่างน้อย 1 เดือน', group: 'รูปแบบตลอด 6 เดือน' },
+  { value: 'consecutive3', label: 'เสี่ยงต่อเนื่องอย่างน้อย 3 เดือน', group: 'รูปแบบตลอด 6 เดือน' },
+  ...exportHorizons.map(h => ({ value: `first-${h}`, label: `เริ่มเสี่ยงครั้งแรกในรอบที่ T+${h}`, group: 'เดือนแรกที่เสี่ยงในรอบพยากรณ์' })),
 ];
 
 export function forecastPattern(risks: ExportRisk[]) {
@@ -21,6 +22,10 @@ export function forecastPattern(risks: ExportRisk[]) {
 }
 
 export function matchesRiskPattern(risks: ExportRisk[], pattern: RiskPattern) {
+  if (pattern.startsWith('risk-')) {
+    const risk = risks[Number(pattern.slice(5)) - 1];
+    return risk === 1 || risk === 2;
+  }
   const result = forecastPattern(risks);
   return pattern === 'all' || (pattern === 'high' ? result.high : pattern === 'consecutive3'
     ? result.longestRun >= 3 : result.confirmedFirst === Number(pattern.slice(6)));

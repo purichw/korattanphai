@@ -19,21 +19,35 @@
   height: auto;
   grid-template-rows: auto minmax(var(--nr-tools-plot-height), 1fr) auto;
 }
+/* Tambon maps keep their inspection aspect instead of inheriting the SVG's intrinsic height. */
+.is-drought-route .nr-drought-compact-workspace.is-subdistrict .nr-dashboard-map-card .nr-map-panel:has(.nr-map-tools):not(:fullscreen) {
+  grid-template-rows: auto var(--nr-tools-plot-height) auto;
+}
 :is(.is-home-overview .nr-overview-cockpit-map, .is-drought-route .nr-drought-compact-workspace) .nr-dashboard-map-card .nr-map-panel:has(.nr-map-tools):not(:fullscreen) .nr-map-svg { min-height: 0; }
 @media (min-width: 901px) {
   .is-drought-route .nr-drought-compact-workspace:not(.is-subdistrict) .nr-dashboard-map-card:has(.nr-map-tools) {
-    height: var(--nr-forecast-desktop-panel-height);
+    height: auto;
+    min-height: var(--nr-forecast-desktop-panel-height);
     grid-template-rows: auto minmax(0, 1fr);
   }
-  .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-drought-workspace-chart-card { height: var(--nr-forecast-desktop-panel-height); }
+  .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-drought-workspace-chart-card { height: 100%; min-height: 370px; }
   .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict):has(.nr-map-tools) .nr-irrigation-empty { height: var(--nr-forecast-desktop-panel-height); }
 }
-.nr-map-tool-actions { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.nr-map-tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
 .nr-map-tool-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; border: 0; border-radius: 5px; background: var(--surface-muted); color: var(--primary); }
 .nr-map-tool-actions .icon-button { width: 36px; min-width: 36px; padding: 6px; }
 .nr-map-tool-actions .nr-tool-analysis-trigger { padding: 6px 10px; font-size: 12px; }
 .nr-map-tool-actions button:hover, .nr-map-tool-actions button[aria-pressed="true"] { background: var(--green-soft); }
 .nr-map-tool-actions button:focus-visible, .nr-tool-dialog button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.nr-map-playback { display: inline-flex; flex: none; align-items: center; gap: 6px; padding-right: 10px; border-radius: 5px; background: var(--surface-muted); }
+.nr-map-playback.is-playing { background: var(--green-soft); }
+.nr-map-tool-actions .nr-map-playback .icon-button { color: var(--primary); background: transparent; }
+.nr-map-tool-actions .nr-map-playback .icon-button:hover { background: var(--green-soft); }
+.nr-map-playback-period { display: flex; align-items: center; justify-content: center; gap: 8px; width: 124px; white-space: nowrap; font-size: 12px; line-height: 1.5; font-variant-numeric: tabular-nums; color: var(--muted); }
+.nr-map-playback-period strong { color: var(--primary); }
+@container (max-width: 499px) {
+  .nr-map-playback { flex-basis: 100%; justify-content: center; }
+}
 .nr-map-tool-status, .nr-map-analysis-notice { display: flex; align-items: center; gap: 6px; font-size: 11px; line-height: 1.5; color: var(--muted); padding-top: 4px; overflow-wrap: anywhere; }
 .nr-map-tool-status .icon-button { min-height: 28px; min-width: 28px; padding: 4px; }
 .nr-map-tool-result { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 11px; line-height: 1.5; padding-top: 4px; }
@@ -45,6 +59,10 @@ html:has(.nr-tool-dialog[open]), body:has(.nr-tool-dialog[open]) { overflow: hid
 html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-tool-dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: 0 20px 64px #12281f30; }
 .nr-tool-dialog.is-wide { width: min(1180px, calc(100vw - 32px)); }
+.nr-tool-dialog.is-tall { height: min(880px, calc(100dvh - 32px)); }
+.nr-tool-dialog.is-tall[open] { display: flex; flex-direction: column; }
+.nr-tool-dialog.is-tall > header { flex: none; }
+.nr-tool-dialog.is-tall > .nr-tool-dialog-content { flex: 1; min-height: 0; max-height: none; }
 .nr-tool-dialog::backdrop { background: #152b2466; }
 .nr-tool-dialog > header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .nr-tool-dialog h2 { flex: 1; margin: 0; font-size: 20px; line-height: 1.4; }
@@ -66,6 +84,14 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-point-form input { min-height: 44px; width: 100%; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 6px; font: inherit; }
 .nr-tool-error { color: var(--red); font-size: 13px; }
 .nr-analysis-context { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.nr-analysis-heading { display: flex; align-items: start; gap: 12px; }
+.nr-analysis-heading > p { flex: 1; }
+.nr-analysis-refresh { flex: none; display: inline-flex; color: var(--muted); }
+.nr-analysis-refresh svg { animation: nr-analysis-refresh 1.2s linear infinite; }
+.nr-analysis-loading { display: grid; gap: 16px; padding: 16px 0; }
+.nr-analysis-loading > div { display: grid; grid-template-columns: 2fr repeat(6, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+@keyframes nr-analysis-refresh { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .nr-analysis-refresh svg { animation: none; } }
 .nr-tool-tabs { display: flex; gap: 4px; padding: 3px; margin-bottom: 16px; background: #eef3f6; border: 1px solid #d9e3e7; border-radius: 6px; }
 .nr-tool-tabs button { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; min-height: 42px; font-size: 13px; border: 1px solid transparent; border-radius: 4px; color: #52636a; }
 .nr-tool-tabs button[aria-pressed="true"] { background: #fff; border-color: #76ade0; color: #086794; }
@@ -77,6 +103,12 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-analysis-toolbar > span { margin-right: auto; }
 .nr-analysis-toolbar > .app-select-field { width: 170px; }
 .nr-analysis-toolbar .secondary-button { font-size: 13px; }
+.nr-analysis-empty { display: grid; align-content: center; justify-items: center; gap: 18px; min-height: 240px; padding: 28px 16px; border-block: 1px solid var(--line); background: var(--surface-muted); text-align: center; }
+.nr-analysis-empty > [role="status"] { display: grid; justify-items: center; gap: 8px; max-width: 400px; }
+.nr-analysis-empty-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 4px; border-radius: 8px; background: var(--surface); color: var(--muted); }
+.nr-analysis-empty h3 { margin: 0; font-size: 17px; line-height: 1.5; font-weight: 600; }
+.nr-analysis-empty p { margin: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.nr-analysis-empty .secondary-button { max-width: 100%; min-height: 44px; font-size: 13px; }
 .nr-analysis-table-wrap { overflow: auto; max-height: 48dvh; border: 1px solid var(--line); border-radius: 6px; }
 .nr-analysis-table { width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0; font-size: 12px; font-variant-numeric: tabular-nums; }
 .nr-analysis-table caption { padding: 10px; text-align: left; color: var(--muted); font-size: 12px; }
@@ -97,9 +129,9 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-district-comparison strong { text-align: right; font-size: 14px; }
 .nr-district-bar { display: flex; height: 24px; background: #f1f4f2; }
 .nr-district-bar i { display: block; height: 100%; }
-.nr-analysis-source { font-size: 11px; color: var(--muted); overflow-wrap: anywhere; margin: 16px 0 0; }
 @media (max-width: 720px) {
   .nr-tool-dialog, .nr-tool-dialog.is-wide { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+  .nr-tool-dialog.is-tall { height: calc(100dvh - 16px); }
   .nr-tool-dialog > header { padding: 12px; }
   .nr-tool-dialog h2 { font-size: 18px; }
   .nr-tool-dialog-content { padding: 12px; max-height: calc(100dvh - 90px); }

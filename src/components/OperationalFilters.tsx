@@ -215,6 +215,7 @@ export function OperationalFilters({
         />}
         {areaSelectConfig && (
           <AppSelect
+            searchable
             label={areaSelectConfig.label}
             icon={compactOverview ? <MapPin size={20} /> : undefined}
             value={areaSelectConfig.value}
@@ -331,6 +332,7 @@ export function OperationalFilters({
                 <div className="operational-filter-sheet-row">
                   <span>พื้นที่</span>
                   <AppSelect
+                    searchable
                     ariaLabel={`เลือก${areaSelectConfig.label}`}
                     value={areaSelectConfig.value}
                     onChange={areaSelectConfig.onChange}

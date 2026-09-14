@@ -382,10 +382,12 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     expect(horizonBox.y).toBeGreaterThanOrEqual(workspaceBox.y);
     expect(horizonBox.y).toBeLessThan(mapBox.y);
     expect(Math.abs(mapBox.y - chartBox.y)).toBeLessThan(2);
-    expect(Math.abs(mapBox.height - chartBox.height)).toBeLessThan(2);
+    expect(mapBox.height).toBeGreaterThanOrEqual(600);
+    expect(chartBox.height).toBeLessThan(450);
+    expect(Math.abs(mapBox.y + mapBox.height - kpisBox.y - kpisBox.height)).toBeLessThan(2);
     expect(chartBox.x).toBeGreaterThan(mapBox.x + mapBox.width - 2);
     expect(kpisBox.y).toBeGreaterThanOrEqual(chartBox.y + chartBox.height);
-    expect(Math.abs(kpisBox.x - mapBox.x)).toBeLessThan(2);
+    expect(Math.abs(kpisBox.x - chartBox.x)).toBeLessThan(2);
     const toolbarBox = await boundingBoxOrThrow(mapToolbar);
     const controlsBox = await boundingBoxOrThrow(mapControls);
     expect(toolbarBox.y + toolbarBox.height).toBeLessThanOrEqual(controlsBox.y + 1);

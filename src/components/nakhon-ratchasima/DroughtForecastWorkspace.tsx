@@ -43,7 +43,7 @@ import { IrrigationEmptyState } from "../IrrigationEmptyState";
 import { type DataProvenanceChipKind, DataProvenanceChip } from "../DataProvenanceChip";
 import { type AppSelectOption } from "../AppSelect";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
-import { MetricGrid, type SummaryMetric } from "../PageSummary";
+import { MetricCard, MetricGrid, type SummaryMetric } from "../PageSummary";
 
 export { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
 
@@ -232,7 +232,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       id: "coverage",
       label: "มีค่าพยากรณ์",
       value: `${formatThaiNumber(summary.inScopeSubdistricts)}/${formatThaiNumber(summary.totalSubdistricts)} ตำบล`,
-      detail: `${formatPercent(summary.totalSubdistricts ? summary.inScopeSubdistricts / summary.totalSubdistricts * 100 : 0)} ของจำนวนตำบลทั้งหมด`,
+      detail: <><span className="nr-drought-coverage-percent">{formatPercent(summary.totalSubdistricts ? summary.inScopeSubdistricts / summary.totalSubdistricts * 100 : 0)}</span><span className="nr-drought-coverage-context"> ของจำนวนตำบลทั้งหมด</span></>,
       icon: <Database size={17} />,
       tone: "info",
       provenance: "REAL" as DataProvenanceChipKind,
@@ -281,8 +281,13 @@ export function DroughtForecastWorkspaceKpiStrip({
   });
 
   return (
-    <MetricGrid className="nr-drought-workspace-kpis" ariaLabel="สรุปค่าพยากรณ์ที่เลือก"
-      metrics={kpis.map(({ id, ...metric }) => ({ ...metric, className: `is-${id}` }))} />
+    <MetricGrid className="nr-drought-workspace-kpis" ariaLabel="สรุปค่าพยากรณ์ที่เลือก">
+      <header className="nr-drought-kpi-summary">
+        <h3 className="nr-drought-kpi-heading">สรุปเดือน {formatMonth(summary.targetMonth, "th")}</h3>
+        <MetricCard {...kpis[0]} className="is-coverage" />
+      </header>
+      {kpis.slice(1).map(({ id, ...metric }) => <MetricCard key={id} {...metric} className={`is-${id}`} />)}
+    </MetricGrid>
   );
 }
 
