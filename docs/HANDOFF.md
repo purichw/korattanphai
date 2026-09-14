@@ -20,6 +20,45 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Global search production release (2026-09-14):
+
+- Released formal-Thai global search across province/district/tambon names,
+  aliases, codes and topics, with grouped contextual results, filters, exact or
+  partial matching, and clearable per-account browser history. See
+  [Search behavior](SEARCH_BEHAVIOR.md). Source month, lead time and irrigation
+  context survive geographic navigation; the existing Excel dialog opens from search.
+- Runtime `6c2dc5d54403cc507a414f92988473f1ac08a824`, build-budget follow-up
+  `f3f8f6d784fb50ffda8fe4084fea00baeec8d0aa`, and navigation-test follow-up
+  `f20803ce0f5bbb5b049da827b5951d638fd3e095` are pushed on
+  `fix/nr-map-zoom-performance`. The last commit changes only the test's expected
+  navigation entries; candidate runtime/build/config/data are identical.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/34809791172)
+  passed all five jobs, including 79 database-browser cases. Local evidence also
+  includes 24 focused unit/auth/route checks, 10 protected-build search cases and
+  two updated static-provider shell cases across desktop/mobile.
+- Promoted the same verified candidate `dpl_FkUCpZxxxpX5Y5EzvzhFE8r2Yq2t` /
+  `https://korattanphai-o8txvojte-purichwc-1517s-projects.vercel.app`.
+  Inspection confirms `https://korattanphai.vercel.app` serves this Ready artifact.
+  Candidate and primary each passed 12 real-account desktop/mobile checks:
+  on-demand loading, duplicate names, filters, exact destination context, history
+  after reload, persistent clearing, Excel dialog, Escape and error-free requests.
+- Built/deployed from a fresh tracked Git archive only. Unrelated pending map,
+  report, loading, UAT, research and later shared-control edits remain unshipped.
+  No forecast/geometry/API/auth changes, database migrations, production-data
+  writes, billing changes or new paid services were part of this release.
+- Search content loads only after opening the dialog (6,508 B gzip on production).
+  Its limit is 25 kB gzip; the always-visible search shell has a documented 2 kB
+  allowance, making the core cap 372 kB. Production core is 370,370 B and login
+  118,452 B; existing login/map/SDK budgets remain unchanged. Node 24 protected
+  builds pass exposure checks and emit no static archive in database mode.
+- Evidence: `artifacts/search-release-20260914/`, including `verification.json`,
+  `quality-final.json`, `candidate-smoke/`, `production-smoke/`, public HTTP and
+  deployment inspection. Test-only local builds are not deployment artifacts.
+  Physical-device testing was not performed; mobile checks use browser automation.
+- Recovery: promote previous deployment `dpl_7hxc83Ya1pNNRsM2th89F4msMixq` /
+  `https://korattanphai-g0r7luxo7-purichwc-1517s-projects.vercel.app` and smoke the
+  primary alias. No database rollback is required.
+
 Global search implementation, local only (2026-09-14):
 
 - Added formal-Thai search across province/district/tambon identities and active
