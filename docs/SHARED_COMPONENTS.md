@@ -35,6 +35,7 @@ files.
 | --- | --- | --- | --- |
 | `AppStartup` | `src/components/AppStartup.tsx` | Cold entry and refresh before the authenticated application is ready | Eager presentation only: receives `path` and status `message`; Home reuses neutral overview loading primitives, other paths use an unnamed workspace placeholder. No account values, forecast data, interactive controls or data loaders. |
 | `SidebarBrand` | `src/components/SidebarBrand.tsx` | Shared logo in live and startup sidebars | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
+| `WorkspaceSearch` / `WorkspaceSearchTrigger` | `src/components/WorkspaceSearch.tsx` | Authenticated global search across geographic levels and active tools | Shared desktop/mobile dialog; loads `WorkspaceSearchContent` only on open, with dismissible loading and scoped recovery. Formal Thai, aliases/topics, contextual results, Contains/Exact, filters, explicit history commits and per-account clearing. Receives `userId`, `includeExport`, navigation/export/close callbacks. See `SEARCH_BEHAVIOR.md`. |
 | `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Shared overview/data loading placeholders and startup shell | Lightweight rendering helpers and `ForecastOverviewLoading`; optional `message` defaults to the existing forecast status. No heavy runtime imports. `ForecastArchiveLoading` reexports the overview and retains the drought header separately. |
 | `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support, option badges support `good`, `watch`, `danger`, and `muted`, and `align="start"` only when scan-left text is intentionally needed. |
 | `ForecastMonthSelect` | `src/components/ForecastArchiveRequest.tsx` | Forecast source-month dropdowns in page filters, Home mobile editor and map toolbars | Reuses `AppSelect.loadingLabel` for an in-place, reduced-motion-aware spinner while the shared request changes month. The loaded month stays selected until success; controls remain usable for a later selection. `ForecastArchiveRequest` announces pending changes to assistive technology without adding a visible top paragraph. Background revision checks stay quiet; error/retry and Supabase freshness behavior are unchanged. |
@@ -63,6 +64,9 @@ the menu is already closed. Selection and explicit menu dismissal return focus
 to the trigger without scrolling; outside clicks retain their intended target.
 `WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
 locks background scroll and restores the opener without moving the page.
+Its optional `closeLabel` defaults to the existing map-tool label; search supplies
+`ปิดการค้นหา`. `ForecastExcelExport` accepts an optional increasing `openRequest`
+number to open the same dialog from search, with its default navigation behavior unchanged.
 
 | Export | File | Use For |
 | --- | --- | --- |

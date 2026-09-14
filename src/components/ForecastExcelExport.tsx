@@ -28,9 +28,16 @@ function currentExportOptions(): ExportOptions {
     irrigation: readIrrigationSelection(window.location.search, window.history.state) };
 }
 
-export function ForecastExcelExport({ onOpen }: { onOpen?: () => void }) {
+export function ForecastExcelExport({ onOpen, openRequest = 0 }: { onOpen?: () => void; openRequest?: number }) {
   const services = useDatabaseWorkspace();
   const [options, setOptions] = useState<ExportOptions | null>(null);
+  const handledRequest = useRef(0);
+  useEffect(() => {
+    if (services && openRequest > handledRequest.current) {
+      handledRequest.current = openRequest;
+      setOptions(currentExportOptions()); onOpen?.();
+    }
+  }, [openRequest, services, onOpen]);
   if (!services) return null;
   return <>
     <button type="button" className="nav-item nr-export-trigger" onClick={() => { setOptions(currentExportOptions()); onOpen?.(); }}>
