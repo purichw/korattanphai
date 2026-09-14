@@ -126,7 +126,7 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
     {pin && <div className="nr-map-tool-status"><Crosshair size={15} /><span>{pin.point[1].toFixed(5)}, {pin.point[0].toFixed(5)} · พยากรณ์ระดับตำบล</span><button className="icon-button" type="button" title="ล้างจุดพิกัด" aria-label="ล้างจุดพิกัด" onClick={() => { onPin(null); setPickedCode(null); setMessage(''); onClearFocus(); }}><X size={15} /></button></div>}
     {message && <span className="nr-map-tool-status" role="status">{message}</span>}
     {error && !tool && <span className="nr-tool-error" role="alert">{error}</span>}
-    {tool === 'analysis' && <WorkspaceDialog title={`วิเคราะห์พยากรณ์ · ${scopeName}`} wide tall onClose={close}>
+    {tool === 'analysis' && <WorkspaceDialog title={`วิเคราะห์พยากรณ์ · ${scopeName}`} wide bounded onClose={close}>
       <Suspense fallback={<LoadingAnalysisTable />}><AnalysisDialog
         archive={archive} originPeriod={originPeriod} horizon={horizon} areaCode={areaCode} scopeName={scopeName} irrigation={irrigation}
         onClose={close} onFocus={focus} onOverlay={onOverlay} /></Suspense>

@@ -60,10 +60,10 @@ html:has(.nr-tool-dialog[open]), body:has(.nr-tool-dialog[open]) { overflow: hid
 html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-tool-dialog { width: min(560px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: 0 20px 64px #12281f30; }
 .nr-tool-dialog.is-wide { width: min(1180px, calc(100vw - 32px)); }
-.nr-tool-dialog.is-tall { height: min(880px, calc(100dvh - 32px)); }
-.nr-tool-dialog.is-tall[open] { display: flex; flex-direction: column; }
-.nr-tool-dialog.is-tall > header { flex: none; }
-.nr-tool-dialog.is-tall > .nr-tool-dialog-content { flex: 1; min-height: 0; max-height: none; }
+.nr-tool-dialog.is-bounded { height: fit-content; max-height: min(880px, calc(100dvh - 32px)); overflow: hidden; }
+.nr-tool-dialog.is-bounded[open] { display: flex; flex-direction: column; }
+.nr-tool-dialog.is-bounded > header { flex: none; }
+.nr-tool-dialog.is-bounded > .nr-tool-dialog-content { flex: 0 1 auto; min-height: 0; max-height: none; }
 .nr-tool-dialog::backdrop { background: #152b2466; }
 .nr-tool-dialog > header { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .nr-tool-dialog h2 { flex: 1; margin: 0; font-size: 20px; line-height: 1.4; }
@@ -110,7 +110,7 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-analysis-empty h3 { margin: 0; font-size: 17px; line-height: 1.5; font-weight: 600; }
 .nr-analysis-empty p { margin: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 .nr-analysis-empty .secondary-button { max-width: 100%; min-height: 44px; font-size: 13px; }
-.nr-analysis-table-wrap { overflow: auto; max-height: 48dvh; border: 1px solid var(--line); border-radius: 6px; }
+.nr-analysis-table-wrap { overflow: auto; overscroll-behavior: contain; max-height: 48dvh; border: 1px solid var(--line); border-radius: 6px; }
 .nr-analysis-table { width: 100%; min-width: 760px; border-collapse: separate; border-spacing: 0; font-size: 12px; font-variant-numeric: tabular-nums; }
 .nr-analysis-table caption { padding: 10px; text-align: left; color: var(--muted); font-size: 12px; }
 .nr-analysis-table th, .nr-analysis-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
@@ -132,7 +132,7 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-district-bar i { display: block; height: 100%; }
 @media (max-width: 720px) {
   .nr-tool-dialog, .nr-tool-dialog.is-wide { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
-  .nr-tool-dialog.is-tall { height: calc(100dvh - 16px); }
+  .nr-tool-dialog.is-bounded { max-height: calc(100dvh - 16px); }
   .nr-tool-dialog > header { padding: 12px; }
   .nr-tool-dialog h2 { font-size: 18px; }
   .nr-tool-dialog-content { padding: 12px; max-height: calc(100dvh - 90px); }

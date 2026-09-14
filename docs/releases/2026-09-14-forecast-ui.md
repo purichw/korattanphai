@@ -7,7 +7,9 @@ User authorization: push and deploy only this conversation's work.
 - Shared searchable area/month dropdowns and long-list search, including Thai
   month names, Buddhist/Gregorian years, Thai digits, keyboard and mobile sheets.
 - Scope-aware analysis titles, separate monthly-risk and first-risk filters,
-  stable modal height/loading and actionable empty results.
+  persistent modal shell/loading and actionable empty results. The latest request
+  replaces fixed analysis height with content-sized height capped to the viewport,
+  removing blank space below empty results and retaining internal result scrolling.
 - Compact district/province charts with centered selected-month coverage and
   percentages; separately restored tambon map sizing; grouped playback period.
 - Cordia New workbook typography and centered short fields with wrapped metadata.
@@ -25,6 +27,11 @@ forecast data, geometry, database migrations or authentication changes ship here
 
 ## Verification
 
+- Latest modal follow-up: six targeted desktop/mobile checks pass for fitted
+  empty results, scoped reset, searchable menus, long table/graph scrolling,
+  visible header/close controls and background scroll containment. Native flex
+  dialogs require `height: fit-content`; `auto` still stretches to the height cap.
+  Empty-state bottom spacing is checked at 10-24px, with current screenshots.
 - Unit suite: 272 tests passed after incorporating the new production baseline.
 - Protected build, exposure checks and deferred-tool boundaries passed on Node 24.
   Core gzip budget is 375 kB (current production baseline: 372 kB); measured about

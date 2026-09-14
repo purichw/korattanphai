@@ -365,9 +365,10 @@ a usable minimum plot height independently of the toolbar.
 
 - `WorkspaceDialog` owns native modal lifecycle, Escape and focus restoration;
   it portals into the fullscreen target when one is active. Feature owners keep
-  their own queries, async jobs, errors and loading states. Its opt-in `tall`
-  variant gives analysis a stable viewport-bound height; other tools retain
-  content-sized dialogs. The analysis shell stays mounted through lazy loading,
+  their own queries, async jobs, errors and loading states. Its opt-in `bounded`
+  variant sizes analysis to its content with a viewport height cap and a scrolling
+  body beneath a visible header. Other tools retain their existing sizing.
+  The analysis shell stays mounted through lazy loading,
   with its scope name supplied by the map's existing administrative label.
 - `ForecastMapTools` owns local administrative search, WGS84 point lookup,
   PNG/PDF download and an on-demand analysis entry point. Search and point results

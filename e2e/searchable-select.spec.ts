@@ -79,7 +79,6 @@ test('searchable analysis and export menus retain their parent modal and tab seq
   await page.getByRole('button', { name: 'วิเคราะห์พยากรณ์', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.locator('.nr-analysis-table')).toBeVisible();
-  const height = (await dialog.boundingBox())!.height;
   const district = dialog.getByRole('combobox', { name: 'อำเภอในตารางวิเคราะห์', exact: true });
   await district.click();
   const search = page.getByRole('searchbox', { name: /^ค้นหาตัวเลือก อำเภอในตาราง/ });
@@ -97,6 +96,7 @@ test('searchable analysis and export menus retain their parent modal and tab seq
   await search.fill('พิมาย');
   await search.press('Enter');
   await expect(dialog.locator('.nr-analysis-table tbody tr')).toHaveCount(1);
+  const height = (await dialog.boundingBox())!.height;
   await dialog.getByRole('combobox', { name: 'รูปแบบความเสี่ยง 6 เดือน', exact: true }).click();
   await page.getByRole('searchbox', { name: /^ค้นหาตัวเลือก รูปแบบความเสี่ยง/ }).fill('T+3');
   await expect(page.getByRole('option')).toHaveCount(2);
