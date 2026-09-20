@@ -20,7 +20,10 @@ test("subdistrict temporal controls stay synchronized without replacing the map"
   await map.evaluate(node => node.setAttribute("data-instance-probe", "same-map"));
   const pageMonth = page.locator(".nr-operational-filters .app-select-field").first().getByRole("combobox");
   await expect(page.getByRole("combobox", { name: /^เดือนตั้งต้น / })).toHaveCount(1);
-  await expect(page.locator(".nr-operational-horizon-filter")).toHaveCount(0);
+  const pageHorizon = page.locator(".nr-operational-horizon-filter").getByRole("combobox");
+  await expect(pageHorizon).toBeVisible();
+  const mapMonth = page.locator(".nr-map-panel").getByRole("combobox", { name: /เดือนตั้งต้น/ });
+  await expect(mapMonth).toContainText("ธ.ค. 2568");
   const tabs = page.locator(".nr-forecast-archive-horizon-tabs").getByRole("tab");
   const context = page.locator(".nr-drought-workspace-context");
   const home = map.locator('[data-nr-subdistrict-code="300806"]');
@@ -28,6 +31,7 @@ test("subdistrict temporal controls stay synchronized without replacing the map"
   for (let index = 0; index < 6; index += 1) {
     await tabs.nth(index).click();
     await expect(tabs.nth(index)).toHaveAttribute("aria-selected", "true");
+    await expect(pageHorizon).toContainText(`ล่วงหน้า ${index + 1} เดือน`);
     await expect(page).toHaveURL(url => url.searchParams.get("horizon") === String(index + 1));
     await expect(context.locator(".is-issue strong")).toHaveText("ธ.ค. 2568");
     await expect(context.locator(".is-target strong")).toHaveText(`${months[index]} 2569`);
@@ -36,7 +40,8 @@ test("subdistrict temporal controls stay synchronized without replacing the map"
     await expect(home).toHaveClass(new RegExp(`is-forecast-${status}(?:\\s|$)`));
     await expect(map).toHaveAttribute("data-instance-probe", "same-map");
   }
-  await tabs.nth(3).click();
+  await pageHorizon.click();
+  await page.getByRole("option", { name: "ล่วงหน้า 4 เดือน", exact: true }).click();
   await expect(tabs.nth(3)).toHaveAttribute("aria-selected", "true");
   await tabs.nth(3).focus();
   await tabs.nth(3).press("ArrowRight");
@@ -49,10 +54,12 @@ test("subdistrict temporal controls stay synchronized without replacing the map"
   await pageMonth.click();
   await page.getByRole("option", { name: "ต.ค. 2568", exact: true }).click();
   await expect(pageMonth).toHaveText("ต.ค. 2568");
+  await expect(mapMonth).toContainText("ต.ค. 2568");
   await expect(context.locator(".is-issue strong")).toHaveText("ต.ค. 2568");
   await pageMonth.click();
   await page.getByRole("option", { name: "ธ.ค. 2568", exact: true }).click();
   await expect(pageMonth).toHaveText("ธ.ค. 2568");
+  await expect(mapMonth).toContainText("ธ.ค. 2568");
   await expect(map).toHaveAttribute("data-instance-probe", "same-map");
   const url = page.url();
   const irrigation = page.getByRole("combobox", { name: "สถานะชลประทาน", exact: true });
