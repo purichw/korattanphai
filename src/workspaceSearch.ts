@@ -1,6 +1,5 @@
 import hierarchy from './data/canonical/nakhon_ratchasima/admin_hierarchy.json';
 import { readIrrigationSelection } from './irrigation';
-import { operationalPath, readOperationalLocation } from './operationalLocation';
 
 export const searchKinds = { province: 'จังหวัด', district: 'อำเภอ', subdistrict: 'ตำบล', tool: 'หน้าและเครื่องมือ' } as const;
 export type SearchKind = keyof typeof searchKinds;
@@ -54,8 +53,8 @@ export function buildWorkspaceSearchIndex(includeExport: boolean): SearchEntry[]
         tags: areaTags, contextKeywords: [...provinceKeywords, district.nameTh, district.name, district.districtCode] });
     }
   }
-  entries.push({ id: 'page:drought', kind: 'tool', name: 'พยากรณ์ภัยแล้ง', title: 'คลังพยากรณ์ภัยแล้ง',
-    context: 'จังหวัดนครราชสีมา · คลังคำพยากรณ์ย้อนหลัง ไม่ใช่สถานการณ์จริง', path: '/drought?mapLayer=forecast-archive',
+  entries.push({ id: 'page:drought', kind: 'tool', name: 'พยากรณ์ภัยแล้ง', title: 'พยากรณ์ภัยแล้ง',
+    context: 'จังหวัดนครราชสีมา · หน้าพยากรณ์ล่วงหน้า 6 เดือน', path: '/drought',
     aliases: ['ภัยแล้ง', 'forecast', 'drought', 'T+'], tags: ['พยากรณ์ภัยแล้ง', 'การวิเคราะห์', 'แผนที่'], contextKeywords: provinceKeywords });
   if (includeExport) entries.push({ id: 'tool:export', kind: 'tool', name: 'ส่งออก Excel', title: 'ส่งออก Excel',
     context: 'เครื่องมือรายงาน · เลือกพื้นที่และรอบข้อมูลก่อนดาวน์โหลด', action: 'export',
@@ -86,14 +85,9 @@ export function searchWorkspace(entries: SearchEntry[], query: string, mode: Sea
   return hits.sort((a, b) => a.score - b.score || a.entry.title.localeCompare(b.entry.title, 'th') || a.entry.id.localeCompare(b.entry.id));
 }
 
-/** Preserve the selected data family; only explicit archive entries change intent. */
+/** Preserve origin and lead time when changing geography; Home uses T+1. */
 export function searchDestination(path: string, search: string, historyState?: unknown) {
   const destination = new URL(path, 'https://local.invalid');
-  const intent = readOperationalLocation(search);
-  if (intent.intent !== 'archive') {
-    if (destination.searchParams.get('mapLayer') === 'forecast-archive') return path;
-    return operationalPath(destination.pathname, intent.intent === 'operational' ? intent.period : undefined);
-  }
   const current = new URLSearchParams(search);
   const next = new URLSearchParams();
   const period = current.get('target') ?? '';

@@ -20,6 +20,27 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Forecast-only restoration, owner-authorized forward change (2026-09-20):
+
+- The owner requested restoring the forecast website, then push/deploy. This
+  supersedes the Actual-by-default release below. `bcbcd33` was docs-only;
+  runtime routing from `8357b02` is selectively parked, not fully reverted.
+- All routes now use rev03 forecasts; plain T/h links keep their original
+  meaning. Retired `period` never becomes a forecast origin. Root T+2..T+6
+  retains district scope. No Actual switch/banner or operational API dependency.
+- Restored map month and page horizon controls through shared components.
+  Retained searchable dropdowns, layout/graph/empty-state fixes, analysis,
+  Cordia Excel export, source lineage, freshness checks and bookmarks.
+- Recovery: `artifacts/rollback-forecast-only/`, baseline `bcbcd33`; see
+  [parking note](rollback-parking-lot.md) and
+  [current contract](FORECAST_ONLY_RESTORATION.md).
+- No database migration/ACL/source changes. Unrelated UAT/research edits and
+  the paused untracked iOS setup are excluded.
+- Local evidence: 314 unit tests and protected build passed; targeted database
+  browser routing passed 7 cases plus one duplicate-tablet skip. Full protected
+  browser/CI and authenticated candidate/production smoke remain release gates.
+  This entry alone is not a claim that production has changed.
+
 Actual / forecast separation production release (2026-09-20):
 
 - Runtime `8357b02340d74e90f2ab84e9db7d8447a09d8872` and test-runner follow-up

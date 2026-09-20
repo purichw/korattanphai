@@ -114,7 +114,6 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
       <div className="nr-forecast-overview-grid">
         <div className="nr-forecast-overview-map nr-overview-cockpit-map">
           <ProvinceDashboardMapCard
-            showMonthFilter={false}
             irrigation={{ ...forecast.irrigation, onChange: (value) => {
               forecast.changeIrrigation(value);
               setSelectedSubdistrictCode(null);

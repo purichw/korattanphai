@@ -25,7 +25,7 @@ export function readWorkspaceAreaCode(location: Pick<Location, 'pathname' | 'sea
 
 export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'search'>, historyState?: unknown): SavedForecastSelection | null {
   const params = new URLSearchParams(location.search);
-  if (params.get('mapLayer') !== 'forecast-archive' || params.getAll('target').length !== 1 || params.getAll('horizon').length > 1) return null;
+  if (params.getAll('target').length !== 1 || params.getAll('horizon').length > 1) return null;
   const code = readWorkspaceAreaCode(location);
   if (!code) return null;
   const horizon = Number(params.get('horizon') ?? '1');

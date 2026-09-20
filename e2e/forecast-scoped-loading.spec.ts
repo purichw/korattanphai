@@ -126,7 +126,7 @@ test('overview has one month owner synchronized with scoped T+1 map data', async
   await month.click(); await page.getByRole('option', { name: 'ธ.ค. 2568', exact: true }).click();
   await expect(mapMonth).toContainText('ธ.ค. 2568');
   if (mobile) await page.getByRole('button', { name: 'แสดงผล', exact: true }).click();
-  await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true })).toContainText('ธ.ค. 2568');
   await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
   await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText(['0 ตำบล', '117 ตำบล', '0 ตำบล', '172 ตำบล']);
   expect(requests.map(r => r.p_origin_period)).toEqual(['2025-12', '2025-11']);

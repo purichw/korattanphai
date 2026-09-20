@@ -56,14 +56,14 @@ test('searchable page and map filters keep selection, scrolling and small menus 
   await expect(page.getByRole('option', { name: 'โบสถ์', exact: true })).toBeVisible();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/phimai\/t-301503/);
-  await expect(fields.getByRole('combobox', { name: /^ระยะพยากรณ์ / })).toHaveCount(0);
+  await expect(fields.getByRole('combobox', { name: /^ระยะพยากรณ์ / })).toBeVisible();
   await page.getByRole('tab', { name: /ล่วงหน้า 4 เดือน/ }).click();
   await expect(page).toHaveURL(/horizon=4/);
   await page.getByRole('combobox', { name: 'สถานะพยากรณ์ภัยแล้ง', exact: true }).click();
   await expect(page.getByRole('searchbox', { name: /^ค้นหาตัวเลือก/ })).toHaveCount(0);
   await page.keyboard.press('Escape');
 
-  await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true })).toBeVisible();
   await month.click();
   await page.getByRole('searchbox', { name: 'ค้นหาตัวเลือก เดือนตั้งต้น', exact: true }).fill('ธันวาคม 2568');
   await page.keyboard.press('Enter');
@@ -119,7 +119,7 @@ test('searchable analysis and export menus retain their parent modal and tab seq
 
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
-  const exportDialog = page.getByRole('dialog', { name: 'ส่งออกคลังคำพยากรณ์ย้อนหลัง' });
+  const exportDialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
   await exportDialog.getByRole('combobox', { name: /^เดือนตั้งต้น \(T\) / }).click();
   await page.getByRole('searchbox', { name: 'ค้นหาตัวเลือก เดือนตั้งต้น (T)', exact: true }).fill('dec 2025');
   await page.getByRole('option', { name: 'ธ.ค. 2568', exact: true }).click();

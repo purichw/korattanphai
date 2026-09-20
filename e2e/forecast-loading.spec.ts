@@ -75,9 +75,8 @@ test("login and overview defer the archive while preserving summary and forecast
   await fillAuthForm(page);
   expect(archiveRequests).toBe(0);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.locator('.nr-primary-workspace')).toBeVisible();
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   expect(archiveRequests).toBe(0);
-  await page.getByRole('link', { name: 'ดูคลังคำพยากรณ์ย้อนหลัง' }).click();
   const summary = page.locator(".nr-forecast-overview");
   await expect(summary).toContainText("117/289 ตำบล");
   await expect(summary.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
@@ -129,14 +128,11 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   const menu = page.getByRole('button', { name: 'เปิดเมนูหลัก' });
   if (await menu.isVisible()) await menu.click();
   await page.locator('.primary-nav').getByRole('button', { name: 'ภาพรวม', exact: true }).click();
-  await page.getByRole('link', { name: 'ดูคลังคำพยากรณ์ย้อนหลัง' }).click();
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
   const response = page.waitForResponse(archiveRequest);
   release();
   await (await response).finished();
   await expect(page.locator(".nr-forecast-overview-summary")).toBeVisible();
-  await page.goBack();
-  await expect(page.locator('.nr-primary-workspace')).toBeVisible();
   await page.goBack();
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("6 เดือน");

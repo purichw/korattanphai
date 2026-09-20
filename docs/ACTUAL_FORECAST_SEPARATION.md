@@ -1,8 +1,11 @@
 # Actual / Forecast Separation
 
-Local implementation, 2026-09-20. Not a production release or an actual-feed activation.
-Authority: `Korat_Tan_Phai_Actual_vs_Forecast_Codex_Handoff_v1.md` supplied by the owner.
-The owner's rev03 definitions override the handoff's incidental older-revision reference.
+**Parked by owner request, 2026-09-20.** The current product is
+[forecast-only](FORECAST_ONLY_RESTORATION.md). The implementation, contracts and
+release evidence below describe the previous activation and retained preparation,
+not current navigation. Do not reactivate without new owner approval.
+See [parking note](rollback-parking-lot.md#2026-09-20-actual--archive-split-accepted-as-parked).
+The owner's rev03 definitions remain authoritative.
 
 ## Evidence And Source Gaps
 

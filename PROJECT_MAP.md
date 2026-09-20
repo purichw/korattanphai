@@ -4,17 +4,16 @@
 
 `Korat Tan Phai / โคราชทันภัย` is an authenticated Nakhon Ratchasima drought
 dashboard derived from the Kaset Tan Phai prototype. Its current surfaces are
-operational data-month views, the explicit province/district/subdistrict forecast
-archive, Excel reporting and personal saved workspaces. Operational feeds remain
-unconfigured; legacy multi-hazard workflows are not the active product.
+forecast overview, province/district/subdistrict six-horizon forecasts, Excel
+reporting and personal saved workspaces. Actual routing is parked by explicit
+owner request on 2026-09-20; operational feeds remain unconfigured.
 
-Released separation (2026-09-20): operational routes select an actual/data month
-separately from the explicit rev03 archive. Actual ingestion and operational
-forecast publication remain unconfigured; unavailable is not zero risk. The
-protected bundle budget passes without raising limits. See the latest
-[release checkpoint](docs/HANDOFF.md) and
-[Actual / Forecast Separation](docs/ACTUAL_FORECAST_SEPARATION.md) for deployed
-evidence and source gaps; archive-only descriptions below apply to archive intent.
+[Forecast-only restoration](docs/FORECAST_ONLY_RESTORATION.md) is the active
+routing contract. `target` is origin T in both old plain and explicit archive
+links. Retain all rev03 values and shared UI fixes. See the latest
+[release checkpoint](docs/HANDOFF.md). The older
+[Actual / Forecast Separation](docs/ACTUAL_FORECAST_SEPARATION.md) is retained as
+parked implementation history, not current navigation.
 
 FACT: The current implementation is a Vite + React + TypeScript single-page app
 with a read-only risk-fusion endpoint and a new machine-authenticated model-input

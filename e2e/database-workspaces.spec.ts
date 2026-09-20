@@ -77,7 +77,6 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'จังหวัดนครราชสีมา', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'ดูคลังคำพยากรณ์ย้อนหลัง' }).click();
   await expect(page.locator('.nr-forecast-overview-summary')).toBeVisible();
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('button', { name: /^ตำบลบ้านเก่า/ })).toBeVisible();

@@ -147,7 +147,7 @@ function ExportDialog({ services, initial, onClose }: { services: Services; init
   const districts = [{ value: '30', label: 'ทุกอำเภอในจังหวัดนครราชสีมา' }, ...hierarchy.province.districts.map(district => ({ value: district.districtCode, label: `อำเภอ${district.nameTh}` }))];
   return <dialog className="nr-export-dialog" ref={dialog} aria-labelledby={`${id}-title`} onCancel={event => { event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }}>
     <div className="nr-export-body">
-      <header className="nr-export-header"><FileSpreadsheet size={23} aria-hidden="true" /><h2 id={`${id}-title`}>ส่งออกคลังคำพยากรณ์ย้อนหลัง</h2>
+      <header className="nr-export-header"><FileSpreadsheet size={23} aria-hidden="true" /><h2 id={`${id}-title`}>ส่งออกข้อมูลพยากรณ์</h2>
         <button type="button" className="icon-button" aria-label="ปิดหน้าส่งออก" title="ปิด" onClick={close}><X size={18} aria-hidden="true" /></button>
       </header>
       <div className="nr-export-scroll">

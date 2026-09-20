@@ -267,3 +267,36 @@ current `/water` removal scope.
     reversed;
   - restore untracked source files from `untracked/`;
   - rerun `git diff --check`, `npm test`, `npm run build`, and route snapshots.
+
+## 2026-09-20: Actual / Archive Split Accepted As Parked
+
+The owner explicitly requested a new forward commit restoring the forecast-only
+website, followed by push and deployment. No history rewrite or whole-commit
+revert is authorized. `bcbcd33` is documentation; runtime activation originated
+in `8357b02`, which also contains unrelated UI improvements that must remain.
+
+Recovery checkpoint: `artifacts/rollback-forecast-only/` at HEAD `bcbcd33`.
+It contains working/staged binary diffs, status, and copies of 17 untracked mobile
+source/assets. Dependencies and credentials are excluded. Other untracked work
+is untouched. The iOS setup is paused and excluded from this release.
+
+Parked live behavior: Actual-by-default routing, valid-month conversion of legacy
+forecast links, and the Actual/Archive switch/banner. Retain the operational
+workspace, domain contracts, metadata API and unit tests as unmounted preparation,
+not an activated actual feed. No database data, permissions or migrations change.
+
+Active behavior: forecast overview and six-horizon province/district/tambon
+workspaces; `target` is origin T, T+1 through T+6 are predictions. Preserve rev03
+values, null/out-of-study semantics, freshness checks, graph/layout repairs,
+shared searchable controls, exports and bookmarks. Explicit archive URLs remain
+compatible. A retired `period` query never becomes a forecast origin.
+
+Restoration of Actual later requires new owner approval and corrected requirements,
+approved source/metric/publication contracts, adapter evidence and route/temporal
+interaction tests. Do not reactivate it merely because parked files exist.
+
+Release verification: forecast defaults and old links at overview/province,
+district and tambon levels; month/horizon and history navigation; saved/search
+context; no operational API dependency; missing-origin handling; protected build,
+browser regressions and authenticated read-only candidate/production smoke.
+Current release evidence is recorded in `docs/HANDOFF.md`.

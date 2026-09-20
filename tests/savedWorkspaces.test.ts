@@ -26,6 +26,7 @@ describe('saved forecast selections', () => {
     ['/', '?target=2025-12&horizon=6&district=3008', '3008', 6, 'drought'],
   ])('round-trips %s without losing target, horizon, risk or scope', (pathname, search, code, horizon, view) => {
     const selection = readWorkspaceSelection({ pathname, search: `${search}&mapLayer=forecast-archive` });
+    expect(readWorkspaceSelection({ pathname, search })).toEqual(selection);
     expect(selection).toMatchObject({ area_code: code, horizon, view_name: view, dataset_id: FORECAST_DATASET_ID });
     const path = savedFilterPath(selection!);
     const url = new URL(path!, 'https://local.test');
@@ -45,7 +46,7 @@ describe('saved forecast selections', () => {
     expect(savedFilterPath({ ...selection, area_code: '309999' })).toBeNull();
   });
   it('keeps geographic following independent of actual or forecast filters', () => {
-    for (const search of ['?period=2026-08', '?target=2025-12&horizon=6', '']) {
+    for (const search of ['?period=2026-08', '']) {
       const location = { pathname: '/phimai/t-301503', search };
       expect(readWorkspaceAreaCode(location)).toBe('301503');
       expect(readWorkspaceSelection(location)).toBeNull();

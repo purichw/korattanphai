@@ -19,18 +19,18 @@ Routes:
 Other province placeholder routes are not part of this subset's primary
 navigation.
 
-Routing separation deployed on 2026-09-20; see the latest [release evidence](HANDOFF.md):
+Forecast-only restoration, 2026-09-20; see [release evidence](HANDOFF.md):
 
-- `NakhonRatchasimaWorkspace` resolves intent through `operationalLocation.ts`.
-  Routes above without explicit archive intent render `OperationalDroughtWorkspace`.
-- `period=YYYY-MM` means valid/data month; with no period the server supplies the
-  current Bangkok month. Bare legacy `target=T&horizon=h` becomes valid month T+h.
-- `mapLayer=forecast-archive` explicitly opens the retained source-month archive.
-  Home's compact archive is T+1 only; explicit T+2..T+6 uses the full archive view
-  without changing the requested vintage. Invalid/missing selections do not default.
-- Actual and eligible future forecast feeds remain unconfigured. Current operational
-  UI is the unavailable/error path, not a completed actual dashboard. See
-  [Actual / Forecast Separation](ACTUAL_FORECAST_SEPARATION.md) for source/release gaps.
+- `NakhonRatchasimaWorkspace` always mounts the existing forecast workspace.
+- Bare `target=T&horizon=h` and explicit `mapLayer=forecast-archive` links have
+  the same origin/horizon meaning. They are never converted to an actual month.
+- No selection uses the latest published origin and T+1. Retired `period` is
+  ignored and removed when the forecast selection is written.
+- Home's compact overview is T+1; T+2..T+6 use the full forecast workspace,
+  preserving district scope when supplied. Invalid/missing selections do not default.
+- `OperationalDroughtWorkspace` and the Actual/Archive switch are parked.
+  The forecast product does not depend on `/api/operational-context`.
+  See [restoration contract](FORECAST_ONLY_RESTORATION.md).
 
 ## User-Facing Surfaces
 
@@ -44,11 +44,10 @@ Primary user-facing surface:
 
 - `NakhonRatchasimaWorkspace`: province -> district -> subdistrict operational
   drill-down for canonical province `TH-P29`, with 32 districts and 289
-  subdistricts. Operational intent has one valid-month selector, neutral unavailable
-  map and source-state disclosure. In archive intent, map coloring switches between archived forecast risk
-  and workbook irrigation status. Catalog entries for other data families are
+  subdistricts. Map coloring switches between archived forecast risk and workbook
+  irrigation status. Catalog entries for other data families are
   not evidence of active map layers.
-- Explicit archive pages at province, district, and subdistrict level include the shared
+- Forecast pages at province, district, and subdistrict level include the shared
   source-backed forecast archive experience: origin/base month T selection, one T+
   horizon selector, archive summary metrics, shared map filters, the local
   Nakhon map and source/limitation wording. Province/district pages have a
@@ -68,8 +67,8 @@ or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
 
 Database mode adds a shared bookmark control in the desktop/mobile account
 toolbar, not a new route. Its modal lists followed areas and saved filters for
-the authenticated user. Following an area is independent of actual/archive intent;
-named forecast filters require an explicit archive selection. Restoring a forecast
+the authenticated user. Following an area is independent of forecast criteria;
+named forecast filters require a valid origin selection, including plain legacy URLs. Restoring a forecast
 filter preserves source month T, horizon,
 area, map risk and irrigation, including restoration on the same pathname. Existing and new
 links/saved filters keep the same source-row values; legacy `target` query and
@@ -121,8 +120,8 @@ needs audit:
   requested path after successful Supabase email/password authentication.
 - Opening `/` hides the inherited nationwide filter band; the local workspace
   owns its layer selector and breadcrumbs.
-- Operational controls select valid month and area; actual has no T+ selector.
-  Archive controls select origin month and area, with one horizon strip. Hazard `ภัยแล้ง`
+- Forecast controls select origin month and area. The page horizon dropdown and
+  horizon strip share state; the map month selector stays synchronized. Hazard `ภัยแล้ง`
   and crop `ข้าว` are fixed context, not working multi-hazard/multi-crop selectors.
   Province chooses districts; district/tambon views choose tambons in that district.
   Map controls also filter risk and irrigation, with an independent color mode.
@@ -142,7 +141,7 @@ needs audit:
 ## Screens / Components By Surface
 
 - Login/history: `src/App.tsx`; authenticated shell: `src/AuthenticatedApp.tsx`.
-- Operational routes: `src/components/nakhon-ratchasima/OperationalDroughtWorkspace.tsx`.
+- Parked Actual composition: `src/components/nakhon-ratchasima/OperationalDroughtWorkspace.tsx` (not mounted).
 - Archive Home: `src/components/nakhon-ratchasima/ProvinceForecastOverview.tsx`.
 - Shared drought layout: `src/components/nakhon-ratchasima/DroughtForecastWorkspace.tsx`.
 - Shared controls: `ForecastControls.tsx` and `DroughtOperationalWorkspace.tsx`

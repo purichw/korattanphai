@@ -435,7 +435,6 @@ export function DroughtForecastWorkspaceMapCard({
         <DataProvenanceChip kind="FORECAST_ARCHIVE" />
       </div>
       <NakhonRatchasimaLocalMap
-        showMonthFilter={false}
         onHorizonChange={onHorizonChange}
         irrigation={irrigation}
         filteredSubdistrictCodes={filteredSubdistrictCodes}
@@ -553,7 +552,7 @@ export function DroughtCompactForecastWorkspace({
     <>
     <DroughtWorkspaceHeader target={target} archiveLabel={formatMonth(archive.meta.targetMonthEnd, "th")} onNavigate={navigateWithForecast} />
     <DroughtWorkspaceFilters target={target} selectedMonth={selectedMonth} monthOptions={monthOptions} onMonthChange={onMonthChange}
-      onNavigate={navigateWithForecast} />
+      selectedHorizon={selectedHorizon} onHorizonChange={onHorizonChange} onNavigate={navigateWithForecast} />
     <section className={`nr-drought-compact-workspace is-${level}${emptyIrrigationScope ? " is-empty-scope" : ""}`} aria-labelledby={`nr-drought-compact-workspace-${level}`}>
       {level !== "subdistrict" && <>{heading}{targetNote}</>}
 

@@ -82,7 +82,7 @@ test("external login return URL is rejected", async ({ page }) => {
   await page.goto("/login?next=https%3A%2F%2Fevil.test%2F");
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await expect(page.locator(".nr-primary-workspace")).toBeVisible();
+  await expect(page.locator(".nr-forecast-overview")).toBeVisible();
   expect(new URL(page.url()).pathname).toBe("/");
   expect(new URL(page.url()).hostname).toBe("127.0.0.1");
 });

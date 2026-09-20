@@ -70,6 +70,8 @@ try {
     const assetChecks = [];
     const rpcChecks = [];
     const rpcHorizons = new Set();
+    let operationalReads = 0;
+    page.on("request", request => { if (new URL(request.url()).pathname === "/api/operational-context") operationalReads++; });
     page.on("pageerror", (error) => errors.push(error.message));
     page.on("requestfailed", (request) => {
       if (new URL(request.url()).origin === base.origin && request.failure()?.errorText !== "net::ERR_ABORTED") errors.push(`Request failed: ${new URL(request.url()).pathname}`);
@@ -107,22 +109,20 @@ try {
         await page.getByLabel("อีเมล", { exact: true }).fill(email);
         await page.getByLabel("รหัสผ่าน", { exact: true }).fill(password);
         await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-        await page.locator(".nr-primary-workspace").waitFor();
+        await page.locator(".nr-forecast-overview").waitFor();
       } catch {
         throw new Error("Smoke login failed. Verify the configured test account, environment and network; credential values are not reported.");
       }
       for (const route of ['/', '/wang-nam-khiao', '/phimai/t-301503']) {
         await page.goto(new URL(`${route}?period=2026-08`, base).href, { waitUntil: 'domcontentloaded' });
-        await expect(page.getByRole('heading', { name: 'ยังไม่มีข้อมูลสถานการณ์จริงสำหรับเดือนนี้' })).toBeVisible();
-        await expect(page.locator('.nr-primary-workspace')).toHaveAttribute('data-valid-period', '2026-08');
-        await expect(page.locator('.nr-map-shape').first()).toBeVisible();
-        await expect(page.locator('.nr-map-shape.is-forecast-no-risk, .nr-map-shape.is-forecast-moderate, .nr-map-shape.is-forecast-high')).toHaveCount(0);
-        await expect(page.locator('.nr-drought-horizon-strip')).toHaveCount(0);
+        await expect(page.locator('.nr-map-shape')).toHaveCount(289);
+        await expect(page.locator('.nr-primary-workspace, .nr-archive-context')).toHaveCount(0);
+        await expect(page).toHaveURL(/target=2025-12&horizon=1/);
+        assert.equal(new URL(page.url()).searchParams.has('period'), false);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
-        if (route === '/') await page.screenshot({ path: path.join(output, `${name}-actual-unavailable.png`), fullPage: true });
-        report.checks.push({ viewport: name, route, family: 'actual', unavailableNotZero: true });
+        if (route === '/') await page.screenshot({ path: path.join(output, `${name}-forecast-default.png`), fullPage: true });
+        report.checks.push({ viewport: name, route, forecastDefault: true, retiredPeriodNotOrigin: true });
       }
-      assert.equal(rpcChecks.length, 0, 'Operational unavailable pages must not read forecasts');
       for (const [route, areaCode] of [["/?mapLayer=forecast-archive", "30"], ["/drought?mapLayer=forecast-archive&target=2025-12&horizon=1", "30"], ["/dan-khun-thot?mapLayer=forecast-archive&target=2025-12&horizon=4", "3008"], ["/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4", "300806"], ["/ban-lueam?mapLayer=forecast-archive&target=2025-12&horizon=1", "3005"]]) {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
@@ -152,15 +152,15 @@ try {
           assert.equal(new URL(page.url()).searchParams.get("horizon"), "1");
           await page.screenshot({ path: path.join(output, `${name}-overview.png`), fullPage: true });
           if (databaseMode) {
-            if (name === 'mobile') await page.getByRole('button', { name: 'แก้ไขตัวกรองข้อมูล' }).click();
-            const mapMonth = page.getByRole('combobox', { name: name === 'mobile' ? 'เลือกเดือนตั้งต้น' : /^เดือนตั้งต้น / });
+            const mapMonth = page.locator('.nr-map-panel').getByRole('combobox', { name: /เดือนตั้งต้น/ });
             await expect(mapMonth).toContainText("ธ.ค. 2568");
             await mapMonth.click();
             await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
             await expect(mapMonth).toContainText("พ.ย. 2568");
             await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "48 ตำบล", "69 ตำบล", "172 ตำบล"]);
             await expect(page).toHaveURL(/target=2025-11.*horizon=1/);
-            const topMonth = page.getByRole("combobox", { name: name === "mobile" ? "เลือกเดือนตั้งต้น" : /^เดือนตั้งต้น / });
+            if (name === "mobile") await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" }).click();
+            const topMonth = page.locator(name === "mobile" ? ".operational-filter-sheet" : ".operational-filter-fields").getByRole("combobox", { name: name === "mobile" ? "เลือกเดือนตั้งต้น" : /^เดือนตั้งต้น / });
             await expect(topMonth).toContainText("พ.ย. 2568");
             await topMonth.click();
             await page.getByRole("option", { name: "ธ.ค. 2568", exact: true }).click();
@@ -169,7 +169,7 @@ try {
             await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
             await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
             await page.locator(".nr-forecast-overview-map").screenshot({ path: path.join(output, `${name}-overview-month-filter.png`) });
-            report.checks.push({ viewport: name, overviewMonthSync: "single owner updates map and summary", forecastHorizon: 1 });
+            report.checks.push({ viewport: name, overviewMonthSync: "page and map controls update the same selection", forecastHorizon: 1 });
             report.checks.push(await smokeExcelExport({ page, viewport: name, output, archive: expectedArchive }));
           }
         }
@@ -333,6 +333,7 @@ try {
         assert.ok(rpcHorizons.has(1) && rpcHorizons.has(6), "App must load both authenticated database projections");
         report.checks.push({ viewport: name, databaseProjectionsMatch: true, savedWorkspaceRead: true, staticFallback: false });
       }
+      assert.equal(operationalReads, 0, "Forecast routes must not depend on the parked Actual API");
       await Promise.all(assetChecks);
       assert.deepEqual(errors, [], `${name}: browser errors`);
       await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();

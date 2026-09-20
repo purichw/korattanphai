@@ -3,7 +3,7 @@ import { Activity, ArrowLeft, CalendarDays, ChevronRight, Database, MapPin, Shie
 import { AppSelect, type AppSelectOption } from "../AppSelect";
 import { ForecastMonthSelect } from "../ForecastArchiveRequest";
 import { forecastHorizonLabel } from "../../forecastPeriod";
-import { type DroughtForecastWorkspaceTarget, type DroughtForecastArchiveSummary, type ForecastArchiveHorizon } from "./forecastModel";
+import { type DroughtForecastWorkspaceTarget, type DroughtForecastArchiveSummary, type ForecastArchiveHorizon, forecastArchiveHorizonValues } from "./forecastModel";
 import { districtOptionsForProvince, formatThaiNumber, formatPercent, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from "./workspaceModel";
 
 export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
@@ -25,18 +25,20 @@ export function DroughtWorkspaceHeader({ target, archiveLabel, onNavigate }: {
   </header>;
 }
 
-export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, onMonthChange, onNavigate }: {
+export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, onMonthChange, selectedHorizon, onHorizonChange, onNavigate }: {
   target: DroughtForecastWorkspaceTarget;
   selectedMonth: string;
   monthOptions: AppSelectOption[];
   onMonthChange: (month: string) => void;
+  selectedHorizon: ForecastArchiveHorizon;
+  onHorizonChange: (horizon: ForecastArchiveHorizon) => void;
   onNavigate: (path: string) => void;
 }) {
   const isProvince = target.level === "province";
   const areaOptions: AppSelectOption[] = isProvince
     ? [{ value: "", label: "ทุกอำเภอ" }, ...districtOptionsForProvince().map(({ value, label }) => ({ value, label }))]
     : [{ value: "", label: "ทุกตำบล" }, ...target.district.subdistricts.map((item) => ({ value: item.subdistrictCode, label: item.nameTh ?? item.name }))];
-  return <section className="nr-operational-filters nr-single-temporal-owner" aria-label="ตัวกรองข้อมูลพื้นที่นครราชสีมา">
+  return <section className="nr-operational-filters" aria-label="ตัวกรองข้อมูลพื้นที่นครราชสีมา">
     <ForecastMonthSelect label="เดือนตั้งต้น" ariaLabel="เดือนตั้งต้น" icon={<CalendarDays size={20} />} value={selectedMonth}
       compactValue options={monthOptions} onChange={onMonthChange} />
     <div className="nr-fixed-filter"><ShieldCheck size={20} aria-hidden="true" /><span>ภัย<strong>ภัยแล้ง</strong></span></div>
@@ -47,6 +49,9 @@ export function DroughtWorkspaceFilters({ target, selectedMonth, monthOptions, o
         const path = isProvince ? pathForDistrictCode(code) : code ? pathForSubdistrictCode(code) : pathForDistrictCode(target.district.districtCode);
         if (path) onNavigate(path);
       }} />
+    <AppSelect className="nr-operational-horizon-filter" label="ระยะพยากรณ์" icon={<TrendingUp size={20} />} value={String(selectedHorizon)}
+      options={forecastArchiveHorizonValues.map(horizon => ({ value: String(horizon), label: forecastHorizonLabel(horizon) }))}
+      onChange={value => onHorizonChange(Number(value) as ForecastArchiveHorizon)} />
   </section>;
 }
 

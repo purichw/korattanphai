@@ -3,17 +3,17 @@
 ## Actual / Forecast Boundary
 
 [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) owns the source audit,
-eligibility contract, deployed separation and open source-integration gates.
-See [HANDOFF.md](HANDOFF.md) for release evidence; live actual and operational
-forecast publication remain unconfigured.
-The archive persistence model below is retained; it is not an actual-data store.
+eligibility contract and open source-integration gates for the parked Actual work.
+The active [forecast-only contract](FORECAST_ONLY_RESTORATION.md) supersedes its
+routing rules. See [HANDOFF.md](HANDOFF.md) for release evidence. The archive
+persistence model below remains active; it is not an actual-data store.
 
-- Operational `period` is the valid month. Trusted server time in Asia/Bangkok
+- In the parked operational implementation, `period` is the valid month. Trusted server time in Asia/Bangkok
   resolves past/current to actual and future to forecast. Current-month actual is
   partial-period; coverage-through must come from source records, never be invented.
 - Archive `target` / saved `target_period` still mean origin T, with forecast target
-  T+h. Explicit `mapLayer=forecast-archive` preserves archive intent. Bare legacy
-  T+h links resolve an operational valid month instead of relabelling predictions.
+  T+h, with or without `mapLayer=forecast-archive`. Bare legacy links retain
+  their exact forecast origin/horizon. Retired `period` is never a forecast origin.
 - Actual kind, metric/classification, crop scope, geographic version, review,
   publication, coverage and revision are separate fields. Do not apply forecast
   0/1/2 semantics or fan out district/province actuals to tambons without an approved
@@ -23,8 +23,8 @@ The archive persistence model below is retained; it is not an actual-data store.
   first-publication date; an ingest timestamp cannot supply that proof.
 - `GET /api/operational-context` currently returns only server clock/policy and
   empty source catalogs, with `private, no-store`. No actual transport is connected.
-  Operational requests must not fall back to the archive cache, static JSON or
-  another period. Existing Supabase archive revision checks remain in force.
+  Active forecast routes do not call it. Parked operational requests must not
+  fall back to archive values. Supabase forecast revision checks remain in force.
 - Existing followed areas remain geographic bookmarks. Actual selections cannot
   be serialized into forecast saved filters. No database schema or ACL changed.
 

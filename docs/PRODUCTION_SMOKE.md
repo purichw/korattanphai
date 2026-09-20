@@ -56,19 +56,15 @@ deploy a server. Local Vite previews explicitly skip serverless API and hosting
 header checks; deployed checks require them.
 
 Checks cover login, overview, drought, district and subdistrict pages at 1440x960
-and 390x844; primary actual/unavailable states without forecast reads; the trusted
-Bangkok clock and no-store metadata; explicit archive entry; 289 map polygons;
-latest T+1 archive overview counts and context;
-T+1/T+4 selection; one full-width categorical status above the subdistrict map;
-an all-null district with no false zero-risk graph; forward target months from
-the selected source month T and date-only T+ tab subtitles; absence of
-duplicate/unsupported panels and demo account actions;
-visible images; horizontal
-overflow; failed same-origin requests; page errors; asset MIME/cache headers;
-hosting security headers; and the read-only API's response contract, no-store
-policy and absence of the retired provider. Google-hosted font request failures
-are not a same-origin availability failure; screenshots still require visual
-review for typography.
+and 390x844; forecast defaults on bare/retired-period links without operational API
+reads; explicit archive compatibility; 289 map polygons; canonical RPC/color parity;
+latest T+1 counts; synchronized page/map month controls; T+1/T+4 selection;
+subdistrict status without aggregate charts; all-null districts without false
+zero risk; irrigation/empty reset; percent/count graphs; Excel workbook values,
+charts and PivotTables; saved-workspace reads; logout; images; overflow; console
+and same-origin network errors; hosting/security/cache headers.
+The retained operational-context endpoint is checked only as a parked metadata
+contract, never as evidence of an active Actual product.
 
 Reports and desktop/mobile screenshots are written to ignored `smoke-results/`.
 Treat screenshots as private: they may contain the test account's display name.

@@ -33,8 +33,7 @@ test("blocked storage does not prevent login or forecast navigation", async ({ p
   await page.goto("/login");
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.locator('.nr-primary-workspace')).toBeVisible();
-  await page.getByRole('link', { name: 'ดูคลังคำพยากรณ์ย้อนหลัง' }).click();
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289");
   await expect(page.locator(".storage-notice")).toBeVisible();
   await page.locator(".nr-forecast-overview-details").click();
@@ -55,8 +54,7 @@ test("a failed dashboard chunk leaves login light and offers recovery", async ({
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   await expect(page.getByRole("heading", { name: "ไม่สามารถแสดงหน้านี้ได้" })).toBeVisible();
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
-  await expect(page.locator('.nr-primary-workspace')).toBeVisible();
-  await page.getByRole('link', { name: 'ดูคลังคำพยากรณ์ย้อนหลัง' }).click();
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289");
   expect(requests).toBe(2);
 });

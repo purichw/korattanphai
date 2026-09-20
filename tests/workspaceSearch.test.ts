@@ -44,9 +44,9 @@ describe('workspace search identities and matching', () => {
     expect(Object.fromEntries(destination.searchParams)).toEqual({ target: '2025-12', horizon: '4', mapLayer: 'forecast-archive', irrigation: 'rainfed' });
     expect(searchDestination('/', '?mapLayer=forecast-archive&target=2025-12&horizon=6')).toContain('horizon=1');
     expect(searchDestination('/drought', '?mapLayer=forecast-archive&target=2025-99&horizon=99')).toBe('/drought?horizon=1&mapLayer=forecast-archive');
-    expect(searchDestination('/phimai', '?period=2026-08')).toBe('/phimai?period=2026-08');
-    expect(searchDestination('/phimai', '?target=2025-12&horizon=6')).toBe('/phimai?period=2026-06');
-    expect(searchDestination('/drought?mapLayer=forecast-archive', '?period=2026-08')).toBe('/drought?mapLayer=forecast-archive');
+    expect(searchDestination('/phimai', '?period=2026-08')).toBe('/phimai?horizon=1&mapLayer=forecast-archive');
+    expect(searchDestination('/phimai', '?target=2025-12&horizon=6')).toBe('/phimai?target=2025-12&horizon=6&mapLayer=forecast-archive');
+    expect(searchDestination('/drought?mapLayer=forecast-archive', '?period=2026-08')).toBe('/drought?horizon=1&mapLayer=forecast-archive');
   });
 });
 

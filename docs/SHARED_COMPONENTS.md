@@ -9,20 +9,16 @@ this document in the same change whenever a shared component contract changes.
 
 ## Public Shared Components
 
-Deployed actual/forecast composition (see [release evidence](HANDOFF.md)):
-`OperationalDroughtWorkspace` shares the period/state contract across all Korat
-geographic routes and composes existing selects, metric cards, disclosure and map.
-`NakhonRatchasimaLocalMap.operationalUnavailable` is an explicit neutral-state
-variant, not an actual classification renderer. It suppresses research/readiness
-fallbacks and supplies consistent legend/preview period and kind labels.
-`DataProvenanceChip` now supports `FORECAST_ARCHIVE` without calling predictions
-actual observations. Archive page month and horizon strip each have one owner;
-the duplicate map month control and header horizon dropdown are removed.
-`AppStartup` uses forecast overview placeholders only for explicit archive intent.
-`WorkspaceBookmarks` derives geographic following separately from forecast filters;
-actual routes can follow an area without manufacturing a forecast month. Explicit
-overview T+2..T+6 saves use the existing drought view and keep their horizon.
-See [contract and remaining source gaps](ACTUAL_FORECAST_SEPARATION.md).
+Active forecast-only composition (see [restoration contract](FORECAST_ONLY_RESTORATION.md)):
+`NakhonRatchasimaWorkspace` mounts the shared forecast composition at every
+geographic level. `OperationalDroughtWorkspace` and its neutral-map variant remain
+parked, not live routes. `DataProvenanceChip.FORECAST_ARCHIVE` labels predictions
+accurately without changing forecast values or calling them actual observations.
+The page and map month controls share selection; the page horizon dropdown and
+six-horizon strip stay synchronized. `AppStartup` uses overview placeholders on
+the default route. `WorkspaceBookmarks` accepts both plain and explicit archive
+forecast links; geographic following remains independent. Overview T+2..T+6 saves
+use the existing drought-view contract and preserve horizon and district scope.
 
 Database migration (enabled in production): `WorkspaceBookmarks` is
 the shared account-toolbar control on desktop/mobile for followed areas and

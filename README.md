@@ -1,10 +1,10 @@
 # Korat Tan Phai / โคราชทันภัย
 
 Authenticated drought dashboard for Nakhon Ratchasima, derived from the Kaset
-Tan Phai prototype. Operational data-month views are separate from source-backed
-forecast-archive review, irrigation context and Excel reporting. Actual and
-operational forecast feeds remain unconfigured; this is not a live multi-hazard
-alert service. The site brand is Korat Tan Phai / โคราชทันภัย.
+Tan Phai prototype. The active product is forecast-only: source-backed drought
+predictions, irrigation context and Excel reporting. Actual routing is parked at
+the owner's request; this is not a live actual-data or multi-hazard alert service.
+The site brand is Korat Tan Phai / โคราชทันภัย.
 
 ## Where To Start
 
@@ -21,11 +21,11 @@ alert service. The site brand is Korat Tan Phai / โคราชทันภั
 
 ## Main Surfaces
 
-With the deployed [actual/forecast separation](docs/ACTUAL_FORECAST_SEPARATION.md),
-operational `period` means the valid month, while explicit `mapLayer=forecast-archive`
-retains the source-month/T+ archive. Actual and operational forecast feeds are not
-yet configured for publication; unavailable is not replaced with archive predictions.
-See the latest [release checkpoint](docs/HANDOFF.md) for deployment and test evidence.
+All routes open the forecast workspace. `target` means source month T and
+`horizon` selects T+1 through T+6, with or without `mapLayer=forecast-archive`.
+Retired `period` links open the default forecast selection, never treating an
+actual valid month as an origin. See the [restoration contract](docs/FORECAST_ONLY_RESTORATION.md)
+and latest [release checkpoint](docs/HANDOFF.md).
 
 The app is a Thai-only single-page application. Navigation exposes `ภาพรวม`,
 its `ภัยแล้ง` subitem, and `ส่งออก Excel` in database mode. `/` opens the

@@ -26,7 +26,7 @@ test('Excel export filters, real download and fresh revision gate', async ({ pag
   expect(requests.every(query => query.p_horizon_count === 1)).toBe(true);
   if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'ส่งออกคลังคำพยากรณ์ย้อนหลัง' });
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
   await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   await dialog.getByRole('combobox', { name: /^พื้นที่ / }).click();
   await page.getByRole('option', { name: 'อำเภอเสิงสาง', exact: true }).click();
@@ -91,7 +91,7 @@ test('Excel export from tambon defaults to its district, supports month/irrigati
   await expect(page.getByRole('heading', { level: 1 }).filter({ hasText: 'เสิงสาง' })).toBeVisible();
   if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'ส่งออกคลังคำพยากรณ์ย้อนหลัง' });
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
   await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   await expect(dialog.getByRole('combobox', { name: /^พื้นที่ / })).toContainText('อำเภอเสิงสาง');
   await dialog.getByRole('combobox', { name: /^เดือนตั้งต้น/ }).click();
@@ -134,7 +134,7 @@ test('Excel export compares the same target month and cancels a live workbook wo
   await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   if (testInfo.project.name.includes('mobile')) await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'ส่งออกคลังคำพยากรณ์ย้อนหลัง' });
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
   await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   await dialog.getByRole('combobox', { name: /^พื้นที่ / }).click();
   await page.getByRole('option', { name: 'อำเภอเสิงสาง', exact: true }).click();
@@ -190,7 +190,7 @@ test('Excel export province preserves all 1734 source values through the workboo
   await page.goto('/?mapLayer=forecast-archive&target=2025-12&horizon=1');
   await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'ส่งออกคลังคำพยากรณ์ย้อนหลัง' });
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
   await dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' }).click();
   await expect(dialog.locator('.nr-export-preview')).toContainText('32 อำเภอ');
   await expect(dialog.locator('.nr-export-preview')).toContainText('289 ตำบล');

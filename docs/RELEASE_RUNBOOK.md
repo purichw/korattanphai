@@ -7,28 +7,24 @@ user task explicitly instructs it.
 
 When authorized, release from `/Users/point/korattanphai`.
 
-## Actual / Forecast Release Scope
+## Forecast-Only Release Scope
 
-For changes to the actual/archive split, read
-[ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) and the latest
-[handoff](HANDOFF.md) first. A working unavailable state is not completed actual
-ingestion. State explicitly whether a candidate exposes only separation/source-gap
-UI or a reviewed live feed; never claim the latter from fixture tests.
+The owner parked Actual routing on 2026-09-20. Follow
+[FORECAST_ONLY_RESTORATION.md](FORECAST_ONLY_RESTORATION.md) and the latest
+[handoff](HANDOFF.md). The older Actual separation notes are historical, not a
+requirement to reactivate that experience.
 
-- Require a passing protected bundle budget, not just TypeScript/Vite and exposure
-  checks. The initial 2026-09-20 checkpoint failed that gate; the authorized
-  candidate fixed it using shorter obfuscated identifiers while retaining string
-  protection. Remeasure each candidate; do not silently raise limits to pass.
-- Migrate archive-focused legacy E2E URLs to explicit `mapLayer=forecast-archive`.
-  Keep separate tests proving bare T/h links resolve operational valid month T+h.
-- Verify server Bangkok time/month rollover, stale-response isolation, unavailable
-  versus error/retry, geography/period navigation and exact archive horizons.
-  Reuse `e2e/actual-forecast-separation.spec.ts` and its focused unit/API tests.
-- Live actual or operational forecast activation additionally requires approved
-  sources, metric/geography/crop definitions, review/publication/freshness policy
-  and real adapter/UAT evidence. A clock endpoint does not meet those gates.
-- Do not migrate ACLs or database data as an implicit part of a UI release.
-  Separate local evidence from authorized candidate/production smoke results.
+- Require the protected build, exposure and unchanged bundle-budget gates.
+- Test bare routes, old source-T/horizon links and explicit archive links at
+  province/district/tambon levels. No live route calls the operational clock.
+- Verify month/horizon synchronization, search/bookmarks, missing-origin recovery,
+  retained graph/export/map fixes and Supabase revision revalidation.
+- Use an isolated tracked-source candidate with production configuration.
+  All required CI jobs and authenticated read-only candidate smoke must pass
+  before promotion; then verify the production alias.
+- Keep Actual code/contracts parked. Future activation needs corrected owner
+  requirements, approved sources and adapter/UAT evidence.
+- No migration, ACL changes, iOS setup or unrelated UAT/research files are included.
 
 ## Local Checks
 

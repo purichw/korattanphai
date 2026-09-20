@@ -101,6 +101,7 @@ export function writeForecastArchiveLocation(month: NakhonRatchasimaDroughtForec
   const url = new URL(window.location.href);
   url.searchParams.set("mapLayer", "forecast-archive");
   url.searchParams.set("target", month.period);
+  url.searchParams.delete("period");
   url.searchParams.set("horizon", String(horizon));
   window.history.replaceState(window.history.state, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
 }
@@ -143,10 +144,10 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     archive.targetMonths.find((month) => month.period === (archive.loadedSelection?.originPeriod ?? selection.selectedTargetPeriod)) ??
     forecastArchiveDefaultTargetMonth(archive);
   useEffect(() => {
-    if (archive.loadedSelection && selectedMonth) {
-      window.history.replaceState({ ...window.history.state, ktpForecastDatasetId: archive.meta.datasetId }, "");
+    if (selectedMonth) {
+      if (archive.loadedSelection) window.history.replaceState({ ...window.history.state, ktpForecastDatasetId: archive.meta.datasetId }, "");
       const params = new URLSearchParams(window.location.search);
-      if (params.get("target") !== selectedMonth.period || Number(params.get("horizon") ?? "1") !== selectedHorizon) {
+      if (params.has("period") || params.get("target") !== selectedMonth.period || Number(params.get("horizon") ?? "1") !== selectedHorizon) {
         writeForecastArchiveLocation(selectedMonth, selectedHorizon);
       }
     }

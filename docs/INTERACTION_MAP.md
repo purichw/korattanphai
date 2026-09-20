@@ -2,34 +2,25 @@
 
 ## Active Product Journeys
 
-Current navigation and ownership are in `APP_MAP.md`. The actual/archive split
-below is deployed; see [release evidence](HANDOFF.md). Actual and operational
-forecast feeds remain unconfigured, as recorded in
-[ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md).
+Current navigation and ownership are in `APP_MAP.md`. The owner requested
+[forecast-only restoration](FORECAST_ONLY_RESTORATION.md); Actual routing is parked.
 
-1. Supabase login restores the requested internal route and query without changing
-   whether it describes operational valid month or explicit archive intent.
-2. Operational Home/province/district/tambon routes have one valid-month selector.
-   Server time chooses actual for past/current and forecast for future. Actual has
-   no T+ strip. Source gaps stay unavailable; failed requests have retry, not a
-   fabricated empty/zero-risk result. Current actual is labelled partial-month.
-3. Changing month or browser Back/Forward updates one request context. Departed
-   requests abort; late responses cannot recolor the new period. The shared map
-   keeps its camera on period/family changes; geographic navigation can refit it.
-4. Explicit archive entry retains origin T and horizons 1-6, deriving target T+h.
-   Compact archive Home uses T+1; explicit later horizons open the full archive view.
-   Missing origins do not substitute latest. Returning to operational exits archive
-   criteria; no archived prediction becomes actual.
-5. Archive map filters select risk and workbook irrigation; coloring can
-   show forecast risk or irrigation status. Area previews lead to district or
-   tambon routes. The locate-style icon returns to the area view, not device GPS.
-6. Archive province/district graphs switch percent/count; tambon pages show one status.
+1. Supabase login restores the requested internal forecast route and query.
+2. Home uses the latest published origin and T+1 unless an origin is supplied.
+   Plain and explicit archive links both preserve source month T and horizon.
+   Root T+2..T+6 opens the full forecast view without losing district scope.
+3. Page/map month selectors and page/strip horizon controls share the same state.
+   Period changes revalidate the Supabase revision; late results cannot replace
+   newer selections. Missing origins show recovery, never silently substitute latest.
+4. Navigation, search, saved filters and browser history retain geographic scope
+   and forecast selection. No Actual switch or operational clock request is active.
+5. Map filters select risk and workbook irrigation. The locate-style icon returns
+   to the area view, not device GPS. Existing camera/preview behavior is unchanged.
+6. Province/district graphs switch percent/count; tambon pages show one status.
    Risk-summary, attention and guidance disclosures open one at a time.
-7. Saved workspaces persist owner-only areas and named archive filters in Supabase.
-   Actual pages can follow an area but cannot save actual criteria as forecast filters.
-8. Excel export explicitly opens the archive dialog, checks current revision and exports
-   all six horizons; optional comparison aligns the same target calendar months.
-   See `FORECAST_EXCEL_EXPORT.md` for workbook and cancellation behavior.
+7. Saved workspaces persist owner-only areas and named forecast filters in Supabase.
+8. Excel export checks current revision and exports all six horizons; optional
+   comparison aligns the same target calendar months. See `FORECAST_EXCEL_EXPORT.md`.
 
 Agriculture/research panels require actual records; cleared/synthetic datasets
 do not make them active. The nationwide, field-verification, farmer and delivery
