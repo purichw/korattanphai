@@ -36,10 +36,34 @@ Forecast-only restoration, owner-authorized forward change (2026-09-20):
   [current contract](FORECAST_ONLY_RESTORATION.md).
 - No database migration/ACL/source changes. Unrelated UAT/research edits and
   the paused untracked iOS setup are excluded.
-- Local evidence: 314 unit tests and protected build passed; targeted database
-  browser routing passed 7 cases plus one duplicate-tablet skip. Full protected
-  browser/CI and authenticated candidate/production smoke remain release gates.
-  This entry alone is not a claim that production has changed.
+- Production restored by forward runtime commit `924e3946ea84b379f39668bb46479ac8db7f86fc`.
+  Follow-ups `0c1e9b9`, `da35167`, `1242475` change two E2E files only:
+  restore dropdown assertions and allow cold CI geometry/multi-route loading.
+  All runtime, build configuration and data match the smoked candidate unchanged.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/35514742374)
+  passed all five jobs on `124247589298aaa6cca0957c272a4a5c2d20d296`:
+  314 unit, 104 model-input, 12 operations, database integrity, 148 protected
+  browser (112 existing provider/legacy skips), 124 database browser (2 duplicate
+  viewport skips), 6 cross-browser checks and the final regression gate.
+  Earlier CI failures were stale temporal-control assertions and dev-server
+  readiness/time budgets, corrected and rerun without removing data checks.
+- Promoted `dpl_HhLSC4paSieFzZvgnBzsUmNt4wsM` /
+  `https://korattanphai-312ana5og-purich-w.vercel.app`.
+  Vercel inspection confirms `https://korattanphai.vercel.app` serves that
+  Ready artifact. Hosted protected app: 316,522 B gzip; unchanged bundle limits
+  and source-exposure checks pass. No static forecast fallback assets are shipped.
+- Candidate and production each passed 39 authenticated read-only smoke checks:
+  forecast defaults, legacy periods, province/district/tambon source color parity,
+  both graph units, month sync, irrigation/empty reset, saved-workspace reads,
+  logout, assets and headers. No page calls the parked operational API.
+  Excel checks verified 1,734 province and 36 district risk values, summaries,
+  native charts and PivotTables. Desktop/mobile screenshots were reviewed.
+- Evidence: `artifacts/forecast-only-release/{candidate,production}/report.json`,
+  screenshots and downloaded workbooks. Mobile top/scrolled captures also verify
+  the sticky menu stays at y=0. Physical iOS/Android devices were not tested.
+- The previous deployment `dpl_5v26dDKrV3zMCJzr99rCNJJd4tTW` reactivates the
+  now-parked Actual UI; do not promote it as routine recovery without owner approval.
+  No database rollback is needed. Future Actual work follows the parking note.
 
 Actual / forecast separation production release (2026-09-20):
 
