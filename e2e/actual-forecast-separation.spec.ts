@@ -27,6 +27,8 @@ test('forecast-only defaults across overview, province, districts and tambons', 
   for (const [path, count] of [['/', 289], ['/drought', 289], ['/wang-nam-khiao', 5], ['/phimai', 12], ['/wang-nam-khiao/t-302503', 1], ['/phimai/t-301503', 1]] as const) {
     // Retired valid-month links must not turn their period into an origin.
     await page.goto(`${path}?period=2026-08`);
+    // The DB dev server loads its module graph before the map's readiness check.
+    await expect(page.locator('.nr-forecast-overview, .nr-drought-compact-workspace')).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('.nr-map-shape')).toHaveCount(289);
     await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)')).toHaveCount(count);
     await expect(page).toHaveURL(/target=2025-12&horizon=1/);
@@ -47,6 +49,7 @@ test('forecast-only defaults across overview, province, districts and tambons', 
 });
 
 test('old source-month links preserve T+6, map camera and synced controls', async ({ page }) => {
+  test.setTimeout(90_000);
   const reads = await setup(page);
   await page.goto('/phimai?target=2025-12&horizon=6');
   const tabs = page.locator('.nr-drought-workspace-horizon');
@@ -95,6 +98,7 @@ test('tablet legacy overview keeps district scope and T+6', async ({ page }, inf
 });
 
 test('explicit archive links remain forecasts and missing origins never substitute latest', async ({ page }) => {
+  test.setTimeout(90_000);
   await setup(page);
   await page.goto('/wang-nam-khiao?mapLayer=forecast-archive&target=2025-12&horizon=4');
   await expect(page.locator('.nr-map-shape.is-forecast-high').first()).toBeVisible();
