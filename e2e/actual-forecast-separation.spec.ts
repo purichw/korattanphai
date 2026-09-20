@@ -29,7 +29,8 @@ test('forecast-only defaults across overview, province, districts and tambons', 
     await page.goto(`${path}?period=2026-08`);
     // The DB dev server loads its module graph before the map's readiness check.
     await expect(page.locator('.nr-forecast-overview, .nr-drought-compact-workspace')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('.nr-map-shape')).toHaveCount(289);
+    // Cold CI also parses the full boundary geometry after the workspace loads.
+    await expect(page.locator('.nr-map-shape')).toHaveCount(289, { timeout: 30_000 });
     await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)')).toHaveCount(count);
     await expect(page).toHaveURL(/target=2025-12&horizon=1/);
     expect(new URL(page.url()).searchParams.has('period')).toBe(false);
