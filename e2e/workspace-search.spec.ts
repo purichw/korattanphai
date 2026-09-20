@@ -64,7 +64,9 @@ test('repeated names retain level, location, filtering and the exact forecast de
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await dialog.getByRole('button', { name: /ตำบลปากช่อง.*รหัสพื้นที่ 302101/ }).click();
   await expect(dialog).not.toBeVisible();
-  await expect(page).toHaveURL(/\/pak-chong\/t-302101\?mapLayer=forecast-archive&target=2025-12&horizon=4&mapLayer=forecast-archive/);
+  await expect(page).toHaveURL(url => url.pathname === '/pak-chong/t-302101'
+    && url.searchParams.get('target') === '2025-12' && url.searchParams.get('horizon') === '4'
+    && url.searchParams.getAll('mapLayer').length === 1 && url.searchParams.get('mapLayer') === 'forecast-archive');
   await expect(page.locator('.nr-drought-compact-workspace.is-subdistrict')).toBeVisible();
   expect(errors).toEqual([]);
 });

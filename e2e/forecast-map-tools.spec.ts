@@ -104,12 +104,15 @@ for (const path of ['/?mapLayer=forecast-archive&target=2025-12', '/drought?mapL
     }
     await expect(layer).not.toHaveAttribute('transform', dragged);
     const panned = await settledCamera(page);
-    await page.getByRole("combobox", { name: /^เดือนตั้งต้น / }).click();
+    const mobileOverview = info.project.name === 'mobile' && path.startsWith('/?');
+    if (mobileOverview) await page.getByRole('button', { name: 'แก้ไขตัวกรองข้อมูล' }).click();
+    await page.getByRole("combobox", { name: mobileOverview ? 'เลือกเดือนตั้งต้น' : /^เดือนตั้งต้น / }).click();
     const options = page.locator('.app-select-options').last();
     await options.hover(); await page.mouse.wheel(0, 220);
     await expect.poll(() => options.evaluate(element => Math.max(element.scrollTop, element.closest('.app-select-menu')!.scrollTop))).toBeGreaterThan(0);
     await expect(layer).toHaveAttribute('transform', panned);
     await page.keyboard.press('Escape');
+    if (mobileOverview) await page.getByRole('button', { name: 'แสดงผล', exact: true }).click();
     const opener = page.getByRole('button', { name: 'ค้นหาพื้นที่บนแผนที่' });
     await opener.click();
     const scroll = await page.evaluate(() => scrollY);
