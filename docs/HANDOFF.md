@@ -20,6 +20,35 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Actual / forecast separation, local only (2026-09-20):
+
+- Operational routes now select a valid/data month (`period`), using server time
+  in Asia/Bangkok. Past/current months require actual; future months require an
+  eligible operational forecast. No cross-family or latest-period substitution.
+- Explicit `mapLayer=forecast-archive` retains rev03, source month T and T+1..T+6.
+  Bare legacy `target=T&horizon=h` resolves valid month T+h. Missing archive origins
+  remain unavailable. Existing archive Auth/RLS, values and Excel Cordia are unchanged.
+- All geographic levels compose the same operational workspace from shared selects,
+  metrics, disclosure and local map. A neutral unavailable map is not an actual
+  classification renderer. Tambon still has no aggregate bar graph. Shared bookmarks
+  follow areas independently of forecast filters and preserve explicit T+6 saves.
+- Actual ingestion and operational forecast publication are **not connected**.
+  No model-input fixture, report index, cleared research panel or upload timestamp
+  is promoted into actual/as-issued forecast evidence. Source/metric/publication
+  contracts and live adapters remain prerequisites.
+- Verification from the implementation pass: 313 Vitest tests, 3 API tests, 9
+  separation E2E cases (one duplicate tablet case skipped), plus 2 targeted bookmark
+  rechecks passed. Samples cover province, two districts and two tambons on desktop/
+  mobile, with a tablet case. Build/exposure checks passed, but the protected core
+  bundle budget failed. Do not treat this as release-ready or raise limits silently.
+- No commit, push, deploy, migration, production write or cross-task coordination
+  occurred. Existing dirty work is preserved. Full legacy E2E intent migration,
+  actual-feed UAT and production smoke remain unverified.
+- Source audit, owner files, screenshots, exact bundle measurement and remaining
+  gates: [Actual / Forecast Separation](ACTUAL_FORECAST_SEPARATION.md).
+  Read it before continuing; older production checkpoints below do not imply this
+  local change is deployed.
+
 Global search production release (2026-09-14):
 
 - Released formal-Thai global search across province/district/tambon names,

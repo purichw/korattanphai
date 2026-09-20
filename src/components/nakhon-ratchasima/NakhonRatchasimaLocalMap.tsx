@@ -164,7 +164,9 @@ export function NakhonRatchasimaLocalMap({
   showMonthFilter = true,
   compactForecast = false,
   overviewLayout = false,
+  operationalUnavailable,
 }: {
+  operationalUnavailable?: { key: string; kindLabel: string; periodLabel: string; statusLabel: string };
   onHorizonChange?: (horizon: ForecastArchiveHorizon) => void;
   irrigation?: ForecastMapIrrigation;
   filteredSubdistrictCodes?: string[];
@@ -202,6 +204,7 @@ export function NakhonRatchasimaLocalMap({
   const [isDragging, setIsDragging] = useState(false);
   const [selectedCode, setSelectedCode] = useState<string | null>(activeSelectedSubdistrictCode ?? null);
   const [preview, setPreview] = useState<LocalMapPreview | null>(null);
+  useEffect(() => { setPreview(null); }, [operationalUnavailable?.key]);
   const [analysisOverlay, setAnalysisOverlay] = useState<ForecastAnalysisOverlay | null>(null);
   const [pin, setPin] = useState<{ point: [number, number]; code: string } | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -368,7 +371,7 @@ export function NakhonRatchasimaLocalMap({
     [geo, preview?.subdistrictCode],
   );
   const provinceMapTab = target.valid && target.level === "province" ? target.tab : null;
-  const useForecastArchiveMap = Boolean(forecastArchive && forecastArchiveMonth && forecastArchiveHorizon);
+  const useForecastArchiveMap = !operationalUnavailable && Boolean(forecastArchive && forecastArchiveMonth && forecastArchiveHorizon);
   const useIrrigationColors = useForecastArchiveMap && irrigation?.colorMode === "irrigation";
   const activeAnalysis = analysisOverlay?.originPeriod === forecastArchiveMonth?.period
     && analysisOverlay?.horizon === forecastArchiveHorizon
@@ -380,7 +383,7 @@ export function NakhonRatchasimaLocalMap({
   useEffect(() => { setPin(null); }, [focusDistrictCode, routeSelectedSubdistrictCode]);
   const irrigationByCode = useMemo(() => new Map(forecastArchive?.locations.map((location) =>
     [location.subdistrictCode, irrigationStatusFromSource(location.irrigationStatus)])), [forecastArchive]);
-  const useResearchCriteriaMap = researchCriteriaEnabled && !useForecastArchiveMap && target.valid && layerUsesResearchCriteriaMap(layer.id, provinceMapTab);
+  const useResearchCriteriaMap = !operationalUnavailable && researchCriteriaEnabled && !useForecastArchiveMap && target.valid && layerUsesResearchCriteriaMap(layer.id, provinceMapTab);
   const filteredCodes = useMemo(() => filteredSubdistrictCodes === undefined ? null : new Set(filteredSubdistrictCodes), [filteredSubdistrictCodes]);
   const useFilterCriteriaMap = useResearchCriteriaMap || useForecastArchiveMap || filteredCodes !== null;
   const criteriaDefaults = useMemo(() => defaultLocalMapCriteria(provinceMapTab, layer.id), [layer.id, provinceMapTab]);
@@ -684,7 +687,7 @@ export function NakhonRatchasimaLocalMap({
     const subdistrict = district?.subdistricts.find((item) => item.subdistrictCode === subdistrictCode);
     const researchRecord = localResearchRecordForSubdistrict(subdistrictCode, activeResearchPeriod.period);
     const forecastRecord = forecastRecordsBySubdistrict.get(subdistrictCode);
-    const status = useForecastArchiveMap
+    const status = operationalUnavailable ? "no-data" as const : useForecastArchiveMap
       ? localMapStatusForForecastRecord(forecastRecord)
       : useResearchCriteriaMap
       ? localMapStatusForResearchRecord(researchRecord, criteria.viewMode)
@@ -958,6 +961,7 @@ export function NakhonRatchasimaLocalMap({
       geo,
       layer.id,
       mapMode,
+      operationalUnavailable,
       projection,
       useForecastArchiveMap,
       useResearchCriteriaMap,
@@ -990,7 +994,7 @@ export function NakhonRatchasimaLocalMap({
 
   const previewTitle = preview ? localPreviewTitleForTarget(target, preview) : "";
   const previewAction = preview ? localPreviewActionForTarget(target, preview) : null;
-  const previewResearch = preview ? localResearchRecordForSubdistrict(preview.subdistrictCode, activeResearchPeriod.period) : undefined;
+  const previewResearch = preview && !operationalUnavailable ? localResearchRecordForSubdistrict(preview.subdistrictCode, activeResearchPeriod.period) : undefined;
   const previewForecastRecord = preview ? forecastRecordsBySubdistrict.get(preview.subdistrictCode) : undefined;
   const previewComparison = preview ? comparisonByCode.get(preview.subdistrictCode) : undefined;
   const previewCardStyle =
@@ -1253,7 +1257,7 @@ export function NakhonRatchasimaLocalMap({
           compactValue={isMobileMap}
           tools={forecastArchive && forecastArchiveMonth && <>
             <ForecastMapTools archive={forecastArchive} originPeriod={forecastArchiveMonth.period} horizon={forecastArchiveHorizon ?? 1}
-              areaCode={toolAreaCode} irrigation={irrigation?.value ?? "all"} features={geo.features} onFocus={focusToolArea}
+              areaCode={toolAreaCode} scopeName={toolScopeName} irrigation={irrigation?.value ?? "all"} features={geo.features} onFocus={focusToolArea}
               onPin={setPin} pin={pin} onHorizonChange={onHorizonChange} onClearFocus={clearFeatureSelection}
               onOverlay={next => { changeForecastRisk("all"); setAnalysisOverlay(next); }}
               exportMap={() => svgRef.current ? ({ svg: svgRef.current, context: {
@@ -1566,7 +1570,7 @@ export function NakhonRatchasimaLocalMap({
                 role="button"
                 tabIndex={isCriteriaFiltered ? -1 : 0}
                 aria-disabled={isCriteriaFiltered || undefined}
-                aria-label={`${feature.properties.T_Name_T} ${feature.properties.A_Name_T} ${activeAnalysis?.comparison ? comparisonStyles[comparisonByCode.get(subdistrictCode)?.comparisonStatus ?? "NOT_COMPARABLE"].label : useIrrigationColors ? irrigationLabels[irrigationStatus] : coverageLabel(status, mapMode)}${isCriteriaFiltered ? " ไม่ตรงเงื่อนไขที่เลือก" : ""}`}
+                aria-label={`${feature.properties.T_Name_T} ${feature.properties.A_Name_T} ${operationalUnavailable?.statusLabel ?? (activeAnalysis?.comparison ? comparisonStyles[comparisonByCode.get(subdistrictCode)?.comparisonStatus ?? "NOT_COMPARABLE"].label : useIrrigationColors ? irrigationLabels[irrigationStatus] : coverageLabel(status, mapMode))}${isCriteriaFiltered ? " ไม่ตรงเงื่อนไขที่เลือก" : ""}`}
                 onPointerEnter={(event) => {
                   if (!isCriteriaFiltered && event.pointerType !== "touch") showSubdistrictPreview(feature, event, "hover");
                 }}
@@ -1691,9 +1695,13 @@ export function NakhonRatchasimaLocalMap({
         >
           <header>
             <strong>{previewTitle}</strong>
-            <span className={`severity-pill ${localStatusPillTone(preview.status)}`}>{coverageLabel(preview.status, mapMode)}</span>
+            <span className={`severity-pill ${localStatusPillTone(preview.status)}`}>{operationalUnavailable?.statusLabel ?? coverageLabel(preview.status, mapMode)}</span>
           </header>
           <dl>
+            {operationalUnavailable && <>
+              <div><dt>ชนิดข้อมูลหลัก</dt><dd>{operationalUnavailable.kindLabel}</dd></div>
+              <div><dt>เดือนข้อมูล</dt><dd>{operationalUnavailable.periodLabel}</dd></div>
+            </>}
             {previewComparison && <>
               <div><dt>การเปลี่ยนระดับ</dt><dd>{comparisonStyles[previewComparison.comparisonStatus].label}</dd></div>
               <div><dt>รอบอ้างอิง {formatMonth(previewComparison.baselineOriginPeriod, "th")}</dt><dd>{exportRiskLabel(previewComparison.baselineStatus === "MISSING" ? undefined : previewComparison.baselineForecastRisk)}</dd></div>
@@ -1775,7 +1783,7 @@ export function NakhonRatchasimaLocalMap({
                 : null
             }
             fallback={
-              useForecastArchiveMap
+              operationalUnavailable ? "ยังประเมินความเสี่ยงจากข้อมูลชุดนี้ไม่ได้ ไม่ใช่ความเสี่ยงระดับ 0" : useForecastArchiveMap
                 ? previewForecastRecord
                   ? "รายการนี้เป็นคำพยากรณ์ย้อนหลัง ไม่ใช่ข้อมูลความเสียหายทางการ"
                   : "ไม่มีรายการพยากรณ์สำหรับรอบนี้"
@@ -1785,6 +1793,7 @@ export function NakhonRatchasimaLocalMap({
         </article>
       )}
       <div className="nr-map-legend" aria-label="คำอธิบายแผนที่จังหวัดนครราชสีมา">
+        {operationalUnavailable ? <span><i className="is-no-data" />{operationalUnavailable.statusLabel} · ไม่ใช่ระดับ 0 หรือนอกขอบเขตการศึกษา</span> : <>
         {activeAnalysis?.comparison ? <strong>การเปลี่ยนระดับพยากรณ์</strong> : useIrrigationColors ? <strong>สถานะชลประทาน</strong> : useForecastArchiveMap && forecastArchiveMonth ? (
           <strong>พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon ?? 1), "th")}</strong>
         ) : useResearchCriteriaMap ? (
@@ -1818,8 +1827,9 @@ export function NakhonRatchasimaLocalMap({
             {!useForecastArchiveMap && activeResearchPeriod.isFallback && <span>ไม่มีข้อมูลในเดือนที่เลือก จึงใช้เดือนล่าสุดแทน</span>}
           </>
         )}
+        </>}
       </div>
-      {onMapModeChange && !useFilterCriteriaMap && (
+      {onMapModeChange && !operationalUnavailable && !useFilterCriteriaMap && (
         <div className="nr-map-bottom-modes" aria-label="เลือกมุมมองข้อมูลบนแผนที่">
           {localMapModes.map((mode) => (
             <button

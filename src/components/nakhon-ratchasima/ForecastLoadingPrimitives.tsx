@@ -10,6 +10,14 @@ export function Skeleton({ className = "" }: { className?: string }) {
   return <span className={`nr-skeleton ${className}`} aria-hidden="true" />;
 }
 
+export function LoadingAnalysisTable() {
+  return <div className="nr-analysis-loading" role="status" aria-label="กำลังโหลดข้อมูลวิเคราะห์พยากรณ์">
+    {[0, 1, 2, 3].map(row => <div key={row} aria-hidden="true">
+      {[0, 1, 2, 3, 4, 5, 6].map(column => <Skeleton key={column} />)}
+    </div>)}
+  </div>;
+}
+
 export function ForecastLoadState({ failed, retry, message, children }: LoadStateProps & { message: string; children: ReactNode }) {
   return <div className={`nr-forecast-load-state${failed ? " is-failed" : ""}`}>
     {failed ? <section className="nr-forecast-load-error">
@@ -41,10 +49,10 @@ export function LoadingFilters({ overview = false, target }: { overview?: boolea
   </div>;
 }
 
-export function LoadingMetrics({ labels, className = "" }: { labels: string[]; className?: string }) {
+export function LoadingMetrics({ labels, className = "", children }: { labels: string[]; className?: string; children?: ReactNode }) {
   return <MetricGrid className={`nr-loading-metrics ${className}`} metrics={labels.map((label) => ({
     label, value: <Skeleton className="is-number" />, icon: <Skeleton className="is-icon" />, tone: "muted",
-  }))} />;
+  }))}>{children}</MetricGrid>;
 }
 
 export function LoadingMap() {

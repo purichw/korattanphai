@@ -19,7 +19,7 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   let fullArchiveRequests = 0;
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", (request) => { if (/drought_forecast_archive_rev03.*\.json$/.test(request.url())) fullArchiveRequests += 1; });
-  await page.goto("/");
+  await page.goto("/?mapLayer=forecast-archive");
   const overview = page.locator(".nr-forecast-overview");
   const summary = overview.locator(".nr-forecast-overview-summary");
   await expect(summary).toContainText("117/289 ตำบล");
@@ -47,7 +47,7 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   expect(fullArchiveRequests).toBe(1);
   await page.goBack();
   await selectArea(page, "ทุกอำเภอ");
-  await page.goto('/?target=2015-06&horizon=1');
+  await page.goto('/?mapLayer=forecast-archive&target=2015-06&horizon=1');
   const firstArea = overview.locator(".nr-forecast-overview-attention li a").first();
   const href = await firstArea.getAttribute("href");
   await firstArea.click();
@@ -63,7 +63,7 @@ test("overview failures remain empty and retry preserves the requested target", 
     if (++attempts === 1) await route.fulfill({ status: 503, body: "Unavailable" });
     else await route.continue();
   });
-  await page.goto("/?target=2025-11&horizon=5");
+  await page.goto("/?mapLayer=forecast-archive&target=2025-11&horizon=1");
   await expect(page.getByRole("alert")).toHaveText("โหลดข้อมูลพยากรณ์ไม่สำเร็จ กรุณาลองใหม่");
   await expect(page.locator(".nr-forecast-overview-summary")).toHaveCount(0);
   await page.getByRole("button", { name: "ลองใหม่", exact: true }).click();
@@ -74,7 +74,7 @@ test("overview failures remain empty and retry preserves the requested target", 
 });
 
 test("changing month updates map counts and risk filtering uses the same forecast", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?mapLayer=forecast-archive");
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
   if (await edit.isVisible()) await edit.click();

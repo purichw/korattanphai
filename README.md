@@ -20,6 +20,12 @@ alerts. The site brand is Korat Tan Phai / โคราชทันภัย.
 
 ## Main Surfaces
 
+Local work adds [actual/forecast separation](docs/ACTUAL_FORECAST_SEPARATION.md):
+operational `period` means the valid month, while explicit `mapLayer=forecast-archive`
+retains the source-month/T+ archive. Actual and operational forecast feeds are not
+yet configured for publication; unavailable is not replaced with archive predictions.
+This change has not been deployed.
+
 The app is a Thai-only single-page application. Navigation exposes `ภาพรวม`,
 its `ภัยแล้ง` subitem, and `ส่งออก Excel` in database mode. `/` opens the
 Nakhon Ratchasima workspace after login.

@@ -17,7 +17,7 @@ test('a stalled map times out and retries in place without losing the selected f
   const documents: string[] = [];
   page.on('request', request => { if (request.isNavigationRequest() && request.frame() === page.mainFrame()) documents.push(request.url()); });
   try {
-    await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4');
+    await page.goto('/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4');
     await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
     await expect(page.locator('.nr-map-loading')).toContainText('กำลังโหลดขอบเขต');
     await page.clock.fastForward(30_001);
@@ -47,7 +47,7 @@ test('a stalled forecast times out and recovers the same source month and horizo
     await route.continue().catch(() => {});
   });
   try {
-    await page.goto('/drought?target=2025-11&horizon=3');
+    await page.goto('/drought?mapLayer=forecast-archive&target=2025-11&horizon=3');
     await expect(page.getByRole('status')).toHaveText('กำลังโหลดข้อมูลพยากรณ์ภัยแล้ง');
     await expect.poll(() => attempts).toBe(1);
     await page.clock.fastForward(30_001);
@@ -62,7 +62,7 @@ test('a stalled forecast times out and recovers the same source month and horizo
 
 test('keyboard login and skip navigation reach risk controls with reduced motion', async ({ page, browserName }, testInfo) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4');
+  await page.goto('/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4');
   await fillAuthForm(page);
   await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
   await expect(page.getByRole('heading', { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();

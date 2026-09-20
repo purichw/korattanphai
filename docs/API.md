@@ -2,6 +2,14 @@
 
 ## Current API State
 
+Local-only addition: `GET /api/operational-context[?period=YYYY-MM]` returns trusted
+server time, Bangkok current/next-month boundary, the selected data family, policy
+version and empty source catalogs. It is public metadata, not a record endpoint;
+responses are `private, no-store`. Invalid/duplicate/unknown query parameters return
+400; non-GET returns 405. Dev Vite and the Vercel handler use the same implementation.
+No actual source, forecast publication policy or new permission was activated.
+See [actual/forecast separation](ACTUAL_FORECAST_SEPARATION.md).
+
 The repo contains the read-only risk-fusion route, a machine-authenticated
 model-input ingestion route, health probes and opt-in operational telemetry.
 The integration/operational handlers were deployed to

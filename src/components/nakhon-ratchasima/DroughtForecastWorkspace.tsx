@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import {
   type NakhonRatchasimaDroughtForecastArchive,
   type NakhonRatchasimaDroughtForecastArchiveTargetMonth,
@@ -43,7 +43,7 @@ import { IrrigationEmptyState } from "../IrrigationEmptyState";
 import { type DataProvenanceChipKind, DataProvenanceChip } from "../DataProvenanceChip";
 import { type AppSelectOption } from "../AppSelect";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
-import { MetricGrid, type SummaryMetric } from "../PageSummary";
+import { MetricCard, MetricGrid, type SummaryMetric } from "../PageSummary";
 
 export { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
 
@@ -104,7 +104,7 @@ export function DroughtForecastArchivePanel({
       eyebrow="คลังพยากรณ์ย้อนหลัง"
       title={sectionTitle}
       description={sectionDescription}
-      provenance="REAL"
+      provenance="FORECAST_ARCHIVE"
       className={`nr-forecast-archive-mode-section is-${level}`}
     >
       <div className="nr-forecast-archive-mode-body">
@@ -224,7 +224,7 @@ export function DroughtForecastWorkspaceKpiStrip({
           : "ผลจากคลังพยากรณ์ ไม่ใช่การยืนยันความเสียหาย",
       icon: risk === null || risk === undefined ? <Info size={20} /> : risk === 0 ? <ShieldCheck size={20} /> : <ShieldAlert size={20} />,
       tone: risk === 2 ? "danger" : risk === 1 ? "watch" : risk === 0 ? "good" : "muted",
-      provenance: selectedRecord ? "REAL" : "PENDING_SOURCE",
+      provenance: selectedRecord ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     }]} />;
   }
   const kpis: (SummaryMetric & { id: string })[] = [
@@ -232,10 +232,10 @@ export function DroughtForecastWorkspaceKpiStrip({
       id: "coverage",
       label: "มีค่าพยากรณ์",
       value: `${formatThaiNumber(summary.inScopeSubdistricts)}/${formatThaiNumber(summary.totalSubdistricts)} ตำบล`,
-      detail: `${formatPercent(summary.totalSubdistricts ? summary.inScopeSubdistricts / summary.totalSubdistricts * 100 : 0)} ของจำนวนตำบลทั้งหมด`,
+      detail: <><span className="nr-drought-coverage-percent">{formatPercent(summary.totalSubdistricts ? summary.inScopeSubdistricts / summary.totalSubdistricts * 100 : 0)}</span><span className="nr-drought-coverage-context"> ของจำนวนตำบลทั้งหมด</span></>,
       icon: <Database size={17} />,
       tone: "info",
-      provenance: "REAL" as DataProvenanceChipKind,
+      provenance: "FORECAST_ARCHIVE" as DataProvenanceChipKind,
     },
     {
       id: "no-risk",
@@ -244,7 +244,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       detail: summary.inScopeSubdistricts > 0 ? `${formatPercent(summary.noRiskSubdistricts / summary.inScopeSubdistricts * 100, 1)} ของตำบลที่มีค่าพยากรณ์` : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <ShieldAlert size={17} />,
       tone: summary.inScopeSubdistricts > 0 ? "good" : "muted",
-      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      provenance: summary.inScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     },
     {
       id: "moderate",
@@ -253,7 +253,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       detail: summary.inScopeSubdistricts > 0 ? `${formatPercent(summary.moderateRiskSubdistricts / summary.inScopeSubdistricts * 100, 1)} ของตำบลที่มีค่าพยากรณ์` : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <TrendingUp size={17} />,
       tone: summary.inScopeSubdistricts > 0 ? "watch" : "muted",
-      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      provenance: summary.inScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     },
     {
       id: "high",
@@ -262,7 +262,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       detail: summary.inScopeSubdistricts > 0 ? `${formatPercent(summary.highRiskSubdistricts / summary.inScopeSubdistricts * 100, 1)} ของตำบลที่มีค่าพยากรณ์` : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <AlertTriangle size={17} />,
       tone: summary.inScopeSubdistricts > 0 ? "danger" : "muted",
-      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      provenance: summary.inScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     },
     {
       id: "out-of-scope",
@@ -271,7 +271,7 @@ export function DroughtForecastWorkspaceKpiStrip({
       detail: "ไม่ใช่ไม่มีความเสี่ยง",
       icon: <Info size={17} />,
       tone: "muted",
-      provenance: summary.outOfScopeSubdistricts > 0 ? "REAL" as DataProvenanceChipKind : "PENDING_SOURCE" as DataProvenanceChipKind,
+      provenance: summary.outOfScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" as DataProvenanceChipKind : "PENDING_SOURCE" as DataProvenanceChipKind,
     },
   ];
 
@@ -281,8 +281,13 @@ export function DroughtForecastWorkspaceKpiStrip({
   });
 
   return (
-    <MetricGrid className="nr-drought-workspace-kpis" ariaLabel="สรุปค่าพยากรณ์ที่เลือก"
-      metrics={kpis.map(({ id, ...metric }) => ({ ...metric, className: `is-${id}` }))} />
+    <MetricGrid className="nr-drought-workspace-kpis" ariaLabel="สรุปค่าพยากรณ์ที่เลือก">
+      <header className="nr-drought-kpi-summary">
+        <h3 className="nr-drought-kpi-heading">สรุปเดือน {formatMonth(summary.targetMonth, "th")}</h3>
+        <MetricCard {...kpis[0]} className="is-coverage" />
+      </header>
+      {kpis.slice(1).map(({ id, ...metric }) => <MetricCard key={id} {...metric} className={`is-${id}`} />)}
+    </MetricGrid>
   );
 }
 
@@ -314,7 +319,7 @@ export function DroughtForecastWorkspaceChart({
               : `ยังไม่มีเดือนพยากรณ์สำหรับ ${scopeLabel}`}
           </span>
         </div>
-        <DataProvenanceChip kind={forecastHasData ? "REAL" : "PENDING_SOURCE"} />
+        <DataProvenanceChip kind={forecastHasData ? "FORECAST_ARCHIVE" : "PENDING_SOURCE"} />
       </div>
       <div className="nr-forecast-chart-toolbar">
         <div className="segmented nr-forecast-unit-control" role="group" aria-label="หน่วยของกราฟพยากรณ์">
@@ -393,9 +398,32 @@ export function DroughtForecastWorkspaceMapCard({
         ? "แผนที่พยากรณ์ความเสี่ยงภัยแล้งระดับตำบล"
         : "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง";
   const issueMonthLabel = formatMonth(forecastArchiveIssueMonth, "th");
+  const mapCard = useRef<HTMLElement>(null);
+  const populatedFrame = useRef<{ viewportWidth: number; height: number } | null>(null);
+  const filteredScope = Boolean(irrigation && irrigation.value !== "all") || filteredSubdistrictCodes?.length === 0;
+  useLayoutEffect(() => {
+    const card = mapCard.current;
+    if (!card || level === "subdistrict" || typeof ResizeObserver === "undefined") return;
+    // Only a real viewport resize invalidates the frame. Scrollbars and overlays
+    // can briefly change the card width without changing the responsive layout.
+    const measure = () => {
+      if (document.fullscreenElement) return;
+      const { height } = card.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      if (!filteredScope) populatedFrame.current = { viewportWidth, height };
+      else if (populatedFrame.current && populatedFrame.current.viewportWidth !== viewportWidth) populatedFrame.current = null;
+      if (filteredScope && populatedFrame.current && window.innerWidth > 900) {
+        card.style.setProperty("--nr-populated-map-height", `${populatedFrame.current.height}px`);
+      } else card.style.removeProperty("--nr-populated-map-height");
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [filteredScope, level]);
 
   return (
-    <section className={`nr-dashboard-map-card nr-area-map-section nr-drought-workspace-map-card is-${level}`} aria-label={title}>
+    <section ref={mapCard} className={`nr-dashboard-map-card nr-area-map-section nr-drought-workspace-map-card is-${level}`} aria-label={title}>
       <div className="nr-drought-workspace-card-heading nr-dashboard-map-header">
         <div>
           <p className="eyebrow">แผนที่</p>
@@ -404,9 +432,10 @@ export function DroughtForecastWorkspaceMapCard({
             เดือนที่พยากรณ์ {formatMonth(forecastArchiveTargetMonthForSelection(forecastArchiveMonth, forecastArchiveHorizon), "th")} · {forecastHorizonLabel(forecastArchiveHorizon)} จากเดือนตั้งต้น {issueMonthLabel}
           </span>
         </div>
-        <DataProvenanceChip kind="REAL" />
+        <DataProvenanceChip kind="FORECAST_ARCHIVE" />
       </div>
       <NakhonRatchasimaLocalMap
+        showMonthFilter={false}
         onHorizonChange={onHorizonChange}
         irrigation={irrigation}
         filteredSubdistrictCodes={filteredSubdistrictCodes}
@@ -506,7 +535,7 @@ export function DroughtCompactForecastWorkspace({
 
   const heading = <div className="nr-drought-workspace-head">
     <div><p className="eyebrow">ข้อมูลพยากรณ์</p><h2 id={`nr-drought-compact-workspace-${level}`}>{title}</h2><p>{description}</p></div>
-    <DataProvenanceChip kind="REAL" />
+    <DataProvenanceChip kind="FORECAST_ARCHIVE" />
   </div>;
   const targetNote = <p className="nr-forecast-target-note">เดือนตั้งต้น {selectedTargetMonth.labelTh} · พยากรณ์ล่วงหน้า 1–6 เดือน: {trendMonths[0]?.labelTh} – {trendMonths.at(-1)?.labelTh}</p>;
   const horizonSelector = <div className="nr-drought-workspace-horizon">
@@ -524,7 +553,7 @@ export function DroughtCompactForecastWorkspace({
     <>
     <DroughtWorkspaceHeader target={target} archiveLabel={formatMonth(archive.meta.targetMonthEnd, "th")} onNavigate={navigateWithForecast} />
     <DroughtWorkspaceFilters target={target} selectedMonth={selectedMonth} monthOptions={monthOptions} onMonthChange={onMonthChange}
-      selectedHorizon={selectedHorizon} onHorizonChange={onHorizonChange} onNavigate={navigateWithForecast} />
+      onNavigate={navigateWithForecast} />
     <section className={`nr-drought-compact-workspace is-${level}${emptyIrrigationScope ? " is-empty-scope" : ""}`} aria-labelledby={`nr-drought-compact-workspace-${level}`}>
       {level !== "subdistrict" && <>{heading}{targetNote}</>}
 

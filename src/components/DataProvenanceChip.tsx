@@ -1,9 +1,10 @@
 import type { DataClass, Language } from "../types";
 
-export type DataProvenanceChipKind = DataClass | "PROXY" | "PENDING_SOURCE";
+export type DataProvenanceChipKind = DataClass | "PROXY" | "PENDING_SOURCE" | "FORECAST_ARCHIVE";
 
 const provenanceChipLabels: Record<Language, Record<DataProvenanceChipKind, string>> = {
   th: {
+    FORECAST_ARCHIVE: "คลังคำพยากรณ์",
     REAL: "ข้อมูลจริง",
     CANONICAL_SYNTHETIC: "ข้อมูลตัวอย่าง",
     DERIVED: "ผลคำนวณ",
@@ -12,6 +13,7 @@ const provenanceChipLabels: Record<Language, Record<DataProvenanceChipKind, stri
     PENDING_SOURCE: "รอยืนยันข้อมูล",
   },
   en: {
+    FORECAST_ARCHIVE: "Forecast archive",
     REAL: "Real data",
     CANONICAL_SYNTHETIC: "Prototype data",
     DERIVED: "Computed",
@@ -23,6 +25,7 @@ const provenanceChipLabels: Record<Language, Record<DataProvenanceChipKind, stri
 
 const provenanceChipDescriptions: Record<Language, Record<DataProvenanceChipKind, string>> = {
   th: {
+    FORECAST_ARCHIVE: "คำพยากรณ์จากชุดข้อมูลต้นฉบับ ไม่ใช่ข้อมูลสถานการณ์จริง",
     REAL: "มาจากแหล่งข้อมูลจริงหรือเอกสารทางการ",
     CANONICAL_SYNTHETIC: "ข้อมูลตัวอย่างสำหรับตรวจสอบรูปแบบการทำงาน",
     DERIVED: "ผลคำนวณจากข้อมูลตั้งต้น",
@@ -31,6 +34,7 @@ const provenanceChipDescriptions: Record<Language, Record<DataProvenanceChipKind
     PENDING_SOURCE: "ยังรอการยืนยันแหล่งข้อมูล",
   },
   en: {
+    FORECAST_ARCHIVE: "Predictions from the source dataset, not observed conditions",
     REAL: "From a real source or official document",
     CANONICAL_SYNTHETIC: "Prototype or mock data for demo use",
     DERIVED: "Computed from source inputs",
@@ -41,6 +45,7 @@ const provenanceChipDescriptions: Record<Language, Record<DataProvenanceChipKind
 };
 
 const provenanceChipClasses: Record<DataProvenanceChipKind, string> = {
+  FORECAST_ARCHIVE: "is-forecast-archive",
   REAL: "is-real",
   CANONICAL_SYNTHETIC: "is-synthetic",
   DERIVED: "is-derived",

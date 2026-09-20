@@ -7,6 +7,7 @@ import { buildForecastOverviewArchive } from "./generate-forecast-summary.mjs";
 import { forecastSlice } from "../tests/fixtures/forecast-slice.mjs";
 import { smokeExcelExport } from "./smoke-excel-export.mjs";
 import { validateSmokeTarget } from './smoke-target.mjs';
+import { BUSINESS_TIMEZONE, OPERATIONAL_POLICY_VERSION, businessMonth, nextBusinessMonth } from '../src/data/operationalPolicy.mjs';
 
 const base = validateSmokeTarget(process.env.SMOKE_URL ?? "https://korattanphai.vercel.app", process.env.SMOKE_ALLOWED_PREVIEW_ORIGINS);
 const local = ["localhost", "127.0.0.1"].includes(base.hostname);
@@ -37,6 +38,21 @@ try {
     assert.equal(body.components.length, 6);
     assert.ok(!JSON.stringify(body).match(/thaiwater|thai-water|thai_water/i), "retired provider remains absent");
     report.api = "passed";
+    const clock = await fetch(new URL('/api/operational-context', base), {
+      signal: AbortSignal.timeout(30_000), redirect: 'error',
+      headers: protectionCookie ? { Cookie: `_vercel_jwt=${protectionCookie}` } : undefined,
+    });
+    assert.equal(clock.status, 200, 'Operational clock status');
+    assert.match(clock.headers.get('cache-control') ?? '', /no-store/);
+    const metadata = await clock.json();
+    assert.equal(metadata.timezone, BUSINESS_TIMEZONE);
+    assert.equal(metadata.policyVersion, OPERATIONAL_POLICY_VERSION);
+    assert.equal(metadata.currentPeriod, businessMonth(metadata.serverNow));
+    assert.equal(metadata.nextBoundary, nextBusinessMonth(metadata.serverNow));
+    assert.ok(Math.abs(Date.now() - Date.parse(metadata.serverNow)) < 60_000, 'Fresh server clock');
+    assert.deepEqual(metadata.actualPeriods, []);
+    assert.deepEqual(metadata.forecastPeriods, []);
+    report.checks.push({ operationalClock: 'passed', actualFeed: 'unconfigured', operationalForecastFeed: 'unconfigured' });
   }
   browser = await chromium.launch();
   for (const [name, viewport] of Object.entries({ desktop: { width: 1440, height: 960 }, mobile: { width: 390, height: 844 } })) {
@@ -91,11 +107,23 @@ try {
         await page.getByLabel("อีเมล", { exact: true }).fill(email);
         await page.getByLabel("รหัสผ่าน", { exact: true }).fill(password);
         await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-        await page.locator(".nr-forecast-overview-summary").waitFor();
+        await page.locator(".nr-primary-workspace").waitFor();
       } catch {
         throw new Error("Smoke login failed. Verify the configured test account, environment and network; credential values are not reported.");
       }
-      for (const [route, areaCode] of [["/", "30"], ["/drought?target=2025-12&horizon=1", "30"], ["/dan-khun-thot?target=2025-12&horizon=4", "3008"], ["/dan-khun-thot/t-300806?target=2025-12&horizon=4", "300806"], ["/ban-lueam?target=2025-12&horizon=1", "3005"]]) {
+      for (const route of ['/', '/wang-nam-khiao', '/phimai/t-301503']) {
+        await page.goto(new URL(`${route}?period=2026-08`, base).href, { waitUntil: 'domcontentloaded' });
+        await expect(page.getByRole('heading', { name: 'ยังไม่มีข้อมูลสถานการณ์จริงสำหรับเดือนนี้' })).toBeVisible();
+        await expect(page.locator('.nr-primary-workspace')).toHaveAttribute('data-valid-period', '2026-08');
+        await expect(page.locator('.nr-map-shape').first()).toBeVisible();
+        await expect(page.locator('.nr-map-shape.is-forecast-no-risk, .nr-map-shape.is-forecast-moderate, .nr-map-shape.is-forecast-high')).toHaveCount(0);
+        await expect(page.locator('.nr-drought-horizon-strip')).toHaveCount(0);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
+        if (route === '/') await page.screenshot({ path: path.join(output, `${name}-actual-unavailable.png`), fullPage: true });
+        report.checks.push({ viewport: name, route, family: 'actual', unavailableNotZero: true });
+      }
+      assert.equal(rpcChecks.length, 0, 'Operational unavailable pages must not read forecasts');
+      for (const [route, areaCode] of [["/?mapLayer=forecast-archive", "30"], ["/drought?mapLayer=forecast-archive&target=2025-12&horizon=1", "30"], ["/dan-khun-thot?mapLayer=forecast-archive&target=2025-12&horizon=4", "3008"], ["/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4", "300806"], ["/ban-lueam?mapLayer=forecast-archive&target=2025-12&horizon=1", "3005"]]) {
         await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
         await page.locator(".nr-map-shape").first().waitFor();
         assert.equal(await page.locator(".nr-map-shape").count(), 289, `${name}: polygon count`);
@@ -114,7 +142,7 @@ try {
           assert.deepEqual(visible.map(shape => shape.code).sort(), expectedCodes, `${name}: exact route scope; other polygons filtered`);
           assert.ok(visible.every(({ code, risk }) => risk === expectedArchive.packedRiskByTargetMonth[target]?.[code]?.[horizon - 1]), `${name}: all in-scope map colors match source`);
         }
-        if (route === "/") {
+        if (route === "/?mapLayer=forecast-archive") {
           const summary = page.locator(".nr-forecast-overview-summary");
           await summary.waitFor();
           assert.deepEqual(await summary.locator(".metric-card-value").allTextContents(), ["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"], `${name}: latest T+1 forecast counts`);
@@ -124,24 +152,24 @@ try {
           assert.equal(new URL(page.url()).searchParams.get("horizon"), "1");
           await page.screenshot({ path: path.join(output, `${name}-overview.png`), fullPage: true });
           if (databaseMode) {
-            const mapMonth = page.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง", exact: true });
+            if (name === 'mobile') await page.getByRole('button', { name: 'แก้ไขตัวกรองข้อมูล' }).click();
+            const mapMonth = page.getByRole('combobox', { name: name === 'mobile' ? 'เลือกเดือนตั้งต้น' : /^เดือนตั้งต้น / });
             await expect(mapMonth).toContainText("ธ.ค. 2568");
             await mapMonth.click();
             await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
             await expect(mapMonth).toContainText("พ.ย. 2568");
             await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "48 ตำบล", "69 ตำบล", "172 ตำบล"]);
             await expect(page).toHaveURL(/target=2025-11.*horizon=1/);
-            if (name === "mobile") await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" }).click();
             const topMonth = page.getByRole("combobox", { name: name === "mobile" ? "เลือกเดือนตั้งต้น" : /^เดือนตั้งต้น / });
             await expect(topMonth).toContainText("พ.ย. 2568");
             await topMonth.click();
             await page.getByRole("option", { name: "ธ.ค. 2568", exact: true }).click();
-            if (name === "mobile") await page.getByRole("button", { name: "แสดงผล", exact: true }).click();
             await expect(mapMonth).toContainText("ธ.ค. 2568");
+            if (name === "mobile") await page.getByRole("button", { name: "แสดงผล", exact: true }).click();
             await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
             await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
             await page.locator(".nr-forecast-overview-map").screenshot({ path: path.join(output, `${name}-overview-month-filter.png`) });
-            report.checks.push({ viewport: name, overviewMonthSync: "both directions", forecastHorizon: 1 });
+            report.checks.push({ viewport: name, overviewMonthSync: "single owner updates map and summary", forecastHorizon: 1 });
             report.checks.push(await smokeExcelExport({ page, viewport: name, output, archive: expectedArchive }));
           }
         }
@@ -162,7 +190,7 @@ try {
           assert.match(await page.locator(".nr-drought-workspace-kpis .is-coverage").innerText(), /117\/289/);
           await expect(page.locator(".nr-forecast-target-note")).toHaveText("เดือนตั้งต้น ธ.ค. 2568 · พยากรณ์ล่วงหน้า 1–6 เดือน: ม.ค. 2569 – มิ.ย. 2569");
         }
-        if (databaseMode && (areaCode === "30" && route !== "/" || areaCode === "3008")) {
+        if (databaseMode && (areaCode === "30" && route !== "/?mapLayer=forecast-archive" || areaCode === "3008")) {
           const chart = page.locator(".nr-drought-workspace-chart-card");
           const codes = expectedArchive.locations.filter(location => areaCode === "30" || location.districtCode === areaCode).map(location => location.subdistrictCode);
           const initialUrl = page.url();
@@ -226,7 +254,7 @@ try {
           ["rainfed", "RainFed", "พึ่งน้ำฝน (ไม่มีชลประทาน)", "rgb(146, 98, 183)"],
           ["unknown", "Collecting", "ยังไม่มีข้อมูลชลประทาน", "rgb(135, 147, 158)"],
         ]) {
-          const route = `${criterion === "unknown" ? "/" : "/drought"}?target=2025-12&horizon=1`;
+          const route = `${criterion === "unknown" ? "/" : "/drought"}?mapLayer=forecast-archive&target=2025-12&horizon=1`;
           await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
           const select = page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox");
           await expect(select).toBeVisible();
@@ -258,9 +286,9 @@ try {
           report.checks.push({ viewport: name, irrigation: criterion, matched: codes.length, highRisk: high, sourceMatch: true, categoricalColor: color, unchangedUrl: true, reloadPreserved: true });
         }
         for (const [scope, route, count] of [
-          ['overview-district', '/?target=2025-12&horizon=1&district=3003', 6],
-          ['district', '/soeng-sang?target=2025-12&horizon=4', 6],
-          ['subdistrict', '/dan-khun-thot/t-300803?target=2025-12&horizon=4', 1],
+          ['overview-district', '/?mapLayer=forecast-archive&target=2025-12&horizon=1&district=3003', 6],
+          ['district', '/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=4', 6],
+          ['subdistrict', '/dan-khun-thot/t-300803?mapLayer=forecast-archive&target=2025-12&horizon=4', 1],
         ]) {
           await page.goto(new URL(route, base).href, { waitUntil: 'domcontentloaded' });
           const shapes = page.locator('.nr-map-shape:not(.is-criteria-filtered)');

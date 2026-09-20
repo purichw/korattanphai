@@ -7,6 +7,7 @@ import { formatMonth } from '../../i18n';
 import { forecastTargetPeriod } from '../../forecastPeriod';
 import { irrigationLabels, irrigationStatusFromSource, type IrrigationCriterion } from '../../irrigation';
 import { ForecastRiskValue } from '../ForecastRiskValue';
+import { LoadingAnalysisTable } from './ForecastLoadingPrimitives';
 import type { NakhonRatchasimaDroughtForecastArchive as Archive } from '../../types';
 import type { MapExportContext } from '../../mapImageExport';
 import type { NakhonRatchasimaGeoFeature } from './workspaceModel';
@@ -16,8 +17,8 @@ import '../../forecast-map-tools.css';
 const AnalysisDialog = lazy(() => import('./ForecastAnalysisDialog'));
 type Pin = { point: [number, number]; code: string };
 
-export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, irrigation, features, onFocus, onPin, onHorizonChange, onOverlay, exportMap, pin, onClearFocus }: {
-  archive: Archive; originPeriod: string; horizon: ForecastArchiveHorizon; areaCode: string; irrigation: IrrigationCriterion;
+export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, scopeName, irrigation, features, onFocus, onPin, onHorizonChange, onOverlay, exportMap, pin, onClearFocus }: {
+  archive: Archive; originPeriod: string; horizon: ForecastArchiveHorizon; areaCode: string; scopeName: string; irrigation: IrrigationCriterion;
   features: NakhonRatchasimaGeoFeature[]; onFocus: (code: string) => string | undefined;
   onPin: (pin: Pin | null) => void; pin: Pin | null; onHorizonChange?: (h: ForecastArchiveHorizon) => void;
   onOverlay: (overlay: ForecastAnalysisOverlay) => void;
@@ -109,23 +110,27 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, irr
     <div className="nr-map-tool-actions" role="group" aria-label="เครื่องมือข้อมูลนครราชสีมา">
       <button className="icon-button" type="button" title="ค้นหาอำเภอ / ตำบล" aria-label="ค้นหาพื้นที่บนแผนที่" onClick={() => open('search')}><Search size={17} /></button>
       <button className="icon-button" type="button" title="ค้นหาด้วยพิกัด" aria-label="ค้นหาด้วยพิกัด" onClick={() => open('pin')}><Crosshair size={17} /></button>
-      <button className="nr-tool-analysis-trigger" type="button" onClick={() => open('analysis')}><Table2 size={17} /><span>ตาราง / วิเคราะห์</span></button>
+      <button className="nr-tool-analysis-trigger" type="button" onClick={() => open('analysis')}><Table2 size={17} /><span>วิเคราะห์พยากรณ์</span></button>
       <button className="icon-button" type="button" title="ส่งออกแผนที่ PDF / PNG" aria-label="ส่งออกแผนที่" onClick={() => open('export')}><Download size={17} /></button>
-      {onHorizonChange && <button className="icon-button" type="button" title={playing ? 'หยุดลำดับพยากรณ์' : 'เล่นลำดับพยากรณ์ 6 เดือน'} aria-label={playing ? 'หยุดลำดับพยากรณ์' : 'เล่นลำดับพยากรณ์ 6 เดือน'} aria-pressed={playing} onClick={() => {
-        if (!playing && horizon === 6) onHorizonChange(1);
-        setPlaying(!playing);
-      }}>{playing ? <Pause size={17} /> : <Play size={17} />}</button>}
+      {onHorizonChange && <div className={`nr-map-playback${playing ? ' is-playing' : ''}`}>
+        <button className="icon-button" type="button" title={playing ? 'หยุดลำดับพยากรณ์' : 'เล่นลำดับพยากรณ์ 6 เดือน'} aria-label={playing ? 'หยุดลำดับพยากรณ์' : 'เล่นลำดับพยากรณ์ 6 เดือน'} aria-pressed={playing} onClick={() => {
+          if (!playing && horizon === 6) onHorizonChange(1);
+          setPlaying(!playing);
+        }}>{playing ? <Pause size={17} /> : <Play size={17} />}</button>
+        <span className="nr-map-playback-period" role="status" aria-atomic="true"><strong>T+{horizon}</strong><span>{formatMonth(forecastTargetPeriod(originPeriod, horizon), 'th')}</span></span>
+      </div>}
     </div>
-    {playing && <span className="nr-map-tool-status" role="status">T+{horizon} · {formatMonth(forecastTargetPeriod(originPeriod, horizon), 'th')}</span>}
     {picked && <div className="nr-map-tool-result" role="status"><span>ต.{picked.subdistrictNameTh} · อ.{picked.districtNameTh}</span><ForecastRiskValue risk={archive.packedRiskByTargetMonth[originPeriod]?.[picked.subdistrictCode]?.[horizon - 1]} /><span>{irrigationLabels[irrigationStatusFromSource(picked.irrigationStatus)]}</span>
       {!pin && <button type="button" className="icon-button" title="ล้างพื้นที่ที่ค้นหา" aria-label="ล้างพื้นที่ที่ค้นหา" onClick={() => { setPickedCode(null); onClearFocus(); }}><X size={15} /></button>}
     </div>}
     {pin && <div className="nr-map-tool-status"><Crosshair size={15} /><span>{pin.point[1].toFixed(5)}, {pin.point[0].toFixed(5)} · พยากรณ์ระดับตำบล</span><button className="icon-button" type="button" title="ล้างจุดพิกัด" aria-label="ล้างจุดพิกัด" onClick={() => { onPin(null); setPickedCode(null); setMessage(''); onClearFocus(); }}><X size={15} /></button></div>}
     {message && <span className="nr-map-tool-status" role="status">{message}</span>}
     {error && !tool && <span className="nr-tool-error" role="alert">{error}</span>}
-    {tool === 'analysis' && <Suspense fallback={<WorkspaceDialog title="วิเคราะห์พยากรณ์นครราชสีมา" onClose={close}><p role="status">กำลังเปิดตารางวิเคราะห์</p></WorkspaceDialog>}><AnalysisDialog
-      archive={archive} originPeriod={originPeriod} horizon={horizon} areaCode={areaCode} irrigation={irrigation}
-      onClose={close} onFocus={focus} onOverlay={onOverlay} /></Suspense>}
+    {tool === 'analysis' && <WorkspaceDialog title={`วิเคราะห์พยากรณ์ · ${scopeName}`} wide bounded onClose={close}>
+      <Suspense fallback={<LoadingAnalysisTable />}><AnalysisDialog
+        archive={archive} originPeriod={originPeriod} horizon={horizon} areaCode={areaCode} scopeName={scopeName} irrigation={irrigation}
+        onClose={close} onFocus={focus} onOverlay={onOverlay} /></Suspense>
+    </WorkspaceDialog>}
     {tool && tool !== 'analysis' && <WorkspaceDialog title={tool === 'search' ? 'ค้นหาพื้นที่นครราชสีมา' : tool === 'pin' ? 'ค้นหาตำบลจากพิกัด' : 'ส่งออกแผนที่'} onClose={close}>
       {tool === 'search' && <><label className="nr-tool-search"><Search size={18} /><input autoFocus type="search" aria-label="ชื่อหรือรหัสพื้นที่นครราชสีมา" placeholder="ชื่ออำเภอ ตำบล หรือรหัสพื้นที่" value={query} onChange={event => setQuery(event.target.value)} /></label><p className="nr-analysis-context" role="status">พบ {choices.length} พื้นที่ในขอบเขตหน้านี้</p>
         <ul className="nr-area-search-results">{choices.map(item => <li key={item.code}><button type="button" onClick={() => focus(item.code)}><strong>{item.name}</strong><span>{item.detail} · {item.code}</span></button></li>)}</ul></>}

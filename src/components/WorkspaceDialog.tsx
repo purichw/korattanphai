@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 /** Shared modal shell; feature owners retain loading, filters and data state. */
-export function WorkspaceDialog({ title, children, onClose, wide = false, closeLabel = 'ปิดเครื่องมือแผนที่' }: {
-  title: string; children: ReactNode; onClose: () => void; wide?: boolean; closeLabel?: string;
+export function WorkspaceDialog({ title, children, onClose, wide = false, bounded = false, closeLabel = 'ปิดเครื่องมือแผนที่' }: {
+  title: string; children: ReactNode; onClose: () => void; wide?: boolean; bounded?: boolean; closeLabel?: string;
 }) {
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
@@ -15,7 +15,7 @@ export function WorkspaceDialog({ title, children, onClose, wide = false, closeL
     return () => { dialog?.close(); if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true }); };
   }, []);
   function close() { ref.current?.close(); onClose(); }
-  return createPortal(<dialog ref={ref} className={`nr-tool-dialog${wide ? ' is-wide' : ''}`}
+  return createPortal(<dialog ref={ref} className={`nr-tool-dialog${wide ? ' is-wide' : ''}${bounded ? ' is-bounded' : ''}`}
     aria-labelledby={id} onCancel={event => { event.preventDefault(); close(); }}
     onClick={event => { if (event.target === event.currentTarget) close(); }}
     onKeyDown={event => { if (event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); event.stopPropagation(); close(); } }}>

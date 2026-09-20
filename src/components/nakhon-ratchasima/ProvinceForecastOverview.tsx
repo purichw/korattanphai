@@ -15,6 +15,7 @@ import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, type Loc
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import { ForecastOverviewLoading } from "./ForecastArchiveLoading";
 import { IrrigationEmptyState } from "../IrrigationEmptyState";
+import { ArchiveUnavailableState } from "../ArchiveUnavailableState";
 
 type OverviewProps = {
   layer: NakhonRatchasimaMapLayer;
@@ -27,6 +28,7 @@ type OverviewProps = {
 export function ProvinceForecastOverview(props: OverviewProps) {
   const request = useForecastArchive(true, "overview");
   const { archive, failed, retry } = request;
+  if (request.periodUnavailable) return <ArchiveUnavailableState />;
   if (!archive) return <ForecastOverviewLoading failed={failed} retry={retry} />;
   return <ForecastArchiveRequest request={request}><ForecastOverviewContent {...props} archive={archive} /></ForecastArchiveRequest>;
 }
@@ -89,7 +91,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
           <h1>จังหวัดนครราชสีมา</h1>
           <p className="nr-forecast-overview-context"><strong>พยากรณ์ {formatMonth(summary.targetMonth, "th")}</strong><span>ล่วงหน้า 1 เดือน · เดือนตั้งต้น (T) {formatMonth(summary.issueMonth, "th")}</span></p>
         </div>
-        <p><DataProvenanceChip kind="REAL" />เดือนตั้งต้นล่าสุดในคลัง {formatMonth(archive.meta.targetMonthEnd, "th")} · ไม่ใช่ข้อมูลสด</p>
+        <p><DataProvenanceChip kind="FORECAST_ARCHIVE" />เดือนตั้งต้นล่าสุดในคลัง {formatMonth(archive.meta.targetMonthEnd, "th")} · ไม่ใช่ข้อมูลสด</p>
       </header>
       <OperationalFilters
         compactOverview
@@ -112,6 +114,7 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
       <div className="nr-forecast-overview-grid">
         <div className="nr-forecast-overview-map nr-overview-cockpit-map">
           <ProvinceDashboardMapCard
+            showMonthFilter={false}
             irrigation={{ ...forecast.irrigation, onChange: (value) => {
               forecast.changeIrrigation(value);
               setSelectedSubdistrictCode(null);

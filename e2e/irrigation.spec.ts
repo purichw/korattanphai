@@ -14,7 +14,7 @@ test("irrigation filters map, totals and horizons and survives district navigati
   test.setTimeout(90_000);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto("/drought?target=2025-12&horizon=1");
+  await page.goto("/drought?mapLayer=forecast-archive&target=2025-12&horizon=1");
   const initialUrl = page.url();
   const historyLength = await page.evaluate(() => history.length);
   const select = page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox");
@@ -75,7 +75,7 @@ test("irrigation filters map, totals and horizons and survives district navigati
 
 test("overview map owns irrigation; Collecting keeps its forecast and gray category", async ({ page }, testInfo) => {
   test.setTimeout(90_000);
-  await page.goto("/?target=2025-12");
+  await page.goto("/?mapLayer=forecast-archive&target=2025-12");
   const mobile = testInfo.project.name === "mobile";
   if (mobile) {
     await page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล", exact: true }).click();
@@ -120,7 +120,7 @@ test("empty district irrigation keeps the map frame stable and restores its char
   const widths = testInfo.project.name === "desktop" ? [1440, 1024, 850] : [390];
   for (const width of widths) {
     await page.setViewportSize({ width, height: 960 });
-    await page.goto("/soeng-sang?target=2025-12&horizon=5");
+    await page.goto("/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=5");
     const map = page.locator(".nr-drought-workspace-map-card");
     const chart = page.locator(".nr-drought-workspace-chart-card");
     await expect(chart).toBeVisible();
@@ -136,11 +136,24 @@ test("empty district irrigation keeps the map frame stable and restores its char
     await page.getByRole("option", { name: "เข้าถึงชลประทาน", exact: true }).click();
     const empty = page.locator(".nr-irrigation-empty");
     await expect(empty).toContainText("ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้");
+    await expect(empty.getByRole("heading", { name: "ไม่พบตำบลตามตัวกรองนี้" })).toBeVisible();
+    await expect(empty.locator(".nr-irrigation-empty-icon svg")).toBeVisible();
+    const heading = await empty.getByRole("heading").boundingBox();
+    const description = await empty.locator("p").boundingBox();
+    expect(description!.y).toBeGreaterThanOrEqual(heading!.y + heading!.height);
+    expect(description!.width).toBeGreaterThan(250);
+    expect(description!.height).toBeLessThan(80);
     await expect(chart).toHaveCount(0);
     await expect(page.locator(".nr-map-shape:not(.is-criteria-filtered)")).toHaveCount(0);
     await expect(page.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(0);
     await map.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: testInfo.outputPath(`empty-irrigation-${width}.png`), fullPage: true });
+    // Full-page Chromium capture temporarily changes the Linux viewport. Keep
+    // this geometry test at its chosen viewport while capturing the map state.
+    await page.screenshot({ path: testInfo.outputPath(`empty-irrigation-${width}.png`) });
+    if (width === 1440 || width === 390) {
+      if (width === 390) await empty.evaluate(element => window.scrollBy(0, element.getBoundingClientRect().top - 140));
+      await empty.screenshot({ path: testInfo.outputPath(`irrigation-empty-state-${width}.png`) });
+    }
     const filtered = await map.boundingBox();
     expect(filtered!.width).toBeCloseTo(original!.width, 1);
     expect(filtered!.height).toBeCloseTo(original!.height, 1);
@@ -148,7 +161,8 @@ test("empty district irrigation keeps the map frame stable and restores its char
     if (width > 900) {
       const emptyFrame = await empty.boundingBox();
       expect(emptyFrame!.width).toBeCloseTo(chartFrame!.width, 1);
-      expect(emptyFrame!.height).toBeCloseTo(chartFrame!.height, 1);
+      // The replacement spans both compact chart and KPI rows beside the map.
+      expect(emptyFrame!.height).toBeCloseTo(filtered!.height, 1);
       expect(emptyFrame!.y).toBeCloseTo(filtered!.y, 1);
       expect(emptyFrame!.x).toBeGreaterThan(filtered!.x + filtered!.width);
     }
@@ -180,7 +194,7 @@ for (const scope of [
     const errors: string[] = [];
     page.on("pageerror", error => errors.push(error.message));
     const locations = archive.locations.filter((location: any) => location.subdistrictCode.startsWith(scope.code));
-    await page.goto(`${scope.path}?target=2025-12&horizon=1${scope.query}`);
+    await page.goto(`${scope.path}?mapLayer=forecast-archive&target=2025-12&horizon=1${scope.query}`);
     const map = page.locator(".nr-dashboard-map-card");
     const shapes = page.locator(".nr-map-shape:not(.is-criteria-filtered)");
     await expect(shapes).toHaveCount(locations.length);
@@ -201,6 +215,13 @@ for (const scope of [
     ]) {
       const matches = locations.filter((location: any) => location.irrigationStatus === status);
       await irrigation.click();
+      const viewport = page.viewportSize()!;
+      const menu = page.locator('.nr-irrigation-filter .app-select-menu');
+      await expect.poll(async () => (await menu.boundingBox())!.x).toBeGreaterThanOrEqual(0);
+      await expect.poll(async () => {
+        const box = (await menu.boundingBox())!;
+        return box.x + box.width;
+      }).toBeLessThanOrEqual(viewport.width + 1);
       await page.getByRole("option", { name: label, exact: true }).click();
       await expect(shapes).toHaveCount(matches.length);
       await expectStableFrame();
@@ -234,7 +255,7 @@ for (const scope of [
 }
 
 test("subdistrict mismatch is an empty filter, not zero risk or missing evidence", async ({ page }, testInfo) => {
-  await page.goto("/dan-khun-thot/t-300803?target=2025-12&horizon=4&irrigation=irrigated");
+  await page.goto("/dan-khun-thot/t-300803?mapLayer=forecast-archive&target=2025-12&horizon=4&irrigation=irrigated");
   await expect(page.locator(".nr-irrigation-empty")).toContainText("ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้");
   await expect(page.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(0);
   await expect(page.locator(".nr-drought-workspace-chart-card")).toHaveCount(0);
@@ -260,7 +281,7 @@ test("subdistrict mismatch is an empty filter, not zero risk or missing evidence
 });
 
 test("all irrigation categories use their own colors; keyboard selection never navigates", async ({ page }, testInfo) => {
-  await page.goto('/drought?target=2025-12&horizon=4');
+  await page.goto('/drought?mapLayer=forecast-archive&target=2025-12&horizon=4');
   const initialUrl = page.url();
   await page.getByRole('button', { name: 'ชลประทาน', exact: true }).click();
   for (const [status, count, color] of [['irrigated', 20, 'rgb(57, 127, 197)'], ['rainfed', 97, 'rgb(146, 98, 183)'], ['unknown', 172, 'rgb(135, 147, 158)']] as const) {

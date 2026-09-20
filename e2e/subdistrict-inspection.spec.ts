@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { test, expect, seedAuthSession } from "./fixtures";
 
 const archive = JSON.parse(readFileSync("src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json", "utf8"));
-const path = "/dan-khun-thot/t-300806?target=2025-12&horizon=1";
+const path = "/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=1";
 const output = "artifacts/subdistrict-v2";
 
 test.beforeEach(async ({ page }) => {
@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 });
 
-test("subdistrict duplicate controls stay synchronized without replacing the map", async ({ page }) => {
+test("subdistrict temporal controls stay synchronized without replacing the map", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto(path);
@@ -19,15 +19,16 @@ test("subdistrict duplicate controls stay synchronized without replacing the map
   await expect(map.locator(".nr-map-shape")).toHaveCount(289);
   await map.evaluate(node => node.setAttribute("data-instance-probe", "same-map"));
   const pageMonth = page.locator(".nr-operational-filters .app-select-field").first().getByRole("combobox");
-  const mapMonth = page.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง", exact: true });
-  const pageHorizon = page.locator(".nr-operational-horizon-filter").getByRole("combobox");
+  await expect(page.getByRole("combobox", { name: /^เดือนตั้งต้น / })).toHaveCount(1);
+  await expect(page.locator(".nr-operational-horizon-filter")).toHaveCount(0);
   const tabs = page.locator(".nr-forecast-archive-horizon-tabs").getByRole("tab");
   const context = page.locator(".nr-drought-workspace-context");
   const home = map.locator('[data-nr-subdistrict-code="300806"]');
   const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย."];
   for (let index = 0; index < 6; index += 1) {
     await tabs.nth(index).click();
-    await expect(pageHorizon).toHaveText(`ล่วงหน้า ${index + 1} เดือน`);
+    await expect(tabs.nth(index)).toHaveAttribute("aria-selected", "true");
+    await expect(page).toHaveURL(url => url.searchParams.get("horizon") === String(index + 1));
     await expect(context.locator(".is-issue strong")).toHaveText("ธ.ค. 2568");
     await expect(context.locator(".is-target strong")).toHaveText(`${months[index]} 2569`);
     const risk = archive.packedRiskByTargetMonth["2025-12"]["300806"][index];
@@ -35,21 +36,21 @@ test("subdistrict duplicate controls stay synchronized without replacing the map
     await expect(home).toHaveClass(new RegExp(`is-forecast-${status}(?:\\s|$)`));
     await expect(map).toHaveAttribute("data-instance-probe", "same-map");
   }
-  await pageHorizon.click();
-  await page.getByRole("option", { name: "ล่วงหน้า 4 เดือน", exact: true }).click();
+  await tabs.nth(3).click();
   await expect(tabs.nth(3)).toHaveAttribute("aria-selected", "true");
   await tabs.nth(3).focus();
   await tabs.nth(3).press("ArrowRight");
   await expect(tabs.nth(4)).toBeFocused();
-  await expect(pageHorizon).toHaveText("ล่วงหน้า 5 เดือน");
+  await expect(tabs.nth(4)).toHaveAttribute("aria-selected", "true");
   await tabs.nth(4).press("Home");
   await expect(tabs.nth(0)).toBeFocused();
   await tabs.nth(0).press("End");
   await expect(tabs.nth(5)).toBeFocused();
   await pageMonth.click();
   await page.getByRole("option", { name: "ต.ค. 2568", exact: true }).click();
-  await expect(mapMonth).toHaveText("ต.ค. 2568");
-  await mapMonth.click();
+  await expect(pageMonth).toHaveText("ต.ค. 2568");
+  await expect(context.locator(".is-issue strong")).toHaveText("ต.ค. 2568");
+  await pageMonth.click();
   await page.getByRole("option", { name: "ธ.ค. 2568", exact: true }).click();
   await expect(pageMonth).toHaveText("ธ.ค. 2568");
   await expect(map).toHaveAttribute("data-instance-probe", "same-map");
@@ -84,7 +85,7 @@ test("subdistrict duplicate controls stay synchronized without replacing the map
   await page.getByRole("button", { name: "ออกจากเต็มจอ", exact: true }).click();
   await expect(map).toHaveAttribute("data-instance-probe", "same-map");
   await page.reload();
-  await expect(pageHorizon).toHaveText("ล่วงหน้า 6 เดือน");
+  await expect(tabs.nth(5)).toHaveAttribute("aria-selected", "true");
   await expect(pageMonth).toHaveText("ธ.ค. 2568");
   await page.getByRole("button", { name: "กลับอำเภอ", exact: true }).click();
   await expect(page).toHaveURL(url => url.pathname === "/dan-khun-thot" && url.searchParams.get("target") === "2025-12" && url.searchParams.get("horizon") === "6");

@@ -13,7 +13,7 @@ test('random original Excel cells match actual map colors and forward dates', as
   await seedAuthSession(page);
   const results = [];
   for (const sample of report.samples) {
-    await page.goto(`/drought?target=${sample.source_month}&horizon=${sample.horizon}`);
+    await page.goto(`/drought?mapLayer=forecast-archive&target=${sample.source_month}&horizon=${sample.horizon}`);
     const polygon = page.locator(`.nr-map-shape[data-nr-subdistrict-code="${sample.subdistrict_code}"]`);
     const expected = sample.risk_value === null ? { status: 'out-of-scope', color: null }
       : [

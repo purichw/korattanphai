@@ -156,8 +156,9 @@ it("renders missing and out-of-scope as separate shared stat cards", () => {
     const card = within(stats).getByText(label).closest(".metric-card")!;
     expect(within(card as HTMLElement).getByText("1 ตำบล")).toBeInTheDocument();
   }
-  expect(within(stats).getByText("33% ของจำนวนตำบลทั้งหมด")).toBeInTheDocument();
+  expect(stats.querySelector(".is-coverage .metric-card-detail")).toHaveTextContent("33% ของจำนวนตำบลทั้งหมด");
   expect(within(stats).getByText("100% ของตำบลที่มีค่าพยากรณ์")).toBeInTheDocument();
+  expect(within(stats).getByRole("heading", { name: "สรุปเดือน ม.ค. 2569" })).toBeInTheDocument();
 });
 
 it("preserves coverage at every archive horizon, including all-null scopes", () => {

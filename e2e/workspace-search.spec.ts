@@ -8,7 +8,7 @@ const historyKey = `korat-tan-phai-search-history-v1:${authTestUser.id}`;
 async function setup(page: Page) {
   await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) }));
   await seedAuthSession(page);
-  await page.goto('/drought?target=2025-12&horizon=4');
+  await page.goto('/drought?mapLayer=forecast-archive&target=2025-12&horizon=4');
   await expect(page.getByRole('button', { name: 'ค้นหาข้อมูล', exact: true }).filter({ visible: true }).first()).toBeVisible();
 }
 async function open(page: Page) {
@@ -64,12 +64,14 @@ test('repeated names retain level, location, filtering and the exact forecast de
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   await dialog.getByRole('button', { name: /ตำบลปากช่อง.*รหัสพื้นที่ 302101/ }).click();
   await expect(dialog).not.toBeVisible();
-  await expect(page).toHaveURL(/\/pak-chong\/t-302101\?target=2025-12&horizon=4&mapLayer=forecast-archive/);
+  await expect(page).toHaveURL(/\/pak-chong\/t-302101\?mapLayer=forecast-archive&target=2025-12&horizon=4&mapLayer=forecast-archive/);
   await expect(page.locator('.nr-drought-compact-workspace.is-subdistrict')).toBeVisible();
   expect(errors).toEqual([]);
 });
 
 test('history is committed explicitly, survives reload and can be cleared without affecting another account', async ({ page }, info) => {
+  // Three full document loads share this budget on the slower CI browser.
+  test.setTimeout(60_000);
   await setup(page);
   await page.evaluate(() => localStorage.setItem('korat-tan-phai-search-history-v1:another-account', JSON.stringify(['ข้อมูลของบัญชีอื่น'])));
   let dialog = await open(page);

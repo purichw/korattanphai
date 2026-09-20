@@ -57,7 +57,16 @@ describe('forecast Excel data contract', () => {
     expect(sheet.getCell('C9').result).toBe(report.totals[0].counts[1]);
     expect(sheet.getCell('C9').numFmt).toBe('#,##0');
     expect(sheet.getCell('H9').numFmt).toBe('0.0%');
-    expect(sheet.getCell('A1').font.size).toBe(17);
+    expect(sheet.getCell('A1').font).toMatchObject({ name: 'Cordia New', size: 18, bold: true });
+    expect(sheet.getCell('A2').font.italic).not.toBe(true);
+    expect(sheet.getCell('A1').alignment).toMatchObject({ horizontal: 'left', vertical: 'middle' });
+    for (const address of ['B4', 'E4', 'A9', 'C9', 'H9']) {
+      expect(sheet.getCell(address).alignment).toMatchObject({ horizontal: 'center', vertical: 'middle', wrapText: true });
+    }
+    for (const address of ['A5', 'C5', 'E5', 'G5', 'H5', 'N5']) {
+      expect(raw.getCell(address).alignment).toMatchObject({ horizontal: 'center', vertical: 'middle', wrapText: true });
+      expect(raw.getCell(address).font.name).toBe('Cordia New');
+    }
     expect(sheet.getCell('A1').fill).not.toEqual(sheet.getCell('B4').fill);
     expect(sheet.getCell('I8').value).toBe('ตำบลตาม\nตัวกรอง');
     expect(book.getWorksheet('ฐาน Pivot')!.rowCount).toBe(1735);
@@ -79,6 +88,10 @@ describe('forecast Excel data contract', () => {
     expect(chart).toContain('numRef');
     expect(chart).toContain('numCache');
     expect(chart).toContain('วิเคราะห์');
+    expect(chart).toContain('typeface="Cordia New"');
+    expect(chart).not.toContain('typeface="Tahoma"');
+    expect(chart).not.toContain('typeface="Arial"');
+    expect(chart).not.toContain('sz="825"');
     expect(Object.keys(zip.files).filter(path => /^xl\/pivotTables\/pivotTable\d+\.xml$/.test(path))).toHaveLength(1);
     expect(Object.keys(zip.files).some(path => /pivotCacheRecords\d+\.xml$/.test(path))).toBe(true);
     const cacheName = Object.keys(zip.files).find(path => /pivotCacheDefinition\d+\.xml$/.test(path))!;
@@ -97,6 +110,10 @@ describe('forecast Excel data contract', () => {
     }
     const dictionary = book.getWorksheet(forecastExportSheetNames.dictionary)!;
     const dictFields = dictionary.getColumn(1).values.slice(5);
+    expect(dictionary.getCell('B5').alignment).toMatchObject({ horizontal: 'left', vertical: 'top', wrapText: true });
+    expect(dictionary.getCell('E5').alignment).toMatchObject({ horizontal: 'center', vertical: 'middle' });
+    expect(book.getWorksheet('ที่มาและนิยาม')!.getCell('B19').alignment).toMatchObject({ horizontal: 'left', vertical: 'middle', wrapText: true });
+    expect(book.getWorksheet('ที่มาและนิยาม')!.getRow(19).height).toBeGreaterThan(44);
     expect(dictFields).toEqual(expect.arrayContaining(definitions.map(item => item.field)));
     expect(dictFields).toEqual(expect.arrayContaining(['forecastRiskDisplay', 'highestForecastRiskDisplay', 'riskShare', 'pivotLocationHorizonCount', 'sourceTambonEn', 'metadataDetail']));
     const descriptions = dictionary.getSheetValues().slice(5) as unknown[][];
@@ -142,6 +159,12 @@ describe('forecast Excel data contract', () => {
     const headers = sheet.getRow(4).values.slice(1) as string[];
     expect(headers.filter(header => !/[ก-๙]/.test(header) || !header.includes('\n'))).toEqual([]);
     const fields = headers.map(header => header.split('\n')[1]);
+    for (const field of ['targetPeriod', 'subdistrictNameTh', 'districtNameTh', 'baselineOriginPeriod', 'currentOriginPeriod', 'baselineHorizon', 'currentHorizon', 'riskDelta']) {
+      expect(sheet.getCell(5, fields.indexOf(field) + 1).alignment).toMatchObject({ horizontal: 'center', vertical: 'middle', wrapText: true });
+    }
+    const hashColumn = fields.findIndex(field => field === 'baselineSourceWorkbookSha256') + 1;
+    expect(hashColumn).toBeGreaterThan(0);
+    expect(sheet.getCell(5, hashColumn).alignment).toMatchObject({ horizontal: 'left', vertical: 'middle', wrapText: true });
     expect(fields.slice(0, 7)).toEqual(['targetPeriod', 'subdistrictCode', 'subdistrictNameTh', 'baselineRiskLabelTh', 'currentRiskLabelTh', 'comparisonLabelTh', 'riskDelta']);
     expect(sheet.getCell('A3').value).toContain('รอบที่เลือก − รอบอ้างอิง');
     expect(sheet.getCell('A3').value).toContain('เทียบระดับไม่ได้ ≠ ระดับเท่าเดิม');

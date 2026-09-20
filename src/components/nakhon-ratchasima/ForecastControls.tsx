@@ -87,7 +87,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       detail: "มีผลพยากรณ์ในรอบที่เลือก",
       icon: <Database size={18} />,
       tone: "info",
-      provenance: "REAL",
+      provenance: "FORECAST_ARCHIVE",
     },
     {
       label: "ไม่มีความเสี่ยง",
@@ -95,7 +95,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       detail: summary.inScopeSubdistricts > 0 ? "ผลพยากรณ์: ไม่พบสัญญาณเสี่ยง" : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <ShieldAlert size={18} />,
       tone: summary.inScopeSubdistricts > 0 ? "good" : "muted",
-      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      provenance: summary.inScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     },
     {
       label: "เสี่ยงปานกลาง",
@@ -103,7 +103,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       detail: summary.inScopeSubdistricts > 0 ? "ผลพยากรณ์: เสี่ยงปานกลาง" : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <TrendingUp size={18} />,
       tone: summary.inScopeSubdistricts > 0 ? "watch" : "muted",
-      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      provenance: summary.inScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     },
     {
       label: "เสี่ยงสูง",
@@ -111,7 +111,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       detail: summary.inScopeSubdistricts > 0 ? "ผลพยากรณ์: เสี่ยงสูง" : "ไม่มีค่าพยากรณ์ให้ประเมิน",
       icon: <TrendingUp size={18} />,
       tone: summary.inScopeSubdistricts > 0 ? "danger" : "muted",
-      provenance: summary.inScopeSubdistricts > 0 ? "REAL" : "PENDING_SOURCE",
+      provenance: summary.inScopeSubdistricts > 0 ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     },
     {
       label: "นอกขอบเขต",
@@ -119,7 +119,7 @@ export function DroughtForecastArchiveSummaryMetrics({
       detail: "ช่องว่างในชุดข้อมูลไม่ใช่ไม่มีความเสี่ยง",
       icon: <Info size={18} />,
       tone: "muted",
-      provenance: "REAL",
+      provenance: "FORECAST_ARCHIVE",
     },
   ];
 
@@ -151,7 +151,7 @@ export function DroughtForecastArchiveSummaryMetrics({
               ? "good"
               : "muted"
         : "muted",
-      provenance: selectedRecord ? "REAL" : "PENDING_SOURCE",
+      provenance: selectedRecord ? "FORECAST_ARCHIVE" : "PENDING_SOURCE",
     });
   }
 

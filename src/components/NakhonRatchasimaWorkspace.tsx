@@ -1,6 +1,7 @@
 import {
   type NakhonRatchasimaRouteTarget,
   getNakhonRatchasimaMapLayers,
+  getNakhonRatchasimaDistrictByCode,
   getNakhonRatchasimaResearchPeriods,
   NAKHON_RATCHASIMA_LAYER_IDS,
   NAKHON_RATCHASIMA_ROUTE_BASE,
@@ -24,8 +25,31 @@ import { DroughtWorkspaceLoading } from "./nakhon-ratchasima/ForecastArchiveLoad
 import { ProvinceView } from "./nakhon-ratchasima/ProvinceView";
 import { DistrictView } from "./nakhon-ratchasima/DistrictView";
 import { SubdistrictView } from "./nakhon-ratchasima/SubdistrictView";
+import { operationalPath, readOperationalLocation } from "../operationalLocation";
+import { ArchiveUnavailableState } from "./ArchiveUnavailableState";
+import { OperationalDroughtWorkspace } from "./nakhon-ratchasima/OperationalDroughtWorkspace";
 
-export function NakhonRatchasimaWorkspace({
+export function NakhonRatchasimaWorkspace(props: { route: NakhonRatchasimaRouteTarget; onNavigate: (path: string) => void }) {
+  const intent = readOperationalLocation(window.location.search);
+  if (props.route.valid && intent.intent !== "archive") {
+    const district = props.route.level === "province" ? getNakhonRatchasimaDistrictByCode(new URLSearchParams(window.location.search).get("district") ?? undefined) : undefined;
+    return <OperationalDroughtWorkspace target={district ? { valid: true, level: "district", district } : props.route} onNavigate={props.onNavigate} />;
+  }
+  const horizon = new URLSearchParams(window.location.search).get("horizon");
+  // Overview has a T+1-only payload. An explicit different vintage needs the
+  // existing six-horizon workspace, never the overview's T+1 substitution.
+  const archiveRoute: NakhonRatchasimaRouteTarget = props.route.valid && props.route.level === "province" && props.route.tab === "overview" && horizon && horizon !== "1"
+    ? { ...props.route, tab: "drought" } : props.route;
+  return <>
+    {props.route.valid && <section className="nr-archive-context" aria-label="บริบทคลังพยากรณ์">
+      <div><strong>คลังคำพยากรณ์ย้อนหลัง</strong><span>เดือนตั้งต้น T และ T+1 ถึง T+6 เป็นคำพยากรณ์ ไม่ใช่สถานการณ์จริง</span></div>
+      <a href={operationalPath(window.location.pathname)} onClick={event => { event.preventDefault(); props.onNavigate(operationalPath(window.location.pathname)); }}>กลับไปข้อมูลสถานการณ์</a>
+    </section>}
+    {horizon && !/^[1-6]$/.test(horizon) ? <ArchiveUnavailableState invalidHorizon /> : <ForecastArchiveWorkspace {...props} route={archiveRoute} />}
+  </>;
+}
+
+function ForecastArchiveWorkspace({
   route,
   onNavigate,
 }: {
@@ -120,6 +144,7 @@ export function NakhonRatchasimaWorkspace({
     );
   }
 
+  if (isDroughtWorkspaceRoute && forecastRequest.periodUnavailable) return <ArchiveUnavailableState />;
   if (isDroughtWorkspaceRoute && !droughtArchive) {
     return <DroughtWorkspaceLoading target={route} failed={archiveFailed} retry={retryArchive} onNavigate={onNavigate} />;
   }

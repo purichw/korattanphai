@@ -1,5 +1,31 @@
 # Korat Tan Phai / โคราชทันภัย Data Contract
 
+## Actual / Forecast Boundary
+
+Local implementation, not deployed: [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md)
+owns the source audit, eligibility contract, implementation coverage and open gates.
+The archive persistence model below is retained; it is not an actual-data store.
+
+- Operational `period` is the valid month. Trusted server time in Asia/Bangkok
+  resolves past/current to actual and future to forecast. Current-month actual is
+  partial-period; coverage-through must come from source records, never be invented.
+- Archive `target` / saved `target_period` still mean origin T, with forecast target
+  T+h. Explicit `mapLayer=forecast-archive` preserves archive intent. Bare legacy
+  T+h links resolve an operational valid month instead of relabelling predictions.
+- Actual kind, metric/classification, crop scope, geographic version, review,
+  publication, coverage and revision are separate fields. Do not apply forecast
+  0/1/2 semantics or fan out district/province actuals to tambons without an approved
+  metric/aggregation contract. Missing, withheld, pending and request error differ.
+- Operational forecasts require an exact eligible vintage with verified issuance
+  and publication/freshness policies. Rev03 source T is not proof of a historical
+  first-publication date; an ingest timestamp cannot supply that proof.
+- `GET /api/operational-context` currently returns only server clock/policy and
+  empty source catalogs, with `private, no-store`. No actual transport is connected.
+  Operational requests must not fall back to the archive cache, static JSON or
+  another period. Existing Supabase archive revision checks remain in force.
+- Existing followed areas remain geographic bookmarks. Actual selections cannot
+  be serialized into forecast saved filters. No database schema or ACL changed.
+
 ## Persistence Model
 
 Supabase Auth supplies identity. `VITE_DATA_BACKEND=supabase` selects the

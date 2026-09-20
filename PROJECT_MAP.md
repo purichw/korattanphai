@@ -8,6 +8,13 @@ current surfaces are overview, province/district/subdistrict forecasts, Excel
 reporting and personal saved workspaces. Legacy multi-hazard workflows are not
 the active product.
 
+Local-only change (2026-09-20): operational routes separate actual/data-month
+selection from the explicit rev03 archive. Actual ingestion and operational
+forecast publication remain unconfigured. The protected bundle budget now passes
+after shortening obfuscated identifiers; hosted verification is pending. See
+[Actual / Forecast Separation](docs/ACTUAL_FORECAST_SEPARATION.md) for evidence
+and the remaining gates; archive-only descriptions below apply to archive intent.
+
 FACT: The current implementation is a Vite + React + TypeScript single-page app
 with a read-only risk-fusion endpoint and a new machine-authenticated model-input
 API. Supabase Auth, scoped forecast reads and personal saved workspaces are
@@ -40,6 +47,13 @@ notification recipient or remote log store was activated. V2 remains proposed. S
 - Active local map: `src/components/nakhon-ratchasima/NakhonRatchasimaLocalMap.tsx`
 - Retained nationwide map component: `src/components/RiskMap.tsx`
 - Nakhon Ratchasima workspace: `src/components/NakhonRatchasimaWorkspace.tsx`
+- Operational route/valid-month semantics: `src/operationalLocation.ts`
+- Shared operational view: `src/components/nakhon-ratchasima/OperationalDroughtWorkspace.tsx`
+- Operational request lifecycle: `src/useOperationalContext.ts`; server clock and
+  source-gap metadata: `api/operational-context.js` and
+  `server/operations/operational-context.mjs` (local implementation, not deployed).
+- Eligibility/integration contracts: `src/operationalData.ts`; Bangkok calendar
+  policy: `src/data/operationalPolicy.mjs`. These do not provide a live actual feed.
 - Shared select component: `src/components/AppSelect.tsx`
 - Shared metric components: `src/components/PageSummary.tsx`
 - Shared map preview footer: `src/components/MapPreviewFooter.tsx`
@@ -140,6 +154,8 @@ Production smoke checks after an authorized deploy:
   transitions.
 - [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md): data shapes, storage keys,
   source precedence, and migration rules.
+- [docs/ACTUAL_FORECAST_SEPARATION.md](docs/ACTUAL_FORECAST_SEPARATION.md): local
+  actual/archive split, valid-month semantics, source gaps and verification evidence.
 - [docs/RAINFALL_SOURCE_AUDIT.md](docs/RAINFALL_SOURCE_AUDIT.md): Nakhon Ratchasima province
   rainfall sources, coverage matrix, proxy policy, and next ingest gates.
 - [docs/ALERTING.md](docs/ALERTING.md): severity taxonomy, provenance,

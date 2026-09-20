@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NakhonRatchasimaDroughtForecastArchive } from '../types';
 import { forecastTargetPeriod } from '../forecastPeriod';
-import { forecastQueryPeriod, forecastScopeCodes, projectForecastScope, type ForecastQuery } from './forecastScope';
+import { ArchivePeriodUnavailableError, forecastQueryPeriod, forecastScopeCodes, projectForecastScope, type ForecastQuery } from './forecastScope';
 import { withLoadDeadline, LoadTimeoutError } from './loadDeadline';
 import { reportOperationalEvent } from '../operationalTelemetry';
 
@@ -81,6 +81,7 @@ export function createSupabaseForecastLoader(userId: string, horizonCount: 1 | 6
     const exact = cache.get(keyFor(query));
     if (exact) return exact;
     for (const archive of cache.values()) {
+      if (query.originPeriod && !archive.targetMonths.some(month => month.period === query.originPeriod)) continue;
       const selection = archive.loadedSelection!;
       if (selection.originPeriod === forecastQueryPeriod(archive, query.originPeriod) &&
           query.areaCode.startsWith(selection.areaCode)) return projectForecastScope(archive, query);
@@ -120,6 +121,7 @@ export function createSupabaseForecastLoader(userId: string, horizonCount: 1 | 6
         if (activeRevision && Date.parse(revision.publishedAt!) < Date.parse(activeRevision.publishedAt!)) throw new Error('Forecast revision changed');
         if (!activeRevision || revisionKey(activeRevision) !== revisionKey(revision)) cache.clear();
         activeRevision = revision;
+        if (query.originPeriod && (!/^\d{4}-(0[1-9]|1[0-2])$/.test(query.originPeriod) || query.originPeriod < revision.targetMonthStart || query.originPeriod > revision.targetMonthEnd)) throw new ArchivePeriodUnavailableError();
         const cached = getCached(query);
         if (cached) return cached;
         const { data, error } = await client.rpc('ktp_load_forecast_slice', {

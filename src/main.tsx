@@ -6,6 +6,7 @@ import { startOperationalTelemetry } from "./operationalTelemetry";
 import "./styles.css";
 import "./drought-workspace.css";
 import "./home-overview.css";
+import "./operational-workspace.css";
 
 const stopTelemetry = startOperationalTelemetry();
 if (import.meta.hot) import.meta.hot.dispose(stopTelemetry);

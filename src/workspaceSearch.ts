@@ -1,5 +1,6 @@
 import hierarchy from './data/canonical/nakhon_ratchasima/admin_hierarchy.json';
 import { readIrrigationSelection } from './irrigation';
+import { operationalPath, readOperationalLocation } from './operationalLocation';
 
 export const searchKinds = { province: 'จังหวัด', district: 'อำเภอ', subdistrict: 'ตำบล', tool: 'หน้าและเครื่องมือ' } as const;
 export type SearchKind = keyof typeof searchKinds;
@@ -53,8 +54,8 @@ export function buildWorkspaceSearchIndex(includeExport: boolean): SearchEntry[]
         tags: areaTags, contextKeywords: [...provinceKeywords, district.nameTh, district.name, district.districtCode] });
     }
   }
-  entries.push({ id: 'page:drought', kind: 'tool', name: 'พยากรณ์ภัยแล้ง', title: 'พยากรณ์ภัยแล้ง',
-    context: 'จังหวัดนครราชสีมา · หน้าพยากรณ์ล่วงหน้า 1–6 เดือน', path: '/drought',
+  entries.push({ id: 'page:drought', kind: 'tool', name: 'พยากรณ์ภัยแล้ง', title: 'คลังพยากรณ์ภัยแล้ง',
+    context: 'จังหวัดนครราชสีมา · คลังคำพยากรณ์ย้อนหลัง ไม่ใช่สถานการณ์จริง', path: '/drought?mapLayer=forecast-archive',
     aliases: ['ภัยแล้ง', 'forecast', 'drought', 'T+'], tags: ['พยากรณ์ภัยแล้ง', 'การวิเคราะห์', 'แผนที่'], contextKeywords: provinceKeywords });
   if (includeExport) entries.push({ id: 'tool:export', kind: 'tool', name: 'ส่งออก Excel', title: 'ส่งออก Excel',
     context: 'เครื่องมือรายงาน · เลือกพื้นที่และรอบข้อมูลก่อนดาวน์โหลด', action: 'export',
@@ -85,18 +86,24 @@ export function searchWorkspace(entries: SearchEntry[], query: string, mode: Sea
   return hits.sort((a, b) => a.score - b.score || a.entry.title.localeCompare(b.entry.title, 'th') || a.entry.id.localeCompare(b.entry.id));
 }
 
-/** Copy only forecast context, never the old geographic scope or arbitrary query parameters. */
+/** Preserve the selected data family; only explicit archive entries change intent. */
 export function searchDestination(path: string, search: string, historyState?: unknown) {
+  const destination = new URL(path, 'https://local.invalid');
+  const intent = readOperationalLocation(search);
+  if (intent.intent !== 'archive') {
+    if (destination.searchParams.get('mapLayer') === 'forecast-archive') return path;
+    return operationalPath(destination.pathname, intent.intent === 'operational' ? intent.period : undefined);
+  }
   const current = new URLSearchParams(search);
   const next = new URLSearchParams();
   const period = current.get('target') ?? '';
   if (/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) next.set('target', period);
   const horizon = current.get('horizon') ?? '1';
-  next.set('horizon', path === '/' ? '1' : /^[1-6]$/.test(horizon) ? horizon : '1');
-  next.set('mapLayer', current.get('mapLayer') === 'irrigation' ? 'irrigation' : 'forecast-archive');
+  next.set('horizon', destination.pathname === '/' ? '1' : /^[1-6]$/.test(horizon) ? horizon : '1');
+  next.set('mapLayer', 'forecast-archive');
   const irrigation = readIrrigationSelection(search, historyState);
   if (irrigation !== 'all') next.set('irrigation', irrigation);
-  return `${path}?${next.toString()}`;
+  return `${destination.pathname}?${next.toString()}`;
 }
 
 export function searchHistoryKey(userId: string) { return `korat-tan-phai-search-history-v1:${encodeURIComponent(userId)}`; }

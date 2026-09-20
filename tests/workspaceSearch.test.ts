@@ -10,7 +10,7 @@ describe('workspace search identities and matching', () => {
     expect(index.filter(item => item.kind === 'subdistrict')).toHaveLength(289);
     expect(new Set(index.map(item => item.id)).size).toBe(index.length);
     for (const item of index.filter(item => item.path)) {
-      const route = resolveAppRoute(item.path!);
+      const route = resolveAppRoute(new URL(item.path!, 'https://local.invalid').pathname);
       expect(route.kind).toBe('nakhon-ratchasima');
       if (route.kind === 'nakhon-ratchasima') expect(route.target.valid).toBe(true);
     }
@@ -39,11 +39,14 @@ describe('workspace search identities and matching', () => {
     expect(searchWorkspace(index, 'ปาก', 'exact')).toEqual([]);
   });
   it('preserves source month and lead time while replacing geographic scope', () => {
-    const destination = new URL(searchDestination('/pak-chong/t-302101', '?target=2025-12&horizon=4&district=3001&mapRisk=high&unrelated=secret', { ktpIrrigation: 'rainfed' }), 'https://example.test');
+    const destination = new URL(searchDestination('/pak-chong/t-302101', '?mapLayer=forecast-archive&target=2025-12&horizon=4&district=3001&mapRisk=high&unrelated=secret', { ktpIrrigation: 'rainfed' }), 'https://example.test');
     expect(destination.pathname).toBe('/pak-chong/t-302101');
     expect(Object.fromEntries(destination.searchParams)).toEqual({ target: '2025-12', horizon: '4', mapLayer: 'forecast-archive', irrigation: 'rainfed' });
-    expect(searchDestination('/', '?target=2025-12&horizon=6')).toContain('horizon=1');
-    expect(searchDestination('/drought', '?target=2025-99&horizon=99')).toBe('/drought?horizon=1&mapLayer=forecast-archive');
+    expect(searchDestination('/', '?mapLayer=forecast-archive&target=2025-12&horizon=6')).toContain('horizon=1');
+    expect(searchDestination('/drought', '?mapLayer=forecast-archive&target=2025-99&horizon=99')).toBe('/drought?horizon=1&mapLayer=forecast-archive');
+    expect(searchDestination('/phimai', '?period=2026-08')).toBe('/phimai?period=2026-08');
+    expect(searchDestination('/phimai', '?target=2025-12&horizon=6')).toBe('/phimai?period=2026-06');
+    expect(searchDestination('/drought?mapLayer=forecast-archive', '?period=2026-08')).toBe('/drought?mapLayer=forecast-archive');
   });
 });
 

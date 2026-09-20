@@ -12,7 +12,7 @@ export function savedAreaInfo(code: string): { label: string; path: string } | n
   return subdistrict ? { label: `ตำบล${subdistrict.nameTh} · อำเภอ${district.nameTh}`, path: getNakhonRatchasimaPath(district, subdistrict) } : null;
 }
 
-export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'search'>, historyState?: unknown): SavedForecastSelection | null {
+export function readWorkspaceAreaCode(location: Pick<Location, 'pathname' | 'search'>): string | null {
   const route = resolveAppRoute(location.pathname);
   if (route.kind !== 'nakhon-ratchasima' || !route.target.valid) return null;
   const target = route.target;
@@ -20,14 +20,25 @@ export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'se
   const overview = target.level === 'province' && target.tab === 'overview';
   const code = target.level === 'subdistrict' ? target.subdistrict.subdistrictCode
     : target.level === 'district' ? target.district.districtCode : overview ? params.get('district') || '30' : '30';
-  if (!savedAreaInfo(code)) return null;
+  return savedAreaInfo(code) ? code : null;
+}
+
+export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'search'>, historyState?: unknown): SavedForecastSelection | null {
+  const params = new URLSearchParams(location.search);
+  if (params.get('mapLayer') !== 'forecast-archive' || params.getAll('target').length !== 1 || params.getAll('horizon').length > 1) return null;
+  const code = readWorkspaceAreaCode(location);
+  if (!code) return null;
+  const horizon = Number(params.get('horizon') ?? '1');
+  // The persisted overview contract supports T+1 only. Other explicit vintages
+  // use the existing drought view without changing their target or horizon.
+  const overview = location.pathname === '/' && horizon === 1;
   const risk = params.get('mapRisk') ?? 'all';
   const irrigation = readIrrigationSelection(location.search, historyState);
   const displayedDataset = historyState && typeof historyState === 'object' && 'ktpForecastDatasetId' in historyState
     && typeof historyState.ktpForecastDatasetId === 'string' ? historyState.ktpForecastDatasetId : FORECAST_DATASET_ID;
   const selection: SavedForecastSelection = {
     view_name: overview ? 'overview' : 'drought', area_code: code, dataset_id: displayedDataset,
-    target_period: `${params.get('target') ?? ''}-01`, horizon: overview ? 1 : Number(params.get('horizon') ?? '1'),
+    target_period: `${params.get('target') ?? ''}-01`, horizon,
     risk_criterion: savedRiskCriteria.includes(risk as SavedRiskCriterion) ? risk as SavedRiskCriterion : 'all',
     ...(irrigation === 'all' ? {} : { irrigation_criterion: irrigation }),
   };

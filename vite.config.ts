@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { readAuthConfiguration } from "./src/authConfig.ts";
 import { fileURLToPath } from "node:url";
+import { createOperationalContextHandler } from "./server/operations/operational-context.mjs";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_SUPABASE_");
@@ -15,7 +16,16 @@ export default defineConfig(({ mode }) => {
     throw new Error("Invalid Supabase browser configuration. Use the project HTTPS URL and a publishable key only.");
   }
   return {
-    plugins: [react(), ...(backend === "supabase" ? [{
+    plugins: [react(), {
+      name: "operational-context-local",
+      configureServer(server) {
+        const handler = createOperationalContextHandler();
+        server.middlewares.use((request, response, next) => {
+          if (request.url?.split('?')[0] === '/api/operational-context') handler(request, response);
+          else next();
+        });
+      },
+    }, ...(backend === "supabase" ? [{
       name: "forecast-database-build",
       generateBundle(this: { emitFile: (asset: { type: "asset"; fileName: string; source: string }) => void }) {
         this.emitFile({ type: "asset", fileName: "data-backend.json", source: '{"backend":"supabase"}' });

@@ -7,6 +7,12 @@ and personal saved workspaces. Vercel also hosts risk-fusion, model-input,
 health and telemetry handlers. Implemented handlers do not imply configured
 live ingestion; see `API.md` and `NFR_OPERATIONS_RUNBOOK.md`.
 
+Local-only addition (2026-09-20): operational valid-month and explicit archive
+intents now branch before mounting an archive loader. This split is not deployed;
+actual feed/rendering and operational forecast publication remain unconfigured.
+[ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) records source evidence,
+ownership, tests and the outstanding protected-build budget gate.
+
 - Framework: Vite + React + TypeScript.
 - Rendering: client-side React mounted from `src/main.tsx`.
 - State: reducer/context in `src/store.tsx`.
@@ -58,7 +64,10 @@ flowchart TD
   NR --> NRGeo["/geodata/nakhon-ratchasima-subdistricts.geojson"]
   NR --> NRBoundary["/geodata/nakhon-ratchasima-boundary.geojson"]
   NR --> NRData["src/data/canonical/nakhon_ratchasima/*"]
-  NR --> Loader["useForecastArchive + DatabaseWorkspaceProvider"]
+  NR --> Intent["operationalLocation: valid month or explicit archive"]
+  Intent -->|"operational: local only"| Operational["OperationalDroughtWorkspace + useOperationalContext"]
+  Operational --> Clock["/api/operational-context: clock + source-gap metadata"]
+  Intent -->|"explicit archive"| Loader["useForecastArchive + DatabaseWorkspaceProvider"]
   Loader --> Revision["Latest publication revision"]
   Loader --> Archive["Scoped Supabase rev03 archive RPC"]
   App --> Saved["Owner-only areas and filters"]
@@ -71,6 +80,16 @@ primary product navigation. See `APP_MAP.md` for the active surfaces.
 
 Boundary rules:
 
+- `operationalPolicy.mjs` owns Bangkok calendar/family resolution;
+  `useOperationalContext.ts` aborts departed requests, ignores late results and
+  revalidates server time without a persistent operational cache. Unknown feed
+  contracts fail closed; metadata is never promoted into observations.
+- `operationalData.ts` defines/test-drives actual and eligible forecast resolution
+  for future adapters. These integration contracts are not a connected data service.
+  Actual-source absence does not mount `useForecastArchive` as a fallback.
+- The same local-map renderer, shared selects, metrics, disclosure and bookmarks
+  serve both intents. `operationalUnavailable` suppresses forecast/research fallback
+  and reuses camera interactions; it does not classify actual values.
 - `src/data/canonical/*.json` is read-only source fixture data.
 - `src/data/catalog.ts` casts JSON into typed application records and derives
   catalog lists.
@@ -90,8 +109,9 @@ Boundary rules:
   clients in database mode. Its security-invoker RPC reconstructs the canonical
   full/T+1 projections. Static archive loaders/assets are replaced at build time;
   network errors do not fall back to JSON. Logout/account changes clear caches.
-- `WorkspaceBookmarks` is shared by desktop/mobile account toolbars. Structured
-  selections preserve area, source month T, T+, dataset and map risk. Legacy
+- `WorkspaceBookmarks` is shared by desktop/mobile account toolbars. Geographic
+  following does not depend on a forecast selection. Structured archive selections
+  preserve area, source month T, T+, dataset and map risk. Legacy
   `target`/`target_period` fields continue to key that source month. Only restoring a
   saved item remounts the route workspace; normal filter dialogs remain open.
 - `src/domain.ts` owns deterministic joins and derived summaries.

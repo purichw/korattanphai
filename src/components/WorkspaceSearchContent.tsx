@@ -91,7 +91,7 @@ export function WorkspaceSearchContent({ userId, includeExport, onNavigate, onEx
         {filtersOpen && <section id={filtersId} className="workspace-search-filters" aria-label="ตัวกรองผลการค้นหา">
           <AppSelect label="ประเภทข้อมูล" value={kind} options={[{ value: 'all', label: 'ทุกประเภท' },
             ...Object.entries(searchKinds).map(([value, label]) => ({ value, label }))]} onChange={value => { setKind(value); setVisibleCount(pageSize); }} />
-          <AppSelect label="อำเภอ" value={district} options={[{ value: 'all', label: 'ทุกอำเภอ' },
+          <AppSelect searchable label="อำเภอ" value={district} options={[{ value: 'all', label: 'ทุกอำเภอ' },
             ...searchDistrictOptions.filter(option => districts.has(option.value) || option.value === district)]} onChange={value => { setDistrict(value); setVisibleCount(pageSize); }} />
           <AppSelect label="หัวข้อ" value={tag} options={[{ value: 'all', label: 'ทุกหัวข้อ' }, ...[...new Set([...tags, ...(tag === 'all' ? [] : [tag])])].map(value => ({ value, label: value }))]}
             onChange={value => { setTag(value); setVisibleCount(pageSize); }} />

@@ -42,7 +42,7 @@ test("shared bar graph reference layout and details across six viewports", async
   let requests = 0;
   page.on("pageerror", error => errors.push(error.message));
   page.on("request", request => { if (request.url().includes("ktp_load_forecast_slice")) requests++; });
-  await page.goto("/soeng-sang?target=2025-12&horizon=1");
+  await page.goto("/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=1");
   const chart = page.locator(".nr-drought-workspace-chart-card");
   const codes = archive.locations.filter(location => location.districtCode === "3003").map(location => location.subdistrictCode);
   await expectSeries(chart, codes, "percent");
@@ -119,7 +119,7 @@ test("shared bar graph preserves loading and unavailable states", async ({ page 
     await route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) });
   });
   try {
-    await page.goto("/chok-chai?target=2025-12&horizon=1");
+    await page.goto("/chok-chai?mapLayer=forecast-archive&target=2025-12&horizon=1");
     mkdirSync("artifacts/bar-graph-v1", { recursive: true });
     let height: number | undefined;
     if (databaseMode) {
@@ -143,7 +143,7 @@ for (const [level, path] of [["province", "/drought"], ["district", "/dan-khun-t
     const errors: string[] = [];
     page.on("pageerror", error => errors.push(error.message));
     const locations = archive.locations.filter(location => level === "province" || location.districtCode === "3008");
-    await page.goto(`${path}?target=2025-12&horizon=1`);
+    await page.goto(`${path}?mapLayer=forecast-archive&target=2025-12&horizon=1`);
     const chart = page.locator(".nr-drought-workspace-chart-card");
     const initialUrl = page.url();
     const historyLength = await page.evaluate(() => history.length);

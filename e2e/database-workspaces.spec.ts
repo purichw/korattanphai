@@ -41,7 +41,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
     return route.abort();
   });
   await seedAuthSession(page);
-  await page.goto('/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high&irrigation=irrigated');
+  await page.goto('/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4&mapRisk=forecast-high&irrigation=irrigated');
   await expect(page.getByRole('heading', { name: /ภัยแล้ง.*บ้านเก่า/ }).first()).toBeVisible();
   const initialUrl = page.url();
   await page.locator('.nr-map-panel .nr-irrigation-filter').getByRole('combobox').click();
@@ -61,7 +61,7 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await mkdir('tmp-snapshots/database-workspaces', { recursive: true });
   await page.screenshot({ path: `tmp-snapshots/database-workspaces/${testInfo.project.name}-saved-filter.png` });
   await page.getByRole('button', { name: 'ปิดรายการที่บันทึก' }).click();
-  await page.goto('/dan-khun-thot/t-300806?target=2025-10&horizon=1');
+  await page.goto('/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-10&horizon=1');
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
   await page.getByRole('tab', { name: 'ตัวกรองที่บันทึก', exact: true }).click();
   await page.getByRole('button', { name: /^บ้านเก่า พยากรณ์ T\+4/ }).click();
@@ -77,6 +77,8 @@ test('database archive and shared bookmarks survive reload and restore the same 
   await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'จังหวัดนครราชสีมา', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'ดูคลังคำพยากรณ์ย้อนหลัง' }).click();
+  await expect(page.locator('.nr-forecast-overview-summary')).toBeVisible();
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('button', { name: /^ตำบลบ้านเก่า/ })).toBeVisible();
   await page.getByRole('button', { name: /^ลบ ตำบลบ้านเก่า/ }).click();
@@ -94,7 +96,7 @@ test('database failure shows retry without static fallback and retains the reque
   await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice', (route) => route.fulfill(failed
     ? { status: 503, json: { message: 'Test-only unavailable' } } : { json: forecastSlice(archive, route.request().postDataJSON()) }));
   await seedAuthSession(page);
-  await page.goto('/drought?target=2025-11&horizon=3');
+  await page.goto('/drought?mapLayer=forecast-archive&target=2025-11&horizon=3');
   const retry = page.getByRole('button', { name: /ลองใหม่/ });
   await expect(retry).toBeVisible(); failed = false; await retry.click();
   await expect(page.locator('.nr-forecast-archive-horizon-tabs button[aria-selected="true"]')).toContainText('3 เดือน');

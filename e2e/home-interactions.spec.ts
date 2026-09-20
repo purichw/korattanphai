@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("home information stays passive without readiness panels or map actions", async ({ page }, testInfo) => {
-  await page.goto("/?target=2015-06&horizon=1");
+  await page.goto("/?mapLayer=forecast-archive&target=2015-06&horizon=1");
   const summary = page.locator(".nr-forecast-overview-summary");
   await expect(summary).toContainText("117/289 ตำบล");
   await expect(summary.locator(".metric-card button, .metric-card a")).toHaveCount(0);
@@ -38,7 +38,7 @@ test("home information stays passive without readiness panels or map actions", a
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.screenshot({ path: testInfo.outputPath("home-without-readiness.png"), fullPage: true, scale: "css" });
-  await page.goto("/?target=2025-12&horizon=1&district=3008&irrigation=rainfed");
+  await page.goto("/?mapLayer=forecast-archive&target=2025-12&horizon=1&district=3008&irrigation=rainfed");
   await expect(summary).toContainText("อ.ด่านขุนทด");
   await expect(page.getByText(/ความพร้อมข้อมูล|ดูความพร้อมบนแผนที่/)).toHaveCount(0);
   await expect(page.locator(".nr-home-readiness, .nr-prediction-readiness")).toHaveCount(0);
@@ -50,7 +50,7 @@ test("home layout retains centered stats and usable map geometry at every breakp
     : [{ width: 390, height: 844 }];
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto("/?mapLayer=forecast-archive");
     await expect(page.locator(".nr-map-shape")).toHaveCount(289);
     await expect(page.locator(".nr-dashboard-map-header h2")).toBeVisible();
     const map = await page.locator(".nr-dashboard-map-card").boundingBox();
@@ -72,7 +72,7 @@ test("home layout retains centered stats and usable map geometry at every breakp
 
 test("home mobile filter sheet restores focus and keeps fixed context passive", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "Mobile filter-sheet contract");
-  await page.goto("/");
+  await page.goto("/?mapLayer=forecast-archive");
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล", exact: true });
   await edit.click();
   const sheet = page.getByRole("dialog", { name: "ตัวกรองข้อมูล", exact: true });
@@ -92,7 +92,7 @@ test("home map failure retains summary and offers reload without losing the targ
     if (++attempts === 1) await route.fulfill({ status: 503, body: "Unavailable" });
     else await route.continue();
   });
-  await page.goto("/?target=2025-11&district=3008");
+  await page.goto("/?mapLayer=forecast-archive&target=2025-11&district=3008");
   await expect(page.locator(".nr-map-loading[role=alert]")).toContainText("ไม่สามารถโหลดขอบเขตตำบล");
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("อ.ด่านขุนทด");
   await page.getByRole("button", { name: "ลองโหลดแผนที่ใหม่" }).click();

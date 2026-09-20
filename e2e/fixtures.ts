@@ -2,6 +2,7 @@ import { test as base, expect } from "@playwright/test";
 import { mockSupabase } from "../tests/fixtures/supabase.mjs";
 import { readFileSync } from 'node:fs';
 import { forecastRevision } from '../tests/fixtures/forecast-slice.mjs';
+import { BUSINESS_TIMEZONE, OPERATIONAL_POLICY_VERSION, businessMonth, nextBusinessMonth, operationalFamily, sourceAvailability } from '../src/data/operationalPolicy.mjs';
 
 export const test = base.extend<{ authMock: Awaited<ReturnType<typeof mockSupabase>> }>({
   authMock: [async ({ context, baseURL }, use) => {
@@ -9,6 +10,16 @@ export const test = base.extend<{ authMock: Awaited<ReturnType<typeof mockSupaba
       throw new Error("Mock auth tests only run against localhost; use the separate real-account smoke harness for Preview.");
     }
     const auth = await mockSupabase(context);
+    // Built previews have no serverless runtime; keep primary navigation explicit
+    // while providing the same read-only clock/catalog contract as the API.
+    await context.route('**/api/operational-context**', route => {
+      const now = '2026-09-20T05:00:00Z';
+      const validPeriod = new URL(route.request().url()).searchParams.get('period') ?? businessMonth(now);
+      return route.fulfill({ json: { policyVersion: OPERATIONAL_POLICY_VERSION, timezone: BUSINESS_TIMEZONE,
+        serverNow: now, currentPeriod: businessMonth(now), validPeriod, nextBoundary: nextBusinessMonth(now),
+        family: operationalFamily(validPeriod, now), sourceAvailability,
+        actualPeriods: [], forecastPeriods: [], latestActualPeriod: null } });
+    });
     const source = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
     await context.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_latest_forecast_revision', route => route.fulfill({ json: forecastRevision(source) }));
     await use(auth);

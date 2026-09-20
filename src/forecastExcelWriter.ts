@@ -8,6 +8,8 @@ import { irrigationLabels, irrigationStatusFromSource } from './irrigation';
 import { withLoadDeadline } from './data/loadDeadline';
 
 const color = { ink: '20342C', green: '58AD7C', amber: 'F3BC4C', red: 'DC5858', pale: 'EEF5F2' };
+const typography = { family: 'Cordia New', body: 11, title: 18, chart: 10 };
+const centered: Partial<ExcelJS.Alignment> = { horizontal: 'center', vertical: 'middle', wrapText: true };
 const longHeaders = ['Source ID', 'รหัสอำเภอ', 'อำเภอ', 'รหัสตำบล', 'ตำบล', 'ชลประทาน', 'เดือนตั้งต้น', 'ระยะ', 'เดือนพยากรณ์', 'ค่าพยากรณ์', 'ระดับความเสี่ยง', 'จำนวนตำบล', 'กุญแจตรวจย้อนกลับ'];
 type CellValue = string | number | boolean | null | ExcelJS.CellFormulaValue;
 export type ForecastWorkbookStage = 'template' | 'workbook' | 'packaging';
@@ -17,7 +19,7 @@ export const forecastExportSheetNames = { machine: 'ข้อมูลสำห�
 function setup(sheet: ExcelJS.Worksheet, widths: number[]) {
   sheet.views = [{ state: 'normal', showGridLines: false }];
   sheet.columns = widths.map(width => ({ width }));
-  sheet.properties.defaultRowHeight = 25;
+  sheet.properties.defaultRowHeight = 30;
   sheet.pageSetup = { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
   sheet.headerFooter = { ...sheet.headerFooter, oddFooter: '&Lโคราชทันภัย&R&P / &N' };
 }
@@ -28,12 +30,13 @@ function table(sheet: ExcelJS.Worksheet, name: string, headers: string[], rows: 
     style: { theme: 'TableStyleMedium4', showRowStripes: true } });
   sheet.views = [{ state: 'frozen', ySplit: start, xSplit: frozenColumns, showGridLines: false }];
   sheet.pageSetup.printTitlesRow = `${start}:${start}`;
-  sheet.getRow(start).height = 42;
+  sheet.getRow(start).height = 48;
   sheet.getRow(start).eachCell(cell => {
-    cell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } };
+    cell.font = { name: typography.family, size: typography.body, bold: true, color: { argb: 'FFFFFF' } };
     cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color.ink } };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
   });
+  rows.forEach((_, index) => sheet.getRow(start + index + 1).eachCell(cell => { cell.alignment = { ...centered }; }));
 }
 
 function riskFormatting(sheet: ExcelJS.Worksheet, ref: string) {
@@ -45,10 +48,28 @@ function riskFormatting(sheet: ExcelJS.Worksheet, ref: string) {
 
 function heading(sheet: ExcelJS.Worksheet, title: string, context: string) {
   sheet.getCell('A1').value = title;
-  sheet.getCell('A1').font = { name: 'Arial', size: 17, bold: true, color: { argb: color.ink } };
-  sheet.getRow(1).height = 30;
+  sheet.getCell('A1').font = { name: typography.family, size: typography.title, bold: true, color: { argb: color.ink } };
+  sheet.getRow(1).height = 38;
   sheet.getCell('A2').value = context;
-  sheet.getCell('A2').font = { name: 'Arial', size: 11, italic: true, color: { argb: '52645E' } };
+  sheet.getCell('A2').font = { name: typography.family, size: typography.body, color: { argb: '52645E' } };
+  for (const address of ['A1', 'A2']) sheet.getCell(address).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+}
+
+function textBand(sheet: ExcelJS.Worksheet, row: number, lastColumn: string, height = 36) {
+  sheet.mergeCells(`A${row}:${lastColumn}${row}`);
+  sheet.getRow(row).height = height;
+  sheet.getCell(row, 1).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
+}
+
+// Reserve conservative line space for bilingual definitions without shrinking text.
+function fitWrappedRow(sheet: ExcelJS.Worksheet, rowNumber: number, minimum: number) {
+  let height = minimum;
+  sheet.getRow(rowNumber).eachCell(cell => {
+    const charactersPerLine = Math.max(8, (sheet.getColumn(cell.col).width ?? 18) * 0.85);
+    const lines = cell.text.split('\n').reduce((sum, line) => sum + Math.max(1, Math.ceil(line.length / charactersPerLine)), 0);
+    height = Math.max(height, lines * 16 + 14);
+  });
+  sheet.getRow(rowNumber).height = Math.min(409, height);
 }
 
 function formula(formula: string, result: number | string): ExcelJS.CellFormulaValue { return { formula, result }; }
@@ -134,11 +155,12 @@ function addDataAndDictionarySheets(book: ExcelJS.Workbook, report: ForecastExpo
     for (const index of [2, 3]) { sheet.getRow(index).height = 42; sheet.getCell(index, 1).alignment = { wrapText: true, vertical: 'middle' }; }
     table(sheet, tableName, dictionary.map(item => businessHeaders ? `${item.labelTh}\n${item.field}` : item.field), rows.map(row => fields.map(field => row[field] ?? null)), 4, businessHeaders ? 3 : Math.min(5, fields.length));
     sheet.pageSetup.fitToPage = false;
-    sheet.getRow(4).height = businessHeaders ? 72 : 48;
+    sheet.getRow(4).height = businessHeaders ? 80 : 64;
     dictionary.forEach((definition, index) => {
       if (definition.type === 'string') sheet.getColumn(index + 1).numFmt = '@';
       if (definition.type === 'integer') sheet.getColumn(index + 1).numFmt = '0';
-      sheet.getColumn(index + 1).alignment = { vertical: 'middle', wrapText: true };
+      const horizontal = /Sha256|Workbook|Sheet|Version|VintageKey|provenance|datasetId/i.test(definition.field) ? 'left' : 'center';
+      rows.forEach((_, row) => { sheet.getCell(row + 5, index + 1).alignment = { ...centered, horizontal }; });
       definitions.push({ ...definition, usedIn: `${name}!${sheet.getColumn(index + 1).letter} (${definition.field})${definition.table === 'machineRows' && legacyFieldUses[definition.field] ? `; ${legacyFieldUses[definition.field]}` : ''}` });
     });
     rows.forEach((_, index) => { sheet.getRow(index + 5).height = 48; });
@@ -196,8 +218,10 @@ function addDataAndDictionarySheets(book: ExcelJS.Workbook, report: ForecastExpo
       item.nullable ? 'Yes / ได้' : 'No / ไม่ได้', item.unit, JSON.stringify(item.sampleValue), item.blankMeaningTh, item.blankMeaningEn, item.usedIn]), 4, 1);
   dictionary.pageSetup.fitToPage = false;
   definitions.forEach((_, index) => {
-    dictionary.getRow(index + 5).height = 100;
-    dictionary.getRow(index + 5).eachCell(cell => { cell.alignment = { vertical: 'top', wrapText: true }; });
+    dictionary.getRow(index + 5).eachCell(cell => {
+      cell.alignment = [4, 5, 6, 7].includes(Number(cell.col)) ? { ...centered } : { horizontal: 'left', vertical: 'top', wrapText: true };
+    });
+    fitWrappedRow(dictionary, index + 5, 100);
   });
 }
 
@@ -276,19 +300,21 @@ export async function createForecastWorkbook(report: ForecastExport, templateByt
   heading(dashboard, 'พยากรณ์ภัยแล้ง 6 เดือน', context);
   dashboard.getCell('A4').value = 'อำเภอ';
   dashboard.getCell('B4').value = 'ทั้งหมด';
+  dashboard.mergeCells('B4:C4');
   dashboard.getCell('D4').value = 'ชลประทาน';
   dashboard.mergeCells('E4:F4');
   dashboard.getCell('E4').value = 'ทั้งหมด';
-  dashboard.getRow(4).height = 30;
+  dashboard.getRow(4).height = 42;
   for (const cell of ['B4', 'E4']) {
     dashboard.getCell(cell).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2CC' } };
-    dashboard.getCell(cell).font = { name: 'Arial', size: 11, color: { argb: '006DA4' }, bold: true };
+    dashboard.getCell(cell).font = { name: typography.family, size: typography.body, color: { argb: '006DA4' }, bold: true };
   }
+  for (const cell of ['A4', 'B4', 'D4', 'E4']) dashboard.getCell(cell).alignment = { ...centered };
   dashboard.getCell('A6').value = 'เลือกอำเภอ/ชลประทานในช่องสีเหลือง กราฟและตารางนี้คำนวณจากฐาน Pivot ภายในไฟล์';
   dashboard.getCell('A7').value = 'เปอร์เซ็นต์เสี่ยง = (ปานกลาง + สูง) / ตำบลที่มีค่า 0/1/2; นอกขอบเขตและไม่มีข้อมูลไม่อยู่ในตัวหาร';
   dashboard.getRow(8).values = ['เดือนพยากรณ์', 'ไม่พบ\nสัญญาณเสี่ยง', 'เสี่ยง\nปานกลาง', 'เสี่ยงสูง', 'นอกขอบเขต\nการศึกษา', 'ไม่มีข้อมูล', 'มีค่า\nพยากรณ์', 'สัดส่วน\nตำบลเสี่ยง', 'ตำบลตาม\nตัวกรอง'];
-  dashboard.getRow(8).height = 38;
-  dashboard.getRow(8).eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color.ink } }; cell.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } }; cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }; });
+  dashboard.getRow(8).height = 48;
+  dashboard.getRow(8).eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color.ink } }; cell.font = { name: typography.family, size: typography.body, bold: true, color: { argb: 'FFFFFF' } }; cell.alignment = { ...centered }; });
   const end = longRows.length + 1;
   const range = (column: string) => `'ฐาน Pivot'!$${column}$2:$${column}$${end}`;
   report.totals.forEach((item, index) => {
@@ -301,6 +327,7 @@ export async function createForecastWorkbook(report: ForecastExport, templateByt
     dashboard.getCell(`H${row}`).value = formula(`IF(G${row}=0,"",(C${row}+D${row})/G${row})`, item.riskShare ?? '');
     dashboard.getCell(`I${row}`).value = formula(`SUM(B${row}:F${row})`, item.total);
     dashboard.getCell(`H${row}`).numFmt = '0.0%';
+    dashboard.getRow(row).eachCell(cell => { cell.alignment = { ...centered }; });
   });
   dashboard.getCell('A33').value = 'กราฟแสดงเฉพาะตำบลที่มีค่าพยากรณ์; จำนวนตำบลนอกขอบเขตและไม่มีข้อมูลแสดงในตารางด้านบน';
 
@@ -349,7 +376,10 @@ export async function createForecastWorkbook(report: ForecastExport, templateByt
     ...report.rows.filter(row => row.sourceAdminCorrectionApplied).map(row => [`แก้ไข Source ID ${row.sourceId}`, `${row.sourceTambonEn}: อำเภอในต้นฉบับ ${row.sourceAmphoeEn}; ยืนยันเป็น ${row.sourceAmphoeEnCorrected} (${row.districtNameTh})`]),
   ];
   table(notes, 'ReportDefinitions', ['หัวข้อ', 'รายละเอียด'], metadata);
-  metadata.forEach((_, index) => { notes.getRow(index + 5).height = 44; notes.getCell(index + 5, 2).alignment = { wrapText: true, vertical: 'middle' }; });
+  metadata.forEach((_, index) => {
+    notes.getRow(index + 5).eachCell(cell => { cell.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true }; });
+    fitWrappedRow(notes, index + 5, 44);
+  });
   notes.getColumn(4).width = 30;
   notes.getColumn(5).width = 35;
   notes.getCell('D1').value = 'ตัวเลือกอำเภอ';
@@ -363,11 +393,18 @@ export async function createForecastWorkbook(report: ForecastExport, templateByt
   dashboard.getCell('B4').dataValidation = { type: 'list', allowBlank: false, formulae: ['ExportDistricts'], showErrorMessage: true, errorTitle: 'เลือกอำเภอ', error: 'เลือกจากรายการอำเภอในไฟล์' };
   dashboard.getCell('E4').dataValidation = { type: 'list', allowBlank: false, formulae: ['ExportIrrigation'], showErrorMessage: true, errorTitle: 'เลือกชลประทาน', error: 'เลือกจากรายการชลประทานในไฟล์' };
   addDataAndDictionarySheets(book, report);
+  for (const [sheet, lastColumn] of [[dashboard, 'I'], [districts, 'J'], [tambons, 'P'], [statistics, 'L'], [notes, 'B']] as const) {
+    textBand(sheet, 1, lastColumn, 38);
+    textBand(sheet, 2, lastColumn);
+  }
+  textBand(districts, 3, 'J'); textBand(tambons, 3, 'P');
+  for (const row of [6, 7, 33]) textBand(dashboard, row, 'I');
+  for (const column of [4, 5]) notes.getColumn(column).eachCell(cell => { cell.alignment = { ...centered }; });
   districts.views = [{ state: 'frozen', ySplit: 4, xSplit: 2, showGridLines: false }];
   tambons.views = [{ state: 'frozen', ySplit: 4, xSplit: 4, showGridLines: false }];
   data.views = [{ state: 'frozen', ySplit: 1, xSplit: 4, showGridLines: false }];
   book.eachSheet(sheet => sheet.eachRow(row => row.eachCell(cell => {
-    cell.font = { name: 'Arial', size: 11, color: { argb: color.ink }, ...cell.font };
+    cell.font = { size: typography.body, color: { argb: color.ink }, ...cell.font, name: typography.family, scheme: undefined };
     cell.alignment = { vertical: 'middle', ...cell.alignment };
     if (typeof cell.value === 'number' || typeof cell.result === 'number') cell.numFmt ||= '#,##0';
   })));
@@ -406,6 +443,15 @@ async function finalizeWorkbookArchive(bytes: Uint8Array, book: ExcelJS.Workbook
   for (const [name, entry] of Object.entries(zip.files)) {
     if (!/^xl\/charts\/chart\d+\.xml$/.test(name)) continue;
     const xml = parser.parseFromString(await entry.async('string'), 'application/xml');
+    const textNamespace = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+    for (const tag of ['latin', 'ea', 'cs']) {
+      for (const font of Array.from(xml.getElementsByTagNameNS(textNamespace, tag))) font.setAttribute('typeface', typography.family);
+    }
+    for (const tag of ['defRPr', 'rPr', 'endParaRPr']) {
+      for (const run of Array.from(xml.getElementsByTagNameNS(textNamespace, tag))) {
+        if (Number(run.getAttribute('sz') ?? 0) < typography.chart * 100) run.setAttribute('sz', String(typography.chart * 100));
+      }
+    }
     const maximum = Math.max(1, ...report.totals.flatMap(item => item.counts.slice(0, 3)));
     const step = [1, 2, 5, 10, 20, 50, 100].find(value => value >= maximum / 5) ?? Math.ceil(maximum / 5);
     for (const axis of Array.from(xml.getElementsByTagNameNS(namespace, 'valAx'))) {

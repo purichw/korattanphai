@@ -5,6 +5,7 @@ import "../app-startup.css";
 /** Presentation only. Never import auth, workspace state, routes or data loaders here. */
 export function AppStartup({ path, message }: { path: string; message: string }) {
   const overview = path === "/";
+  const archiveIntent = new URLSearchParams(window.location.search).get("mapLayer") === "forecast-archive";
   return <div className={`app-shell app-startup${overview ? " is-home-overview" : ""}`} lang="th">
     <aside className="sidebar" aria-label="โคราชทันภัย">
       <SidebarBrand compactMobileLogo={overview} label="โคราชทันภัย" />
@@ -18,7 +19,7 @@ export function AppStartup({ path, message }: { path: string; message: string })
         <Skeleton className="is-icon" /><Skeleton className="is-value" />
       </div>
       <div className="content-area">
-        {overview ? <ForecastOverviewLoading failed={false} retry={() => {}} message={message} /> : <section className="app-startup-workspace">
+        {overview && archiveIntent ? <ForecastOverviewLoading failed={false} retry={() => {}} message={message} /> : <section className="app-startup-workspace">
           <header><p className="eyebrow">โคราชทันภัย</p><h1>กำลังเตรียมพื้นที่ที่เลือก</h1></header>
           <p className="nr-forecast-loading-status" role="status"><span aria-hidden="true" />{message}</p>
           <div className="app-startup-placeholder" aria-busy="true" aria-label="กำลังเตรียมหน้าเว็บ">

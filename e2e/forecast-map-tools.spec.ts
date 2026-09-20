@@ -5,7 +5,7 @@ import { forecastSlice, forecastRevision } from '../tests/fixtures/forecast-slic
 test.skip(process.env.PLAYWRIGHT_DATA_BACKEND !== 'supabase', 'Requires isolated database fixture');
 const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
 const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
-async function setup(page: Page, path = '/soeng-sang?target=2025-12&horizon=1') {
+async function setup(page: Page, path = '/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=1') {
   const requests: any[] = [];
   await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
     const query = route.request().postDataJSON(); requests.push(query);
@@ -24,7 +24,7 @@ async function choose(page: Page, name: string | RegExp, option: string) {
   await page.getByRole('option', { name: option, exact: true }).click();
 }
 async function openAnalysis(page: Page) {
-  await page.getByRole('button', { name: 'ตาราง / วิเคราะห์', exact: true }).click();
+  await page.getByRole('button', { name: 'วิเคราะห์พยากรณ์', exact: true }).click();
   await expect(page.locator('.nr-analysis-table tbody tr').first()).toBeVisible();
 }
 
@@ -45,9 +45,11 @@ async function settledCamera(page: Page) {
   return previous!;
 }
 
-for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?target=2025-12', '/phimai/t-301503?target=2025-12']) {
+for (const path of ['/?mapLayer=forecast-archive&target=2025-12', '/drought?mapLayer=forecast-archive&target=2025-12', '/soeng-sang?mapLayer=forecast-archive&target=2025-12', '/phimai/t-301503?mapLayer=forecast-archive&target=2025-12']) {
   test(`Korat shared map scroll, camera and fullscreen tools ${path}`, async ({ page }, info) => {
     test.setTimeout(90_000);
+    // Compact tambon pages can fit at 960px; keep real document scrolling available.
+    if (info.project.name === 'desktop') await page.setViewportSize({ width: 1440, height: 720 });
     await setup(page, path);
     const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     const panel = page.locator('.nr-map-panel');
@@ -102,7 +104,7 @@ for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?
     }
     await expect(layer).not.toHaveAttribute('transform', dragged);
     const panned = await settledCamera(page);
-    await panel.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true }).click();
+    await page.getByRole("combobox", { name: /^เดือนตั้งต้น / }).click();
     const options = page.locator('.app-select-options').last();
     await options.hover(); await page.mouse.wheel(0, 220);
     await expect.poll(() => options.evaluate(element => Math.max(element.scrollTop, element.closest('.app-select-menu')!.scrollTop))).toBeGreaterThan(0);
@@ -138,7 +140,7 @@ for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?
     await expect(pattern).toBeFocused();
     await page.screenshot({ path: info.outputPath('fullscreen-analysis.png') });
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('button', { name: 'ตาราง / วิเคราะห์', exact: true })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'วิเคราะห์พยากรณ์', exact: true })).toBeFocused();
     await panel.getByTitle('ออกจากเต็มจอ', { exact: true }).click();
     await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true);
     await panel.getByTitle('กลับมุมมองพื้นที่นี้', { exact: true }).click();
@@ -149,7 +151,7 @@ for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?
   });
 }
 
-for (const path of ['/?target=2025-12', '/drought?target=2025-12', '/soeng-sang?target=2025-12', '/phimai/t-301503?target=2025-12']) {
+for (const path of ['/?mapLayer=forecast-archive&target=2025-12', '/drought?mapLayer=forecast-archive&target=2025-12', '/soeng-sang?mapLayer=forecast-archive&target=2025-12', '/phimai/t-301503?mapLayer=forecast-archive&target=2025-12']) {
   test(`Korat map tools scope and on-demand table ${path}`, async ({ page }, info) => {
     const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     const lazyRequests: string[] = [];
@@ -220,9 +222,90 @@ test('Korat map tools table, pattern, district comparison and same-target map co
   await expect(page.locator('.nr-map-analysis-notice')).toHaveCount(0);
 });
 
+test('Korat empty irrigation retains compact map dimensions', async ({ page }) => {
+  await setup(page, '/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=4');
+  const map = page.locator('.nr-dashboard-map-card');
+  const initial = (await map.boundingBox())!;
+  await map.locator('.nr-irrigation-filter').getByRole('combobox').click();
+  await page.getByRole('option', { name: 'เข้าถึงชลประทาน', exact: true }).click();
+  await expect(page.locator('.nr-irrigation-empty')).toBeVisible();
+  const empty = (await map.boundingBox())!;
+  expect(empty.width).toBeCloseTo(initial.width, 0);
+  expect(empty.height).toBeCloseTo(initial.height, 0);
+  if (page.viewportSize()!.width > 900) {
+    await map.evaluate(element => { element.style.width = 'calc(100% - 16px)'; });
+    await expect.poll(async () => (await map.boundingBox())!.width).toBeLessThan(initial.width - 10);
+    await map.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await expect.poll(() => map.evaluate(element => Number.parseFloat(element.style.getPropertyValue('--nr-populated-map-height')))).toBeCloseTo(initial.height, 0);
+    await map.evaluate(element => element.style.removeProperty('width'));
+    await expect.poll(async () => (await map.boundingBox())!.height).toBeCloseTo(initial.height, 0);
+  }
+  await page.getByRole('button', { name: 'แสดงทุกสถานะชลประทาน', exact: true }).click();
+  await expect(page.locator('.nr-drought-workspace-chart-card')).toBeVisible();
+  await expect.poll(async () => (await map.boundingBox())!.height).toBeCloseTo(initial.height, 0);
+});
+
+test('Korat playback period stays grouped and keeps the map frame stable', async ({ page }, info) => {
+  await setup(page);
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const playback = page.locator('.nr-map-playback');
+  const period = playback.getByRole('status');
+  const panel = page.locator('.nr-map-panel');
+  await playback.scrollIntoViewIfNeeded();
+  await expect(period).toContainText('T+1');
+  await expect(period).toContainText('ม.ค. 2569');
+  const initial = await panel.boundingBox();
+  const initialControl = await playback.boundingBox();
+  await playback.getByRole('button', { name: 'เล่นลำดับพยากรณ์ 6 เดือน' }).click();
+  await expect(playback).toHaveClass(/is-playing/);
+  await expect(page).toHaveURL(/horizon=2/);
+  await playback.getByRole('button', { name: 'หยุดลำดับพยากรณ์' }).click();
+  await expect(period).toContainText('T+2');
+  await expect(period).toContainText('ก.พ. 2569');
+  await expect(playback).not.toHaveClass(/is-playing/);
+  expect((await panel.boundingBox())!.height).toBeCloseTo(initial!.height, 0);
+  expect((await playback.boundingBox())!.height).toBe(initialControl!.height);
+  expect((await playback.boundingBox())!.width).toBe(initialControl!.width);
+  await expect(page.locator('.nr-map-tool-status')).toHaveCount(0);
+  const layout = await playback.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    return [...element.querySelectorAll('button, .nr-map-playback-period')].every(child => {
+      const rect = child.getBoundingClientRect();
+      return rect.left >= box.left && rect.right <= box.right && rect.top >= box.top && rect.bottom <= box.bottom;
+    });
+  });
+  expect(layout).toBe(true);
+  await playback.getByRole('button', { name: 'เล่นลำดับพยากรณ์ 6 เดือน' }).click();
+  await page.mouse.move(0, 0);
+  const contrast = await playback.getByRole('button').evaluate(element => ({
+    icon: getComputedStyle(element).color,
+    expected: getComputedStyle(element.querySelector('svg')!).color,
+  }));
+  expect(contrast.icon).not.toBe('rgb(255, 255, 255)');
+  expect(contrast.expected).toBe(contrast.icon);
+  const card = (await page.locator('.nr-dashboard-map-card').boundingBox())!;
+  const control = (await playback.boundingBox())!;
+  const viewport = page.viewportSize()!;
+  const x = Math.max(0, card.x - 12), y = Math.max(0, card.y - 12);
+  await page.screenshot({ path: info.outputPath(`playback-${info.project.name}.png`), scale: 'css', clip: {
+    x, y, width: Math.min(viewport.width - x, card.width + 24),
+    height: Math.min(viewport.height - y, control.y + control.height + 100 - y),
+  } });
+  await playback.getByRole('button', { name: 'หยุดลำดับพยากรณ์' }).click();
+  if (info.project.name === 'mobile') {
+    await page.setViewportSize({ width: 320, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const narrow = await playback.boundingBox();
+    expect(narrow!.x).toBeGreaterThanOrEqual(0);
+    expect(narrow!.x + narrow!.width).toBeLessThanOrEqual(320);
+  }
+  expect(errors).toEqual([]);
+});
+
 test('Korat map tools coordinates, playback, search focus and PNG/PDF download', async ({ page }, info) => {
   test.setTimeout(90_000);
-  await setup(page, '/drought?target=2025-12&horizon=1');
+  await setup(page, '/drought?mapLayer=forecast-archive&target=2025-12&horizon=1');
   await page.getByRole('button', { name: 'ค้นหาด้วยพิกัด', exact: true }).click();
   await page.getByLabel('ละติจูด (WGS84)').fill('13.7563');
   await page.getByLabel('ลองจิจูด (WGS84)').fill('100.5018');
@@ -262,7 +345,7 @@ test('Korat map tools coordinates, playback, search focus and PNG/PDF download',
   }
 });
 
-for (const path of ['/soeng-sang?target=2025-12&horizon=1', '/phimai/t-301503?target=2025-12&horizon=1']) {
+for (const path of ['/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=1', '/phimai/t-301503?mapLayer=forecast-archive&target=2025-12&horizon=1']) {
   test(`Korat report A4 scoped export ${path}`, async ({ page }, info) => {
     await setup(page, path);
     await page.getByRole('button', { name: 'ส่งออกแผนที่', exact: true }).click();
@@ -278,25 +361,32 @@ for (const path of ['/soeng-sang?target=2025-12&horizon=1', '/phimai/t-301503?ta
   });
 }
 
-test('Korat map tools rejects stale analysis, recovers errors and revalidates new publication', async ({ page }) => {
+test('Korat map tools rejects stale analysis, recovers errors and revalidates new publication', async ({ page }, info) => {
   await setup(page);
   let failed = true, current = archive, reads = 0;
   await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => route.fulfill(failed ? { status: 503, json: { message: 'test failure' } }
     : { json: forecastSlice(current, route.request().postDataJSON()) }));
-  await page.getByRole('button', { name: 'ตาราง / วิเคราะห์' }).click();
+  await page.getByRole('button', { name: 'วิเคราะห์พยากรณ์' }).click();
   await expect(page.locator('.nr-tool-dialog [role="alert"]')).toBeVisible();
   await expect(page.locator('.nr-analysis-table')).toHaveCount(0);
   failed = false;
   await page.getByRole('button', { name: 'ลองใหม่', exact: true }).click();
   await expect(page.locator('.nr-analysis-table')).toBeVisible();
+  await expect(page.locator('.nr-analysis-table tbody tr').first().locator('td').first()).toContainText('1 · ปานกลาง');
+  await expect(page.locator('.nr-analysis-source')).toHaveCount(0);
+  await expect(page.locator('.nr-tool-dialog')).not.toContainText('Drought_T1-6_rev03.xlsx');
+  await page.screenshot({ path: info.outputPath('analysis-without-footer.png') });
   current = structuredClone(archive); current.meta.datasetId = '11111111-1111-4111-8111-111111111111';
   current.meta.datasetVersion = 'test-new-publication'; current.meta.sourceWorkbookSha256 = 'b'.repeat(64);
+  const changed = current.locations.find((location: { districtCode: string; subdistrictCode: string }) => location.districtCode === '3003'
+    && current.packedRiskByTargetMonth['2025-12'][location.subdistrictCode]?.[0] === 1);
+  current.packedRiskByTargetMonth['2025-12'][changed.subdistrictCode][0] = 2;
   await page.route('**/rest/v1/rpc/ktp_latest_forecast_revision', route => { reads++; return route.fulfill({ json: { ...forecastRevision(current), publishedAt: '2026-09-08T10:00:00Z' } }); });
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
   await expect.poll(() => reads).toBeGreaterThan(0);
   // Either the page and dialog adopt the new revision together, or old output is withheld.
-  await expect.poll(async () => (await page.locator('.nr-analysis-source').allTextContents()).join('')
-    + (await page.locator('.nr-tool-dialog [role="alert"]').allTextContents()).join('')).toMatch(/test-new-publication|มีข้อมูลรุ่นใหม่/);
+  await expect.poll(async () => (await page.locator('.nr-analysis-table tbody tr').first().locator('td').first().allTextContents()).join('')
+    + (await page.locator('.nr-tool-dialog [role="alert"]').allTextContents()).join('')).toMatch(/2 · สูง|มีข้อมูลรุ่นใหม่/);
 });
 
 test('Korat report dynamic pagination preserves Thai text and page flow', async ({ page }, info) => {

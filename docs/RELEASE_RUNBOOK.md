@@ -7,6 +7,28 @@ user task explicitly instructs it.
 
 When authorized, release from `/Users/point/korattanphai`.
 
+## Actual / Forecast Release Scope
+
+For candidates containing the local actual/archive split, read
+[ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) and the latest
+[handoff](HANDOFF.md) first. A working unavailable state is not completed actual
+ingestion. State explicitly whether a candidate exposes only separation/source-gap
+UI or a reviewed live feed; never claim the latter from fixture tests.
+
+- Require a passing protected bundle budget, not just TypeScript/Vite and exposure
+  checks. The 2026-09-20 local checkpoint failed that gate; remeasure the exact
+  candidate after fixing it. Do not silently raise limits to obtain a pass.
+- Migrate archive-focused legacy E2E URLs to explicit `mapLayer=forecast-archive`.
+  Keep separate tests proving bare T/h links resolve operational valid month T+h.
+- Verify server Bangkok time/month rollover, stale-response isolation, unavailable
+  versus error/retry, geography/period navigation and exact archive horizons.
+  Reuse `e2e/actual-forecast-separation.spec.ts` and its focused unit/API tests.
+- Live actual or operational forecast activation additionally requires approved
+  sources, metric/geography/crop definitions, review/publication/freshness policy
+  and real adapter/UAT evidence. A clock endpoint does not meet those gates.
+- Do not migrate ACLs or database data as an implicit part of a UI release.
+  Separate local evidence from authorized candidate/production smoke results.
+
 ## Local Checks
 
 Inspect scope:
@@ -66,7 +88,7 @@ Production builds:
 - Vercel uses `npm run build:protected` from `vercel.json`.
 - `build:protected` runs the normal TypeScript/Vite build, obfuscates generated
   JavaScript assets in `dist`, rewrites the final asset hash, and runs the
-  production exposure check.
+  production exposure and bundle-budget checks. A failing gate blocks release.
 
 ## Production Deploy
 
@@ -92,7 +114,8 @@ After deploy:
    `docs/AUTH_SETUP.md`. Do not use test-only fake build values for deployments.
 3. Confirm Thai-only visible UI and Korat Tan Phai / โคราชทันภัย brand title.
 4. Confirm no console errors and no failed network requests.
-5. Confirm the primary sidebar shows only `ภาพรวม`.
+5. Confirm the primary sidebar shows `ภาพรวม`, its `ภัยแล้ง` subitem and
+   database-mode `ส่งออก Excel`, with no unrelated legacy workflow navigation.
 6. Confirm `/geodata/thailand-neighbor-context.geojson` loads.
 7. Confirm `/geodata/nakhon-ratchasima-subdistricts.geojson` loads.
 8. Confirm `/geodata/nakhon-ratchasima-boundary.geojson` loads.

@@ -19,6 +19,19 @@ Routes:
 Other province placeholder routes are not part of this subset's primary
 navigation.
 
+Local-only routing change (2026-09-20), not deployed:
+
+- `NakhonRatchasimaWorkspace` resolves intent through `operationalLocation.ts`.
+  Routes above without explicit archive intent render `OperationalDroughtWorkspace`.
+- `period=YYYY-MM` means valid/data month; with no period the server supplies the
+  current Bangkok month. Bare legacy `target=T&horizon=h` becomes valid month T+h.
+- `mapLayer=forecast-archive` explicitly opens the retained source-month archive.
+  Home's compact archive is T+1 only; explicit T+2..T+6 uses the full archive view
+  without changing the requested vintage. Invalid/missing selections do not default.
+- Actual and eligible future forecast feeds remain unconfigured. Current operational
+  UI is the unavailable/error path, not a completed actual dashboard. See
+  [Actual / Forecast Separation](ACTUAL_FORECAST_SEPARATION.md) for source/release gaps.
+
 ## User-Facing Surfaces
 
 Primary user-facing surface:
@@ -31,17 +44,18 @@ Primary user-facing surface:
 
 - `NakhonRatchasimaWorkspace`: province -> district -> subdistrict operational
   drill-down for canonical province `TH-P29`, with 32 districts and 289
-  subdistricts. Active map coloring switches between archived forecast risk
+  subdistricts. Operational intent has one valid-month selector, neutral unavailable
+  map and source-state disclosure. In archive intent, map coloring switches between archived forecast risk
   and workbook irrigation status. Catalog entries for other data families are
   not evidence of active map layers.
-- Drought pages at province, district, and subdistrict level include the shared
+- Explicit archive pages at province, district, and subdistrict level include the shared
   source-backed forecast archive experience: origin/base month T selection, one T+
   horizon selector, archive summary metrics, shared map filters, the local
   Nakhon map and source/limitation wording. Province/district pages have a
   six-month percent/count bar graph; a tambon page shows its own forecast status,
   not a multi-tambon aggregate. Supabase supplies scoped rev03 data using the
   same semantics across all geography levels.
-- Home is a compact T+1 overview with district filtering, risk counts and links
+- Archive Home is a compact T+1 overview with district filtering, risk counts and links
   to high-risk tambons. Agriculture panels require real source records and are
   currently hidden; cleared research panels are not restored as placeholder data.
 - `ForecastExcelExport` opens a filtered workbook dialog. It includes all six
@@ -54,7 +68,9 @@ or reuse, but they are not exposed through the initial Korat Tan Phai sidebar.
 
 Database mode adds a shared bookmark control in the desktop/mobile account
 toolbar, not a new route. Its modal lists followed areas and saved filters for
-the authenticated user. Restoring an item preserves source month T, horizon,
+the authenticated user. Following an area is independent of actual/archive intent;
+named forecast filters require an explicit archive selection. Restoring a forecast
+filter preserves source month T, horizon,
 area, map risk and irrigation, including restoration on the same pathname. Existing and new
 links/saved filters keep the same source-row values; legacy `target` query and
 saved `target_period` keys still identify T, with forward dates derived at runtime.
@@ -105,7 +121,8 @@ needs audit:
   requested path after successful Supabase email/password authentication.
 - Opening `/` hides the inherited nationwide filter band; the local workspace
   owns its layer selector and breadcrumbs.
-- Shared local controls select origin month, area and horizon. Hazard `ภัยแล้ง`
+- Operational controls select valid month and area; actual has no T+ selector.
+  Archive controls select origin month and area, with one horizon strip. Hazard `ภัยแล้ง`
   and crop `ข้าว` are fixed context, not working multi-hazard/multi-crop selectors.
   Province chooses districts; district/tambon views choose tambons in that district.
   Map controls also filter risk and irrigation, with an independent color mode.
@@ -125,7 +142,8 @@ needs audit:
 ## Screens / Components By Surface
 
 - Login/history: `src/App.tsx`; authenticated shell: `src/AuthenticatedApp.tsx`.
-- Home: `src/components/nakhon-ratchasima/ProvinceForecastOverview.tsx`.
+- Operational routes: `src/components/nakhon-ratchasima/OperationalDroughtWorkspace.tsx`.
+- Archive Home: `src/components/nakhon-ratchasima/ProvinceForecastOverview.tsx`.
 - Shared drought layout: `src/components/nakhon-ratchasima/DroughtForecastWorkspace.tsx`.
 - Shared controls: `ForecastControls.tsx` and `DroughtOperationalWorkspace.tsx`
   in the same directory; graph: `ForecastRiskBarGraph.tsx`; map:

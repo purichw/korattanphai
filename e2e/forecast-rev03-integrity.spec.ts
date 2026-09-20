@@ -26,7 +26,7 @@ for (const scope of [
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     for (const period of ['2015-06', '2025-12']) {
-      await page.goto(`${scope.path}?target=${period}&horizon=1`);
+      await page.goto(`${scope.path}?mapLayer=forecast-archive&target=${period}&horizon=1`);
       const codes = runtime.locations.filter((l: any) => l.subdistrictCode.startsWith(scope.code));
       for (const horizon of [1, 2, 3, 4, 5, 6]) {
         await page.locator('.nr-forecast-archive-horizon-tabs').getByRole('tab', { name: new RegExp(`^ล่วงหน้า ${horizon} เดือน`) }).click();
@@ -55,7 +55,7 @@ for (const scope of [
 test('rev03 Home T+1 counts and changed month are source-backed, not an old cache', async ({ page }, testInfo) => {
   for (const [period, expected] of [['2025-12', ['0 ตำบล', '117 ตำบล', '0 ตำบล', '172 ตำบล']],
     ['2025-11', ['0 ตำบล', '48 ตำบล', '69 ตำบล', '172 ตำบล']]] as const) {
-    await page.goto(`/?target=${period}&horizon=1`);
+    await page.goto(`/?mapLayer=forecast-archive&target=${period}&horizon=1`);
     await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText([...expected]);
     await expect(page.locator('.nr-map-shape.is-forecast-high')).toHaveCount(0);
     await expect(page.locator('.nr-map-shape.is-forecast-out-of-scope')).toHaveCount(172);

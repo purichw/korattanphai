@@ -25,6 +25,49 @@ describe('shared analysis preserves source risk and scope', () => {
     expect(filterAnalysisRows(report.rows, 'เชียงใหม่', '', 'all')).toHaveLength(0);
     expect(report.rows.every(row => row.provinceCode === '30')).toBe(true);
   });
+  it('distinguishes risk in a month from the first risky month in Wang Nam Khiao', () => {
+    const rows = report.rows.filter(row => row.districtCode === '3025');
+    expect([1, 2, 3, 4, 5, 6].map(h => filterAnalysisRows(rows, '', '', `risk-${h}`).length))
+      .toEqual([4, 4, 4, 3, 0, 0]);
+    expect(filterAnalysisRows(rows, '', '', 'first-1')).toHaveLength(4);
+    expect(filterAnalysisRows(rows, '', '', 'first-3')).toHaveLength(0);
+    expect(matchesRiskPattern([null, undefined, 0, 1, 2, 0], 'risk-1')).toBe(false);
+    expect(matchesRiskPattern([null, undefined, 0, 1, 2, 0], 'risk-2')).toBe(false);
+    expect(matchesRiskPattern([null, undefined, 0, 1, 2, 0], 'risk-3')).toBe(false);
+    expect(matchesRiskPattern([null, undefined, 0, 1, 2, 0], 'risk-5')).toBe(true);
+  });
+  it('samples province, eight districts and twelve tambons across four origins against source slots', () => {
+    let seed = 20260914;
+    function sample<T>(values: T[], count: number) {
+      const pool = [...values];
+      for (let i = pool.length - 1; i > 0; i--) {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        const j = seed % (i + 1);
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, count);
+    }
+    const scopes = ['30', ...sample([...new Set(archive.locations.map(l => l.districtCode))], 8),
+      ...sample(archive.locations.map(l => l.subdistrictCode), 12)];
+    const origins = ['2025-12', ...sample(archive.targetMonths.filter(m => m.period !== '2025-12').map(m => m.period), 3)];
+    for (const originPeriod of origins) for (const areaCode of scopes) {
+      const selected = buildForecastExport(archive, { areaCode, originPeriod, irrigation: 'all' });
+      const members = archive.locations.filter(l => l.subdistrictCode.startsWith(areaCode));
+      expect(selected.rows.map(row => row.subdistrictCode).sort()).toEqual(members.map(l => l.subdistrictCode).sort());
+      for (let h = 1; h <= 6; h++) {
+        const expected = members.filter(l => [1, 2].includes(archive.packedRiskByTargetMonth[originPeriod][l.subdistrictCode][h - 1] as number));
+        const filtered = filterAnalysisRows(selected.rows, '', '', `risk-${h}`);
+        expect(filtered.map(row => row.subdistrictCode).sort()).toEqual(expected.map(l => l.subdistrictCode).sort());
+        for (const row of selected.rows) expect(row.risks[h - 1]).toBe(archive.packedRiskByTargetMonth[originPeriod][row.subdistrictCode][h - 1]);
+        for (const group of analysisDistricts(filtered)) {
+          const source = expected.filter(l => l.districtCode === group.code)
+            .map(l => archive.packedRiskByTargetMonth[originPeriod][l.subdistrictCode][h - 1] as number);
+          expect(group.horizons[h - 1].highest).toBe(Math.max(...source));
+          expect(group.horizons[h - 1].valid).toBe(source.length);
+        }
+      }
+    }
+  });
   it('matches every district / horizon directly against the original normalized slots', () => {
     const groups = analysisDistricts(report.rows);
     expect(groups).toHaveLength(32);

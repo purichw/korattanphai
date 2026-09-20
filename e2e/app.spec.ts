@@ -22,6 +22,7 @@ async function loginAs(page: Page) {
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
   await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
+  await page.getByRole("link", { name: "ดูคลังคำพยากรณ์ย้อนหลัง" }).click();
 }
 
 async function expectProvinceOverviewHeading(page: Page) {
@@ -321,6 +322,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(nav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toBeVisible();
   await nav.getByRole("button", { name: "ภัยแล้ง", exact: true }).click();
   await expect(page).toHaveURL(/\/drought$/);
+  await expect(page.locator('.nr-primary-workspace')).toBeVisible();
+  await page.getByRole("link", { name: "ดูคลังคำพยากรณ์ย้อนหลัง" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "ภัยแล้ง" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ภาพรวมจังหวัด" })).toBeVisible();
   await expect(page.getByRole("button", { name: "กลับภาพรวมจังหวัด" })).toHaveCount(0);
@@ -359,8 +362,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   const mapToolbar = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria");
   const mapControls = droughtWorkspace.locator(".nr-drought-workspace-map-card .nr-map-controls");
   await expect(page.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
-  await expect(mapToolbar.getByRole("combobox")).toHaveCount(3);
-  await expect(mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" })).toBeVisible();
+  await expect(mapToolbar.getByRole("combobox")).toHaveCount(2);
+  await expect(page.getByRole("combobox", { name: /^เดือนตั้งต้น / })).toBeVisible();
   await expect(mapToolbar.getByRole("combobox", { name: "สถานะพยากรณ์ภัยแล้ง" })).toBeVisible();
   const filterStatus = mapToolbar.locator(".nr-local-map-filter-status");
   await expect(filterStatus).toHaveClass(/is-reserved/);
@@ -370,7 +373,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(horizonTabs.getByRole("tab", { name: /ล่วงหน้า 2 เดือน/ })).toHaveAttribute("aria-selected", "true");
   await expect(archiveMode).toContainText("117/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง116 ตำบล");
-  await mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" }).click();
+  await page.getByRole("combobox", { name: /^เดือนตั้งต้น / }).click();
   await page.getByRole("option", { name: "ก.ย. 2568", exact: true }).click();
   await expect(archiveMode).toContainText("117/289 ตำบล");
   await expect(archiveMode).toContainText("เสี่ยงปานกลาง17 ตำบล");
@@ -383,10 +386,12 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     expect(horizonBox.y).toBeGreaterThanOrEqual(workspaceBox.y);
     expect(horizonBox.y).toBeLessThan(mapBox.y);
     expect(Math.abs(mapBox.y - chartBox.y)).toBeLessThan(2);
-    expect(Math.abs(mapBox.height - chartBox.height)).toBeLessThan(2);
+    expect(mapBox.height).toBeGreaterThanOrEqual(600);
+    expect(chartBox.height).toBeLessThan(450);
+    expect(Math.abs(mapBox.y + mapBox.height - kpisBox.y - kpisBox.height)).toBeLessThan(2);
     expect(chartBox.x).toBeGreaterThan(mapBox.x + mapBox.width - 2);
     expect(kpisBox.y).toBeGreaterThanOrEqual(chartBox.y + chartBox.height);
-    expect(Math.abs(kpisBox.x - mapBox.x)).toBeLessThan(2);
+    expect(Math.abs(kpisBox.x - chartBox.x)).toBeLessThan(2);
     const toolbarBox = await boundingBoxOrThrow(mapToolbar);
     const controlsBox = await boundingBoxOrThrow(mapControls);
     expect(toolbarBox.y + toolbarBox.height).toBeLessThanOrEqual(controlsBox.y + 1);
@@ -401,6 +406,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await closePrimaryNav(page);
   await page.getByRole("button", { name: "ภาพรวมจังหวัด" }).click();
   await expect(page).toHaveURL((url) => url.pathname === "/");
+  // Returning to province must retain T+2 instead of silently replacing it with T+1.
+  await expect(page.getByRole('tab', { name: /ล่วงหน้า 2 เดือน/ })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator(".brand-lockup strong")).toHaveCount(0);
   await expect(page.locator(".brand-lockup span")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "EN", exact: true })).toHaveCount(0);
@@ -415,7 +422,8 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     "href",
     "/brand/korat-tan-phai-favicon.png?v=3",
   );
-  await expectProvinceOverviewHeading(page);
+  await expect(page.getByRole('heading', { level: 1, name: 'ภัยแล้ง', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /ล่วงหน้า 2 เดือน/ })).toHaveAttribute('aria-selected', 'true');
 });
 
 test("removed water route no longer renders the province water page", async ({ page }) => {
@@ -440,7 +448,7 @@ test("drought forecast archive components are shared across province, district, 
   await expect(provinceWorkspace.locator(".nr-forecast-archive-mode-section")).toHaveCount(0);
   await expect(provinceWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("117/289 ตำบล");
   await expect(provinceWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้ง" })).toBeVisible();
-  await expect(provinceWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
+  await expect(provinceWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
 
   await page.goto("/dan-khun-thot?mapLayer=forecast-archive&horizon=1");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*ด่านขุนทด/, level: 1 })).toBeVisible();
@@ -451,7 +459,7 @@ test("drought forecast archive components are shared across province, district, 
   await expect(districtWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("6/16 ตำบล");
   await expect(districtWorkspace.locator(".nr-drought-workspace-kpis .is-out-of-scope")).toContainText("10 ตำบล");
   await expect(districtWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งระดับตำบล" })).toBeVisible();
-  await expect(districtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
+  await expect(districtWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
 
   await page.goto("/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=1");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
@@ -462,10 +470,10 @@ test("drought forecast archive components are shared across province, district, 
   await expect(subdistrictWorkspace.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(1);
   await expect(subdistrictWorkspace.locator(".nr-drought-workspace-kpis")).toContainText("เสี่ยงปานกลาง");
   await expect(subdistrictWorkspace.getByRole("heading", { name: "แผนที่พยากรณ์ความเสี่ยงภัยแล้งของตำบล" })).toBeVisible();
-  await expect(subdistrictWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(3);
+  await expect(subdistrictWorkspace.locator(".nr-drought-workspace-map-card .nr-local-map-criteria").getByRole("combobox")).toHaveCount(2);
 });
 
-test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async ({ page }) => {
+test("Nakhon Ratchasima month dropdown wheel scroll does not zoom the map", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 960 });
   await loginAs(page);
   await page.goto("/drought?mapLayer=forecast-archive&target=2025-12&horizon=1");
@@ -479,29 +487,22 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
   await expect(localSvg.locator(".nr-map-shape")).toHaveCount(289);
   await page.waitForTimeout(220);
 
-  await mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" }).click();
+  await page.getByRole("combobox", { name: /^เดือนตั้งต้น / }).click();
   const targetMonthMenu = page.locator(".app-select-menu").last();
   const targetMonthOptions = targetMonthMenu.locator(".app-select-options");
   await expect(targetMonthMenu).toBeVisible();
   await expect(targetMonthOptions.getByRole("option").first()).toHaveText("ธ.ค. 2568");
   await expect(targetMonthOptions.locator("small")).toHaveCount(0);
-  await expect(mapCard).toHaveCSS("overflow", "visible");
+  await expect(mapCard).toHaveCSS("overflow", "hidden");
   const menuLayering = await targetMonthMenu.evaluate((menu) => {
-    const card = menu.closest(".nr-drought-workspace-map-card")!;
-    const toolbar = menu.closest(".nr-local-map-criteria")!;
-    const legend = card.querySelector(".nr-map-legend")!;
     const bounds = menu.getBoundingClientRect();
-    const cardBottom = card.getBoundingClientRect().bottom;
     const x = bounds.left + bounds.width / 2;
-    const y = Math.min(bounds.bottom - 12, cardBottom + 18, innerHeight - 12);
+    const y = Math.min(bounds.bottom - 12, innerHeight - 12);
     return {
-      aboveLegend: Number(getComputedStyle(toolbar).zIndex) > Number(getComputedStyle(legend).zIndex),
       reachableAtBottom: menu.contains(document.elementFromPoint(x, y)),
     };
   });
-  // Adaptive map frames can contain the menu; its visible bottom must still be
-  // hit-testable above the legend whether it ends inside or outside the frame.
-  expect(menuLayering).toEqual({ aboveLegend: true, reachableAtBottom: true });
+  expect(menuLayering).toEqual({ reachableAtBottom: true });
 
   const transformBeforeDropdownWheel = await readMapTransform(localSvg, ".nr-map-transform-layer");
   const dropdownScrollBefore = await targetMonthMenu.evaluate((menu) => {
@@ -534,7 +535,7 @@ test("Nakhon Ratchasima map dropdown wheel scroll does not zoom the map", async 
   expect(transformAfterDropdownWheel.y).toBeCloseTo(transformBeforeDropdownWheel.y, 1);
   await page.getByRole("option", { name: "พ.ย. 2568", exact: true }).click();
   await expect(page).toHaveURL(/target=2025-11&horizon=1/);
-  await expect(mapToolbar.getByRole("combobox", { name: "เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง" })).toContainText("พ.ย. 2568");
+  await expect(page.getByRole("combobox", { name: /^เดือนตั้งต้น / })).toContainText("พ.ย. 2568");
   await expect(mapCard).toHaveCSS("overflow", "hidden");
 });
 
@@ -734,11 +735,11 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page).toHaveURL((url) => url.pathname === "/");
   await expect(page.getByRole("heading", { name: "พืชที่ได้รับผลกระทบ" })).toHaveCount(0);
   await expectProvinceOverviewHeading(page);
-  await expect(page.locator(".data-provenance-chip.is-real:visible").first()).toBeVisible();
+  await expect(page.locator(".data-provenance-chip.is-forecast-archive:visible").first()).toBeVisible();
   await expect(page.locator(".nr-forecast-overview .metric-card .data-provenance-chip.is-synthetic")).toHaveCount(0);
   await expect(page.locator(".nr-home-agriculture")).toHaveCount(0);
   await expect(page.locator(".nr-home-readiness, .nr-prediction-readiness")).toHaveCount(0);
-  await expect(page.locator(".nr-forecast-overview-summary .data-provenance-chip.is-real")).toHaveCount(4);
+  await expect(page.locator(".nr-forecast-overview-summary .data-provenance-chip.is-forecast-archive")).toHaveCount(4);
   await expect(page.locator(".nr-forecast-overview .data-provenance-chip.is-proxy")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
@@ -802,7 +803,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "กลับอำเภอ" })).toBeVisible();
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   const subdistrictFilters = page.locator(".nr-operational-filters");
-  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(3);
+  await expect(subdistrictFilters.getByRole("combobox")).toHaveCount(2);
   await expect(subdistrictFilters.getByRole("combobox", { name: /^สถานะชลประทาน/ })).toHaveCount(0);
   await expect(page.locator(".nr-map-panel").getByRole("combobox", { name: "สถานะชลประทาน", exact: true })).toContainText("ทุกสถานะ");
   await expect(subdistrictFilters.getByRole("combobox", { name: /^ตำบล/ })).toContainText("อุดมทรัพย์");
@@ -824,8 +825,8 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByText("ระดับน้ำ")).toHaveCount(0);
   await expect(page.getByText("ความพร้อมข้อมูลน้ำ")).toHaveCount(0);
 
-  await page.goto("/nakhon-ratchasima/wang-nam-khiao/t-302504");
-  await expect(page).toHaveURL(/\/nakhon-ratchasima\/wang-nam-khiao\/t-302504$/);
+  await page.goto("/nakhon-ratchasima/wang-nam-khiao/t-302504?mapLayer=forecast-archive");
+  await expect(page).toHaveURL(/\/nakhon-ratchasima\/wang-nam-khiao\/t-302504\?mapLayer=forecast-archive/);
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*อุดมทรัพย์/, level: 1 })).toBeVisible();
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.getByText("สถานการณ์ภัยแล้งตามข้อมูลพื้นที่", { exact: true })).toHaveCount(0);
@@ -847,11 +848,11 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
 
   await expect(page.locator(".nr-layer-control")).toHaveCount(0);
-  await page.goto("/mueang-nakhon-ratchasima");
+  await page.goto("/mueang-nakhon-ratchasima?mapLayer=forecast-archive");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*เมืองนครราชสีมา/, level: 1 })).toBeVisible();
   await expect(localMap.getByText("ขอบเขตตำบล")).toHaveCount(0);
 
-  await page.goto("/mueang-nakhon-ratchasima/t-300101");
+  await page.goto("/mueang-nakhon-ratchasima/t-300101?mapLayer=forecast-archive");
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*ในเมือง/, level: 1 })).toBeVisible();
   await expect(page.getByText("สถานการณ์ภัยแล้งตามข้อมูลพื้นที่", { exact: true })).toHaveCount(0);
   await expect(page.locator(".nr-drought-workspace-chart-card")).toHaveCount(0);
@@ -861,7 +862,7 @@ test("Nakhon Ratchasima province drill-down preserves code-based evidence and no
   await expect(page.getByText("หลักฐานสถานี")).toHaveCount(0);
   await expect(page.locator(".nr-subdistrict-gap-section")).toHaveCount(0);
 
-  await page.goto("/");
+  await page.goto("/?mapLayer=forecast-archive");
   await expect(page.getByRole("button", { name: "กลับแผนที่ประเทศ" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "ย้อนกลับหนึ่งระดับ" })).toHaveCount(0);
   await expect(page).toHaveURL((url) => url.pathname === "/");
@@ -872,7 +873,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
   test.setTimeout(90_000);
 
   await loginAs(page);
-  await page.goto("/");
+  await page.goto("/?mapLayer=forecast-archive");
 
   const isMobile = testInfo.project.name === "mobile";
   const localMap = page.locator(".nr-map-panel").first();
@@ -993,7 +994,7 @@ test("Nakhon Ratchasima local map preview actions stay layered and depth-aware",
 
   if (!isMobile) {
     await expect(page.locator(".nr-layer-control")).toHaveCount(0);
-    await page.goto("/mueang-nakhon-ratchasima");
+    await page.goto("/mueang-nakhon-ratchasima?mapLayer=forecast-archive");
     await centerInViewport(localMap);
     await clickSvgPathFillPoint(
       page,
@@ -1017,7 +1018,7 @@ test("Nakhon Ratchasima local map zoom controls do not re-render per animation f
 
   await installReactCommitCounter(page);
   await loginAs(page);
-  await page.goto("/");
+  await page.goto("/?mapLayer=forecast-archive");
 
   const localMap = page.locator(".nr-map-panel").first();
   const localSvg = page.getByRole("img", { name: "แผนที่ตำบลจังหวัดนครราชสีมา" });

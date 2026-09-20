@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { AlertCircle, Bookmark, BookmarkPlus, CalendarDays, Check, CircleCheck, ChevronRight, Droplets, ListFilter, LoaderCircle, MapPin, Plus, RotateCcw, Trash2, X } from 'lucide-react';
 import { useDatabaseWorkspace } from '../DatabaseWorkspaceProvider';
 import { savedWorkspaceError, type FollowedArea, type SavedFilter, type SavedForecastSelection } from '../data/savedWorkspaces';
-import { readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../savedWorkspaceRoutes';
+import { readWorkspaceAreaCode, readWorkspaceSelection, savedAreaInfo, savedFilterPath } from '../savedWorkspaceRoutes';
 import { formatMonth } from '../i18n';
 import { irrigationLabels } from '../irrigation';
 import { forecastHorizonLabel, forecastTargetPeriod } from '../forecastPeriod';
@@ -42,7 +42,8 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [confirm, setConfirm] = useState<string | null>(null);
-  const area = selection ? savedAreaInfo(selection.area_code) : null;
+  const [areaCode] = useState(() => readWorkspaceAreaCode(window.location));
+  const area = areaCode ? savedAreaInfo(areaCode) : null;
   const [name, setName] = useState(selection && area ? `${area.label.split(' · ')[0]} ตั้งต้น ${formatMonth(selection.target_period.slice(0,7), 'th')} ${forecastHorizonLabel(selection.horizon)}` : '');
 
   async function refresh(signal: AbortSignal) {
@@ -82,7 +83,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
     event.preventDefault();
     if (selection) void perform((signal) => services.saved.saveFilter(name, selection, signal), 'บันทึกตัวกรองแล้ว');
   }
-  const followed = selection && areas.some((a) => a.area_code === selection.area_code);
+  const followed = areaCode && areas.some((a) => a.area_code === areaCode);
   const items = tab === 'area' ? areas.map((item) => {
     const info = savedAreaInfo(item.area_code);
     return { id: item.area_code, label: info?.label ?? item.area_code, path: info?.path ?? null, detail: '' };
@@ -107,13 +108,13 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
         <button type="button" role="tab" id={`${id}-filter`} tabIndex={tab === 'filter' ? 0 : -1} aria-selected={tab === 'filter'} aria-controls={`${id}-panel`} onClick={() => changeTab('filter')}><ListFilter size={16} aria-hidden="true" />ตัวกรองที่บันทึก</button>
       </div>
       <div className="nr-saved-panel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${tab}`}>
-        {selection && area ? tab === 'area' ? <div className="nr-saved-current">
+        {tab === 'area' && area && areaCode ? <div className="nr-saved-current">
           <MapPin size={20} aria-hidden="true" />
           <div><small>พื้นที่ปัจจุบัน</small><strong>{area.label}</strong></div>
-          <button type="button" className={followed ? 'secondary-button' : 'primary-button'} disabled={busy || Boolean(followed)} onClick={() => void perform((signal) => services.saved.follow(selection.area_code, signal), 'เพิ่มพื้นที่ติดตามแล้ว')}>
+          <button type="button" className={followed ? 'secondary-button' : 'primary-button'} disabled={busy || Boolean(followed)} onClick={() => void perform((signal) => services.saved.follow(areaCode, signal), 'เพิ่มพื้นที่ติดตามแล้ว')}>
             {followed ? <Check size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}{followed ? 'ติดตามแล้ว' : 'ติดตามพื้นที่นี้'}
           </button>
-        </div> : <form onSubmit={save} className="nr-saved-form">
+        </div> : tab === 'filter' && selection && area ? <form onSubmit={save} className="nr-saved-form">
           <label htmlFor={`${id}-name`}>ชื่อตัวกรอง</label>
           <div className="nr-saved-name-field"><input id={`${id}-name`} value={name} onChange={(event) => setName(event.target.value)} maxLength={80} required disabled={busy} />
             <button type="submit" className="primary-button" disabled={busy || !name.trim()}><BookmarkPlus size={16} aria-hidden="true" />บันทึก</button></div>
@@ -122,7 +123,7 @@ function SavedWorkspaceDialog({ services, selection, onClose, onNavigate }: {
             <span><CalendarDays size={14} aria-hidden="true" />{selectionPeriodLabel(selection)}</span>
             <span><Droplets size={14} aria-hidden="true" />{irrigationLabels[selection.irrigation_criterion ?? 'all']}</span>
           </div>
-        </form> : <p className="nr-saved-pending"><AlertCircle size={18} aria-hidden="true" />รอข้อมูลพยากรณ์พร้อมก่อนบันทึกตัวกรอง</p>}
+        </form> : <p className="nr-saved-pending"><AlertCircle size={18} aria-hidden="true" />{tab === 'area' ? 'เลือกพื้นที่ก่อนเพิ่มรายการติดตาม' : 'บันทึกตัวกรองได้จากคลังคำพยากรณ์ย้อนหลัง เมื่อเลือกเดือนตั้งต้นแล้ว'}</p>}
         {error && <div role="alert" className="nr-saved-error"><AlertCircle size={18} aria-hidden="true" /><span>{error}</span><button type="button" className="secondary-button" disabled={busy} onClick={() => void perform()}><RotateCcw size={16} aria-hidden="true" />ลองใหม่</button></div>}
         <p role="status" className="nr-saved-status">{busy ? <><LoaderCircle size={16} className="nr-saved-spinner" aria-hidden="true" /><span>กำลังโหลดรายการ...</span></> : message ? <><CircleCheck size={16} aria-hidden="true" /><span>{message}</span></> : null}</p>
         {loaded && <section className="nr-saved-collection" aria-label={tab === 'area' ? 'พื้นที่ที่ติดตาม' : 'ตัวกรองของฉัน'} aria-busy={busy}>

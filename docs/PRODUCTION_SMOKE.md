@@ -56,7 +56,9 @@ deploy a server. Local Vite previews explicitly skip serverless API and hosting
 header checks; deployed checks require them.
 
 Checks cover login, overview, drought, district and subdistrict pages at 1440x960
-and 390x844; 289 map polygons; latest T+1 overview counts and context;
+and 390x844; primary actual/unavailable states without forecast reads; the trusted
+Bangkok clock and no-store metadata; explicit archive entry; 289 map polygons;
+latest T+1 archive overview counts and context;
 T+1/T+4 selection; one full-width categorical status above the subdistrict map;
 an all-null district with no false zero-risk graph; forward target months from
 the selected source month T and date-only T+ tab subtitles; absence of

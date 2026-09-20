@@ -7,7 +7,7 @@ import { FORECAST_DATASET_ID } from '../src/data/supabaseForecastArchive';
 const f = vi.hoisted(() => ({ context: null as any }));
 vi.mock('../src/DatabaseWorkspaceProvider', () => ({ useDatabaseWorkspace: () => f.context }));
 beforeEach(() => {
-  window.history.replaceState(null, '', '/dan-khun-thot/t-300806?target=2025-12&horizon=4&mapRisk=forecast-high');
+  window.history.replaceState(null, '', '/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4&mapRisk=forecast-high');
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
   const areas: any[] = []; const filters: any[] = [];
@@ -52,7 +52,7 @@ describe('shared saved workspace controls', () => {
     expect(screen.queryByText('ลบรายการแล้ว')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toBeEmptyDOMElement();
   });
-  it('saves actual month/horizon/risk and navigates to the same filter', async () => {
+  it('saves the displayed archive month/horizon/risk and navigates to the same filter', async () => {
     const onNavigate = vi.fn(); render(<WorkspaceBookmarks onNavigate={onNavigate} />);
     fireEvent.click(screen.getByRole('button', { name: 'รายการที่บันทึก' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'ติดตามพื้นที่นี้' })).toBeEnabled());
@@ -80,5 +80,18 @@ describe('shared saved workspace controls', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('มีชื่อหรือตำบลนี้อยู่ในรายการแล้ว');
     expect(screen.getByLabelText('ชื่อตัวกรอง')).toHaveValue('ชื่อตัวกรองเดิม');
     expect(screen.queryByText('บันทึกตัวกรองแล้ว')).not.toBeInTheDocument();
+  });
+  it('follows an actual area without inventing a forecast selection', async () => {
+    window.history.replaceState(null, '', '/phimai?period=2026-08');
+    render(<WorkspaceBookmarks onNavigate={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'รายการที่บันทึก' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'ติดตามพื้นที่นี้' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'ติดตามพื้นที่นี้' }));
+    await screen.findByText('เพิ่มพื้นที่ติดตามแล้ว');
+    expect(f.context.saved.follow).toHaveBeenCalledWith('3015', expect.any(AbortSignal));
+    fireEvent.click(screen.getByRole('tab', { name: 'ตัวกรองที่บันทึก' }));
+    expect(screen.queryByLabelText('ชื่อตัวกรอง')).not.toBeInTheDocument();
+    expect(screen.getByText(/บันทึกตัวกรองได้จากคลังคำพยากรณ์ย้อนหลัง/)).toBeVisible();
+    expect(f.context.saved.saveFilter).not.toHaveBeenCalled();
   });
 });

@@ -13,7 +13,7 @@ export async function smokeExcelExport({ page, viewport, output, archive }) {
   const initialUrl = page.url();
   if (viewport === 'mobile') await page.getByRole('button', { name: 'เปิดเมนูหลัก' }).click();
   await page.getByRole('button', { name: 'ส่งออก Excel', exact: true }).click();
-  const dialog = page.getByRole('dialog', { name: 'ส่งออกข้อมูลพยากรณ์' });
+  const dialog = page.getByRole('dialog', { name: 'ส่งออกคลังคำพยากรณ์ย้อนหลัง' });
   const downloadButton = dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' });
   await expect(dialog.getByRole('button', { name: 'ตรวจข้อมูลก่อนส่งออก' })).toBeEnabled();
   if (districtCode !== '30') {

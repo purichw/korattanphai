@@ -11,6 +11,7 @@ import { withLoadDeadline } from '../data/loadDeadline';
 import { irrigationCriteria, irrigationLabels, readIrrigationSelection } from '../irrigation';
 import { forecastTargetPeriod } from '../forecastPeriod';
 import { formatMonth } from '../i18n';
+import { MonthSelect } from './MonthSelect';
 import { getSupabaseClient } from '../supabase';
 import { AppSelect } from './AppSelect';
 import '../forecast-export.css';
@@ -146,16 +147,16 @@ function ExportDialog({ services, initial, onClose }: { services: Services; init
   const districts = [{ value: '30', label: 'ทุกอำเภอในจังหวัดนครราชสีมา' }, ...hierarchy.province.districts.map(district => ({ value: district.districtCode, label: `อำเภอ${district.nameTh}` }))];
   return <dialog className="nr-export-dialog" ref={dialog} aria-labelledby={`${id}-title`} onCancel={event => { event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }}>
     <div className="nr-export-body">
-      <header className="nr-export-header"><FileSpreadsheet size={23} aria-hidden="true" /><h2 id={`${id}-title`}>ส่งออกข้อมูลพยากรณ์</h2>
+      <header className="nr-export-header"><FileSpreadsheet size={23} aria-hidden="true" /><h2 id={`${id}-title`}>ส่งออกคลังคำพยากรณ์ย้อนหลัง</h2>
         <button type="button" className="icon-button" aria-label="ปิดหน้าส่งออก" title="ปิด" onClick={close}><X size={18} aria-hidden="true" /></button>
       </header>
       <div className="nr-export-scroll">
       <fieldset className="nr-export-filters" disabled={initializing || busy}>
         <legend className="sr-only">ตัวกรองรายงาน Excel</legend>
-        <AppSelect label="เดือนตั้งต้น (T)" ariaLabel="เดือนตั้งต้นของไฟล์ Excel" value={options.originPeriod} options={periods.map(period => ({ value: period, label: formatMonth(period, 'th') }))} onChange={originPeriod => { changeOptions({ ...options, originPeriod }); setComparisonPeriod(''); }} icon={<CalendarDays size={19} />} />
-        <AppSelect label="พื้นที่" ariaLabel="พื้นที่ของไฟล์ Excel" value={options.areaCode} options={districts} onChange={areaCode => changeOptions({ ...options, areaCode })} icon={<MapPin size={19} />} />
+        <MonthSelect label="เดือนตั้งต้น (T)" ariaLabel="เดือนตั้งต้นของไฟล์ Excel" value={options.originPeriod} options={periods.map(period => ({ value: period, label: formatMonth(period, 'th') }))} onChange={originPeriod => { changeOptions({ ...options, originPeriod }); setComparisonPeriod(''); }} icon={<CalendarDays size={19} />} />
+        <AppSelect searchable label="พื้นที่" ariaLabel="พื้นที่ของไฟล์ Excel" value={options.areaCode} options={districts} onChange={areaCode => changeOptions({ ...options, areaCode })} icon={<MapPin size={19} />} />
         <AppSelect label="สถานะชลประทาน" ariaLabel="ชลประทานของไฟล์ Excel" value={options.irrigation} options={irrigationCriteria.map(value => ({ value, label: irrigationLabels[value] }))} onChange={irrigation => changeOptions({ ...options, irrigation: irrigation as ExportOptions['irrigation'] })} icon={<Droplets size={19} />} />
-        <AppSelect label="รอบตั้งต้นที่ใช้เปรียบเทียบ" value={comparisonPeriod} options={[{ value: '', label: 'ไม่เปรียบเทียบ' }, ...comparisonPeriods.map(period => ({ value: period, label: formatMonth(period, 'th') }))]} onChange={period => { setComparisonPeriod(period); setPreview(null); setError(''); setMessage(''); }} icon={<CalendarDays size={19} />} />
+        <MonthSelect label="รอบตั้งต้นที่ใช้เปรียบเทียบ" value={comparisonPeriod} options={[{ value: '', label: 'ไม่เปรียบเทียบ' }, ...comparisonPeriods.map(period => ({ value: period, label: formatMonth(period, 'th') }))]} onChange={period => { setComparisonPeriod(period); setPreview(null); setError(''); setMessage(''); }} icon={<CalendarDays size={19} />} />
       </fieldset>
       {comparisonPeriod && <p className="nr-export-hint">เปรียบเทียบเฉพาะตำบลและเดือนพยากรณ์เดียวกัน ค่าที่เพิ่มขึ้นหมายถึงความเสี่ยงสูงขึ้นจากรอบ {formatMonth(comparisonPeriod, 'th')}</p>}
       {options.originPeriod && <div className="nr-export-period"><CalendarDays size={18} aria-hidden="true" /><span><strong>พยากรณ์ล่วงหน้า 6 เดือน</strong><span>{formatMonth(forecastTargetPeriod(options.originPeriod, 1), 'th')} – {formatMonth(forecastTargetPeriod(options.originPeriod, 6), 'th')}</span></span></div>}

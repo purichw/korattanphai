@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { NakhonRatchasimaDroughtForecastArchive } from "./types";
 import { forecastArchiveLoader, forecastOverviewLoader } from "./data/forecastArchive";
 import { useDatabaseWorkspace } from "./DatabaseWorkspaceProvider";
+import { ArchivePeriodUnavailableError } from "./data/forecastScope";
 
 export function useForecastArchive(enabled: boolean, source: "full" | "overview" = "full", areaCode = "30") {
   const database = useDatabaseWorkspace();
@@ -17,7 +18,7 @@ export function useForecastArchive(enabled: boolean, source: "full" | "overview"
   const [attempt, setAttempt] = useState(0);
   const requestKey = `${areaCode}|${originPeriod ?? ""}|${attempt}`;
   const query = { areaCode, originPeriod };
-  const [result, setResult] = useState(() => ({ loader, areaCode, key: "", failed: false,
+  const [result, setResult] = useState(() => ({ loader, areaCode, key: "", failed: false, periodUnavailable: false,
     archive: loader.getCached(query) as NakhonRatchasimaDroughtForecastArchive | null }));
   const sameScope = result.loader === loader && result.areaCode === areaCode;
   const archive = sameScope ? result.archive : loader.getCached(query);
@@ -38,14 +39,18 @@ export function useForecastArchive(enabled: boolean, source: "full" | "overview"
     let active = true;
     // Share one request across routes; a departed view must not receive its result.
     loader.load({ areaCode, originPeriod }).then(
-      (data) => { if (active) setResult({ loader, areaCode, key: requestKey, archive: data, failed: false }); },
-      () => { if (active) setResult((previous) => ({ loader, areaCode, key: requestKey, failed: true,
+      (data) => { if (active) {
+        const periodUnavailable = Boolean(data && originPeriod && !data.targetMonths.some(month => month.period === originPeriod));
+        setResult({ loader, areaCode, key: requestKey, archive: periodUnavailable ? null : data, failed: false, periodUnavailable });
+      } },
+      (error: unknown) => { if (active) setResult((previous) => ({ loader, areaCode, key: requestKey, failed: true, periodUnavailable: error instanceof ArchivePeriodUnavailableError,
         archive: previous.loader === loader && previous.areaCode === areaCode ? previous.archive : null })); },
     );
     return () => { active = false; };
   }, [enabled, requestKey, areaCode, originPeriod, loader]);
 
   const changingPeriod = pending && Boolean(archive?.loadedSelection && originPeriod && archive.loadedSelection.originPeriod !== originPeriod);
-  return { archive, failed, pending, changingPeriod, retry: () => setAttempt((value) => value + 1),
+  const periodUnavailable = enabled && ((!pending && result.periodUnavailable) || Boolean(originPeriod && archive && !archive.targetMonths.some(month => month.period === originPeriod)));
+  return { archive, failed, pending, changingPeriod, periodUnavailable, retry: () => setAttempt((value) => value + 1),
     requestPeriod: database ? (period: string) => setSelection({ routeKey, originPeriod: period }) : undefined };
 }

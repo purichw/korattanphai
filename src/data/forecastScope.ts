@@ -12,7 +12,12 @@ export function forecastScopeCodes(areaCode: string): string[] {
 }
 
 export function forecastQueryPeriod(archive: Archive, period?: string | null) {
-  return archive.targetMonths.some((month) => month.period === period) ? period! : archive.meta.targetMonthEnd;
+  if (period != null && !archive.targetMonths.some((month) => month.period === period)) throw new ArchivePeriodUnavailableError();
+  return period ?? archive.meta.targetMonthEnd;
+}
+
+export class ArchivePeriodUnavailableError extends Error {
+  constructor() { super('Requested archive origin is unavailable'); this.name = 'ArchivePeriodUnavailableError'; }
 }
 
 export function projectForecastScope(archive: Archive, query: ForecastQuery): Archive {

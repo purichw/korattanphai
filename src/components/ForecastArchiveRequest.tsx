@@ -1,6 +1,7 @@
 import { createContext, useContext, type ComponentProps, type ReactNode } from 'react';
 import type { useForecastArchive } from '../useForecastArchive';
 import { AppSelect } from './AppSelect';
+import { MonthSelect } from './MonthSelect';
 
 const ForecastPeriodRequest = createContext<((period: string) => void) | undefined>(undefined);
 const ForecastPeriodChanging = createContext(false);
@@ -8,7 +9,7 @@ export const useForecastPeriodRequest = () => useContext(ForecastPeriodRequest);
 
 export function ForecastMonthSelect(props: ComponentProps<typeof AppSelect>) {
   const changing = useContext(ForecastPeriodChanging);
-  return <AppSelect {...props} loadingLabel={changing ? 'กำลังโหลดเดือนที่เลือก · ขณะนี้ยังแสดงรอบเดิม' : undefined} />;
+  return <MonthSelect {...props} loadingLabel={changing ? 'กำลังโหลดเดือนที่เลือก · ขณะนี้ยังแสดงรอบเดิม' : undefined} />;
 }
 
 export function ForecastArchiveRequest({ request, children }: {

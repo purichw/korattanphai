@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { Check, ChevronDown, LoaderCircle, X } from "lucide-react";
+import { Check, ChevronDown, LoaderCircle, Search, SearchX, X } from "lucide-react";
 
 export type AppSelectOption = {
   value: string;
@@ -10,6 +10,7 @@ export type AppSelectOption = {
   badge?: string;
   badgeTone?: "good" | "watch" | "danger" | "muted";
   disabled?: boolean;
+  searchText?: string;
 };
 
 type AppSelectProps = {
@@ -24,10 +25,12 @@ type AppSelectProps = {
   compactValue?: boolean;
   align?: "center" | "start";
   loadingLabel?: string;
+  searchable?: boolean;
 };
 
 function normalizeSearch(value: string) {
-  return value.trim().toLocaleLowerCase("th-TH");
+  return value.normalize("NFKC").toLocaleLowerCase("th-TH")
+    .replace(/[๐-๙]/g, digit => String(digit.charCodeAt(0) - 0x0e50)).replace(/[.\s]/g, "");
 }
 
 export function AppSelect({
@@ -42,13 +45,17 @@ export function AppSelect({
   compactValue = false,
   align = "center",
   loadingLabel,
+  searchable,
 }: AppSelectProps) {
   const generatedId = useId().replaceAll(":", "");
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const searchTimeoutRef = useRef<number | null>(null);
   const searchRef = useRef("");
   const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const canSearch = searchable ?? options.length >= 8;
   const selectedIndex = options.findIndex((option) => option.value === value);
   const firstEnabledIndex = options.findIndex((option) => !option.disabled);
   const [activeIndex, setActiveIndex] = useState(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex);
@@ -57,11 +64,20 @@ export function AppSelect({
   const labelId = `${generatedId}-label`;
   const valueId = `${generatedId}-value`;
   const loadingId = `${generatedId}-loading`;
-  const activeOptionId = activeIndex >= 0 ? `${generatedId}-option-${activeIndex}` : undefined;
+  const visibleOptions = useMemo(() => {
+    const terms = canSearch ? query.trim().split(/\s+/).map(normalizeSearch).filter(Boolean) : [];
+    return options.map((option, index) => ({ option, index })).filter(({ option }) => {
+      const text = normalizeSearch([option.label, option.triggerLabel, option.value, option.searchText,
+        option.description, option.group, option.badge].filter(Boolean).join(" "));
+      return terms.every(term => text.includes(term));
+    });
+  }, [options, query, canSearch]);
   const enabledIndexes = useMemo(
-    () => options.map((option, index) => (option.disabled ? -1 : index)).filter((index) => index >= 0),
-    [options],
+    () => visibleOptions.filter(({ option }) => !option.disabled).map(({ index }) => index),
+    [visibleOptions],
   );
+  const currentActiveIndex = enabledIndexes.includes(activeIndex) ? activeIndex : (enabledIndexes[0] ?? -1);
+  const activeOptionId = currentActiveIndex >= 0 ? `${generatedId}-option-${currentActiveIndex}` : undefined;
 
   useEffect(() => {
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex);
@@ -80,8 +96,33 @@ export function AppSelect({
 
   useEffect(() => {
     if (!isOpen || !activeOptionId) return;
-    document.getElementById(activeOptionId)?.scrollIntoView({ block: "nearest" });
-  }, [activeOptionId, isOpen]);
+    const option = document.getElementById(activeOptionId);
+    const optionsList = document.getElementById(listboxId);
+    const list = optionsList && getComputedStyle(optionsList).overflowY === "auto"
+      ? optionsList : optionsList?.closest<HTMLElement>(".app-select-menu");
+    // Never scroll page ancestors when hovering a fixed mobile option sheet.
+    if (option && list) {
+      const itemBox = option.getBoundingClientRect();
+      const listBox = list.getBoundingClientRect();
+      if (itemBox.top < listBox.top) list.scrollTop += itemBox.top - listBox.top;
+      else if (itemBox.bottom > listBox.bottom) list.scrollTop += itemBox.bottom - listBox.bottom;
+    }
+  }, [activeOptionId, isOpen, canSearch, listboxId, query]);
+
+  useEffect(() => {
+    if (!isOpen || !canSearch) return;
+    // Touch users can browse without opening the keyboard; desktop can type immediately.
+    if (window.matchMedia?.("(min-width: 721px)").matches) inputRef.current?.focus({ preventScroll: true });
+    const viewport = window.visualViewport;
+    const updateViewport = () => {
+      rootRef.current?.style.setProperty("--app-select-viewport-height", `${viewport?.height ?? window.innerHeight}px`);
+      rootRef.current?.style.setProperty("--app-select-viewport-bottom", `${Math.max(0, window.innerHeight - (viewport?.height ?? window.innerHeight) - (viewport?.offsetTop ?? 0))}px`);
+    };
+    updateViewport();
+    viewport?.addEventListener("resize", updateViewport);
+    viewport?.addEventListener("scroll", updateViewport);
+    return () => { viewport?.removeEventListener("resize", updateViewport); viewport?.removeEventListener("scroll", updateViewport); };
+  }, [isOpen, canSearch]);
 
   useEffect(() => {
     return () => {
@@ -90,6 +131,7 @@ export function AppSelect({
   }, []);
 
   const openMenu = () => {
+    setQuery("");
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex);
     setIsOpen(true);
   };
@@ -102,7 +144,7 @@ export function AppSelect({
 
   const moveActive = (step: number) => {
     if (enabledIndexes.length === 0) return;
-    const currentPosition = enabledIndexes.indexOf(activeIndex);
+    const currentPosition = enabledIndexes.indexOf(currentActiveIndex);
     const fallbackPosition = step > 0 ? -1 : 0;
     const nextPosition = (currentPosition >= 0 ? currentPosition : fallbackPosition) + step;
     const normalizedPosition = (nextPosition + enabledIndexes.length) % enabledIndexes.length;
@@ -111,7 +153,7 @@ export function AppSelect({
 
   const chooseIndex = (index: number) => {
     const option = options[index];
-    if (!option || option.disabled) return;
+    if (!option || option.disabled || !enabledIndexes.includes(index)) return;
     onChange(option.value);
     closeMenu();
     window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
@@ -139,6 +181,7 @@ export function AppSelect({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.nativeEvent.isComposing) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       if (!isOpen) {
@@ -159,7 +202,7 @@ export function AppSelect({
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       if (isOpen) {
-        chooseIndex(activeIndex);
+        chooseIndex(currentActiveIndex);
       } else {
         openMenu();
       }
@@ -181,7 +224,19 @@ export function AppSelect({
 
     if (event.key.length === 1 && !event.altKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
-      handleTypeahead(event.key);
+      if (canSearch) {
+        setQuery(event.key); setActiveIndex(-1); setIsOpen(true);
+        window.requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
+      } else handleTypeahead(event.key);
+    }
+  };
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.nativeEvent.isComposing) return;
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault(); moveActive(event.key === "ArrowDown" ? 1 : -1);
+    } else if (event.key === "Enter") {
+      event.preventDefault(); chooseIndex(currentActiveIndex);
     }
   };
 
@@ -190,6 +245,12 @@ export function AppSelect({
   return (
     <div
       ref={rootRef}
+      onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) closeMenu(); }}
+      onKeyDown={event => {
+        if (isOpen && event.key === "Escape" && !event.nativeEvent.isComposing) {
+          event.preventDefault(); event.stopPropagation(); closeMenu(true);
+        }
+      }}
       className={[
         "app-select-field",
         icon ? "has-leading-icon" : "",
@@ -243,7 +304,7 @@ export function AppSelect({
             }}
           />
           <div
-            className={["app-select-menu", menuClassName ?? ""].join(" ")}
+            className={["app-select-menu", canSearch ? "is-searchable" : "", menuClassName ?? ""].join(" ")}
             role="presentation"
           >
             <div className="app-select-menu-header" role="presentation">
@@ -252,6 +313,16 @@ export function AppSelect({
                 <X size={16} aria-hidden="true" />
               </button>
             </div>
+            {canSearch && <div className="app-select-search">
+              <Search size={17} aria-hidden="true" />
+              <input ref={inputRef} type="text" role="searchbox" aria-label={`ค้นหาตัวเลือก ${label ?? ariaLabel ?? ""}`}
+                aria-controls={listboxId} aria-autocomplete="list" aria-activedescendant={activeOptionId}
+                autoComplete="off" spellCheck={false} placeholder="ค้นหา..." value={query}
+                onChange={event => { setQuery(event.target.value); setActiveIndex(-1); }} onKeyDown={handleSearchKeyDown} />
+              {query && <button type="button" aria-label="ล้างคำค้นตัวเลือก" title="ล้างคำค้น" onClick={() => {
+                setQuery(""); setActiveIndex(selectedIndex); inputRef.current?.focus({ preventScroll: true });
+              }}><X size={16} aria-hidden="true" /></button>}
+            </div>}
             <div
               id={listboxId}
               className="app-select-options"
@@ -259,11 +330,11 @@ export function AppSelect({
               aria-labelledby={label ? labelId : undefined}
               aria-label={label ? undefined : ariaLabel}
             >
-              {options.map((option, index) => {
+              {visibleOptions.map(({ option, index }) => {
                 const showGroup = option.group && option.group !== currentGroup;
                 currentGroup = option.group;
                 const isSelected = option.value === value;
-                const isActive = index === activeIndex;
+                const isActive = index === currentActiveIndex;
                 return (
                   <div key={option.value}>
                     {showGroup && (
@@ -304,6 +375,10 @@ export function AppSelect({
                 );
               })}
             </div>
+            {canSearch && !visibleOptions.length && <div className="app-select-empty" role="status">
+              <SearchX size={24} aria-hidden="true" /><strong>ไม่พบตัวเลือก</strong><span>ลองใช้คำค้นอื่น</span>
+            </div>}
+            {canSearch && visibleOptions.length > 0 && <span className="sr-only" role="status">{visibleOptions.length} ตัวเลือก</span>}
           </div>
         </>
       )}

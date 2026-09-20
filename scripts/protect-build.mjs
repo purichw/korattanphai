@@ -13,7 +13,8 @@ const obfuscatorOptions = {
   deadCodeInjection: false,
   debugProtection: false,
   disableConsoleOutput: false,
-  identifierNamesGenerator: "hexadecimal",
+  // Short opaque names reduce transfer size without changing string protection.
+  identifierNamesGenerator: "mangled-shuffled",
   numbersToExpressions: false,
   renameGlobals: false,
   // Keep chunk URLs literal so the post-build asset rename can update every reference.

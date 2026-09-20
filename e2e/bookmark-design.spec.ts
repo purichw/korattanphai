@@ -8,7 +8,7 @@ test('bookmark tabs, confirmation, failure, and focus remain usable', async ({ p
   const state = await mockBookmarks(context);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/?target=2025-12&horizon=1');
+  await page.goto('/?mapLayer=forecast-archive&target=2025-12&horizon=1');
   await page.locator('.nr-map-shape').first().waitFor();
   const trigger = page.getByRole('button', { name: 'รายการที่บันทึก', exact: true });
   await trigger.click();
@@ -60,7 +60,7 @@ test('long saved names scroll inside the modal without losing the close control'
     created_at: '2026-09-07T00:00:00Z',
   }));
   await page.setViewportSize({ width: page.viewportSize()!.width, height: 600 });
-  await page.goto('/?target=2025-12&horizon=1');
+  await page.goto('/?mapLayer=forecast-archive&target=2025-12&horizon=1');
   await page.locator('.nr-map-shape').first().waitFor();
   await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).click();
   const dialog = page.getByRole('dialog');

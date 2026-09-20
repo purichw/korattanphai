@@ -11,7 +11,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/thepharak"
   test(`${scope} actions open one card below its two collapsed siblings`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     page.on("pageerror", error => errors.push(error.message));
-    await page.goto(`${path}?target=2025-12&horizon=1`);
+    await page.goto(`${path}?mapLayer=forecast-archive&target=2025-12&horizon=1`);
     const group = page.locator(".nr-operational-forecast-actions");
     await expect(group.locator(":scope > details")).toHaveCount(3);
     const map = page.locator(".nr-drought-workspace-map-card");
@@ -62,7 +62,7 @@ for (const [scope, path] of [["province", "/drought"], ["district", "/thepharak"
 }
 
 test("unavailable and empty-irrigation scopes retain only applicable action cards", async ({ page }) => {
-  await page.goto("/ban-lueam?target=2025-12&horizon=1");
+  await page.goto("/ban-lueam?mapLayer=forecast-archive&target=2025-12&horizon=1");
   const group = page.locator(".nr-operational-forecast-actions");
   await expect(group.locator(":scope > details")).toHaveCount(2);
   await expect(group.locator(".nr-operational-forecast-summary")).toContainText("ไม่มีค่าพยากรณ์ในรอบนี้");
@@ -70,7 +70,7 @@ test("unavailable and empty-irrigation scopes retain only applicable action card
   await group.locator(".nr-operational-guidance > summary").click();
   await expect(group.locator("details[open]")).toHaveCount(1);
 
-  await page.goto("/soeng-sang?target=2025-12&horizon=1&irrigation=irrigated");
+  await page.goto("/soeng-sang?mapLayer=forecast-archive&target=2025-12&horizon=1&irrigation=irrigated");
   await expect(group.locator(":scope > details")).toHaveCount(1);
   await expect(group.locator(".nr-operational-guidance")).toBeVisible();
   await group.locator("summary").click();
