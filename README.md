@@ -1,9 +1,10 @@
 # Korat Tan Phai / โคราชทันภัย
 
-Authenticated drought-forecast archive dashboard for Nakhon Ratchasima, derived
-from the Kaset Tan Phai prototype. The current product covers source-backed
-forecast review, irrigation context, and Excel reporting, not live multi-hazard
-alerts. The site brand is Korat Tan Phai / โคราชทันภัย.
+Authenticated drought dashboard for Nakhon Ratchasima, derived from the Kaset
+Tan Phai prototype. Operational data-month views are separate from source-backed
+forecast-archive review, irrigation context and Excel reporting. Actual and
+operational forecast feeds remain unconfigured; this is not a live multi-hazard
+alert service. The site brand is Korat Tan Phai / โคราชทันภัย.
 
 ## Where To Start
 
@@ -20,11 +21,11 @@ alerts. The site brand is Korat Tan Phai / โคราชทันภัย.
 
 ## Main Surfaces
 
-Local work adds [actual/forecast separation](docs/ACTUAL_FORECAST_SEPARATION.md):
+With the deployed [actual/forecast separation](docs/ACTUAL_FORECAST_SEPARATION.md),
 operational `period` means the valid month, while explicit `mapLayer=forecast-archive`
 retains the source-month/T+ archive. Actual and operational forecast feeds are not
 yet configured for publication; unavailable is not replaced with archive predictions.
-This change has not been deployed.
+See the latest [release checkpoint](docs/HANDOFF.md) for deployment and test evidence.
 
 The app is a Thai-only single-page application. Navigation exposes `ภาพรวม`,
 its `ภัยแล้ง` subitem, and `ส่งออก Excel` in database mode. `/` opens the
@@ -119,6 +120,7 @@ user task explicitly authorizes it.
 - [docs/AGRI_MAP_CAPABILITY_COMPARISON.md](docs/AGRI_MAP_CAPABILITY_COMPARISON.md)
 - [docs/INTERACTION_MAP.md](docs/INTERACTION_MAP.md)
 - [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md)
+- [docs/ACTUAL_FORECAST_SEPARATION.md](docs/ACTUAL_FORECAST_SEPARATION.md)
 - [docs/RAINFALL_SOURCE_AUDIT.md](docs/RAINFALL_SOURCE_AUDIT.md)
 - [docs/NON_FUNCTIONAL_REQUIREMENTS.md](docs/NON_FUNCTIONAL_REQUIREMENTS.md)
 - [docs/NFR_OPERATIONS_RUNBOOK.md](docs/NFR_OPERATIONS_RUNBOOK.md)

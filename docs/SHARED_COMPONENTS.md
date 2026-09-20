@@ -9,7 +9,7 @@ this document in the same change whenever a shared component contract changes.
 
 ## Public Shared Components
 
-Local actual/forecast delta (not deployed):
+Deployed actual/forecast composition (see [release evidence](HANDOFF.md)):
 `OperationalDroughtWorkspace` shares the period/state contract across all Korat
 geographic routes and composes existing selects, metric cards, disclosure and map.
 `NakhonRatchasimaLocalMap.operationalUnavailable` is an explicit neutral-state

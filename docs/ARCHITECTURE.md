@@ -4,14 +4,15 @@
 
 FACT: The app is a Vite SPA with Supabase Auth, scoped published forecast reads
 and personal saved workspaces. Vercel also hosts risk-fusion, model-input,
-health and telemetry handlers. Implemented handlers do not imply configured
-live ingestion; see `API.md` and `NFR_OPERATIONS_RUNBOOK.md`.
+health, telemetry and operational-context handlers. Implemented handlers do not
+imply configured live ingestion; see `API.md` and `NFR_OPERATIONS_RUNBOOK.md`.
 
-Local-only addition (2026-09-20): operational valid-month and explicit archive
-intents now branch before mounting an archive loader. This split is not deployed;
-actual feed/rendering and operational forecast publication remain unconfigured.
+Deployed separation (2026-09-20): operational valid-month and explicit archive
+intents branch before mounting an archive loader. Actual feed/rendering and
+operational forecast publication remain unconfigured.
 [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) records source evidence,
-ownership, tests and the outstanding protected-build budget gate.
+ownership, tests and source gaps; [HANDOFF.md](HANDOFF.md) records the verified
+release. The protected-build budget gate passed without increasing limits.
 
 - Framework: Vite + React + TypeScript.
 - Rendering: client-side React mounted from `src/main.tsx`.
@@ -65,7 +66,7 @@ flowchart TD
   NR --> NRBoundary["/geodata/nakhon-ratchasima-boundary.geojson"]
   NR --> NRData["src/data/canonical/nakhon_ratchasima/*"]
   NR --> Intent["operationalLocation: valid month or explicit archive"]
-  Intent -->|"operational: local only"| Operational["OperationalDroughtWorkspace + useOperationalContext"]
+  Intent -->|"operational valid month"| Operational["OperationalDroughtWorkspace + useOperationalContext"]
   Operational --> Clock["/api/operational-context: clock + source-gap metadata"]
   Intent -->|"explicit archive"| Loader["useForecastArchive + DatabaseWorkspaceProvider"]
   Loader --> Revision["Latest publication revision"]

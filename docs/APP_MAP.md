@@ -19,7 +19,7 @@ Routes:
 Other province placeholder routes are not part of this subset's primary
 navigation.
 
-Local-only routing change (2026-09-20), not deployed:
+Routing separation deployed on 2026-09-20; see the latest [release evidence](HANDOFF.md):
 
 - `NakhonRatchasimaWorkspace` resolves intent through `operationalLocation.ts`.
   Routes above without explicit archive intent render `OperationalDroughtWorkspace`.

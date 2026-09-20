@@ -2,8 +2,10 @@
 
 ## Actual / Forecast Boundary
 
-Local implementation, not deployed: [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md)
-owns the source audit, eligibility contract, implementation coverage and open gates.
+[ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) owns the source audit,
+eligibility contract, deployed separation and open source-integration gates.
+See [HANDOFF.md](HANDOFF.md) for release evidence; live actual and operational
+forecast publication remain unconfigured.
 The archive persistence model below is retained; it is not an actual-data store.
 
 - Operational `period` is the valid month. Trusted server time in Asia/Bangkok

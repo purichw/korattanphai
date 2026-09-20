@@ -2,9 +2,10 @@
 
 ## Active Product Journeys
 
-Current local navigation and ownership are in `APP_MAP.md`. The actual/archive
-split below is implemented locally, not deployed; source/release gaps are recorded
-in [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md).
+Current navigation and ownership are in `APP_MAP.md`. The actual/archive split
+below is deployed; see [release evidence](HANDOFF.md). Actual and operational
+forecast feeds remain unconfigured, as recorded in
+[ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md).
 
 1. Supabase login restores the requested internal route and query without changing
    whether it describes operational valid month or explicit archive intent.

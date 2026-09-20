@@ -3,10 +3,10 @@
 ## Purpose / Current Goal
 
 `Korat Tan Phai / โคราชทันภัย` is an authenticated Nakhon Ratchasima drought
-forecast-archive dashboard derived from the Kaset Tan Phai prototype. Its
-current surfaces are overview, province/district/subdistrict forecasts, Excel
-reporting and personal saved workspaces. Legacy multi-hazard workflows are not
-the active product.
+dashboard derived from the Kaset Tan Phai prototype. Its current surfaces are
+operational data-month views, the explicit province/district/subdistrict forecast
+archive, Excel reporting and personal saved workspaces. Operational feeds remain
+unconfigured; legacy multi-hazard workflows are not the active product.
 
 Released separation (2026-09-20): operational routes select an actual/data month
 separately from the explicit rev03 archive. Actual ingestion and operational

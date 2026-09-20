@@ -9,7 +9,7 @@ When authorized, release from `/Users/point/korattanphai`.
 
 ## Actual / Forecast Release Scope
 
-For candidates containing the local actual/archive split, read
+For changes to the actual/archive split, read
 [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) and the latest
 [handoff](HANDOFF.md) first. A working unavailable state is not completed actual
 ingestion. State explicitly whether a candidate exposes only separation/source-gap
