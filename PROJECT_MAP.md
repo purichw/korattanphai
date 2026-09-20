@@ -8,12 +8,13 @@ current surfaces are overview, province/district/subdistrict forecasts, Excel
 reporting and personal saved workspaces. Legacy multi-hazard workflows are not
 the active product.
 
-Local-only change (2026-09-20): operational routes separate actual/data-month
-selection from the explicit rev03 archive. Actual ingestion and operational
-forecast publication remain unconfigured. The protected bundle budget now passes
-after shortening obfuscated identifiers; hosted verification is pending. See
-[Actual / Forecast Separation](docs/ACTUAL_FORECAST_SEPARATION.md) for evidence
-and the remaining gates; archive-only descriptions below apply to archive intent.
+Released separation (2026-09-20): operational routes select an actual/data month
+separately from the explicit rev03 archive. Actual ingestion and operational
+forecast publication remain unconfigured; unavailable is not zero risk. The
+protected bundle budget passes without raising limits. See the latest
+[release checkpoint](docs/HANDOFF.md) and
+[Actual / Forecast Separation](docs/ACTUAL_FORECAST_SEPARATION.md) for deployed
+evidence and source gaps; archive-only descriptions below apply to archive intent.
 
 FACT: The current implementation is a Vite + React + TypeScript single-page app
 with a read-only risk-fusion endpoint and a new machine-authenticated model-input
@@ -51,7 +52,7 @@ notification recipient or remote log store was activated. V2 remains proposed. S
 - Shared operational view: `src/components/nakhon-ratchasima/OperationalDroughtWorkspace.tsx`
 - Operational request lifecycle: `src/useOperationalContext.ts`; server clock and
   source-gap metadata: `api/operational-context.js` and
-  `server/operations/operational-context.mjs` (local implementation, not deployed).
+  `server/operations/operational-context.mjs` (deployed metadata, not a live feed).
 - Eligibility/integration contracts: `src/operationalData.ts`; Bangkok calendar
   policy: `src/data/operationalPolicy.mjs`. These do not provide a live actual feed.
 - Shared select component: `src/components/AppSelect.tsx`

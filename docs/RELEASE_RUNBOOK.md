@@ -16,8 +16,9 @@ ingestion. State explicitly whether a candidate exposes only separation/source-g
 UI or a reviewed live feed; never claim the latter from fixture tests.
 
 - Require a passing protected bundle budget, not just TypeScript/Vite and exposure
-  checks. The 2026-09-20 local checkpoint failed that gate; remeasure the exact
-  candidate after fixing it. Do not silently raise limits to obtain a pass.
+  checks. The initial 2026-09-20 checkpoint failed that gate; the authorized
+  candidate fixed it using shorter obfuscated identifiers while retaining string
+  protection. Remeasure each candidate; do not silently raise limits to pass.
 - Migrate archive-focused legacy E2E URLs to explicit `mapLayer=forecast-archive`.
   Keep separate tests proving bare T/h links resolve operational valid month T+h.
 - Verify server Bangkok time/month rollover, stale-response isolation, unavailable

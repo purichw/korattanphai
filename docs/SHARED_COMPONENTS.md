@@ -226,6 +226,11 @@ recovery feedback. Neither resets persisted state automatically.
   behavior is shared through its CSS. Do not add native `<select>` controls for
   new product filters unless there is a concrete accessibility or platform
   reason.
+  Active-option scrolling stays inside the list/menu, never page ancestors.
+  Map filter fields use the shared container-query grid, including tambon pages;
+  obsolete positional `nth-child` placement can create implicit columns after a
+  control is removed. Test menu bounds against the configured mobile viewport,
+  not just `innerWidth`, which mobile browsers can inflate after overflow.
 - **Page filters:** use `OperationalFilters` for generic page-wide filters and
   the root overview. Drought detail routes use `DroughtWorkspaceFilters` to bind
   the visible origin month T and T+ to their actual forecast selection. Both reuse

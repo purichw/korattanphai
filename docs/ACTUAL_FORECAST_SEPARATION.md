@@ -120,7 +120,7 @@ Archive rules:
   accuracy export is invented. Operational printing retains period and unavailable
   labels. No source data or permission is embedded in the clock API.
 
-## Validation And Readiness
+## Initial Local Validation
 
 Executed locally using authenticated test fixtures, never live writes:
 
@@ -138,11 +138,12 @@ Executed locally using authenticated test fixtures, never live writes:
 - Screenshots: `artifacts/actual-forecast-{desktop,mobile}.png` and
   `artifacts/archive-preserved-{desktop,mobile}.png`; local test-account/source-fixture
   evidence, not a deployed-production snapshot.
-- TypeScript/Vite build and protected-source exposure checks passed. The final
-  protected build is **not release-ready**: the core budget gate reports 3,502,667
+- TypeScript/Vite build and protected-source exposure checks passed. At that
+  checkpoint the protected build was **not release-ready**: the gate reported 3,502,667
   raw / 381,459 gzip bytes against 3,500,000 / 375,000. This is the combined dirty
   workspace measurement, not an attribution of every byte to this change. Limits
-  were not raised for this work. Bundle reduction remains a release prerequisite.
+  were not raised for this work. The reduction was completed in the subsequent
+  authorized release pass below.
 
 The safety separation and unavailable paths are implemented. **Actual ingestion,
 actual category rendering, actual aggregation/history, and operational forecast
@@ -156,12 +157,33 @@ The owner subsequently requested push/deploy for this task. Scope excludes the
 uncommitted API UAT/research work. No database migration or feed activation is included.
 The protected build now uses the supported `mangled-shuffled` identifier generator,
 retaining the existing string protection and exposure checks. The measured database
-core is 321,374 gzip bytes and the static/telemetry core is 322,272 gzip bytes;
-both pass the unchanged gates. These are local measurements, not hosted proof.
+core was 321,374 gzip bytes and the static/telemetry core was 322,272 gzip bytes;
+both passed the unchanged gates. The isolated Node 24 candidate passed at 321,254
+gzip bytes; the hosted production-config build passed at 321,139 gzip bytes.
 Archive browser tests now enter explicit archive URLs and primary navigation has
-its own clock/unavailable/legacy-link coverage. Hosted smoke and release-wide test
-completion remain pending until recorded in the handoff; actual-feed UAT remains
-out of scope because no eligible source is connected.
+its own clock/unavailable/legacy-link coverage. Release-pass local checks passed
+314 unit tests, 104 model-input tests, 12 operations tests and 11 local database
+integrity/RLS checks. No remote database was migrated or written.
+
+Candidate `dpl_5v26dDKrV3zMCJzr99rCNJJd4tTW` and the promoted production alias each
+passed 39 real-account read-only checks at 1440x960 and 390x844. Evidence:
+`artifacts/separation-release/{candidate,production}/report.json` and associated
+screenshots/downloads. Checks cover server time/no-store policy, actual
+unavailable at three geographic levels without forecast RPC, scoped archive RPC
+parity and map colors, both graph units, irrigation filters/empty reset, saved
+workspace reads, logout, assets and security headers. Downloaded Excel workbooks
+verify 1,734 province and 36 district values, district summaries, native charts
+and PivotTables. This proves the archive, not a live actual feed.
+
+Runtime `8357b02` and test-only follow-up `d2b7695` are pushed. All five jobs in
+[Quality Gate](https://github.com/purichw/korattanphai/actions/runs/35508515552)
+passed before promotion: browser compatibility, contracts, database browser,
+protected built browser and regression. The primary URL resolves to the same Ready
+candidate, not a rebuild. See the latest handoff for counts and recovery policy.
+Actual-feed UAT remains out of scope because no eligible source is connected.
+Shared dropdown regression
+checks additionally cover mobile menu bounds and subdistrict filter grids after
+removal of duplicate temporal controls.
 
 Rollback must not restore forecast-as-actual. Keep separation and show unavailable
 if an adapter fails. Archive access can remain available under its existing policy.

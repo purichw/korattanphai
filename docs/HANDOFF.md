@@ -20,6 +20,48 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Actual / forecast separation production release (2026-09-20):
+
+- Runtime `8357b02340d74e90f2ab84e9db7d8447a09d8872` and test-runner follow-up
+  `d2b7695be8c4a97411d947490a903aa6b6efcabb` are pushed on
+  `fix/nr-map-zoom-performance`. The follow-up changes tests/dev warmup only;
+  runtime, build configuration and data match the candidate byte for byte.
+- Operational routes now use the valid/data month and server Bangkok clock.
+  Actual and operational forecast sources remain **unconfigured**: missing data
+  stays neutral/unavailable, never forecast-as-actual or zero risk. The explicit
+  rev03 archive retains original values, Auth/RLS, T+1..T+6, maps and Excel.
+  This is the deployed separation/source-gap experience, not live actual-feed UAT.
+- This task's shared controls, map/analysis/report and Excel refinements are included.
+  Mobile dropdowns scroll only their own list; tambon map filters reuse the shared
+  grid after duplicate temporal controls were removed. No aggregate tambon chart
+  was introduced. Excel uses Cordia and preserves source traceability.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/35508515552)
+  passed all five jobs: contracts, browser compatibility (6 passed), database
+  browser (126 passed, 2 skipped), protected built browser (150 passed, 112 skipped)
+  and regression. Provider-specific exclusions are retained. Local gates also
+  passed 314 unit, 104 model-input, 12 operations and 11 database/integrity tests.
+- Promoted the exact real-account-smoked candidate `dpl_5v26dDKrV3zMCJzr99rCNJJd4tTW`
+  / `https://korattanphai-cjso1yrd8-purich-w.vercel.app`. Inspection confirms the
+  production alias serves this Ready artifact. Hosted protected core is 321,139 B
+  gzip; existing limits and source-exposure checks pass without a budget increase.
+- Candidate and production each passed 39 read-only real-account checks at
+  1440x960 and 390x844: actual unavailable at province/district/tambon without
+  archive RPC, explicit archive colors/RPC parity, both graph units, month sync,
+  irrigation/empty reset, saved-workspace reads, logout, assets and security headers.
+  Downloaded Excel validates 1,734 province and 36 district risk cells, summaries,
+  native charts and PivotTables. Production screenshots were visually reviewed.
+  Evidence: `artifacts/separation-release/{candidate,production}/report.json`,
+  screenshots and downloaded workbooks. Physical-device checks were not performed.
+- Built from an isolated tracked archive. Unrelated API UAT/research edits and
+  their bundle-budget allowance remain unshipped. No migration, application-data
+  write, ACL change, feed activation or cross-task coordination occurred.
+- Previous artifact: `dpl_A8iPHuHNK4a6KZaG9WmKcGwFxjjg` /
+  `https://korattanphai-8wkl3diot-purich-w.vercel.app`. Do not blindly restore it:
+  recovery must preserve actual/forecast separation and fail closed to unavailable,
+  not reintroduce forecast-as-actual. No database rollback is needed.
+- Related contract: [Actual / Forecast Separation](ACTUAL_FORECAST_SEPARATION.md).
+  This release supersedes the initial local-only checkpoint below.
+
 Actual / forecast separation, local only (2026-09-20):
 
 - Operational routes now select a valid/data month (`period`), using server time
