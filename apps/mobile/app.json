@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Korat Tan Phai Dev",
+    "slug": "korattanphai-mobile",
+    "scheme": "korattanphai-dev",
+    "version": "0.1.0",
+    "platforms": [
+      "ios"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/korat-tan-phai-emblem.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "th.korattanphai.development",
+      "infoPlist": {
+        "CFBundleDisplayName": "โคราชทันภัย Dev"
+      }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          }
+        }
+      ],
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-asset"
+    ]
+  }
+}

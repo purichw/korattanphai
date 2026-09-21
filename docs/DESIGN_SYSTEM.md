@@ -1,4 +1,4 @@
-# เกษตรทันภัย Design System
+# โคราชทันภัย Design System
 
 ## Brand / Tone / Visual Direction
 
@@ -15,14 +15,14 @@ alert and decision-support prototype.
 
 ### Brand Assets
 
-- Primary horizontal logo: `public/brand/kaset-tan-phai-logo.webp` (`720x240`,
-  transparent WebP). Use it in the main topbar without stretching or cropping.
-- Compact emblem: `public/brand/kaset-tan-phai-emblem.webp` (`256x252`,
-  transparent WebP). Use it where the full Thai lockup would become too small to
-  read, paired with live brand text.
-- Browser favicon: `public/brand/kaset-tan-phai-favicon.png` (`32x32`,
-  transparent PNG, tightly fitted to the canvas). The browser controls the tab
-  icon slot; maximize visible size by keeping only about 1px transparent inset.
+- Primary sidebar lockup: `public/brand/korat-tan-phai-sidebar-logo.webp`
+  (`640x585`). `SidebarBrand` owns its responsive presentation. Never stretch,
+  crop, recolor or redraw the artwork.
+- Compact emblem: `public/brand/korat-tan-phai-emblem.png` (`768x768`), with a
+  WebP counterpart. Use it with live brand text when the full lockup is too small.
+- Browser favicon: `public/brand/korat-tan-phai-favicon.png` (`512x512`).
+- The iOS shell uses the same unmodified Korat emblem. Legacy `kaset-*` files
+  are not the current product identity and must not be used in new Korat UI.
 - The supplied artwork contains gradients, highlights, and fine raster detail;
   do not auto-trace it to SVG. Re-export from the original design source only if
   a true vector master becomes available.
@@ -72,6 +72,35 @@ Core roles:
 Severity colors are also defined in `src/components/RiskMap.tsx`.
 
 Do not rely on color alone; always pair severity colors with labels.
+
+## Web And iOS CI
+
+CI means corporate identity here. Web and iOS are the same Korat Tan Phai
+product, not separate visual brands. `src/styles.css`, `index.html` and the
+current Korat assets are the source of truth; do not introduce a new palette,
+typeface or logo for the native app.
+
+- Native semantic colors and typography live in `apps/mobile/src/theme.ts`.
+  All current native text and surface styles use these roles. The native
+  parity test checks them against the web and compares the emblem file hash.
+- Google Sans static regular, semibold and bold faces ship as local app assets
+  through `@expo-google-fonts/google-sans`. Do not depend on a runtime Google
+  Fonts request. The font package includes its OFL license and Thai glyphs.
+- Adapt safe areas, touch targets, text scaling and spacing to iOS; do not
+  copy desktop pixel dimensions. Use the same icon meanings and state wording.
+- Reuse platform-independent domain logic. Native views cannot reuse DOM
+  components directly; share native primitives when real repeated consumers
+  exist. Future dropdowns should preserve searchable lists and selection
+  behavior while fitting native sheets, keyboard and accessibility.
+- Risk colors must come from the actual forecast legend, not generic accent
+  tokens. Native forecast views, maps and charts reuse the shared forecast
+  domain and preserve missing-data and out-of-study distinctions. Current
+  functionality and verification gaps are recorded in
+  `apps/mobile/NATIVE_PARITY.md`.
+
+Run `npm run test:brand` in `apps/mobile` with Node 24 and the repository root
+dependencies installed whenever web or native CI tokens/assets change. This
+guards source drift; Simulator screenshots still verify actual rendering.
 
 ## Asset Locations
 
