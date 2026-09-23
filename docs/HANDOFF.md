@@ -20,6 +20,27 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Map toolbar production release (2026-09-24):
+
+- Runtime `c55329f` centers the shared map tools and removes the empty status
+  row above the map. Active filter feedback appears over the map without resizing
+  its frame. The drought workspace toolbar-to-map gap is 6 px on desktop/mobile.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/35893768353)
+  passed all five jobs on `95154f8`. That follow-up changes only two E2E startup
+  readiness gates; runtime, build configuration and data match the candidate.
+- Promoted `dpl_GPqAAQ9S7SUWvsHcF7mi7wzGTogd` /
+  `https://korattanphai-58xv6r9lw-purich-w.vercel.app`; inspection confirms
+  `https://korattanphai.vercel.app` serves this Ready artifact. Protected build,
+  source-exposure and unchanged bundle-budget checks passed.
+- Candidate and production each passed 39 authenticated read-only smoke checks
+  and eight toolbar route/viewport checks, including filters, reset, stable map
+  dimensions and playback. Production desktop/mobile screenshots were reviewed.
+  Evidence: `artifacts/map-toolbar-release-20260924/production/` and
+  `artifacts/map-toolbar-release-20260924/release-state.json`.
+- Built from tracked source only; unrelated API/UAT/research and local budget
+  edits remain unshipped. No database migration or application-data write occurred.
+  Recovery artifact: `dpl_HhLSC4paSieFzZvgnBzsUmNt4wsM` (forecast-only).
+
 Forecast-only restoration, owner-authorized forward change (2026-09-20):
 
 - The owner requested restoring the forecast website, then push/deploy. This
