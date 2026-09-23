@@ -140,10 +140,13 @@ test("shared bar graph preserves loading and unavailable states", async ({ page 
 
 for (const [level, path] of [["province", "/drought"], ["district", "/dan-khun-thot"]] as const) {
   test(`${level} graph separates source risk levels in both units and retains scope`, async ({ page }) => {
+    test.setTimeout(60_000);
     const errors: string[] = [];
     page.on("pageerror", error => errors.push(error.message));
     const locations = archive.locations.filter(location => level === "province" || location.districtCode === "3008");
     await page.goto(`${path}?mapLayer=forecast-archive&target=2025-12&horizon=1`);
+    // Cold dev-module loading is separate from chart and filter assertions.
+    await expect(page.locator('.nr-drought-compact-workspace')).toBeVisible({ timeout: 30_000 });
     const chart = page.locator(".nr-drought-workspace-chart-card");
     const initialUrl = page.url();
     const historyLength = await page.evaluate(() => history.length);

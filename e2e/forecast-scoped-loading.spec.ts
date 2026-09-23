@@ -12,7 +12,7 @@ for (const scope of [
   { path: '/dan-khun-thot/t-300806', area: '300806', count: 1 },
 ]) test(`scoped loading ${scope.area}: atomic month change, retry and cached horizons`, async ({ page }, testInfo) => {
   // This complete retry/race journey makes four requests and several route updates.
-  // Keep each assertion's deadline unchanged while allowing slower CI rendering.
+  // Interaction deadlines stay unchanged; cold startup has its own readiness gate.
   test.setTimeout(60_000);
   const requests: any[] = []; const legacy: string[] = [];
   let failNovember = true;
@@ -33,6 +33,7 @@ for (const scope of [
   });
   await seedAuthSession(page);
   await page.goto(`${scope.path}?mapLayer=forecast-archive&target=2025-12&horizon=4`);
+  await expect(page.locator('.nr-drought-compact-workspace')).toBeVisible({ timeout: 30_000 });
   const month = page.getByRole("combobox", { name: /^เดือนตั้งต้น / });
   await expect(month).toContainText('ธ.ค. 2568');
   const selectMonth = async (label: string) => { await month.click(); await page.getByRole('option', { name: label, exact: true }).click(); };
