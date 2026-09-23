@@ -173,7 +173,7 @@ for (const path of ['/?mapLayer=forecast-archive&target=2025-12', '/drought?mapL
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: 'ค้นหาพื้นที่บนแผนที่' })).toBeFocused();
     await openAnalysis(page);
-    const rowCount = path.startsWith('/phimai') ? 1 : path.startsWith('/soeng') ? 1 : 32;
+    const rowCount = path.startsWith('/phimai') ? 1 : path.startsWith('/soeng') ? 6 : 32;
     await expect(page.locator('.nr-analysis-table tbody tr')).toHaveCount(rowCount);
     await expect(page.locator('.nr-analysis-table')).toContainText('ม.ค. 2569');
     await expect(page.locator('.nr-analysis-table')).toContainText('มิ.ย. 2569');
