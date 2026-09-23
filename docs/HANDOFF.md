@@ -20,6 +20,23 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Compact playback production release (2026-09-24):
+
+- Runtime `a4ac283` reduces desktop playback width from 176 to 156 px through
+  two scoped CSS declarations; desktop/mobile control heights stay 36/40 px.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/35898059095)
+  passed all five jobs on the exact runtime commit. Protected build,
+  source-exposure and unchanged bundle-budget checks also passed.
+- Promoted `dpl_2ehiLmYBCnuLqrVLMehtydjNoLxf` /
+  `https://korattanphai-2rs9uw3v4-purich-w.vercel.app`; Vercel inspection confirms
+  the primary production alias serves this Ready artifact.
+- Candidate and production passed targeted authenticated desktop/mobile checks:
+  T+1 through T+6, pause/resume, readable text, stable map/control dimensions,
+  no horizontal overflow or browser errors. Production screenshots were reviewed.
+  Evidence: `artifacts/playback-compact-release-20260924/`.
+- Deployed from an isolated tracked-source archive. Other pending local changes
+  remain unshipped. Recovery: `dpl_GPqAAQ9S7SUWvsHcF7mi7wzGTogd`.
+
 Map toolbar production release (2026-09-24):
 
 - Runtime `c55329f` centers the shared map tools and removes the empty status
