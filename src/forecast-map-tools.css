@@ -1,7 +1,22 @@
 .nr-map-tools { min-width: 0; width: 100%; }
-.nr-dashboard-map-card .nr-map-panel.has-criteria-map .nr-local-map-filter-status.is-reserved { min-height: 1.35em; }
+/* Keep filter feedback near the controls without reserving an empty toolbar row. */
+.nr-dashboard-map-card .nr-map-panel.has-criteria-map .nr-local-map-filter-status.is-reserved {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 6px;
+  z-index: 1;
+  max-width: calc(100% - 54px);
+  min-height: 0;
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  white-space: normal;
+  pointer-events: none;
+}
+.nr-dashboard-map-card .nr-map-panel.has-criteria-map .nr-local-map-filter-status.is-reserved:empty { padding: 0; border: 0; }
 @container (max-width: 499px) {
-  .nr-dashboard-map-card .nr-map-panel.has-criteria-map .nr-local-map-filter-status.is-reserved { min-height: 2.7em; }
   .nr-dashboard-map-card .nr-map-panel.has-criteria-map:has(.nr-map-tools) .nr-map-legend { min-height: 56px; }
   .is-drought-route .nr-dashboard-map-card:has(.nr-map-tools) .nr-dashboard-map-header h3 { min-height: 2lh; }
 }
@@ -34,7 +49,7 @@
   .is-drought-route .nr-drought-compact-workspace:has(.nr-map-tools) .nr-forecast-bar-plot { height: 220px; }
   .is-drought-route .nr-drought-compact-workspace.is-empty-scope:not(.is-subdistrict):has(.nr-map-tools) .nr-irrigation-empty { height: 100%; }
 }
-.nr-map-tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+.nr-map-tool-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; min-width: 0; }
 .nr-map-tool-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; border: 0; border-radius: 5px; background: var(--surface-muted); color: var(--primary); }
 .nr-map-tool-actions .icon-button { width: 36px; min-width: 36px; padding: 6px; }
 .nr-map-tool-actions .nr-tool-analysis-trigger { padding: 6px 10px; font-size: 12px; }
