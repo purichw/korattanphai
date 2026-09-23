@@ -20,6 +20,29 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Forecast analysis hierarchy production release (2026-09-24):
+
+- Runtime `6e9c1ac` shares the geography rule: province tables start with
+  districts, district tables/charts show their tambons, and tambon scope stays
+  at the known source-data leaf. No finer-area forecasts are invented.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/35903158353)
+  passed all five jobs on `b2e9b02`. This test-only follow-up corrects the
+  remaining Soeng Sang row-count assertion from one district to six tambons.
+  Runtime, data and build configuration match the candidate unchanged.
+- Promoted `dpl_6QdQEAETfyEHb6EEv5bKsQpcMAfi` /
+  `https://korattanphai-7w39aca4w-purich-w.vercel.app`; inspection confirms the
+  primary production alias serves this Ready artifact. Protected build,
+  source-exposure and unchanged bundle budgets passed (316,373 B app gzip).
+- Candidate and production each passed 39 authenticated read-only smoke checks
+  plus 10 hierarchy route/viewport checks. All six source risk values, province
+  summaries, child-tambon charts, empty reset and map focus were verified.
+  Production desktop/mobile screenshots were reviewed. Evidence:
+  `artifacts/analysis-hierarchy-release-20260924/`.
+- Built from isolated committed source. Unrelated API/UAT/research and local
+  budget edits remain unshipped. No database migration, application-data write
+  or native-app change occurred. Recovery: `dpl_2ehiLmYBCnuLqrVLMehtydjNoLxf`,
+  the compact-playback release already live before this promotion.
+
 Compact playback production release (2026-09-24):
 
 - Runtime `a4ac283` reduces desktop playback width from 176 to 156 px through
