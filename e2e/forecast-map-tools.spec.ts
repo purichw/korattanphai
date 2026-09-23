@@ -188,11 +188,10 @@ for (const path of ['/?mapLayer=forecast-archive&target=2025-12', '/drought?mapL
   });
 }
 
-test('Korat map tools table, pattern, district comparison and same-target map colors', async ({ page }, info) => {
+test('Korat map tools table, pattern, subdistrict comparison and same-target map colors', async ({ page }, info) => {
   await setup(page);
   await choose(page, 'สถานะพยากรณ์ภัยแล้ง', 'เสี่ยงสูง');
   await openAnalysis(page);
-  await choose(page, 'ระดับตาราง', 'รายตำบล');
   await expect(page.locator('.nr-analysis-table tbody tr')).toHaveCount(6);
   await choose(page, 'รูปแบบความเสี่ยง 6 เดือน', 'เสี่ยงต่อเนื่องอย่างน้อย 3 เดือน');
   const members = archive.locations.filter((row: any) => row.districtCode === '3003');
@@ -206,9 +205,9 @@ test('Korat map tools table, pattern, district comparison and same-target map co
   await page.getByRole('button', { name: 'ล้างการวิเคราะห์', exact: true }).click();
   await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)')).toHaveCount(6);
   await openAnalysis(page);
-  await page.getByRole('button', { name: 'กราฟอำเภอ', exact: true }).click();
-  await expect(page.getByRole('list', { name: 'กราฟเปรียบเทียบอำเภอ' })).toContainText('เสิงสาง');
-  await page.screenshot({ path: info.outputPath('district-comparison.png') });
+  await page.getByRole('button', { name: 'เปรียบเทียบตำบล', exact: true }).click();
+  await expect(page.getByRole('list', { name: 'กราฟเปรียบเทียบตำบล' }).getByRole('listitem')).toHaveCount(6);
+  await page.screenshot({ path: info.outputPath('subdistrict-comparison.png') });
   await page.getByRole('button', { name: 'เปรียบเทียบรอบ', exact: true }).click();
   await choose(page, /^รอบตั้งต้นอ้างอิง /, 'พ.ย. 2568');
   await expect(page.getByRole('region', { name: 'ตารางเปรียบเทียบรอบ' })).toBeVisible();

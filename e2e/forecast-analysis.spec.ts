@@ -15,6 +15,7 @@ async function setup(page: Page, path: string) {
   });
   await seedAuthSession(page);
   await page.goto(path);
+  await expect(page.locator('.nr-forecast-overview, .nr-drought-compact-workspace')).toBeVisible({ timeout: 30_000 });
   await page.getByRole('button', { name: 'วิเคราะห์พยากรณ์', exact: true }).click();
   await expect(page.locator('.nr-analysis-table tbody tr').first()).toBeVisible();
   await expect(page.locator('.nr-analysis-refresh')).toHaveCount(0);
@@ -41,6 +42,7 @@ const samples = [
   { code: '30', path: '/', origin: '2025-12' },
   { code: '30', path: '/drought', origin: '2025-12' },
   { code: '3025', path: '/wang-nam-khiao', origin: '2025-12' },
+  { code: '3028', path: '/phra-thong-kham', origin: '2025-12' },
   { code: '3017', path: '/chum-phuang', origin: '2023-04' },
   { code: '3018', path: '/sung-noen', origin: '2025-12' },
   { code: '300101', path: '/mueang-nakhon-ratchasima/t-300101', origin: '2019-10' },
@@ -52,7 +54,7 @@ for (const sample of samples) test(`analysis scope and six monthly filters ${sam
   test.setTimeout(90_000);
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   const reads = await setup(page, `${sample.path}?mapLayer=forecast-archive&target=${sample.origin}&horizon=1`);
-  const dialog = page.getByRole('dialog');
+  const dialog = page.getByRole('dialog', { name: /^วิเคราะห์พยากรณ์/ });
   const members = archive.locations.filter(l => l.subdistrictCode.startsWith(sample.code))
     .sort((a, b) => a.subdistrictCode.localeCompare(b.subdistrictCode));
   const scopeName = sample.code === '30' ? 'จังหวัดนครราชสีมา' : sample.code.length === 4
@@ -60,7 +62,7 @@ for (const sample of samples) test(`analysis scope and six monthly filters ${sam
     : `ตำบล${members[0].subdistrictNameTh} · อำเภอ${members[0].districtNameTh}`;
   await expect(dialog.getByRole('heading', { level: 2 })).toHaveText(`วิเคราะห์พยากรณ์ · ${scopeName}`);
   await expectDialogBounds(page);
-  if (sample.code.length !== 6) {
+  if (sample.code === '30') {
     const expected = [...new Set(members.map(l => l.districtCode))].sort().map(code => ({ code,
       risks: [0, 1, 2, 3, 4, 5].map(h => {
         const valid = members.filter(l => l.districtCode === code).map(l => archive.packedRiskByTargetMonth[sample.origin][l.subdistrictCode][h])
@@ -74,6 +76,9 @@ for (const sample of samples) test(`analysis scope and six monthly filters ${sam
     })));
     expect(actual).toEqual(expected);
     await choose(page, 'ระดับตาราง', 'รายตำบล');
+  } else {
+    await expect(dialog.getByRole('combobox', { name: 'ระดับตาราง', exact: true })).toHaveCount(0);
+    await expect(dialog.getByRole('button', { name: 'เปรียบเทียบอำเภอ', exact: true })).toHaveCount(0);
   }
   const tableRows = page.locator('.nr-analysis-table tbody tr');
   const expectedAll = members.map(l => ({ code: l.subdistrictCode, risks: archive.packedRiskByTargetMonth[sample.origin][l.subdistrictCode]
@@ -105,12 +110,38 @@ for (const sample of samples) test(`analysis scope and six monthly filters ${sam
   await page.getByRole('searchbox', { name: 'ค้นหาในตารางพยากรณ์' }).clear();
   await expect(tableRows).toHaveCount(members.length);
   expect(reads.length).toBe(settledReads);
-  if (sample.code === '3025') {
-    await choose(page, 'ระดับตาราง', 'สรุปอำเภอ');
+  if (['30', '3028', '302503'].includes(sample.code)) {
     await dialog.locator('.nr-tool-dialog-content').evaluate(el => { el.scrollTop = 0; });
-    await page.screenshot({ path: info.outputPath('analysis-wang-nam-khiao.png') });
+    await page.screenshot({ path: info.outputPath(`analysis-hierarchy-${sample.code}.png`) });
   }
-  await page.keyboard.press('Escape');
+  if (sample.code.length === 4) {
+    await dialog.getByRole('button', { name: 'เปรียบเทียบตำบล', exact: true }).click();
+    const graph = dialog.getByRole('list', { name: 'กราฟเปรียบเทียบตำบล' });
+    await expect(graph.getByRole('listitem')).toHaveCount(members.length);
+    await expect(dialog.getByRole('combobox', { name: 'หน่วยเปรียบเทียบอำเภอ' })).toHaveCount(0);
+    for (const member of members) {
+      const row = graph.locator(`[data-area-code="${member.subdistrictCode}"]`);
+      const risk = archive.packedRiskByTargetMonth[sample.origin][member.subdistrictCode][0];
+      await expect(row.locator('.nr-analysis-risk')).toHaveClass(`nr-analysis-risk is-${risk === null ? 'outside' : risk}`);
+      if (risk === null) await expect(row.locator('.nr-subdistrict-risk-bar i')).toHaveCount(0);
+      else await expect(row.locator('.nr-subdistrict-risk-bar i')).toHaveAttribute('style', `width: ${risk / 2 * 100}%;`);
+    }
+    if (sample.code === '3028') {
+      await dialog.locator('.nr-tool-dialog-content').evaluate(el => { el.scrollTop = 0; });
+      await page.screenshot({ path: info.outputPath('analysis-subdistrict-graph.png') });
+    }
+    await page.getByRole('searchbox', { name: 'ค้นหาในตารางพยากรณ์' }).fill(members[0].subdistrictCode);
+    await expect(graph.getByRole('listitem')).toHaveCount(1);
+    const initialUrl = page.url();
+    const focusButton = graph.getByRole('button', { name: `ต.${members[0].subdistrictNameTh}`, exact: true });
+    if (info.project.name === 'mobile') await focusButton.tap();
+    else await focusButton.click();
+    await expect(page.locator(`.nr-map-shape[data-nr-subdistrict-code="${members[0].subdistrictCode}"]`)).toHaveClass(/is-selected/);
+    expect(page.url()).toBe(initialUrl);
+  } else if (sample.code.length === 6) {
+    await expect(dialog.getByRole('button', { name: 'เปรียบเทียบตำบล', exact: true })).toHaveCount(0);
+  }
+  if (sample.code.length !== 4) await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'วิเคราะห์พยากรณ์', exact: true })).toBeFocused();
   expect(errors).toEqual([]);
@@ -127,11 +158,11 @@ test('analysis empty results fit their content and offer a scoped reset', async 
   await expect(dialog.getByRole('button', { name: 'แสดงบนแผนที่', exact: true })).toBeDisabled();
   await empty.getByRole('button', { name: 'ล้างตัวกรองการวิเคราะห์' }).click();
   await expect(search).toBeFocused();
-  await expect(dialog.locator('.nr-analysis-table tbody tr')).toHaveCount(1);
+  await expect(dialog.locator('.nr-analysis-table tbody tr')).toHaveCount(5);
   await expect(dialog.getByRole('combobox', { name: 'รูปแบบความเสี่ยง 6 เดือน', exact: true })).toContainText('ทุกรูปแบบพยากรณ์');
 
   await search.fill('ไม่มีพื้นที่นี้');
-  for (const tab of ['กราฟอำเภอ', 'เปรียบเทียบรอบ', 'ตาราง 6 เดือน']) {
+  for (const tab of ['เปรียบเทียบตำบล', 'เปรียบเทียบรอบ', 'ตาราง 6 เดือน']) {
     await dialog.getByRole('button', { name: tab, exact: true }).click();
     await expect(empty).toBeVisible();
     await expectDialogBounds(page);
@@ -148,7 +179,7 @@ test('analysis empty results fit their content and offer a scoped reset', async 
   await expect(search).toHaveValue('');
   await expect(search).toBeFocused();
   await expect(empty).toHaveCount(0);
-  await expect(dialog.locator('.nr-analysis-table tbody tr')).toHaveCount(1);
+  await expect(dialog.locator('.nr-analysis-table tbody tr')).toHaveCount(5);
   expect(page.url()).toBe(url);
 });
 
@@ -167,8 +198,8 @@ test('analysis keeps its frame and current data while refreshing and changing ba
   expect((await dialog.boundingBox())!.height).toBe(initial.height);
   release();
   await expect(page.locator('.nr-analysis-refresh')).toHaveCount(0);
-  await dialog.getByRole('button', { name: 'กราฟอำเภอ', exact: true }).click();
-  await expect(dialog.getByRole('list', { name: 'กราฟเปรียบเทียบอำเภอ' })).toContainText('วังน้ำเขียว');
+  await dialog.getByRole('button', { name: 'เปรียบเทียบตำบล', exact: true }).click();
+  await expect(dialog.getByRole('list', { name: 'กราฟเปรียบเทียบตำบล' }).getByRole('listitem')).toHaveCount(5);
   await expectDialogBounds(page);
   await dialog.getByRole('button', { name: 'เปรียบเทียบรอบ', exact: true }).click();
   await choose(page, /^รอบตั้งต้นอ้างอิง /, 'พ.ย. 2568');
@@ -228,6 +259,10 @@ test('long analysis results scroll inside the modal with its header visible', as
   await expectDialogBounds(page);
   await page.screenshot({ path: info.outputPath('analysis-long-table-scroll.png') });
   await dialog.getByRole('button', { name: 'เปรียบเทียบอำเภอ', exact: true }).click();
+  const districtGraph = dialog.getByRole('list', { name: 'กราฟเปรียบเทียบอำเภอ' });
+  await expect(districtGraph.getByRole('listitem')).toHaveCount(32);
+  await choose(page, 'หน่วยเปรียบเทียบอำเภอ', 'จำนวนตำบลเสี่ยง');
+  await expect(districtGraph.getByRole('listitem')).toHaveCount(32);
   const body = dialog.locator('.nr-tool-dialog-content');
   expect(await body.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
   await body.evaluate(el => { el.scrollTop = el.scrollHeight; });

@@ -1,5 +1,18 @@
 import { exportHorizons, summarizeExportRisks, type ExportLocation, type ExportRisk, type ForecastExportComparisonRow } from './forecastExportModel';
 
+export type AnalysisLevel = 'district' | 'subdistrict';
+const analysisHierarchyByScope = {
+  province: { defaultLevel: 'district', levels: ['district', 'subdistrict'], comparisonLevel: 'district' },
+  district: { defaultLevel: 'subdistrict', levels: ['subdistrict'], comparisonLevel: 'subdistrict' },
+  // Tambon is the current source-data leaf. Do not invent finer-area forecasts.
+  subdistrict: { defaultLevel: 'subdistrict', levels: ['subdistrict'], comparisonLevel: null },
+} as const;
+
+export function analysisHierarchy(areaCode: string) {
+  const scope = areaCode === '30' ? 'province' : areaCode.length === 4 ? 'district' : 'subdistrict';
+  return analysisHierarchyByScope[scope];
+}
+
 export type RiskPattern = 'all' | 'high' | 'consecutive3' | `first-${number}` | `risk-${number}`;
 export const riskPatternOptions = [
   { value: 'all', label: 'ทุกรูปแบบพยากรณ์' },

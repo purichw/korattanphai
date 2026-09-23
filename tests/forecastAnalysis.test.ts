@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analysisDistricts, areaMatchesSearch, filterAnalysisRows, forecastPattern, matchesRiskPattern } from '../src/forecastAnalysis';
+import { analysisDistricts, analysisHierarchy, areaMatchesSearch, filterAnalysisRows, forecastPattern, matchesRiskPattern } from '../src/forecastAnalysis';
 import { buildForecastExport, buildForecastComparison, type ExportLocation } from '../src/forecastExportModel';
 import { locateKoratPoint } from '../src/mapPoint';
 import raw from '../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json';
@@ -10,6 +10,15 @@ const archive = raw as unknown as Archive;
 const report = buildForecastExport(archive, { areaCode: '30', originPeriod: '2025-12', irrigation: 'all' });
 
 describe('shared analysis preserves source risk and scope', () => {
+  it('selects child areas at province/district scope and retains the known leaf at tambon scope', () => {
+    expect(analysisHierarchy('30')).toEqual({ defaultLevel: 'district', levels: ['district', 'subdistrict'], comparisonLevel: 'district' });
+    for (const code of ['3028', '3025', '3015', '3001']) {
+      expect(analysisHierarchy(code)).toEqual({ defaultLevel: 'subdistrict', levels: ['subdistrict'], comparisonLevel: 'subdistrict' });
+    }
+    for (const code of ['302801', '302503', '301503', '300101']) {
+      expect(analysisHierarchy(code)).toEqual({ defaultLevel: 'subdistrict', levels: ['subdistrict'], comparisonLevel: null });
+    }
+  });
   it('never bridges null or missing values, or claims a first risk after a gap', () => {
     expect(forecastPattern([1, 2, null, 1, 1, 1]).longestRun).toBe(3);
     expect(matchesRiskPattern([1, 2, undefined, 1, 2, null], 'consecutive3')).toBe(false);

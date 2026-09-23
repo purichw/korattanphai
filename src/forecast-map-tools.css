@@ -145,6 +145,15 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-district-comparison strong { text-align: right; font-size: 14px; }
 .nr-district-bar { display: flex; height: 24px; background: #f1f4f2; }
 .nr-district-bar i { display: block; height: 100%; }
+.nr-subdistrict-comparison { display: grid; gap: 14px; }
+.nr-subdistrict-comparison > div { display: grid; grid-template-columns: 160px minmax(80px, 1fr) 150px; align-items: center; gap: 2px 12px; }
+.nr-subdistrict-comparison .nr-analysis-risk { justify-self: center; }
+.nr-subdistrict-comparison small { grid-column: 1 / -1; color: var(--muted); font-size: 11px; }
+.nr-subdistrict-risk-bar { height: 24px; background: var(--surface-muted); }
+.nr-subdistrict-risk-bar i { display: block; height: 100%; }
+.nr-subdistrict-risk-bar.is-1 i { background: #f1b84b; }
+.nr-subdistrict-risk-bar.is-2 i { background: #d95d59; }
+.nr-subdistrict-risk-bar.is-outside, .nr-subdistrict-risk-bar.is-missing { background: none; border: 1px dashed var(--line-strong); }
 @media (max-width: 720px) {
   .nr-tool-dialog, .nr-tool-dialog.is-wide { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
   .nr-tool-dialog.is-bounded { max-height: calc(100dvh - 16px); }
@@ -158,6 +167,10 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
   .nr-analysis-toolbar .secondary-button { width: 100%; }
   .nr-district-comparison > div { grid-template-columns: 100px minmax(50px, 1fr) 64px; gap: 4px 8px; font-size: 12px; }
   .nr-district-comparison strong { font-size: 12px; }
+  .nr-subdistrict-comparison > div { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; font-size: 12px; }
+  .nr-subdistrict-comparison .nr-tool-link { grid-area: 1 / 1; }
+  .nr-subdistrict-comparison .nr-analysis-risk { grid-area: 1 / 2; }
+  .nr-subdistrict-risk-bar { grid-column: 1 / -1; }
   .nr-map-tool-actions button { min-height: 40px; }
   .nr-map-tool-actions .icon-button { width: 40px; min-width: 40px; }
   .nr-map-tool-actions .nr-tool-analysis-trigger { flex: 1; padding: 4px; }

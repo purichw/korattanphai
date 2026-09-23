@@ -393,7 +393,14 @@ a usable minimum plot height independently of the toolbar.
   treat point coordinates as plot-level risk. The pin is transient, not saved.
 - `ForecastAnalysisDialog` shares the existing Excel model for all six horizon
   values, district maxima, counts/denominators and same-calendar-target
-  comparisons. It uses its own cancellable Supabase loader and revalidates on
+  comparisons. `analysisHierarchy` sets province tables to districts (with an
+  optional all-tambon detail view), district tables to their tambons, and tambon
+  tables to the selected tambon, the current source-data leaf. District/tambon
+  scopes cannot switch upward to a redundant district summary. Province charts
+  retain district risk counts/shares; district charts compare each tambon's
+  source 0/1/2 level at the selected horizon, never a per-tambon percentage.
+  No finer-area forecasts or comparative chart are fabricated at leaf scope.
+  It uses its own cancellable Supabase loader and revalidates on
   open, focus, visibility and every 60 seconds while open. New-revision data
   cannot overlay an older map. There is no static fallback in database mode.
   A matching complete page slice remains visible during revalidation, with a

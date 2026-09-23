@@ -9,7 +9,7 @@ import { getSupabaseClient } from '../../supabase';
 import { buildForecastExport, buildForecastComparison, exportHorizons, type ExportRisk, type ForecastExport } from '../../forecastExportModel';
 import { ForecastRiskValue } from '../ForecastRiskValue';
 import { LoadingAnalysisTable } from './ForecastLoadingPrimitives';
-import { analysisDistricts, comparisonStyles, filterAnalysisRows, forecastPattern, riskPatternOptions, type ForecastAnalysisOverlay, type RiskPattern } from '../../forecastAnalysis';
+import { analysisDistricts, analysisHierarchy, comparisonStyles, filterAnalysisRows, forecastPattern, riskPatternOptions, type AnalysisLevel, type ForecastAnalysisOverlay, type RiskPattern } from '../../forecastAnalysis';
 import { forecastTargetPeriod } from '../../forecastPeriod';
 import { formatMonth } from '../../i18n';
 import { irrigationLabels, type IrrigationCriterion } from '../../irrigation';
@@ -21,8 +21,11 @@ export default function ForecastAnalysisDialog({ archive, originPeriod, horizon,
 }) {
   const services = useDatabaseWorkspace();
   const [loader] = useState(() => services ? createSupabaseForecastLoader(services.userId, 6, getSupabaseClient) : null);
-  const [tab, setTab] = useState<'table' | 'districts' | 'comparison'>('table');
-  const [level, setLevel] = useState(areaCode.length === 6 ? 'subdistrict' : 'district');
+  const hierarchy = analysisHierarchy(areaCode);
+  const [tab, setTab] = useState<'table' | 'areas' | 'comparison'>('table');
+  const [levelSelection, setLevelSelection] = useState<{ areaCode: string; level: AnalysisLevel } | null>(null);
+  const level = levelSelection?.areaCode === areaCode && hierarchy.levels.some(value => value === levelSelection.level)
+    ? levelSelection.level : hierarchy.defaultLevel;
   const [query, setQuery] = useState('');
   const searchInput = useRef<HTMLInputElement>(null);
   const [district, setDistrict] = useState('');
@@ -107,7 +110,7 @@ export default function ForecastAnalysisDialog({ archive, originPeriod, horizon,
     </div>
     <div className="nr-tool-tabs" role="group" aria-label="มุมมองวิเคราะห์">
       <button type="button" aria-pressed={tab === 'table'} onClick={() => setTab('table')}><Table2 size={17} />ตาราง 6 เดือน</button>
-      {areaCode.length !== 6 && <button type="button" aria-pressed={tab === 'districts'} onClick={() => setTab('districts')}><ChartColumn size={17} />{areaCode === '30' ? 'เปรียบเทียบอำเภอ' : 'กราฟอำเภอ'}</button>}
+      {hierarchy.comparisonLevel && <button type="button" aria-pressed={tab === 'areas'} onClick={() => setTab('areas')}><ChartColumn size={17} />{hierarchy.comparisonLevel === 'district' ? 'เปรียบเทียบอำเภอ' : 'เปรียบเทียบตำบล'}</button>}
       <button type="button" aria-pressed={tab === 'comparison'} onClick={() => setTab('comparison')}><GitCompareArrows size={17} />เปรียบเทียบรอบ</button>
     </div>
     <div className="nr-analysis-filters">
@@ -122,9 +125,9 @@ export default function ForecastAnalysisDialog({ archive, originPeriod, horizon,
     </div>}
     {error ? <div role="alert" className="nr-tool-error"><p>{error}</p><button type="button" className="secondary-button" onClick={() => setAttempt(v => v + 1)}><RotateCcw size={16} />ลองใหม่</button></div> : !report ? <LoadingAnalysisTable /> : <>
       <div className="nr-analysis-toolbar"><span role="status">{rows.length} / {report.rows.length} ตำบล · {districts.length} อำเภอ</span>
-        {tab === 'table' && <><AppSelect ariaLabel="ระดับตาราง" value={level} onChange={setLevel} options={[...(areaCode.length !== 6 ? [{ value: 'district', label: 'สรุปอำเภอ' }] : []), { value: 'subdistrict', label: 'รายตำบล' }]} />
+        {tab === 'table' && <>{hierarchy.levels.length > 1 && <AppSelect ariaLabel="ระดับตาราง" value={level} onChange={value => setLevelSelection({ areaCode, level: value as AnalysisLevel })} options={hierarchy.levels.map(value => ({ value, label: value === 'district' ? 'สรุปอำเภอ' : 'รายตำบล' }))} />}
           <AppSelect ariaLabel="เรียงตาราง" value={sort} onChange={setSort} icon={<ArrowDownWideNarrow size={16} />} options={[{ value: 'code', label: 'รหัสพื้นที่' }, { value: 'name', label: 'ชื่อพื้นที่' }, { value: 'risk', label: `ความเสี่ยง T+${horizon}` }]} /></>}
-        {tab === 'districts' && <AppSelect ariaLabel="หน่วยเปรียบเทียบอำเภอ" value={unit} onChange={setUnit} options={[{ value: 'percent', label: 'สัดส่วนตำบลเสี่ยง (%)' }, { value: 'count', label: 'จำนวนตำบลเสี่ยง' }]} />}
+        {tab === 'areas' && hierarchy.comparisonLevel === 'district' && <AppSelect ariaLabel="หน่วยเปรียบเทียบอำเภอ" value={unit} onChange={setUnit} options={[{ value: 'percent', label: 'สัดส่วนตำบลเสี่ยง (%)' }, { value: 'count', label: 'จำนวนตำบลเสี่ยง' }]} />}
         <button className="secondary-button" type="button" disabled={busy || !rows.length || (tab === 'comparison' && !comparison.length)} onClick={() => overlay(tab === 'comparison')}><MapPinned size={16} />แสดงบนแผนที่</button>
       </div>
       {tab === 'comparison' && baselinePeriod && !baseline && busy ? <LoadingAnalysisTable /> : !rows.length ? <div className="nr-analysis-empty">
@@ -142,7 +145,22 @@ export default function ForecastAnalysisDialog({ archive, originPeriod, horizon,
             {row.risks.map((risk, index) => <td key={index} className={index === horizon - 1 ? 'is-active-period' : ''}><ForecastRiskValue risk={risk} />{row.coverage[index] && <small>มีค่า {row.coverage[index]} ตำบล</small>}</td>)}
             {level === 'subdistrict' && <td>{forecastPattern(row.risks).longestRun} เดือน</td>}</tr>)}</tbody>
         </table></div>
-      </> : tab === 'districts' ? <>
+      </> : tab === 'areas' && hierarchy.comparisonLevel === 'subdistrict' ? <>
+        <p className="nr-analysis-context">พยากรณ์ {formatMonth(targetPeriod, 'th')} · ระดับรายตำบล: 0 ไม่พบสัญญาณเสี่ยง · 1 ปานกลาง · 2 สูง</p>
+        <div className="nr-subdistrict-comparison" role="list" aria-label="กราฟเปรียบเทียบตำบล">
+          {[...rows].sort((a, b) => riskOrder(b.risks[horizon - 1]) - riskOrder(a.risks[horizon - 1]) || a.subdistrictCode.localeCompare(b.subdistrictCode)).map(row => {
+            const risk = row.risks[horizon - 1];
+            return <div key={row.subdistrictCode} role="listitem" data-area-code={row.subdistrictCode}>
+              <button className="nr-tool-link" type="button" onClick={() => focused(row.subdistrictCode)}>ต.{row.subdistrictNameTh}</button>
+              <div className={`nr-subdistrict-risk-bar is-${risk === null ? 'outside' : risk === undefined ? 'missing' : risk}`} aria-hidden="true">
+                {typeof risk === 'number' && <i style={{ width: `${risk / 2 * 100}%` }} />}
+              </div>
+              <ForecastRiskValue risk={risk} />
+              <small>{row.subdistrictCode} · ID {row.sourceId}</small>
+            </div>;
+          })}
+        </div>
+      </> : tab === 'areas' ? <>
         <p className="nr-analysis-context">พยากรณ์ {formatMonth(targetPeriod, 'th')} · จำนวนเสี่ยง = ระดับ 1 + 2 · สัดส่วนใช้เฉพาะตำบลที่มีค่าพยากรณ์ตามตัวกรอง ไม่ใช่ร้อยละของพื้นที่ดิน</p>
         <div className="nr-district-comparison" role="list" aria-label="กราฟเปรียบเทียบอำเภอ">
           {[...districts].sort((a, b) => (b.horizons[horizon - 1].riskShare ?? -1) - (a.horizons[horizon - 1].riskShare ?? -1) || a.code.localeCompare(b.code)).map(d => {
