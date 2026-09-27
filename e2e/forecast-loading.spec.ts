@@ -123,7 +123,7 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await page.route(archiveRequest, async (route) => { requests += 1; await held; await route.continue(); });
   await page.goto("/drought?mapLayer=forecast-archive&target=2025-12&horizon=6");
   await expect(page.getByRole("status")).toHaveText("กำลังโหลดข้อมูลพยากรณ์ภัยแล้ง");
-  await expect.poll(() => geometryRequests.length).toBe(3);
+  await expect.poll(() => geometryRequests.length).toBe(4);
   await expect(page.locator(".nr-drought-compact-workspace")).toHaveCount(0);
   const menu = page.getByRole('button', { name: 'เปิดเมนูหลัก' });
   if (await menu.isVisible()) await menu.click();
@@ -137,7 +137,12 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("6 เดือน");
   expect(requests).toBe(1);
-  expect(geometryRequests).toHaveLength(3);
+  expect(geometryRequests.sort()).toEqual([
+    '/geodata/nakhon-ratchasima-boundary.geojson',
+    '/geodata/nakhon-ratchasima-subdistricts.geojson',
+    '/geodata/thailand-adm1.geojson',
+    '/geodata/thailand-neighbor-context.geojson',
+  ]);
 });
 
 test("optional map context failure does not hide the forecast or its local polygons", async ({ page }) => {

@@ -115,6 +115,7 @@ try {
       }
       for (const route of ['/', '/wang-nam-khiao', '/phimai/t-301503']) {
         await page.goto(new URL(`${route}?period=2026-08`, base).href, { waitUntil: 'domcontentloaded' });
+        await page.locator('.nr-map-shape').first().waitFor();
         await expect(page.locator('.nr-map-shape')).toHaveCount(289);
         await expect(page.locator('.nr-primary-workspace, .nr-archive-context')).toHaveCount(0);
         await expect(page).toHaveURL(/target=2025-12&horizon=1/);
