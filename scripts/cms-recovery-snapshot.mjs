@@ -108,7 +108,8 @@ if (mode === 'capture') {
     await db.exec(original.definition);
     const before = (await db.query('select ktp_latest_forecast_revision() revision')).rows[0].revision;
     for (const migration of ['20260909010000_model_input_batches.sql', '20260927010000_cms_data_drafts.sql',
-      '20260927020000_cms_forecast_review.sql', '20260927030000_cms_reference_resources.sql']) {
+      '20260927020000_cms_forecast_review.sql', '20260927030000_cms_reference_resources.sql',
+      '20260928010000_cms_publication_readiness.sql']) {
       await db.exec(await fs.readFile(`supabase/migrations/${migration}`, 'utf8'));
     }
     const after = (await db.query('select ktp_latest_forecast_revision() revision')).rows[0].revision;

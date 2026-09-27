@@ -16,7 +16,8 @@ test('reviewed forecast publication preserves original data, other months, nulls
     await db.exec(await readFile(new URL('../../supabase/baseline/20260905_existing.sql', import.meta.url), 'utf8'));
     for (const migration of ['20260905110000_archive_and_saved_workspaces.sql','20260905124000_target_month_archive_publication.sql',
       '20260906160000_rev03_origin_forecast.sql','20260907040000_scoped_forecast_reads.sql',
-      '20260909010000_model_input_batches.sql','20260927010000_cms_data_drafts.sql','20260927020000_cms_forecast_review.sql']) {
+      '20260909010000_model_input_batches.sql','20260927010000_cms_data_drafts.sql','20260927020000_cms_forecast_review.sql',
+      '20260928010000_cms_publication_readiness.sql']) {
       await db.exec(await readFile(new URL(`../../supabase/migrations/${migration}`, import.meta.url), 'utf8'));
     }
     const archive = JSON.parse(await readFile(new URL('../../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', import.meta.url), 'utf8'));

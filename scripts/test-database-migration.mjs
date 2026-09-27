@@ -31,6 +31,7 @@ try {
     await db.exec(await fs.readFile('supabase/migrations/20260905124000_target_month_archive_publication.sql', 'utf8'));
     await db.exec(await fs.readFile('supabase/migrations/20260906160000_rev03_origin_forecast.sql', 'utf8'));
     await db.exec(await fs.readFile('supabase/migrations/20260907040000_scoped_forecast_reads.sql', 'utf8'));
+    await db.exec(await fs.readFile('supabase/migrations/20260928010000_cms_publication_readiness.sql', 'utf8'));
   });
   const archive = JSON.parse(await fs.readFile('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
   const expected = inspectArchive(archive);
@@ -62,6 +63,7 @@ try {
       ["update ktp_forecast_runs set source_year_month=null where horizon=1", /Origin must equal/],
       ["delete from ktp_forecast_values where horizon=6; delete from ktp_forecast_runs where horizon=6", /Each origin/],
       ["delete from ktp_forecast_values where subdistrict_code='300806' and horizon=6", /Every run requires/],
+      ["delete from ktp_forecast_values where origin_period='2015-06-01' and horizon=6", /Every run requires/],
       ["update ktp_forecast_values set source_first_row=null where horizon=1", /trace to an original/],
     ]) {
       await assert.rejects(db.exec(`begin; ${change}; ${publish}; commit;`), message);

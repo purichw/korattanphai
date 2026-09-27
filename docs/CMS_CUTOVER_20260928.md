@@ -30,6 +30,12 @@ Only migrations `20260909010000`, `20260927010000`, `20260927020000`, and
 `20260927030000` plus the reviewed reference seed are authorized for this
 cutover. Do not run every pending migration or change unrelated services.
 
+Full-size transaction-only production rehearsal found the existing publication
+trigger exceeding 60 seconds when checking a newly cloned dataset. Migration
+`20260928010000` pre-aggregates scoped value counts before joining runs, keeping
+all completeness and immutability guards. A fresh rehearsal is required before
+opening CMS publication. The failed rehearsal rolled back without a new dataset.
+
 Required: logical checkpoint, schema/row parity, all 45 reference payloads,
 real Auth/operator/anonymous permission checks, protected bundle budgets,
 required CI jobs, candidate smoke, then production smoke and integrity check.
