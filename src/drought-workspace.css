@@ -69,8 +69,8 @@
 .nr-forecast-unit-control button.active { color: #086794; border-color: #76ade0; background: #f7fbfe; box-shadow: none; }
 .nr-forecast-unit-control button:focus-visible { outline: 2px solid #205b85; outline-offset: 2px; }
 .nr-drought-forecast-active-column { fill: #eff7fb; }
-.nr-drought-forecast-bar.is-moderate { fill: #f1b84b; stroke: #b86100; stroke-width: 1; }
-.nr-drought-forecast-bar.is-high { fill: #d95d59; stroke: #a83937; stroke-width: 1; }
+.nr-drought-forecast-bar { stroke: none; }
+.nr-drought-forecast-bar-outline { fill: none; stroke: #34454a; stroke-opacity: .16; stroke-width: 1; pointer-events: none; }
 .nr-drought-forecast-zero { stroke: #41a76d; stroke-width: 3; }
 .nr-drought-forecast-graph .nr-forecast-point-group .nr-drought-forecast-point-label { fill: #21363f; font-size: 14px; font-weight: 700; }
 .nr-drought-forecast-graph .nr-drought-forecast-point-label.is-unavailable { fill: var(--muted); font-size: 10px; }

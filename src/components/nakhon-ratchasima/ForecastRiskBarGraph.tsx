@@ -20,6 +20,7 @@ export function DroughtForecastTrendGraph({ months, unit = "percent", activeHori
   const plotRef = useRef<HTMLDivElement>(null);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const tooltipId = useId();
+  const paintId = useId();
   const [size, setSize] = useState({ width: compactChart ? 360 : 720, height: compactChart ? 230 : 300 });
   const [detail, setDetail] = useState<Detail>(null);
 
@@ -83,6 +84,16 @@ export function DroughtForecastTrendGraph({ months, unit = "percent", activeHori
       <svg className="nr-forecast-line-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={title}>
         <title>{title}</title>
         <desc>{months.map(descriptionFor).join("; ")}</desc>
+        <defs>
+          <linearGradient id={`${paintId}-moderate`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffcf69" />
+            <stop offset="100%" stopColor="#f1b84b" />
+          </linearGradient>
+          <linearGradient id={`${paintId}-high`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#e97772" />
+            <stop offset="100%" stopColor="#d95d59" />
+          </linearGradient>
+        </defs>
         {months.map((month, index) => activeHorizon === month.monthIndex && <rect key={month.period}
           className="nr-drought-forecast-active-column" x={padding.left + xStep * index + 2} y={8}
           width={xStep - 4} height={zeroY - 4} rx={4} />)}
@@ -95,11 +106,24 @@ export function DroughtForecastTrendGraph({ months, unit = "percent", activeHori
           const moderate = valueFor(month.moderateRiskSubdistricts, month);
           const total = valueFor(month.riskSubdistricts, month);
           const unavailable = month.inScopeSubdistricts === 0;
+          const left = x - barWidth / 2;
+          const right = x + barWidth / 2;
+          const top = yForValue(total);
+          const radius = Math.min(6, barWidth / 2, (zeroY - top) / 2);
+          const clipId = `${paintId}-cap-${index}`;
+          // Round the whole stack, keeping segment joins and the zero baseline square.
+          const outline = `M ${left} ${zeroY} V ${top + radius} Q ${left} ${top} ${left + radius} ${top} H ${right - radius} Q ${right} ${top} ${right} ${top + radius} V ${zeroY} Z`;
           return <g key={month.period} className={`nr-forecast-point-group${activeHorizon === month.monthIndex ? " is-active" : ""}`}>
             <title>{descriptionFor(month)}</title>
             {!unavailable && <>
-              {month.moderateRiskSubdistricts > 0 && <rect className="nr-drought-forecast-bar is-moderate" data-count={month.moderateRiskSubdistricts} x={x - barWidth / 2} y={yForValue(moderate)} width={barWidth} height={zeroY - yForValue(moderate)} />}
-              {month.highRiskSubdistricts > 0 && <rect className="nr-drought-forecast-bar is-high" data-count={month.highRiskSubdistricts} x={x - barWidth / 2} y={yForValue(total)} width={barWidth} height={yForValue(moderate) - yForValue(total)} />}
+              {total > 0 && <>
+                <clipPath id={clipId}><path d={outline} /></clipPath>
+                <g clipPath={`url(#${clipId})`}>
+                  {month.moderateRiskSubdistricts > 0 && <rect className="nr-drought-forecast-bar is-moderate" fill={`url(#${paintId}-moderate)`} data-count={month.moderateRiskSubdistricts} x={x - barWidth / 2} y={yForValue(moderate)} width={barWidth} height={zeroY - yForValue(moderate)} />}
+                  {month.highRiskSubdistricts > 0 && <rect className="nr-drought-forecast-bar is-high" fill={`url(#${paintId}-high)`} data-count={month.highRiskSubdistricts} x={x - barWidth / 2} y={yForValue(total)} width={barWidth} height={yForValue(moderate) - yForValue(total)} />}
+                </g>
+                <path className="nr-drought-forecast-bar-outline" d={outline} />
+              </>}
               {total === 0 && <line className="nr-drought-forecast-zero" x1={x - barWidth / 2} x2={x + barWidth / 2} y1={zeroY} y2={zeroY} />}
             </>}
             <text className={`nr-drought-forecast-point-label${unavailable ? " is-unavailable" : ""}`} x={x} y={yForValue(total) - 10}>
