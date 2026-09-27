@@ -1,13 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { isDeepStrictEqual } from 'node:util';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { PGlite } from '@electric-sql/pglite';
 
 // Read-only remote snapshot; restore is restricted to an ephemeral local database.
 const mode = process.argv[2];
-assert.ok(['capture', 'rehearse'].includes(mode), 'Use capture or rehearse');
+assert.ok(['capture', 'rehearse', 'compare'].includes(mode), 'Use capture, rehearse or compare');
 const output = path.resolve(process.env.CMS_SNAPSHOT_DIR ?? 'artifacts/cms-recovery');
 const linkedRoot = path.resolve(process.env.CMS_LINKED_ROOT ?? process.cwd());
 const tables = ['ktp_districts', 'ktp_subdistricts', 'ktp_forecast_datasets',
@@ -15,7 +16,6 @@ const tables = ['ktp_districts', 'ktp_subdistricts', 'ktp_forecast_datasets',
   'ktp_followed_areas', 'ktp_saved_filters'];
 const identifier = name => { assert.match(name, /^[a-z_][a-z0-9_]*$/); return `"${name}"`; };
 const digest = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
-const literal = value => `'${String(value).replaceAll("'", "''")}'`;
 function query(sql) {
   const result = execFileSync('supabase', ['db', 'query', '--linked', '--output', 'json', sql],
     { cwd: linkedRoot, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -57,12 +57,24 @@ if (mode === 'capture') {
   }
   await save('manifest.json', metadata);
   console.log('Snapshot complete. No remote data changed; no Auth credentials exported.');
+} else if (mode === 'compare') {
+  assert.equal((await fs.readFile(path.join(linkedRoot, 'supabase/.temp/project-ref'), 'utf8')).trim(), 'dihchjflzhcekywarhxd');
+  const metadata = JSON.parse(await fs.readFile(path.join(output, 'manifest.json'), 'utf8'));
+  for (const part of metadata.parts) {
+    assert.ok(tables.includes(part.table));
+    const expected = JSON.parse(await fs.readFile(path.join(output, part.file), 'utf8'));
+    assert.equal(digest(expected), part.digest);
+    assert.ok(isDeepStrictEqual(query(rowQuery(part.table, part.columns, part.predicate))[0].data, expected), `Live fields changed: ${part.file}`);
+  }
+  const report = { checkedAt: new Date().toISOString(), everyExistingRowUnchanged: true,
+    rows: metadata.parts.reduce((sum, part) => sum + part.rows, 0) };
+  await save(`comparison-${Date.now()}.json`, report); console.log(JSON.stringify(report));
 } else {
   const metadata = JSON.parse(await fs.readFile(path.join(output, 'manifest.json'), 'utf8'));
   assert.equal(metadata.project, 'dihchjflzhcekywarhxd');
   const db = new PGlite();
   try {
-    await db.exec(`create role anon; create role authenticated; create role service_role;
+    await db.exec(`set timezone='UTC'; create role anon; create role authenticated; create role service_role;
       create schema auth; create table auth.users(id uuid primary key);
       create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
       grant usage on schema auth,public to authenticated,anon;`);
@@ -85,7 +97,10 @@ if (mode === 'capture') {
           select ${columns} from jsonb_populate_recordset(null::public.${identifier(part.table)},$1::jsonb)`, [JSON.stringify(records)]);
       }
       const restored = (await db.query(rowQuery(part.table, part.columns, part.predicate))).rows[0].data;
-      assert.equal(digest(restored), part.digest, `Restored fields differ: ${part.file}`);
+      if (!isDeepStrictEqual(restored, rows)) console.log(JSON.stringify({ mismatch: part.file,
+        fields: part.columns.filter((_, index) => restored.some((row, rowIndex) => !isDeepStrictEqual(row[index], rows[rowIndex]?.[index]))),
+      }));
+      assert.ok(isDeepStrictEqual(restored, rows), `Restored fields differ: ${part.file}`);
     }
     await db.exec('set session_replication_role=origin');
     const original = metadata.functions.find(fn => fn.proname === 'ktp_latest_forecast_revision');
@@ -99,7 +114,8 @@ if (mode === 'capture') {
     const after = (await db.query('select ktp_latest_forecast_revision() revision')).rows[0].revision;
     assert.deepEqual(after, before);
     for (const part of metadata.parts) {
-      assert.equal(digest((await db.query(rowQuery(part.table, part.columns, part.predicate))).rows[0].data), part.digest);
+      const expected = JSON.parse(await fs.readFile(path.join(output, part.file), 'utf8'));
+      assert.ok(isDeepStrictEqual((await db.query(rowQuery(part.table, part.columns, part.predicate))).rows[0].data, expected), `Migration changed fields: ${part.file}`);
     }
     const report = { checkedAt: new Date().toISOString(), restoredRows: metadata.parts.reduce((sum, part) => sum + part.rows, 0),
       parts: metadata.parts.length, everyFieldMatches: true, migrationsPreserveEveryExistingRow: true, unchangedPublication: before.datasetId };
