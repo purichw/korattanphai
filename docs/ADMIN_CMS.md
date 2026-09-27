@@ -1,8 +1,9 @@
 # Admin Data Workspace
 
-Status: production cutover authorized on 2026-09-28 (Asia/Bangkok). The database
-migration and real-account CMS candidate checks are complete. Web promotion and
-final post-promotion verification are pending; authorization is not activation.
+Status: the owner-authorized production cutover completed on 2026-09-28
+(Asia/Bangkok), runtime `2a84a0e`. Database, candidate and post-promotion checks
+passed with the original data unchanged. This is the scoped CMS foundation,
+not complete no-code ownership of every data family; see remaining gates below.
 See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
 
 ## Owner Requirements
@@ -71,7 +72,7 @@ the no-hardcoded-data requirement complete until every active reader is migrated
 - [x] Local permission, lifecycle, null/zero, provenance and API parity tests.
 - [ ] Complete the remaining feature gates below; this is not a full CMS release.
 - [x] Owner-approved remote migrations/seed and real-account CMS candidate checks.
-- [ ] Owner-approved production cutover.
+- [x] Owner-approved production cutover and real-account post-promotion checks.
 
 ## Implemented Boundaries
 
@@ -157,8 +158,8 @@ search, scope and Excel selection. It also refuses unregistered canonical JSON
 imports. CMS builds omit public GeoJSON copies and expose a
 `reference-backend.json` marker. Original files remain in source control for
 migration verification and explicit static regression builds only. Static mode
-is not a fallback for CMS mode. Production remains on its old configuration until
-the approved candidate passes the cutover gates.
+is not a fallback for CMS mode. Production now enables both database flags;
+changing a build flag is not a substitute for the cutover gates.
 
 Reference drafts preserve data shape, nulls, types, IDs, joins, provenance and
 status labels. Safe scalar fields can be edited in a paginated, searchable UI;
@@ -224,7 +225,7 @@ Local checks live in `tests/admin-data`, `tests/adminWorkbook.test.ts`,
 isolated PGlite database and test-only Auth/network interception. They are never
 imported by application code and are restricted to localhost.
 
-### Local Verification Evidence
+### Initial Local Verification Evidence
 
 - 39 Node tests passed across CMS contracts, isolated SQL migrations, shared
   API validators and operational endpoint compatibility.
@@ -236,5 +237,6 @@ imported by application code and are restricted to localhost.
   resources fail closed. No production account/data is used by these fixtures.
 - Screenshots and local build/seed artifacts are under
   `artifacts/admin-cms-20260927/`; fixture annotations identify test-only edits.
-- Broad unrelated route/iOS audits and remote Supabase/candidate smoke are not
-  evidence from this pass. Existing production configuration remains unchanged.
+- These initial local checks did not prove remote behavior. Subsequent authorized
+  database/candidate/production verification is recorded in the cutover document.
+  Broad unrelated iOS/parked-feature audits were not part of this web release.

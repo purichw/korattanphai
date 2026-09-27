@@ -2,8 +2,10 @@
 
 ## Current API State
 
-CMS candidate: `/api/admin-data?action=...` verifies the existing Supabase
-session and database operator membership. Import/edit/validate/accept/export
+CMS: `/api/admin-data?action=...` verifies the Supabase bearer session and
+database operator membership. The browser obtains that session through the
+separate `/admin/login`; this does not create a second user directory or change
+the API field schemas. Import/edit/validate/accept/export
 share the V1 domain fields; draft bookkeeping is a separate envelope.
 `CMS_SUPABASE_URL` and `CMS_SUPABASE_SECRET_KEY` are server-only. Published
 references are authenticated read-only RPCs, not direct table access. See

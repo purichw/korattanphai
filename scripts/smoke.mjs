@@ -257,6 +257,7 @@ try {
         ]) {
           const route = `${criterion === "unknown" ? "/" : "/drought"}?mapLayer=forecast-archive&target=2025-12&horizon=1`;
           await page.goto(new URL(route, base).href, { waitUntil: "domcontentloaded" });
+          await page.locator('.nr-map-shape').first().waitFor();
           const select = page.locator(".nr-map-panel .nr-irrigation-filter").getByRole("combobox");
           await expect(select).toBeVisible();
           const mapFrame = await page.locator('.nr-dashboard-map-card').boundingBox();
@@ -282,6 +283,7 @@ try {
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `${name}: irrigation overflow`);
           await page.screenshot({ path: path.join(output, `${name}-irrigation-${criterion}.png`), fullPage: true });
           await page.reload({ waitUntil: "domcontentloaded" });
+          await page.locator('.nr-map-shape').first().waitFor();
           await expect(select).toContainText(label);
           await expect(shapes).toHaveCount(codes.length);
           report.checks.push({ viewport: name, irrigation: criterion, matched: codes.length, highRisk: high, sourceMatch: true, categoricalColor: color, unchangedUrl: true, reloadPreserved: true });
@@ -292,6 +294,7 @@ try {
           ['subdistrict', '/dan-khun-thot/t-300803?mapLayer=forecast-archive&target=2025-12&horizon=4', 1],
         ]) {
           await page.goto(new URL(route, base).href, { waitUntil: 'domcontentloaded' });
+          await page.locator('.nr-map-shape').first().waitFor();
           const shapes = page.locator('.nr-map-shape:not(.is-criteria-filtered)');
           await expect(shapes).toHaveCount(count);
           const map = page.locator('.nr-dashboard-map-card');
@@ -342,6 +345,12 @@ try {
       await page.getByRole("menuitem", { name: "ออกจากระบบ", exact: true }).click();
       await page.getByLabel("อีเมล", { exact: true }).waitFor();
       assert.equal(await page.getByRole("alert").count(), 0, "Logout should complete without an auth error");
+    } catch (error) {
+      await Promise.all(rpcChecks);
+      if (errors.length) error.message += `\nObserved browser failures: ${errors.join('; ')}`;
+      await page.screenshot({ path: path.join(output, `${name}-failure.png`),
+        mask: [page.locator('input[type="password"], #login-email, #login-password')] }).catch(() => {});
+      throw error;
     } finally { await context.close(); }
   }
 } catch (error) {

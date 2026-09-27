@@ -5,7 +5,8 @@
 `Korat Tan Phai / โคราชทันภัย` is an authenticated Nakhon Ratchasima drought
 dashboard derived from the Kaset Tan Phai prototype. Its current surfaces are
 forecast overview, province/district/subdistrict six-horizon forecasts, Excel
-reporting and personal saved workspaces. Actual routing is parked by explicit
+reporting, personal saved workspaces and the scoped no-code CMS at `/admin`.
+Actual routing is parked by explicit
 owner request on 2026-09-20; operational feeds remain unconfigured.
 
 [Forecast-only restoration](docs/FORECAST_ONLY_RESTORATION.md) is the active
@@ -37,8 +38,10 @@ notification recipient or remote log store was activated. V2 remains proposed. S
 
 ## Current State
 
-- CMS candidate: `src/admin`, `server/admin-data`, `shared`, and three additive
-  CMS migrations. `/admin` reuses existing Auth, shared selects and dialogs.
+- CMS: `src/admin`, `server/admin-data`, `shared`, and additive migrations through
+  `20260928010000`. `/admin/login` uses existing accounts with an independent
+  Admin session. Shared login, selects, dialogs and empty states preserve the
+  visitor design/interaction contracts; `authScope.ts` owns session boundaries.
 - `VITE_REFERENCE_BACKEND=cms` uses published database resources with no bundled
   fallback; activation status and scope are in [the cutover record](docs/CMS_CUTOVER_20260928.md).
 
@@ -128,12 +131,14 @@ Production smoke checks after an authorized deploy:
 - Confirm the visible product UI is Thai-only and the brand is Korat Tan Phai /
   โคราชทันภัย.
 - Confirm navigation shows `ภาพรวม`, its `ภัยแล้ง` subitem and `ส่งออก Excel`
-  in database mode, with saved workspaces in the account toolbar.
+  in database mode, plus `จัดการข้อมูล`, with saved workspaces in the account toolbar.
+- Confirm `/admin` requires separate sign-in from the visitor, Admin sign-out
+  leaves the visitor session working and vice versa, including real refresh.
 - Confirm `/`, `/wang-nam-khiao`, and `/wang-nam-khiao/t-302504` load after
   login, while legacy `/nakhon-ratchasima/...` links still resolve.
-- Confirm the Nakhon Ratchasima map loads and no network errors appear for
-  `/geodata/nakhon-ratchasima-subdistricts.geojson` or
-  `/geodata/thailand-neighbor-context.geojson`.
+- Confirm the Nakhon Ratchasima map loads from pinned CMS reference RPCs in
+  CMS mode, with no fallback to `/geodata/`. Static regression builds still
+  exercise the source GeoJSONs; they are not production migration evidence.
 - Confirm the active map offers forecast-risk and workbook irrigation coloring,
   not water, flood, reservoir, weather or rainfall feeds. Raw catalog entries
   remain parked for future ingest/prediction work only.

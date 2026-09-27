@@ -46,12 +46,18 @@ back: two original datasets remain, with no new forecast publication.
 Required: logical checkpoint, schema/row parity, all 45 reference payloads,
 real Auth/operator/anonymous permission checks, protected bundle budgets,
 required CI jobs, candidate smoke, then production smoke and integrity check.
-Database migration is complete; web promotion is pending the final candidate
-and CI gates. Candidate source is `b405fe1` (runtime changes through `e51b0a7`),
-deployment `dpl_FBLsEfdCxXjM1xWpFtRcVY7jMsXV`.
-That candidate passed 39 visitor checks and the real CMS workflow but is held:
-it predates the separate Admin-session requirement. A replacement candidate and
-independent login/logout/tab/refresh verification are required before promotion.
+Database migration and web promotion are complete. Production now points to
+runtime `2a84a0e`, deployment `dpl_HK4g5ZzWBGwSf8AYoRSgVLhDi2Qz`,
+`https://korattanphai-3wlhsnc9s-purich-w.vercel.app`. Both production backend
+flags are configured. [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36341840804)
+passed all six jobs on that exact runtime. The main alias was verified to still
+be the recovery baseline immediately before promotion, and to be the candidate
+afterwards. `reference-backend.json` confirms `backend: cms`, `fallback: false`.
+
+The earlier `b405fe1` candidate `dpl_FBLsEfdCxXjM1xWpFtRcVY7jMsXV` passed its
+39 visitor checks but was never promoted: the owner then requested independent
+Admin sessions. The replacement shares the login/empty-state UI primitives while
+isolating persisted SDK sessions and broadcast channels, preserving visitor keys.
 
 ## Verification Evidence
 
@@ -75,6 +81,22 @@ These files are ignored, not published through the website or committed.
 - One labelled verification draft `0414a977-22b3-43db-ae00-80a6ca6fff38` retains
   unchanged December 2025 values and two audit entries. It is not published;
   no synthetic observation or forecast was accepted into visitor-facing data.
+- `candidate-admin-auth/cms/` and `production/cms/`: real separate Admin login,
+  same-scope multi-tab logout, opposite-scope session survival and successful
+  real refresh-token calls after logout. Both desktop/mobile also verify CMS
+  filters, history and unchanged JSON/Excel exports. Final ready-state snapshots
+  wait for fonts, logos and forecast controls; provenance is recorded alongside.
+- `candidate-admin-auth/browser-ready/` and `production/browser-confirmed/`:
+  all 39 authenticated visitor checks passed on each, including scope, null/zero,
+  monthly selection, graph units, source-exact Excel, irrigation reset and saved
+  workspace reads. No raw archive fallback or parked Actual UI was activated.
+- `production/references/`: all 45 resources match every source field/hash,
+  the 34-resource bootstrap matches, and all 13 denied-access probes pass.
+- `production/database/`: 220,218 forecast cells retain digest
+  `44cfcd55c251d9c95f169d3b391040de435b3b6462139f501559a155456e5fd1`;
+  T+1/T+6 and nine scoped projections match their original values.
+- `recovery/comparison-1790535854905.json`: after promotion, every original
+  field in all 442,862 rows across the eight captured public tables is unchanged.
 
 The project's existing new-format secret key returned `Invalid API key` in
 real preflight. The existing service-role credential passed Auth and operator
@@ -87,6 +109,17 @@ Tests now explicitly cover the CMS control and four geometry resources. The
 live smoke also waits for map readiness (bounded 30 seconds) before counting
 polygons; CMS cold-start network reads must finish, not just DOM navigation.
 Targeted desktop/mobile static regression passed all four cases.
+
+The first post-promotion visitor pass encountered one failed mobile forecast
+load. Its screenshot is retained under `production/browser/`; the exact upstream
+cause was not established, and no error was silently treated as empty data.
+`production/forecast-cold/` records five successful cold-route repeats (2.1-2.9s)
+with RPC status/timing and a controlled read-only network failure followed by
+successful real-service retry. The complete subsequent production run passed.
+This is bounded recovery evidence, not a promise that external reads cannot fail.
+The smoke harness now waits for map readiness before irrigation interactions
+and preserves failure screenshots/RPC failures rather than relying on a 5s
+expectation immediately after navigation. No application deadline was relaxed.
 
 ## Recovery Procedure
 

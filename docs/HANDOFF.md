@@ -20,6 +20,33 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+CMS cutover and independent Admin login (2026-09-28):
+
+- Runtime `2a84a0e`, branch `release/cms-cutover-20260928`, deployed as
+  `dpl_HK4g5ZzWBGwSf8AYoRSgVLhDi2Qz` to the main production alias. All six
+  [Quality Gate jobs](https://github.com/purichw/korattanphai/actions/runs/36341840804)
+  passed; candidate and final production each passed 39 visitor smoke checks.
+- `/admin/login` uses the same existing Supabase users but independent sessions
+  from visitor `/login`. Real desktop/mobile checks prove same-scope tab logout
+  and that the opposite session still refreshes successfully. Server operator
+  membership remains authoritative; personas do not grant access.
+- CMS reuses shared login, selects, months, dialogs, buttons, skeletons, brand
+  tokens and empty-state presentation. Existing visitor interactions and
+  province/district/tambon map/chart/Excel contracts remain intact.
+- All 45 reference resources are versioned in Supabase; 34 bootstrap resources
+  and on-demand geometry replace bundled reads in production CMS mode, without
+  fallback. Every original field in 442,862 rows is unchanged; all 220,218 rev03
+  forecast cells retain their source digest. Five approved additive migrations
+  were applied; unrelated pending migrations were excluded.
+- A labelled unchanged-value QA draft remains unpublished with its audit history.
+  New forecast origins/model-result publication, geometry/structural edits,
+  binary XLSX retention and UI restore remain gated. iOS is not migrated here.
+- One production smoke pass encountered a forecast-load failure. Five cold-route
+  repetitions, controlled-failure retry and a full subsequent 39-check run pass;
+  the original failure is retained, with no unsupported root-cause claim.
+- See [CMS contracts](ADMIN_CMS.md) and [cutover/recovery evidence](CMS_CUTOVER_20260928.md)
+  for migrations, artifacts, credentials boundaries, feature gates and recovery.
+
 Softer shared forecast bars production release (2026-09-27):
 
 - Runtime `e6d8623` releases the graph work explicitly authorized from
