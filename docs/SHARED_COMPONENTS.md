@@ -9,6 +9,13 @@ this document in the same change whenever a shared component contract changes.
 
 ## Public Shared Components
 
+Shared web surface styling is owned by `src/brand-theme.css`, imported once in
+`src/main.tsx`. Existing shell, filters, `AppSelect`, metrics, map controls and
+forecast cards consume its paint-only rules without new props or layout wrappers.
+Do not copy these visual rules into individual route components. Component sizes,
+spacing, fonts, responsive order, events and data ownership stay in their current
+owners. See [BRAND_SURFACE_THEME.md](BRAND_SURFACE_THEME.md).
+
 Active forecast-only composition (see [restoration contract](FORECAST_ONLY_RESTORATION.md)):
 `NakhonRatchasimaWorkspace` mounts the shared forecast composition at every
 geographic level. `OperationalDroughtWorkspace` and its neutral-map variant remain

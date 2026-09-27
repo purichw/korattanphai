@@ -104,6 +104,17 @@ guards source drift; Simulator screenshots still verify actual rendering.
 
 ## Asset Locations
 
+### Shared web surface theme
+
+`src/brand-theme.css` adds the reference-led ivory, forest-green and antique-gold
+surface treatment to the existing web components. It is imported once by
+`src/main.tsx`. Use its `--brand-*` roles for decorative surfaces; the original
+semantic/risk tokens, font metrics and component geometry remain authoritative.
+The shared decorative illustration is `public/brand/korat-rice-landscape.webp`.
+It is illustrative brand art, not satellite imagery or evidence of field conditions.
+See [surface-theme contract](BRAND_SURFACE_THEME.md) for reuse, asset provenance
+and the geometry-preservation verification.
+
 - Static map: `public/geodata/thailand-adm1.geojson`
 - Static regional-country underlay:
   `public/geodata/thailand-neighbor-context.geojson`
