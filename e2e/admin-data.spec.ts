@@ -1,4 +1,4 @@
-import { test, expect, seedAuthSession } from './fixtures';
+import { test, expect, seedAdminSession } from './fixtures';
 import { cmsTestDatabase } from '../tests/fixtures/admin-data.mjs';
 import ExcelJS from '@protobi/exceljs';
 import { readFile } from 'node:fs/promises';
@@ -8,7 +8,7 @@ test('CMS import, repair, reload, export, conflict and acceptance use the persis
   const database = await cmsTestDatabase(context, { references: true });
   const runtimeErrors: string[] = []; page.on('pageerror', error => runtimeErrors.push(error.message));
   try {
-    await seedAuthSession(page);
+    await seedAdminSession(page);
     await page.goto('/admin');
     await expect(page.getByRole('heading', { name: 'ยังไม่มีรายการนำเข้า' })).toBeVisible({ timeout: 30000 });
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).first().click();
@@ -77,7 +77,7 @@ test('original T+ workbook imports through a worker and preserves conflicts for 
     for (const area of archive.locations) sheet.addRow([2025, 12, area.sourceId, area.subdistrictNameEn, area.districtNameEn, 'RainFed', ...archive.packedRiskByTargetMonth['2025-12'][area.subdistrictCode]]);
     const repeated = sheet.getRow(3).values as ExcelJS.CellValue[];
     sheet.addRow([...repeated.slice(1, 7), 2, ...repeated.slice(8)]);
-    await seedAuthSession(page); await page.goto('/admin');
+    await seedAdminSession(page); await page.goto('/admin');
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).first().click();
     await page.getByLabel('ไฟล์ข้อมูล', { exact: true }).setInputFiles({ name: 'normalized-test.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: Buffer.from(await workbook.xlsx.writeBuffer()) });
     await expect(page.getByRole('heading', { name: 'พยากรณ์ T+1–T+6 จากต้นฉบับ', exact: true })).toBeVisible();
@@ -99,7 +99,7 @@ test('CMS reviews a published forecast origin and publishes an immutable new ver
   test.setTimeout(90000);
   const database = await cmsTestDatabase(context, { forecasts: true, references: true });
   try {
-    await seedAuthSession(page); await page.goto('/admin');
+    await seedAdminSession(page); await page.goto('/admin');
     await page.getByRole('button', { name: 'ตรวจแก้รอบนี้', exact: true }).click();
     await expect(page).toHaveURL(/draft=/);
     const id = new URL(page.url()).searchParams.get('draft')!;

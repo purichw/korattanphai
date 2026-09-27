@@ -19,7 +19,7 @@ export function safeInternalRedirect(value: string | null, origin: string): stri
   if (!value?.startsWith("/") || value.startsWith("//") || /[\\\u0000-\u001f\u007f]/.test(value)) return "/";
   try {
     const url = new URL(value, origin);
-    if (url.origin !== origin || url.pathname === "/login" || url.pathname === "/login/") return "/";
+    if (url.origin !== origin || ['/login', '/login/', '/admin/login', '/admin/login/'].includes(url.pathname)) return "/";
     return url.pathname + url.search + url.hash;
   } catch { return "/"; }
 }

@@ -13,6 +13,7 @@ export const authTestUser = {
   created_at: "2026-09-05T00:00:00Z",
 };
 export const authStorageKey = "sb-ktp-auth-test-auth-token";
+export const adminAuthStorageKey = `${authStorageKey}-admin`;
 
 export function authTestSession(expiresAt = Math.floor(Date.now() / 1000) + 3600) {
   const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -26,15 +27,18 @@ export function authTestSession(expiresAt = Math.floor(Date.now() / 1000) + 3600
   };
 }
 
-export async function seedAuthSession(pageOrContext, expiresAt) {
+export async function seedAuthSession(pageOrContext, expiresAt, scope = 'visitor') {
   await pageOrContext.addInitScript(({ key, session }) => {
     // Once per isolated browser context: reload must exercise SDK persistence.
-    if (!sessionStorage.getItem("ktp-test-session-seeded")) {
+    const marker = `ktp-test-session-seeded:${key}`;
+    if (!sessionStorage.getItem(marker)) {
       localStorage.setItem(key, JSON.stringify(session));
-      sessionStorage.setItem("ktp-test-session-seeded", "1");
+      sessionStorage.setItem(marker, "1");
     }
-  }, { key: authStorageKey, session: authTestSession(expiresAt) });
+  }, { key: scope === 'admin' ? adminAuthStorageKey : authStorageKey, session: authTestSession(expiresAt) });
 }
+
+export function seedAdminSession(pageOrContext, expiresAt) { return seedAuthSession(pageOrContext, expiresAt, 'admin'); }
 
 export async function mockSupabase(pageOrContext) {
   const requests = [];

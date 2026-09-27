@@ -1,4 +1,4 @@
-import { test, expect, seedAuthSession } from './fixtures';
+import { test, expect, seedAuthSession, seedAdminSession } from './fixtures';
 import { cmsTestDatabase } from '../tests/fixtures/admin-data.mjs';
 import { readFile } from 'node:fs/promises';
 import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
@@ -14,7 +14,7 @@ test('CMS resource edit survives reload and the public runtime reads the publish
   page.on('request', request => { if (request.url().includes('ktp_cms_reference_bundle')) reads.push(request.postData() ?? ''); });
   page.on('response', async response => { if (response.url().includes('ktp_cms_reference_bundle') && response.ok()) readValues.push(...Object.values(await response.json())); });
   try {
-    await seedAuthSession(page); await page.goto('/admin');
+    await seedAdminSession(page); await page.goto('/admin');
     await expect(page.getByRole('heading', { name: 'ทะเบียนและข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
     expect(reads).toHaveLength(1); expect(JSON.parse(reads[0]).p_ids).toHaveLength(34);
     await page.getByLabel('ค้นหาทะเบียนหรือ field', { exact: true }).fill('ทะเบียนแหล่งข้อมูล');
@@ -77,7 +77,7 @@ test('map geometry comes from the pinned CMS revision and zoom behavior is prese
 test('incomplete CMS migration fails closed without serving bundled references', async ({ page, context }) => {
   test.setTimeout(60000);
   await context.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_cms_reference_catalog', route => route.fulfill({ json: [] }));
-  await seedAuthSession(page); await page.goto('/admin');
+  await seedAdminSession(page); await page.goto('/admin');
   await expect(page.getByRole('heading', { name: 'ไม่สามารถแสดงหน้านี้ได้', exact: true })).toBeVisible({ timeout: 30000 });
   await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toHaveCount(0);
 });

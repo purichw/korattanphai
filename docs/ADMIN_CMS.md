@@ -1,14 +1,17 @@
 # Admin Data Workspace
 
-Status: production cutover authorized on 2026-09-28 (Asia/Bangkok), with
-before/after real-account verification required. Preparation and candidate
-verification are in progress; authorization is not proof of activation.
+Status: production cutover authorized on 2026-09-28 (Asia/Bangkok). The database
+migration and real-account CMS candidate checks are complete. Web promotion and
+final post-promotion verification are pending; authorization is not activation.
 See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
 
 ## Owner Requirements
 
 - Reuse Supabase Auth and existing staff accounts. Staff and Admin have the same
   operational role for this release; display personas never grant permission.
+- `/admin/login` requires a separate sign-in even when the visitor session is
+  active. Same accounts/provider, separate persisted sessions and tab channels.
+  Signing out either scope must preserve the other scope's refresh session.
 - No-code upload, inspect, resolve errors, edit, validate, export and explicitly
   publish. An upload is not publication.
 - API and files use the same domain fields and validators. CMS bookkeeping is a
@@ -67,12 +70,24 @@ the no-hardcoded-data requirement complete until every active reader is migrated
 - [x] CMS build replaces registered JSON imports and map file reads; no fallback.
 - [x] Local permission, lifecycle, null/zero, provenance and API parity tests.
 - [ ] Complete the remaining feature gates below; this is not a full CMS release.
-- [ ] Owner-approved remote migrations/seed and real-account candidate smoke.
+- [x] Owner-approved remote migrations/seed and real-account CMS candidate checks.
 - [ ] Owner-approved production cutover.
 
 ## Implemented Boundaries
 
-`/admin` uses the existing Supabase session and shared app shell. The server
+Design reuse is intentional: CMS uses the same `AppSelect`, `MonthSelect`,
+`WorkspaceDialog`, `Skeleton`, button classes, brand tokens/fonts, shell and
+account controls as the visitor UI. `WorkspaceEmptyState` serves both CMS and
+the visitor irrigation adapter. Login uses one form implementation. Table
+editing/pagination and publication workflows remain CMS-owned; consistency
+does not justify sharing domain state or visitor/Admin sessions.
+
+`/admin` uses an independent Supabase session and the shared app shell. Visitor
+`/login` and `/admin/login` share `LoginScreen`, styling and error/password
+behavior. `authScope.ts` selects distinct SDK storage/broadcast keys; crossing
+between visitor/Admin performs document navigation and same-scope return URLs
+only. Visitor keys remain backward compatible. This is browser session isolation,
+not a second user directory or an additional permission tier. The server
 verifies the token with Auth and checks `ktp_cms_operators`; the SQL RPC repeats
 the membership check. Personas in the retained `users` resource never grant
 permission. No service key is exposed through Vite variables.
@@ -130,7 +145,7 @@ It performs no network operations. The seed is transactional and refuses to
 overwrite a different existing revision. Local tests compare all seeded JSON
 values with their originals, not only row counts.
 
-The proposed cutover uses `VITE_REFERENCE_BACKEND=cms` alongside
+The CMS build uses `VITE_REFERENCE_BACKEND=cms` alongside
 `VITE_DATA_BACKEND=supabase`. Before importing the authenticated UI, the app reads
 an authenticated reference catalog and one bundle containing the 34 required
 resources. Immutable IDs pin the page session to coherent revisions. Geometry
@@ -177,9 +192,10 @@ Do not describe this as complete no-code ownership of every dataset yet:
 - The existing model-input validator still uses the canonical area allowlist
   as a validation contract. Moving/change-managing that registry across all API
   services needs a coordinated migration, not a browser-only edit.
-- Real Supabase authorization, full 220,218-cell publication timing, online
-  recovery and production row/hash parity must be checked on an approved
-  candidate before cutover. Local PGlite/browser evidence does not prove these.
+- Before future cutovers, repeat real Supabase authorization, full-size
+  publication timing, recovery and production row/hash parity. The 2026-09-28
+  database results and remaining activation status are in the cutover record.
+- iOS reference readers are not migrated by this web CMS release.
 - Generalized arbitrary workbook schemas, CSV upload and geometry/asset upload
   are outside the currently implemented adapters.
 
@@ -188,7 +204,8 @@ Do not describe this as complete no-code ownership of every dataset yet:
 1. Obtain owner approval for the target Supabase project and operator membership.
    Back up the live database and record the active forecast dataset/version.
 2. Apply the already-required model-input migration, then CMS migrations
-   `20260927010000`, `20260927020000`, `20260927030000` in order on an isolated
+   `20260927010000`, `20260927020000`, `20260927030000`, then
+   `20260928010000` in order on an isolated
    candidate with the forecast schema/data already present.
 3. Review and apply the prepared reference seed there. Compare all 45 resource
    payloads and original hashes, forecast counts and sample T+h/null values.
@@ -203,7 +220,7 @@ Do not describe this as complete no-code ownership of every dataset yet:
 
 Local checks live in `tests/admin-data`, `tests/adminWorkbook.test.ts`,
 `tests/adminNormalizedForecast.test.ts`, `tests/workspaceDialog.test.tsx`,
-`e2e/admin-data.spec.ts` and `e2e/cms-references.spec.ts`. Browser fixtures use an
+`e2e/admin-data.spec.ts`, `e2e/admin-auth.spec.ts` and `e2e/cms-references.spec.ts`. Browser fixtures use an
 isolated PGlite database and test-only Auth/network interception. They are never
 imported by application code and are restricted to localhost.
 

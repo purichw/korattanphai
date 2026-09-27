@@ -51,11 +51,15 @@ using `.env.example` as the placeholder reference. No demo username bypass exist
 Missing configuration denies entry with a not-ready message. Never expose a
 service-role JWT, `sb_secret` key or database password through Vite variables.
 
-The SDK owns session persistence. Persona selection changes display context,
+Visitor `/login` and CMS `/admin/login` use the same accounts and shared login
+form, but independent SDK sessions. Entering `/admin` requires Admin sign-in;
+logging out one scope does not revoke the other scope. Persona selection changes display context,
 not account permissions. `VITE_DATA_BACKEND=supabase` reads the verified Excel
 archive through authenticated RLS and saves personal areas/filters per account.
-New database builds omit raw archive assets; other static JSON/GeoJSON and old
-deployment assets remain public. See [Data Migration](docs/SUPABASE_DATA_MIGRATION.md)
+CMS builds also use `VITE_REFERENCE_BACKEND=cms` to read versioned reference
+resources and geometry from authenticated storage, with no bundled fallback.
+Original static files remain for verification builds; earlier deployment assets
+may remain public. See [Data Migration](docs/SUPABASE_DATA_MIGRATION.md)
 for source integrity and [Auth Setup](docs/AUTH_SETUP.md) for the Preview
 checklist, test-only mocks, unverified backend prerequisites and SMTP limitations.
 

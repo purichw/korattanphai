@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { getAccountDisplayName, type LoginUser } from "./auth";
+import { authScopeForPath } from './authScope';
 import { DataProvenanceChip, DataProvenanceLegend, dataProvenanceChipKindFromText } from "./components/DataProvenanceChip";
 import { NakhonRatchasimaWorkspaceSummary } from "./components/NakhonRatchasimaWorkspaceSummary";
 import { NakhonRatchasimaWorkspace } from "./components/NakhonRatchasimaWorkspace";
@@ -383,7 +384,7 @@ function AppShell({
     onNavigate(destination);
   };
   const appRoute = resolveAppRoute(path);
-  const isAdmin = path === '/admin' || path === '/admin/';
+  const isAdmin = authScopeForPath(path) === 'admin';
   const nakhonRoute = appRoute.kind === "nakhon-ratchasima" ? appRoute.target : null;
   const provinceRoute = appRoute.kind === "province-workspace" ? appRoute.target : null;
   const isDroughtSubNavActive = Boolean(

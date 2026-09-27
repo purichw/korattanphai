@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Download, History, LockKeyhole, Pencil, RefreshCw, Search, SearchX } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Download, History, LockKeyhole, Pencil, RefreshCw, Search } from 'lucide-react';
 import { AppSelect } from '../components/AppSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
+import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
 import { createAdminClient } from './client';
 import type { Json, AuditEntry } from './types';
 import { lockedResourceField } from '../../shared/resourceEditPolicy.mjs';
@@ -84,7 +85,8 @@ export function ReferenceResources({ api, resourceId, onNavigate }: { api: Retur
               const id = resource.draft_id ?? (resource.resource_group === 'reference' ? (await api<ResourceDraft>('resource-clone', { body: { key: resource.resource_key } })).id : resource.id);
               setQuery(''); onNavigate(`/admin?resource=${id}`);
             })}><Pencil size={16} />ตรวจข้อมูล</button>{resource.draft_id && <small>มีฉบับร่าง</small>}</td></tr>)}</tbody></table></div>
-      {!(item ? filteredLeaves.length : selected.length) && <div className="cms-empty"><SearchX size={28} /><h3>ไม่พบข้อมูลตามตัวกรอง</h3></div>}
+      {!(item ? filteredLeaves.length : selected.length) && <WorkspaceEmptyState className="cms-empty" title="ไม่พบข้อมูลตามตัวกรอง"
+        action={<button className="secondary-button" onClick={() => { setQuery(''); setGroup('all'); }}><RefreshCw size={16} />ล้างตัวกรอง</button>} />}
       {(item ? filteredLeaves.length : selected.length) > 30 && <div className="cms-pagination"><button className="icon-button" aria-label="ทะเบียนหน้าก่อน" disabled={page === 0} onClick={() => setPage(value => value - 1)}><ArrowLeft size={16} /></button><span>หน้า {page + 1} / {Math.ceil((item ? filteredLeaves.length : selected.length) / 30)}</span>
         <button className="icon-button" aria-label="ทะเบียนหน้าถัดไป" disabled={(page + 1) * 30 >= (item ? filteredLeaves.length : selected.length)} onClick={() => setPage(value => value + 1)}><ArrowRight size={16} /></button></div>}
     </>}

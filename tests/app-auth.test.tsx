@@ -83,3 +83,17 @@ it("keeps CSP restricted to self plus the exact HTTPS Supabase origin", () => {
   expect(csp).toContain("frame-ancestors 'none'");
   expect(config.buildCommand).toBe("npm run build:protected");
 });
+
+it('keeps direct admin entry on its own login and retains the draft return URL', async () => {
+  const auth = {
+    getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
+    onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+  };
+  vi.mocked(getSupabaseClient).mockResolvedValue({ auth } as never);
+  window.history.replaceState(null, '', '/admin?draft=123');
+  render(<App />);
+  expect(await screen.findByRole('heading', { name: 'เข้าสู่ระบบผู้ดูแล' })).toBeInTheDocument();
+  expect(window.location.pathname).toBe('/admin/login');
+  expect(new URLSearchParams(window.location.search).get('next')).toBe('/admin?draft=123');
+  expect(screen.queryByText(/Protected:/)).toBeNull();
+});

@@ -1,4 +1,5 @@
-import { RotateCcw, SearchX } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { WorkspaceEmptyState } from './WorkspaceEmptyState';
 
 type IrrigationEmptyStateProps = {
   onReset: () => void;
@@ -7,16 +8,10 @@ type IrrigationEmptyStateProps = {
 
 export function IrrigationEmptyState({ onReset, className = "" }: IrrigationEmptyStateProps) {
   return (
-    <div className={`nr-irrigation-empty ${className}`.trim()} role="status">
-      <span className="nr-irrigation-empty-icon"><SearchX size={28} strokeWidth={1.6} aria-hidden="true" /></span>
-      <hgroup className="nr-irrigation-empty-copy">
-        <h3>ไม่พบตำบลตามตัวกรองนี้</h3>
-        <p>ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้</p>
-      </hgroup>
-      <button type="button" className="secondary-button" onClick={onReset}>
+    <WorkspaceEmptyState className={`nr-irrigation-empty ${className}`.trim()} title="ไม่พบตำบลตามตัวกรองนี้"
+      description="ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้" action={<button type="button" className="secondary-button" onClick={onReset}>
         <RotateCcw size={16} aria-hidden="true" />
         แสดงทุกสถานะชลประทาน
-      </button>
-    </div>
+      </button>} />
   );
 }

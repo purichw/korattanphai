@@ -51,6 +51,8 @@ files.
 
 | Component | File | Use For | Current Contract |
 | --- | --- | --- | --- |
+| `LoginFrame` / `LoginPage` | `src/components/LoginScreen.tsx` | Visitor and Admin sign-in | Same brand, fields, password visibility, Enter submission, busy/error behavior. `scope` changes title/return link only; `App`/Auth own routing and independent sessions. |
+| `WorkspaceEmptyState` | `src/components/WorkspaceEmptyState.tsx` | Shared empty/error presentation in CMS and irrigation | Icon, heading level, description and optional action; owner retains filtering/retry events and state. `IrrigationEmptyState` is the domain adapter, not a duplicate layout. |
 | `AppStartup` | `src/components/AppStartup.tsx` | Cold entry and refresh before the authenticated application is ready | Eager presentation only: receives `path` and status `message`; Home reuses neutral overview loading primitives, other paths use an unnamed workspace placeholder. No account values, forecast data, interactive controls or data loaders. |
 | `SidebarBrand` | `src/components/SidebarBrand.tsx` | Shared logo in live and startup sidebars | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
 | `WorkspaceSearch` / `WorkspaceSearchTrigger` | `src/components/WorkspaceSearch.tsx` | Authenticated global search across geographic levels and active tools | Shared desktop/mobile dialog; loads `WorkspaceSearchContent` only on open, with dismissible loading and scoped recovery. Formal Thai, aliases/topics, contextual results, Contains/Exact, filters, explicit history commits and per-account clearing. Receives `userId`, `includeExport`, navigation/export/close callbacks. See `SEARCH_BEHAVIOR.md`. |

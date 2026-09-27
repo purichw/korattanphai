@@ -203,6 +203,8 @@ summary:focus-visible {
   gap: 12px;
 }
 
+.login-return { justify-content: center; text-decoration: none; }
+
 .login-form label {
   display: grid;
   gap: 7px;
@@ -10444,13 +10446,13 @@ textarea {
   min-width: 0;
 }
 
-.nr-irrigation-empty,
+.workspace-empty,
 .is-drought-route .nr-drought-workspace-kpis.nr-irrigation-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; min-height: 240px; padding: 28px 16px; background: var(--surface-muted); color: var(--muted); text-align: center; }
-.nr-irrigation-empty-icon { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-muted); }
-.nr-irrigation-empty-copy { display: grid; grid-template-columns: minmax(0,1fr); gap: 8px; width: min(100%,400px); margin: 0; }
-.nr-irrigation-empty h3 { margin: 0; color: var(--ink); font-size: 17px; line-height: 1.5; font-weight: 600; }
-.nr-irrigation-empty p { margin: 0; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
-.nr-irrigation-empty > button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; max-width: 100%; font-size: 13px; }
+.workspace-empty-icon { display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-muted); }
+.workspace-empty-copy { display: grid; grid-template-columns: minmax(0,1fr); gap: 8px; width: min(100%,400px); margin: 0; }
+.workspace-empty h2, .workspace-empty h3 { margin: 0; color: var(--ink); font-size: 17px; line-height: 1.5; font-weight: 600; }
+.workspace-empty p { margin: 0; font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+.workspace-empty > button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; max-width: 100%; font-size: 13px; }
 
 .operational-filters.filter-count-3 .operational-filter-fields {
   grid-template-columns: repeat(3, minmax(0, 1fr));

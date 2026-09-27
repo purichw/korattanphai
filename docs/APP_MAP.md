@@ -76,20 +76,15 @@ saved `target_period` keys still identify T, with forward dates derived at runti
 
 ## Admin / Internal Routes
 
-FACT: There are no protected admin routes. Admin/operator roles are simulated
-personas in the same SPA:
+`/admin` is the CMS workspace; `/admin?draft=...` restores a saved draft.
+`/admin/login` uses the same Auth accounts as `/login` but an independent
+session. A visitor login alone does not open the CMS. Scope transitions reload
+the document, and logout synchronizes only tabs in the same scope.
 
-- National agricultural officer
-- Provincial agricultural officer
-- District agricultural officer
-- Extension officer
-- Analyst
-- Water/irrigation authority
-- Supervisor/approver
-- Farmer
-
-PROPOSAL: If real admin access is added, operator/admin routes should be
-protected and separated from the public resident route.
+The shared navigation offers `จัดการข้อมูล`; API access additionally requires
+server-verified `ktp_cms_operators` membership. Retained simulated personas are
+not authorization. See [ADMIN_CMS.md](ADMIN_CMS.md) for workflows/limitations
+and [CMS_CUTOVER_20260928.md](CMS_CUTOVER_20260928.md) for activation status.
 
 ## Hidden / Legacy / Compatibility Routes
 

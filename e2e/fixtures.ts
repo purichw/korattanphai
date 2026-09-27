@@ -27,4 +27,4 @@ export const test = base.extend<{ authMock: Awaited<ReturnType<typeof mockSupaba
 });
 export { expect };
 export type { Page, Locator } from "@playwright/test";
-export { authTestEmail, authTestPassword, authTestUser, authStorageKey, fillAuthForm, seedAuthSession } from "../tests/fixtures/supabase.mjs";
+export { authTestEmail, authTestPassword, authTestUser, authStorageKey, adminAuthStorageKey, fillAuthForm, seedAuthSession, seedAdminSession } from "../tests/fixtures/supabase.mjs";

@@ -137,7 +137,7 @@ test("empty district irrigation keeps the map frame stable and restores its char
     const empty = page.locator(".nr-irrigation-empty");
     await expect(empty).toContainText("ไม่พบตำบลที่ตรงกับสถานะชลประทานในพื้นที่นี้");
     await expect(empty.getByRole("heading", { name: "ไม่พบตำบลตามตัวกรองนี้" })).toBeVisible();
-    await expect(empty.locator(".nr-irrigation-empty-icon svg")).toBeVisible();
+    await expect(empty.locator(".workspace-empty-icon svg")).toBeVisible();
     const heading = await empty.getByRole("heading").boundingBox();
     const description = await empty.locator("p").boundingBox();
     expect(description!.y).toBeGreaterThanOrEqual(heading!.y + heading!.height);

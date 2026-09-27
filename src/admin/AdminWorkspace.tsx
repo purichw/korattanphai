@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Database, Download, FileUp, History, Pencil, Plus, RefreshCw, Search, SearchX, ShieldCheck, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Database, Download, FileUp, History, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, X } from 'lucide-react';
 import { AppSelect } from '../components/AppSelect';
 import { MonthSelect } from '../components/MonthSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
+import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
 import { Skeleton } from '../components/nakhon-ratchasima/ForecastLoadingPrimitives';
 import { createAdminClient } from './client';
 import { AdminImport } from './AdminImport';
@@ -51,15 +52,15 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
           onClick={() => setGeneration(value => value + 1)}><RefreshCw size={18} /></button></div>
     </header>
     {loading ? <div className="cms-loading" role="status" aria-label="กำลังโหลดชุดข้อมูล"><Skeleton /><Skeleton /><Skeleton /></div>
-      : error ? <div className="cms-empty" role="alert"><Database size={32} /><h2>ยังเปิดชุดข้อมูลไม่ได้</h2><p>{error}</p>
-        <button className="secondary-button" onClick={() => setGeneration(value => value + 1)}><RefreshCw size={16} />ลองใหม่</button></div>
+      : error ? <WorkspaceEmptyState className="cms-empty" role="alert" heading="h2" icon={Database} title="ยังเปิดชุดข้อมูลไม่ได้" description={error}
+        action={<button className="secondary-button" onClick={() => setGeneration(value => value + 1)}><RefreshCw size={16} />ลองใหม่</button>} />
       : draft ? <DraftEditor key={draft.id} draft={draft} api={api} onSaved={setDraft} />
       : <>
         <PublishedForecasts api={api} onCreated={openDraft} />
         <ReferenceResources api={api} resourceId={new URLSearchParams(window.location.search).get('resource')} onNavigate={onNavigate} />
         <div className="cms-list-heading"><h2>รายการนำเข้า</h2><span>{total.toLocaleString('th-TH')} ชุดข้อมูล</span></div>
-        {!items.length ? <div className="cms-empty"><Database size={32} /><h2>ยังไม่มีรายการนำเข้า</h2>
-          <button className="secondary-button" onClick={() => setImportOpen(true)}><FileUp size={16} />นำเข้าข้อมูล</button></div>
+        {!items.length ? <WorkspaceEmptyState className="cms-empty" heading="h2" icon={Database} title="ยังไม่มีรายการนำเข้า"
+          action={<button className="secondary-button" onClick={() => setImportOpen(true)}><FileUp size={16} />นำเข้าข้อมูล</button>} />
           : <div className="cms-table-scroll"><table className="cms-table"><thead><tr><th>ชุดข้อมูล</th><th>ประเภท</th><th>สถานะ</th><th>แก้ไขล่าสุด</th><th><span className="sr-only">เปิด</span></th></tr></thead>
             <tbody>{items.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename}</small></td>
               <td>{kindLabels[item.kind]}</td><td><span className={`cms-status ${item.state}`}>{item.state === 'accepted' ? (item.kind === 'archive' ? 'เผยแพร่แล้ว' : 'รับเข้าระบบแล้ว') : 'ฉบับร่าง'}</span></td>
@@ -166,7 +167,8 @@ function DraftEditor({ draft, api, onSaved }: { draft: Draft; api: ReturnType<ty
         {fields.map(field => <td key={field.key}>{value[field.key] === null ? <span className="cms-null">ไม่มีค่า</span> : value[field.key] === undefined ? <span className="cms-null">ไม่ระบุ</span> : String(value[field.key])}</td>)}
         <td><button className="icon-button" title={`แก้ไขแถว ${index + 1}`} aria-label={`แก้ไขแถว ${index + 1}`} disabled={busy || draft.state === 'accepted'}
           onClick={() => { setReason(''); setEdit({ index, value: structuredClone(value) }); }}><Pencil size={16} /></button></td></tr>)}</tbody></table></div>
-      : <div className="cms-empty"><SearchX size={30} /><h2>ไม่พบรายการตามตัวกรอง</h2><button className="secondary-button" onClick={() => { setQuery(''); setMode('all'); }}>ล้างตัวกรอง</button></div>}
+      : <WorkspaceEmptyState className="cms-empty" heading="h2" title="ไม่พบรายการตามตัวกรอง"
+        action={<button className="secondary-button" onClick={() => { setQuery(''); setMode('all'); }}><RefreshCw size={16} />ล้างตัวกรอง</button>} />}
     {filtered.length > 25 && <div className="cms-pagination"><button className="icon-button" aria-label="รายการหน้าก่อน" disabled={page === 0} onClick={() => setPage(value => value - 1)}><ArrowLeft size={18} /></button>
       <span>หน้า {page + 1} / {Math.ceil(filtered.length / 25)}</span><button className="icon-button" aria-label="รายการหน้าถัดไป" disabled={(page + 1) * 25 >= filtered.length} onClick={() => setPage(value => value + 1)}><ArrowRight size={18} /></button></div>}
     <footer className="cms-editor-footer"><button className="cms-text-button" disabled={busy} onClick={() => { void run(async () => {

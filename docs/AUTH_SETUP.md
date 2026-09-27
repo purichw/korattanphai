@@ -33,6 +33,22 @@ an administrator; personas still do not grant privileges.
 
 ## Configuration
 
+CMS session contract: visitor `/login` and `/admin/login` use the same Supabase
+users but separate sessions. `authScope.ts` keeps the existing visitor key
+`sb-<project>-auth-token` and uses `sb-<project>-auth-token-admin` for Admin,
+including the SDK's cross-tab channel. Cross-scope navigation reloads the
+document; same-scope `next` redirects preserve draft/query/hash context. Logout
+is local to that SDK session, not global across the user's account. Do not
+replace this with a role dropdown or reuse an already logged-in visitor token
+to skip the Admin login page. This is UI/session isolation; both accounts still
+have the same owner-approved operational role. Server Auth verification and
+`ktp_cms_operators` membership remain authoritative for CMS operations.
+
+Tests: `tests/auth-scope.test.ts`, `tests/app-auth.test.tsx`, and
+`e2e/admin-auth.spec.ts` exercise separate entry, same-scope cross-tab logout,
+preserved opposite-scope sessions, password errors and safe redirects. Release
+verification additionally tests both real refresh sessions after opposite logout.
+
 - `VITE_SUPABASE_URL`: `https://dihchjflzhcekywarhxd.supabase.co` for this project.
 - `VITE_SUPABASE_PUBLISHABLE_KEY`: the project's `sb_publishable_...` browser key.
 - `.env.example` contains placeholders only. Local `.env.*` files are ignored.
@@ -54,7 +70,7 @@ an administrator; personas still do not grant privileges.
   Newer auth events invalidate pending restoration. Logout invalidates older
   async results and late session events; a deliberate new login reopens it.
   Subscriptions are cleaned up on unmount/retry, including React StrictMode.
-- `src/App.tsx` owns the login form and internal-only `next` return paths,
+- `src/components/LoginScreen.tsx` owns the shared form; `src/App.tsx` owns same-scope-only `next` return paths,
   preserving query/hash through the login-page reload and subsequent navigation.
 - `src/auth.ts` maps safe errors and display names, and removes only the retired
   `korat-tan-phai-login-user` key. No other local preferences are cleared.
@@ -65,9 +81,10 @@ an administrator; personas still do not grant privileges.
 - On SDK logout failure, the UI distinguishes an intact session from one the
   SDK has already removed locally. It never claims the server confirmed logout
   when it did not. Access tokens already issued can remain valid until expiry.
-- Auth guards protect the UI journey, not downloadable static JSON/GeoJSON or
-  the public read-only risk-fusion API. Future privileged data/actions still
-  require server-side authorization and independently verified RLS.
+- Auth guards protect the UI journey. CMS builds read references/geometry through
+  authenticated RPCs, but old static deployments may still expose their assets;
+  the public read-only risk-fusion API is a separate contract. Privileged CMS
+  actions require server authorization and independently verified RLS.
 - If browser storage is blocked, the SDK can use an in-memory session. Refresh
   may require login again. Display/workflow preferences have their existing
   separate document-lifetime fallback.
