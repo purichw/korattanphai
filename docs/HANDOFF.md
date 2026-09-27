@@ -20,6 +20,38 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Softer shared forecast bars production release (2026-09-27):
+
+- Runtime `e6d8623` releases the graph work explicitly authorized from
+  “โคราชทันภัย 3”: amber/red gradients, rounded stack tops and softer outlines in
+  the shared `ForecastRiskBarGraph`. Values, segment joins, chart dimensions,
+  percent/count units and tooltip/keyboard/touch behavior are preserved.
+- Released on `release/graph-softness-20260927`, based on `3d54128`.
+  The runtime diff contains exactly three graph/component/test files. The
+  previously released brand theme and Plus Code lookup remain included;
+  uncommitted research/UAT/API work and bundle-budget relaxation are excluded.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36321466689)
+  passed all five jobs on the exact runtime commit. The protected hosted build,
+  source-exposure check and unchanged bundle budgets passed (316,547 B app gzip);
+  no static forecast archive is exposed.
+- Candidate and production each passed 39 authenticated read-only smoke checks
+  and eight graph cases: province/district, desktop/mobile and percent/count.
+  Exact card/plot/segment geometry and labels match the prior production release;
+  gradient/clip ownership, overflow, tooltip interaction and error checks pass.
+  Desktop/mobile reference-before-after screenshots were personally reviewed.
+- An initial candidate capture measured before map tools mounted. Existing
+  `:has(.nr-map-tools)` CSS sets the final chart height after map geometry loads.
+  Waiting for map tools and both SVG dimensions resolved this harness race;
+  no runtime layout change or loosened geometry assertion was introduced.
+- Promoted `dpl_DqWq6D7Y5Vn1654QKGGtCCdLeWjk` /
+  `https://korattanphai-lx77ernvs-purich-w.vercel.app`. The primary production
+  alias was verified to serve that Ready artifact.
+- Evidence: `artifacts/graph-release-20260927/release-state.json`,
+  `ci-final.json`, `candidate/`, `production/` and comparison screenshots.
+  Recovery: `dpl_9nxHr9FT9iYDkGQSYV95WUmontem` (brand theme release).
+  No database migration, application-data write, native-app or billing change.
+  Physical-device and unrelated UAT/API integration checks were skipped.
+
 Shared brand surface production release (2026-09-27):
 
 - Runtime `c03cd7e` adds the shared ivory/forest/gold paint layer and one
