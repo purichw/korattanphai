@@ -4,19 +4,14 @@ import { forecastTargetPeriod } from '../forecastPeriod';
 import { ArchivePeriodUnavailableError, forecastQueryPeriod, forecastScopeCodes, projectForecastScope, type ForecastQuery } from './forecastScope';
 import { withLoadDeadline, LoadTimeoutError } from './loadDeadline';
 import { reportOperationalEvent } from '../operationalTelemetry';
-
-export const FORECAST_DATASET_ID = 'a3be4448-6c8e-4039-b574-4674e261ee9b';
-export const FORECAST_DATASET_VERSION = 'drought-rev03-a3be44486c8e';
-export const FORECAST_SOURCE_SHA256 = 'a3be44486c8e8039f5744674e261ee9b27306f0c78b46bd1ce62e8903d4915b4';
+import { isForecastPublicationSource } from '../../shared/forecastPublication.mjs';
 
 type ForecastRevision = Pick<NakhonRatchasimaDroughtForecastArchive['meta'],
-  'datasetId' | 'datasetVersion' | 'sourceWorkbookSha256' | 'targetMonthCount' | 'targetMonthStart' | 'targetMonthEnd'> & { publishedAt?: string };
-const originalRevision: ForecastRevision = { datasetId: FORECAST_DATASET_ID, datasetVersion: FORECAST_DATASET_VERSION,
-  sourceWorkbookSha256: FORECAST_SOURCE_SHA256, targetMonthCount: 127, targetMonthStart: '2015-06', targetMonthEnd: '2025-12' };
+  'datasetId' | 'datasetVersion' | 'sourceWorkbookSha256' | 'targetMonthCount' | 'targetMonthStart' | 'targetMonthEnd' | 'sourceOfTruth'> & { publishedAt?: string };
 
 function validateRevision(value: unknown): ForecastRevision {
   const revision = value as NakhonRatchasimaDroughtForecastArchive['meta'] & { publishedAt: string };
-  if (!revision || revision.sourceOfTruth !== 'normalized_rev03_original_workbook' ||
+  if (!revision || !isForecastPublicationSource(revision.sourceOfTruth) ||
       revision.temporalInterpretation !== 'SOURCE_YEARMONTH_IS_ORIGIN_MONTH' || revision.provinceCode !== '30' ||
       !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(revision.datasetId) || !revision.datasetVersion ||
       !/^[0-9a-f]{64}$/.test(revision.sourceWorkbookSha256) || !Number.isFinite(Date.parse(revision.publishedAt)) ||
@@ -28,11 +23,12 @@ function validateRevision(value: unknown): ForecastRevision {
   return revision;
 }
 
-export function validateDatabaseArchive(value: unknown, horizonCount: 1 | 6, query?: ForecastQuery, revision = originalRevision): NakhonRatchasimaDroughtForecastArchive {
+export function validateDatabaseArchive(value: unknown, horizonCount: 1 | 6, revision: ForecastRevision, query?: ForecastQuery): NakhonRatchasimaDroughtForecastArchive {
   const archive = value as NakhonRatchasimaDroughtForecastArchive | null;
   const expectedCodes = query ? forecastScopeCodes(query.areaCode) : null;
   const expectedCount = expectedCodes?.length ?? 289;
-  if (!archive || archive.meta?.sourceOfTruth !== 'normalized_rev03_original_workbook' ||
+  if (!archive || !isForecastPublicationSource(archive.meta?.sourceOfTruth) ||
+      archive.meta.sourceOfTruth !== revision.sourceOfTruth ||
       archive.meta.datasetId !== revision.datasetId || archive.meta.datasetVersion !== revision.datasetVersion ||
       archive.meta.sourceWorkbookSha256 !== revision.sourceWorkbookSha256 ||
       archive.meta.targetMonthStart !== revision.targetMonthStart || archive.meta.targetMonthEnd !== revision.targetMonthEnd ||
@@ -134,7 +130,7 @@ export function createSupabaseForecastLoader(userId: string, horizonCount: 1 | 6
         const { data: current, error: currentError } = await client.auth.getSession();
         if (currentError || current.session?.user.id !== userId || epoch !== generation || request.signal.aborted) throw new Error('Session changed');
         if (revisionKey(activeRevision) !== revisionKey(revision)) throw new Error('Forecast revision changed');
-        const validated = validateDatabaseArchive(data, horizonCount, query, revision);
+        const validated = validateDatabaseArchive(data, horizonCount, revision, query);
         cache.set(key, validated);
         // Bound per-account memory; do not persist protected predictions to disk.
         while (cache.size > 16) cache.delete(cache.keys().next().value!);

@@ -140,7 +140,8 @@ export const seededDeepLocations = locations.filter(
 
 export const months = Array.from(new Set(provinceMonthlyRisk.map((record) => record.month))).sort();
 
-export const operationalMonths = ["2026-06", "2026-07", "2026-08", "2026-09", "2026-10"];
+export const operationalMonths = [...dataPeriodJson.observedSourceGroundedMonths,
+  dataPeriodJson.currentOperationalMonth, ...dataPeriodJson.forecastSourceGroundedMonths];
 
 export const hazards = Array.from(
   new Set([

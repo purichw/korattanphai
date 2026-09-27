@@ -2,6 +2,13 @@
 
 ## Current API State
 
+CMS candidate: `/api/admin-data?action=...` verifies the existing Supabase
+session and database operator membership. Import/edit/validate/accept/export
+share the V1 domain fields; draft bookkeeping is a separate envelope.
+`CMS_SUPABASE_URL` and `CMS_SUPABASE_SECRET_KEY` are server-only. Published
+references are authenticated read-only RPCs, not direct table access. See
+[CMS contracts](ADMIN_CMS.md) and [activation evidence](CMS_CUTOVER_20260928.md).
+
 Local-only addition: `GET /api/operational-context[?period=YYYY-MM]` returns trusted
 server time, Bangkok current/next-month boundary, the selected data family, policy
 version and empty source catalogs. It is public metadata, not a record endpoint;

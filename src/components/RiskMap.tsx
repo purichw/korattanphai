@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Layers, LocateFixed, Maximize2, Minimize2, Minus, Plus, RotateCcw } from "lucide-react";
 import { AppSelect } from "./AppSelect";
+import { loadLocalMapGeometry } from '../data/localMapGeometry';
 import { DataProvenanceChip, dataProvenanceChipKindFromText } from "./DataProvenanceChip";
 import { MapPreviewFooter } from "./MapPreviewFooter";
 import { NakhonRatchasimaWorkspaceSummary } from "./NakhonRatchasimaWorkspaceSummary";
@@ -528,8 +529,7 @@ export function RiskMap({
 
   useEffect(() => {
     let active = true;
-    fetch("/geodata/thailand-adm1.geojson")
-      .then((response) => response.json())
+    loadLocalMapGeometry<GeoCollection>("/geodata/thailand-adm1.geojson")
       .then((data: GeoCollection) => {
         if (active) {
           setGeo(data);
@@ -540,11 +540,7 @@ export function RiskMap({
         if (active) setMapError(true);
       });
 
-    fetch("/geodata/thailand-neighbor-context.geojson")
-      .then((response) => {
-        if (!response.ok) throw new Error("Neighbor context map unavailable");
-        return response.json();
-      })
+    loadLocalMapGeometry<GeoCollection>("/geodata/thailand-neighbor-context.geojson")
       .then((data: GeoCollection) => {
         if (active) setContextGeo(data);
       })

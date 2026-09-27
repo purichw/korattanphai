@@ -1,5 +1,6 @@
 import { validateBatch, hashBatch, InputError, normalizeTimestamp, SOURCE_ID, BATCH_ID } from './contract.mjs';
 import { isKoratSubdistrict } from './domain-contract.mjs';
+import { requiredFields } from '../../shared/dataFields.mjs';
 
 export const FEATURE_METRICS = ['precipitation', 'ndvi', 'ndmi', 'land_surface_temperature', 'soil_moisture'];
 const assert = (condition, message) => { if (!condition) throw new InputError(message); };
@@ -100,18 +101,25 @@ export function validateForecastResult(result) {
     const key = `${ref.sourceId}/${ref.batchId}`;
     assert(!references.has(key), 'Duplicate input batch provenance.'); references.add(key);
   }
-  assert(Array.isArray(result.predictions) && result.predictions.length === codes.length * 6, 'Return all T+1 through T+6 cells for every scoped subdistrict.');
+  validateForecastCells(result.predictions, { codes, originMonth: result.originMonth });
+  return { ...result, informationCutoff, createdAt, scope: { subdistrictCodes: codes } };
+}
+
+export function validateForecastCells(predictions, { codes, originMonth }) {
+  assert(Array.isArray(predictions) && predictions.length === codes.length * 6, 'Return all T+1 through T+6 cells for every scoped subdistrict.');
   const seen = new Set();
-  for (const row of result.predictions) {
-    assert(exactKeys(row, ['subdistrictCode', 'horizonMonths', 'targetMonth', 'status', 'riskCode']), 'Invalid prediction row.');
+  for (const [index, row] of predictions.entries()) {
+    try {
+    assert(exactKeys(row, requiredFields('forecast')), 'Invalid prediction row.');
     assert(codes.includes(row.subdistrictCode) && Number.isInteger(row.horizonMonths) && row.horizonMonths >= 1 && row.horizonMonths <= 6, 'Prediction is outside its area/horizon scope.');
-    assert(row.targetMonth === shiftMonth(result.originMonth, row.horizonMonths), 'targetMonth must equal originMonth + horizonMonths.');
+    assert(row.targetMonth === shiftMonth(originMonth, row.horizonMonths), 'targetMonth must equal originMonth + horizonMonths.');
     assert(['predicted', 'out_of_scope', 'insufficient_data'].includes(row.status), 'Invalid prediction status.');
     assert(row.status === 'predicted' ? [0, 1, 2].includes(row.riskCode) : row.riskCode === null, 'Predicted risk must be 0/1/2; other statuses require null.');
     const key = `${row.subdistrictCode}/${row.horizonMonths}`;
     assert(!seen.has(key), 'Duplicate prediction cell.'); seen.add(key);
+    } catch (error) { throw new InputError(`Prediction ${index + 1}: ${error.message}`); }
   }
-  return { ...result, informationCutoff, createdAt, scope: { subdistrictCodes: codes } };
+  return predictions;
 }
 
 export function forecastCellsForReview(input) {

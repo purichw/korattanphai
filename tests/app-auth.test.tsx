@@ -41,6 +41,13 @@ it("restores a session without flashing the login form and unmounts account cont
   await act(async () => resolve({ data: { session }, error: null }));
   await screen.findByText(/Protected: \/dan-khun-thot\/t-300806/);
   expect(window.location.search).toBe("?target=2025-12&horizon=4");
+  const blockDirtyDeparture = (event: Event) => event.preventDefault();
+  window.addEventListener('ktp:before-navigation', blockDirtyDeparture);
+  try {
+    fireEvent.click(screen.getByRole("button", { name: "Logout" }));
+    expect(auth.signOut).not.toHaveBeenCalled();
+    expect(screen.getByText(/Protected:/)).toBeInTheDocument();
+  } finally { window.removeEventListener('ktp:before-navigation', blockDirtyDeparture); }
   fireEvent.click(screen.getByRole("button", { name: "Logout" }));
   await screen.findByLabelText("อีเมล");
   expect(window.location.pathname).toBe("/login");

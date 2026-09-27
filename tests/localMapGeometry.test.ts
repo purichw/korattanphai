@@ -14,7 +14,7 @@ it("shares pending and parsed geometry across preloading and map mounts", async 
   await preload;
   expect(await first).toBe(geometry);
   await loadLocalMapGeometry("/geodata/nakhon-ratchasima-boundary.geojson");
-  expect(fetchMock).toHaveBeenCalledTimes(3);
+  expect(fetchMock).toHaveBeenCalledTimes(4);
 });
 
 it("does not cache failures or fail the main geometry when optional context fails", async () => {
@@ -24,11 +24,11 @@ it("does not cache failures or fail the main geometry when optional context fail
   vi.stubGlobal("fetch", fetchMock);
   const { preloadLocalMapGeometry, loadLocalMapGeometry } = await import("../src/data/localMapGeometry");
   const result = await preloadLocalMapGeometry();
-  expect(result.map((entry) => entry.status)).toEqual(["fulfilled", "rejected", "rejected"]);
+  expect(result.map((entry) => entry.status)).toEqual(["fulfilled", "rejected", "rejected", "rejected"]);
   await expect(loadLocalMapGeometry("/geodata/nakhon-ratchasima-subdistricts.geojson")).resolves.toEqual({ features: [] });
   fetchMock.mockResolvedValue({ ok: true, json: async () => ({ features: ["context"] }) });
   await expect(loadLocalMapGeometry("/geodata/thailand-adm1.geojson")).resolves.toEqual({ features: ["context"] });
-  expect(fetchMock).toHaveBeenCalledTimes(4);
+  expect(fetchMock).toHaveBeenCalledTimes(5);
 });
 
 it('times out a hanging response body and permits retry without a late result replacing it', async () => {

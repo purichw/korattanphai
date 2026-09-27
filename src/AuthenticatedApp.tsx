@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from "react";
+const AdminWorkspace = lazy(() => import('./admin/AdminWorkspace'));
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { SidebarBrand } from "./components/SidebarBrand";
 import { DatabaseWorkspaceProvider, useDatabaseWorkspace } from "./DatabaseWorkspaceProvider";
@@ -382,6 +383,7 @@ function AppShell({
     onNavigate(destination);
   };
   const appRoute = resolveAppRoute(path);
+  const isAdmin = path === '/admin' || path === '/admin/';
   const nakhonRoute = appRoute.kind === "nakhon-ratchasima" ? appRoute.target : null;
   const provinceRoute = appRoute.kind === "province-workspace" ? appRoute.target : null;
   const isDroughtSubNavActive = Boolean(
@@ -428,7 +430,7 @@ function AppShell({
           {visibleSections.map((section) => {
             const Icon = sectionIcons[section];
             const isOverviewSection = section === "overview";
-            const isMainItemActive = state.section === section && !(isOverviewSection && isDroughtSubNavActive);
+            const isMainItemActive = !isAdmin && state.section === section && !(isOverviewSection && isDroughtSubNavActive);
             return (
               <div key={section} className="nav-group">
                 <button
@@ -464,6 +466,8 @@ function AppShell({
             );
           })}
           <ForecastExcelExport openRequest={exportRequest} onOpen={() => setIsMobileMenuOpen(false)} />
+          <button type="button" className={isAdmin ? 'nav-item active' : 'nav-item'} aria-current={isAdmin ? 'page' : undefined}
+            onClick={() => { onNavigate('/admin'); setIsMobileMenuOpen(false); }}><Database size={17} /><span>จัดการข้อมูล</span></button>
         </nav>
       </aside>
 
@@ -486,7 +490,7 @@ function AppShell({
           </div>
         </header>
 
-        {!appRoute.isWorkspace && (
+        {!isAdmin && !appRoute.isWorkspace && (
           <OperationalFilters
             areaLabel={t("province", language)}
             areaValue={state.selectedProvinceId}
@@ -515,7 +519,9 @@ function AppShell({
           onNavigate(url.pathname + url.search + url.hash);
         }}>
           <AppErrorBoundary resetKey={`${path}:${state.section}:${state.personaId}`}>
-          {nakhonRoute ? (
+          {isAdmin ? <Suspense fallback={<p role="status">กำลังเปิดพื้นที่จัดการข้อมูล...</p>}>
+            <AdminWorkspace userId={loginUser.id} draftId={new URLSearchParams(window.location.search).get('draft')} onNavigate={onNavigate} />
+          </Suspense> : nakhonRoute ? (
             <NakhonRatchasimaWorkspace key={savedSelectionVersion} route={nakhonRoute} onNavigate={onNavigate} />
           ) : provinceRoute ? (
             <ProvinceWorkspacePlaceholder route={provinceRoute} onNavigate={onNavigate} />

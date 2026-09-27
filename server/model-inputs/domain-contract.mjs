@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { requiredFields, optionalFields } from '../../shared/dataFields.mjs';
 
 const matrix = JSON.parse(readFileSync(new URL('../../src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json', import.meta.url), 'utf8'));
 const subdistricts = new Set(matrix.map(row => row.subdistrict_code));
@@ -8,11 +9,6 @@ if (subdistricts.size !== 289 || matrix.length !== 289 || matrix.some(row => row
 }
 
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$/;
-const SATELLITE_FIELDS = ['subdistrictCode', 'period', 'availableAt', 'metric', 'value', 'unit', 'quality',
-  'validPixelFraction', 'product', 'productVersion', 'processingVersion', 'resolutionMeters', 'spatialAggregation', 'temporalAggregation'];
-const SATELLITE_OPTIONAL_FIELDS = ['geometryVersion', 'maskVersion', 'nativeSupportMeters', 'sourceArtifactHash'];
-const CROP_FIELDS = ['subdistrictCode', 'cropCode', 'seasonId', 'periodType', 'periodStart', 'periodEnd', 'availableAt',
-  'agency', 'datasetVersion', 'plantedAreaRai', 'harvestedAreaRai', 'productionTonnes', 'yieldKgPerRai', 'yieldAreaBasis', 'quality'];
 const CROP_MEASURES = ['plantedAreaRai', 'harvestedAreaRai', 'productionTonnes', 'yieldKgPerRai'];
 const METRICS = {
   ndvi: { unit: '1', minimum: -1, maximum: 1, aggregation: 'mean' },
@@ -35,8 +31,8 @@ export function validateDomainBatch(input, { normalizeTimestamp, InputError } = 
   const assert = (condition, message) => { if (!condition) throw new InputError(message, 400, 'invalid_batch'); };
   assert(input && ['satellite', 'crop'].includes(input.kind), 'Batch kind must be satellite or crop.');
   assert(Array.isArray(input.observations) && input.observations.length > 0, 'observations must be a nonempty array.');
-  const fields = input.kind === 'satellite' ? SATELLITE_FIELDS : CROP_FIELDS;
-  const optionalFields = input.kind === 'satellite' ? SATELLITE_OPTIONAL_FIELDS : [];
+  const fields = requiredFields(input.kind);
+  const allowedOptional = optionalFields(input.kind);
 
   function finite(value) { return typeof value === 'number' && Number.isFinite(value); }
   function asciiText(value, label) {
@@ -65,7 +61,7 @@ export function validateDomainBatch(input, { normalizeTimestamp, InputError } = 
     const label = `Observation ${index + 1}`;
     assert(row !== null && typeof row === 'object' && !Array.isArray(row), `${label} must be an object.`);
     assert(fields.every(field => Object.hasOwn(row, field)), `${label} is missing a required field.`);
-    assert(Object.keys(row).every(field => fields.includes(field) || optionalFields.includes(field) || field === 'sourceRecordId'), `${label} has an unknown field.`);
+    assert(Object.keys(row).every(field => fields.includes(field) || allowedOptional.includes(field)), `${label} has an unknown field.`);
     assert(isKoratSubdistrict(row.subdistrictCode), `${label}: subdistrictCode must be a canonical Nakhon Ratchasima subdistrict code.`);
     assert(['reported', 'missing', 'suspect'].includes(row.quality), `${label}: invalid quality.`);
     if (Object.hasOwn(row, 'sourceRecordId')) {

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { validateDomainBatch } from './domain-contract.mjs';
+import { requiredFields, optionalFields } from '../../shared/dataFields.mjs';
 
 export const MAX_BODY_BYTES = 1024 * 1024;
 export const MAX_OBSERVATIONS = 2000;
@@ -72,7 +73,7 @@ export function validateBatch(input) {
   const seen = new Set();
   const observations = input.observations.map((row, index) => {
     const label = `Observation ${index + 1}`;
-    objectWithKeys(row, ['stationId', 'observedAt', 'metric', 'value', 'unit', 'aggregation', 'periodMinutes', 'quality'], ['sourceRecordId'], label);
+    objectWithKeys(row, requiredFields('station'), optionalFields('station'), label);
     assert(typeof row.stationId === 'string' && STATION_ID.test(row.stationId), `${label}: stationId must be an ASCII identifier (1–64 characters).`);
     const observedAt = normalizeTimestamp(row.observedAt);
     assert(typeof row.metric === 'string' && Object.hasOwn(UNITS, row.metric), `${label}: unsupported metric.`);

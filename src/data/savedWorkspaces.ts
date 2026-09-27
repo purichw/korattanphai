@@ -1,5 +1,4 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { FORECAST_DATASET_ID } from './supabaseForecastArchive';
 import { irrigationCriteria, type IrrigationCriterion } from '../irrigation';
 
 export const savedRiskCriteria = ['all', 'forecast-no-risk', 'forecast-moderate', 'forecast-high', 'forecast-out-of-scope', 'forecast-missing'] as const;
@@ -20,7 +19,6 @@ export function isSavedSelection(value: SavedForecastSelection): boolean {
   // PostgreSQL's published-dataset policy and run FK validate new revisions.
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value.dataset_id) && /^30([0-9]{2}){0,2}$/.test(value.area_code) &&
     /^\d{4}-(0[1-9]|1[0-2])-01$/.test(value.target_period) &&
-    (value.dataset_id !== FORECAST_DATASET_ID || (value.target_period >= '2015-06-01' && value.target_period <= '2025-12-01')) &&
     Number.isInteger(value.horizon) && value.horizon >= 1 && value.horizon <= 6 && savedRiskCriteria.includes(value.risk_criterion) &&
     (value.irrigation_criterion === undefined || irrigationCriteria.includes(value.irrigation_criterion)) &&
     (value.view_name === 'drought' || (value.view_name === 'overview' && value.horizon === 1 && value.area_code.length <= 4));

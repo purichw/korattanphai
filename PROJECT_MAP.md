@@ -37,6 +37,11 @@ notification recipient or remote log store was activated. V2 remains proposed. S
 
 ## Current State
 
+- CMS candidate: `src/admin`, `server/admin-data`, `shared`, and three additive
+  CMS migrations. `/admin` reuses existing Auth, shared selects and dialogs.
+- `VITE_REFERENCE_BACKEND=cms` uses published database resources with no bundled
+  fallback; activation status and scope are in [the cutover record](docs/CMS_CUTOVER_20260928.md).
+
 - Repo path: `/Users/point/korattanphai`
 - GitHub remote: `https://github.com/purichw/korattanphai.git`
 - Production URL: `https://korattanphai.vercel.app`

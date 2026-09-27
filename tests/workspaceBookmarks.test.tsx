@@ -2,12 +2,13 @@ import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { WorkspaceBookmarks } from '../src/components/WorkspaceBookmarks';
-import { FORECAST_DATASET_ID } from '../src/data/supabaseForecastArchive';
+
+const displayedDatasetId = '11111111-1111-4111-8111-111111111111';
 
 const f = vi.hoisted(() => ({ context: null as any }));
 vi.mock('../src/DatabaseWorkspaceProvider', () => ({ useDatabaseWorkspace: () => f.context }));
 beforeEach(() => {
-  window.history.replaceState(null, '', '/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4&mapRisk=forecast-high');
+  window.history.replaceState({ ktpForecastDatasetId: displayedDatasetId }, '', '/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4&mapRisk=forecast-high');
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
   const areas: any[] = []; const filters: any[] = [];
@@ -64,7 +65,7 @@ describe('shared saved workspace controls', () => {
     await screen.findByText('บันทึกตัวกรองแล้ว');
     expect(screen.getByRole('button', { name: /^บ้านเก่า T\+4/ })).toHaveTextContent('เดือนตั้งต้น ธ.ค. 2568 → เม.ย. 2569 (ล่วงหน้า 4 เดือน)');
     expect(f.context.saved.saveFilter).toHaveBeenCalledWith('บ้านเก่า T+4', {
-      area_code: '300806', dataset_id: FORECAST_DATASET_ID, target_period: '2025-12-01', horizon: 4, risk_criterion: 'forecast-high', view_name: 'drought',
+      area_code: '300806', dataset_id: displayedDatasetId, target_period: '2025-12-01', horizon: 4, risk_criterion: 'forecast-high', view_name: 'drought',
     }, expect.any(AbortSignal));
     fireEvent.click(screen.getByRole('button', { name: /^บ้านเก่า T\+4/ }));
     expect(onNavigate).toHaveBeenCalledWith('/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4&mapRisk=forecast-high');

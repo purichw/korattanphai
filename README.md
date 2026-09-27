@@ -18,6 +18,9 @@ The site brand is Korat Tan Phai / โคราชทันภัย.
    changing, or standardizing shared UI components.
 5. Read [docs/RELEASE_RUNBOOK.md](docs/RELEASE_RUNBOOK.md) before commit, push,
    deploy, or production smoke work.
+6. Read [docs/ADMIN_CMS.md](docs/ADMIN_CMS.md) for CMS contracts, editable data,
+   permission boundaries and remaining feature gates. The approved migration
+   checkpoint is [docs/CMS_CUTOVER_20260928.md](docs/CMS_CUTOVER_20260928.md).
 
 ## Main Surfaces
 

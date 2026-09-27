@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import { beginRequest } from './request-log.mjs';
 import { OperationalError, sendJson, withDeadline } from './http.mjs';
+import { FORECAST_PUBLICATION_SOURCES } from '../../shared/forecastPublication.mjs';
 
 export function createArchiveProbe({ url, key, fetchImpl = fetch, timeoutMs = 5000 }) {
   const base = new URL(url);
@@ -11,7 +12,7 @@ export function createArchiveProbe({ url, key, fetchImpl = fetch, timeoutMs = 50
     target.searchParams.set('select', 'dataset_id,published_at,source_time_role');
     target.searchParams.set('status', 'eq.published');
     target.searchParams.set('source_time_role', 'eq.CONFIRMED_SOURCE_IS_ORIGIN');
-    target.searchParams.set('archive_manifest->meta->>sourceOfTruth', 'eq.normalized_rev03_original_workbook');
+    target.searchParams.set('archive_manifest->meta->>sourceOfTruth', `in.(${FORECAST_PUBLICATION_SOURCES.join(',')})`);
     target.searchParams.set('order', 'published_at.desc,dataset_id.desc');
     target.searchParams.set('limit', '1');
     const headers = { apikey: key, Accept: 'application/json' };

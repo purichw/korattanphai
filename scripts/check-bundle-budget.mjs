@@ -118,11 +118,24 @@ const searchBytes = [...searchGraph].reduce((sum, file) => sum + sources.get(fil
 const searchGzipBytes = [...searchGraph].reduce((sum, file) => sum + gzipSync(sources.get(file)).length, 0);
 if (searchBytes > 100_000 || searchGzipBytes > 25_000) throw new Error(`Lazy search exceeds 100000 / 25000 bytes: ${searchBytes} / ${searchGzipBytes}`);
 console.log(`[bundle-budget] Search on demand: ${searchBytes} bytes / ${searchGzipBytes} gzip bytes; no eager imports.`);
+// The operator workspace and its spreadsheet parsers load only on /admin.
+// Shared map/search dependencies stay charged to their original budgets.
+const adminRoots = [...sources.keys()].filter(file => /^AdminWorkspace-[\w-]+\.js$/.test(file));
+if (adminRoots.length !== 1 || eagerProduct.has(adminRoots[0])) throw new Error('Expected one route-lazy CMS workspace.');
+const adminGraph = new Set();
+followTool(adminRoots[0], adminGraph);
+for (const file of [...toolGraph, ...searchGraph]) adminGraph.delete(file);
+const adminWorkers = [...sources.keys()].filter(file => /^workbook\.worker-[\w-]+\.js$/.test(file));
+if (adminWorkers.length !== 1 || !adminGraph.has(adminWorkers[0])) throw new Error('CMS spreadsheet worker must be referenced only by the lazy CMS graph.');
+const adminBytes = [...adminGraph].reduce((sum, file) => sum + sources.get(file).length, 0);
+const adminGzipBytes = [...adminGraph].reduce((sum, file) => sum + gzipSync(sources.get(file)).length, 0);
+if (adminBytes > 3_500_000 || adminGzipBytes > 900_000) throw new Error(`Lazy CMS exceeds 3500000 / 900000 bytes: ${adminBytes} / ${adminGzipBytes}`);
+console.log(`[bundle-budget] CMS on demand: ${adminBytes} bytes / ${adminGzipBytes} gzip bytes; no eager imports.`);
 for (const file of sources.keys()) {
-  if (toolGraph.has(file) || searchGraph.has(file)) continue;
+  if (toolGraph.has(file) || searchGraph.has(file) || adminGraph.has(file)) continue;
   for (const node of syntaxTree(file).statements) {
     if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)
-      && (toolGraph.has(path.basename(node.moduleSpecifier.text)) || searchGraph.has(path.basename(node.moduleSpecifier.text)))) throw new Error(`Eager import of on-demand tool dependency in ${file}.`);
+      && (toolGraph.has(path.basename(node.moduleSpecifier.text)) || searchGraph.has(path.basename(node.moduleSpecifier.text)) || adminGraph.has(path.basename(node.moduleSpecifier.text)))) throw new Error(`Eager import of on-demand tool dependency in ${file}.`);
   }
 }
 const toolBytes = [...toolGraph].reduce((sum, file) => sum + sources.get(file).length, 0);
@@ -164,10 +177,12 @@ if (exportBytes > 2_650_000 || exportGzipBytes > 700_000) throw new Error(`Excel
 // triggers and dismissible dialog shell add a bounded 2 kB (0.54%); indexing,
 // results and history stay in the separately checked user-action-only chunk.
 const appGzipLimit = 370_000 + 2_000;
-if (!jsBytes || jsBytes - exportBytes - toolBytes - telemetryBytes - searchBytes > 3_500_000 || jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes > appGzipLimit) {
-  throw new Error(`Application JavaScript budget exceeded: ${jsBytes - exportBytes - toolBytes - telemetryBytes - searchBytes} bytes / ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes} app gzip bytes (limits 3500000 / ${appGzipLimit} plus bounded SDKs).`);
+const coreBytes = jsBytes - exportBytes - toolBytes - telemetryBytes - searchBytes - adminBytes;
+const coreGzipBytes = jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes - adminGzipBytes;
+if (!jsBytes || coreBytes > 3_500_000 || coreGzipBytes > appGzipLimit) {
+  throw new Error(`Application JavaScript budget exceeded: ${coreBytes} bytes / ${coreGzipBytes} app gzip bytes (limits 3500000 / ${appGzipLimit} plus bounded SDKs).`);
 }
-console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; Excel on demand: ${exportGzipBytes}; application: ${jsGzipBytes - authGzipBytes - exportGzipBytes - toolGzipBytes - telemetryGzipBytes - searchGzipBytes} gzip bytes.`);
+console.log(`[bundle-budget] Supabase SDK: ${authGzipBytes} gzip bytes; Excel on demand: ${exportGzipBytes}; application: ${coreGzipBytes} gzip bytes.`);
 const archiveAsset = assets.find((name) => /^drought_forecast_archive_rev03-[\w-]+\.json$/.test(name));
 let databaseBuild = false;
 try { databaseBuild = JSON.parse(await fs.readFile(path.join(distDir, "data-backend.json"), "utf8")).backend === "supabase"; }

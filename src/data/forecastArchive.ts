@@ -1,5 +1,6 @@
 import archiveUrl from "./canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json?url";
 import overviewUrl from "./generated/forecast-overview-t1.json?url";
+import { meta as staticForecastRevision } from './canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json';
 import type { NakhonRatchasimaDroughtForecastArchive } from "../types";
 import { validateDatabaseArchive } from "./supabaseForecastArchive";
 import { withLoadDeadline, LoadTimeoutError } from './loadDeadline';
@@ -32,7 +33,7 @@ function createArchiveLoader(url: string, horizonCount: 1 | 6) {
           archive.targetMonths.length !== archive.meta.targetMonthCount ||
           !archive.targetMonths.every((month) => Array.isArray(month.horizons) && archive.packedRiskByTargetMonth[month.period])
         ) throw new Error("Invalid forecast archive");
-        cachedArchive = validateDatabaseArchive(archive, horizonCount);
+        cachedArchive = validateDatabaseArchive(archive, horizonCount, staticForecastRevision);
         return cachedArchive;
       }))
       .then((archive) => {

@@ -48,8 +48,8 @@ describe("forecast archive loading", () => {
     await expect(loadForecastArchive()).resolves.toEqual(archiveJson);
   });
 
-  it("never caches a structurally valid archive with unapproved provenance", async () => {
-    const rejectedArchive = { ...archiveJson, meta: { ...archiveJson.meta, sourceWorkbookSha256: "unapproved" } };
+  it.each(['unapproved', 'a'.repeat(64)])("never caches a structurally valid archive with unapproved provenance %s", async (hash) => {
+    const rejectedArchive = { ...archiveJson, meta: { ...archiveJson.meta, sourceWorkbookSha256: hash } };
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => rejectedArchive })
       .mockResolvedValueOnce({ ok: true, json: async () => archiveJson });

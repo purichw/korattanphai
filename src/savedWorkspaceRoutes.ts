@@ -1,6 +1,5 @@
 import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaPath, resolveAppRoute } from './domain';
 import { isSavedSelection, savedRiskCriteria, type SavedForecastSelection, type SavedRiskCriterion } from './data/savedWorkspaces';
-import { FORECAST_DATASET_ID } from './data/supabaseForecastArchive';
 import { readIrrigationSelection } from './irrigation';
 
 export function savedAreaInfo(code: string): { label: string; path: string } | null {
@@ -35,7 +34,8 @@ export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'se
   const risk = params.get('mapRisk') ?? 'all';
   const irrigation = readIrrigationSelection(location.search, historyState);
   const displayedDataset = historyState && typeof historyState === 'object' && 'ktpForecastDatasetId' in historyState
-    && typeof historyState.ktpForecastDatasetId === 'string' ? historyState.ktpForecastDatasetId : FORECAST_DATASET_ID;
+    && typeof historyState.ktpForecastDatasetId === 'string' ? historyState.ktpForecastDatasetId : null;
+  if (!displayedDataset) return null;
   const selection: SavedForecastSelection = {
     view_name: overview ? 'overview' : 'drought', area_code: code, dataset_id: displayedDataset,
     target_period: `${params.get('target') ?? ''}-01`, horizon,

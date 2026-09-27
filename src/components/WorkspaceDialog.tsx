@@ -14,7 +14,9 @@ export function WorkspaceDialog({ title, children, onClose, wide = false, bounde
     dialog?.showModal();
     return () => { dialog?.close(); if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true }); };
   }, []);
-  function close() { ref.current?.close(); onClose(); }
+  // The owner may defer closing while saving or ask to discard unsaved changes.
+  // Native close belongs to unmount cleanup, after that decision is accepted.
+  function close() { onClose(); }
   return createPortal(<dialog ref={ref} className={`nr-tool-dialog${wide ? ' is-wide' : ''}${bounded ? ' is-bounded' : ''}`}
     aria-labelledby={id} onCancel={event => { event.preventDefault(); close(); }}
     onClick={event => { if (event.target === event.currentTarget) close(); }}

@@ -6,7 +6,11 @@ import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { StorageNotice } from "./components/StorageNotice";
 import { AppStartup } from "./components/AppStartup";
 
-const AuthenticatedApp = lazy(() => import("./AuthenticatedApp"));
+const AuthenticatedApp = lazy(async () => {
+  const { bootstrapCmsReferences } = await import('./data/cmsReferences');
+  await bootstrapCmsReferences();
+  return import('./AuthenticatedApp');
+});
 
 function LoginFrame({ children }: { children: ReactNode }) {
   return (
@@ -64,17 +68,26 @@ const currentLocation = () => window.location.pathname + window.location.search 
 export function App() {
   const auth = useAuth();
   const [location, setLocation] = useState(currentLocation);
+  const lastLocation = useRef(location);
+  lastLocation.current = location;
   const explicitLogout = useRef(false);
   const path = new URL(location, window.location.origin).pathname;
   const isLoginPath = path === "/login" || path === "/login/";
 
   const navigate = (nextPath: string) => {
+    if (!window.dispatchEvent(new Event('ktp:before-navigation', { cancelable: true }))) return;
     window.history.pushState(null, "", safeInternalRedirect(nextPath, window.location.origin));
     setLocation(currentLocation());
   };
 
   useEffect(() => {
-    const handlePopState = () => setLocation(currentLocation());
+    const handlePopState = () => {
+      if (!window.dispatchEvent(new Event('ktp:before-navigation', { cancelable: true }))) {
+        window.history.pushState(null, '', lastLocation.current);
+        return;
+      }
+      setLocation(currentLocation());
+    };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
@@ -93,6 +106,7 @@ export function App() {
   }, [auth.status, isLoginPath, location]);
 
   const handleLogout = async () => {
+    if (!window.dispatchEvent(new Event('ktp:before-navigation', { cancelable: true }))) return;
     explicitLogout.current = true;
     const signedOut = await auth.signOut();
     if (!signedOut) explicitLogout.current = false;

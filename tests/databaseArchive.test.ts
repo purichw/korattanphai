@@ -8,6 +8,7 @@ import { forecastScopeCodes } from '../src/data/forecastScope';
 import { forecastTargetPeriod } from '../src/forecastPeriod';
 
 const slice = forecastSlice(archive);
+const revision = forecastRevision(archive);
 
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 function fixture(data: unknown = slice) {
@@ -64,12 +65,12 @@ describe('Supabase archive loader', () => {
     await expect(loader.load()).rejects.toThrow('Session changed');
   });
   it('preserves explicit nulls and rejects absent/invalid vintages', () => {
-    expect(validateDatabaseArchive(archive, 6)).toBe(archive);
-    expect(validateDatabaseArchive(overview, 1)).toBe(overview);
+    expect(validateDatabaseArchive(archive, 6, revision)).toBe(archive);
+    expect(validateDatabaseArchive(overview, 1, revision)).toBe(overview);
     for (const risks of [[0, 1, 2], [0, 1, 2, null, null, 4]]) {
       const broken = structuredClone(archive);
       broken.packedRiskByTargetMonth['2025-12']['300806'] = risks as typeof broken.packedRiskByTargetMonth['2025-12']['300806'];
-      expect(() => validateDatabaseArchive(broken, 6)).toThrow();
+      expect(() => validateDatabaseArchive(broken, 6, revision)).toThrow();
     }
   });
   it('loads only the requested month/scope and reuses parent data without another RPC', async () => {
@@ -168,7 +169,7 @@ describe('Supabase archive loader', () => {
       for (const data of [archive, overview]) {
         const query = { areaCode, originPeriod: '2025-12' };
         const selected = forecastSlice(data, { p_area_code: areaCode, p_origin_period: query.originPeriod });
-        expect(validateDatabaseArchive(selected, data.meta.horizonCount as 1 | 6, query)).toBe(selected);
+        expect(validateDatabaseArchive(selected, data.meta.horizonCount as 1 | 6, revision, query)).toBe(selected);
         expect(selected.locations).toHaveLength(forecastScopeCodes(areaCode).length);
         for (const mutate of [
           (v: any) => { v.loadedSelection.originPeriod = '2025-11'; },
@@ -178,11 +179,11 @@ describe('Supabase archive loader', () => {
           (v: any) => { v.packedRiskByTargetMonth['2025-12'][v.locations[0].subdistrictCode][0] = 4; },
         ]) {
           const invalid = structuredClone(selected); mutate(invalid);
-          expect(() => validateDatabaseArchive(invalid, data.meta.horizonCount as 1 | 6, query)).toThrow();
+          expect(() => validateDatabaseArchive(invalid, data.meta.horizonCount as 1 | 6, revision, query)).toThrow();
         }
       }
     }
-    expect(() => validateDatabaseArchive(archive, 6, { areaCode: '30' })).toThrow();
+    expect(() => validateDatabaseArchive(archive, 6, revision, { areaCode: '30' })).toThrow();
     expect(() => forecastScopeCodes('309999')).toThrow();
   });
 });

@@ -43,7 +43,7 @@ test('archive probe rejects HTML, no publication, oversized bodies and a never-e
   const valid = [{ dataset_id: '11111111-1111-4111-8111-111111111111', published_at: '2026-09-09T00:00:00Z', source_time_role: 'CONFIRMED_SOURCE_IS_ORIGIN' }];
   assert.deepEqual(await createArchiveProbe({ ...options, fetchImpl: async target => {
     assert.equal(target.searchParams.get('source_time_role'), 'eq.CONFIRMED_SOURCE_IS_ORIGIN');
-    assert.equal(target.searchParams.get('archive_manifest->meta->>sourceOfTruth'), 'eq.normalized_rev03_original_workbook');
+    assert.equal(target.searchParams.get('archive_manifest->meta->>sourceOfTruth'), 'in.(normalized_rev03_original_workbook,admin_reviewed_forecast)');
     return Response.json(valid);
   } })(), { publishedArchive: 'available' });
   await assert.rejects(createArchiveProbe({ ...options, fetchImpl: async () => Response.json([{ ...valid[0], source_time_role: 'CONFIRMED_SOURCE_IS_TARGET' }]) })());
