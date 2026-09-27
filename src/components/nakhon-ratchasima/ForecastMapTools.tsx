@@ -1,5 +1,5 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { Crosshair, Download, Pause, Play, Search, Table2, X } from 'lucide-react';
+import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react';
+import { Crosshair, Download, MapPin, Pause, Play, Search, Table2, X } from 'lucide-react';
 import { WorkspaceDialog } from '../WorkspaceDialog';
 import { AppSelect } from '../AppSelect';
 import { areaMatchesSearch, type ForecastAnalysisOverlay } from '../../forecastAnalysis';
@@ -28,6 +28,10 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
   const [tool, setTool] = useState<'search' | 'pin' | 'export' | 'analysis' | null>(null);
   const [query, setQuery] = useState('');
   const [lat, setLat] = useState(''); const [lon, setLon] = useState('');
+  const [pointMode, setPointMode] = useState<'coordinates' | 'plus-code'>('coordinates');
+  const [plusCode, setPlusCode] = useState('');
+  const [locating, setLocating] = useState(false);
+  const pointHintId = useId(); const pointErrorId = useId();
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [format, setFormat] = useState<'png' | 'pdf'>('png');
@@ -39,7 +43,7 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
   const opener = useRef<Element | null>(null);
   const callback = useRef(onHorizonChange); callback.current = onHorizonChange;
   const sequence = `${originPeriod}|${areaCode}|${irrigation}`;
-  useEffect(() => { setPlaying(false); setPickedCode(null); setMessage(''); setError(''); setTool(null); job.current += 1; setExporting(false); }, [sequence]);
+  useEffect(() => { setPlaying(false); setPickedCode(null); setMessage(''); setError(''); setTool(null); job.current += 1; setExporting(false); setLocating(false); }, [sequence]);
   useEffect(() => { live.current = true; return () => { live.current = false; job.current += 1; }; }, []);
   useEffect(() => {
     const pause = () => { if (document.hidden) setPlaying(false); };
@@ -62,7 +66,7 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
   ].filter(item => areaMatchesSearch(query, item.code, item.name, item.detail));
   function open(next: typeof tool) { opener.current = document.activeElement; setPlaying(false); setTool(next); setError(''); setMessage(''); }
   function close() {
-    job.current += 1; setExporting(false); setTool(null);
+    job.current += 1; setExporting(false); setLocating(false); setTool(null);
     queueMicrotask(() => { if (opener.current instanceof HTMLElement && opener.current.isConnected) opener.current.focus(); });
   }
   function focus(code: string) {
@@ -72,19 +76,24 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
     setPickedCode(code); setMessage(''); close();
   }
   async function locate() {
-    setError('');
+    if (locating) return;
+    setError(''); setLocating(true);
     const current = ++job.current;
     try {
-      const { locateKoratPoint } = await import('../../mapPoint');
+      const { locateKoratPoint, locateKoratPlusCode } = await import('../../mapPoint');
       if (!live.current || current !== job.current) return;
-      const result = locateKoratPoint(lat, lon, features);
+      const result = pointMode === 'plus-code' ? locateKoratPlusCode(plusCode, features) : locateKoratPoint(lat, lon, features);
       const code = result.feature.properties.Admin_code;
       if (areaCode !== '30' && !code.startsWith(areaCode)) throw new Error('พิกัดอยู่ในนครราชสีมา แต่อยู่นอกพื้นที่หน้านี้ กรุณาเปิดแผนที่จังหวัดเพื่อค้นหาจุดนี้');
       const problem = onFocus(code);
       if (problem) throw new Error(problem);
       onPin({ point: result.point, code });
-      setPickedCode(code); setMessage('พยากรณ์ระดับตำบล ไม่ใช่รายแปลง'); close();
+      setPickedCode(code); setMessage(`${'plusCode' in result ? `จุดกึ่งกลาง Plus Code ${result.plusCode} · ` : ''}พยากรณ์ระดับตำบล ไม่ใช่รายแปลง`); close();
     } catch (cause) { if (live.current && current === job.current) setError(cause instanceof Error ? cause.message : 'ค้นหาพิกัดไม่สำเร็จ'); }
+    finally { if (live.current && current === job.current) setLocating(false); }
+  }
+  function resetPointLookup() {
+    job.current += 1; setLocating(false); setError('');
   }
   async function download() {
     if (exporting) return;
@@ -109,7 +118,7 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
   return <div className="nr-map-tools">
     <div className="nr-map-tool-actions" role="group" aria-label="เครื่องมือข้อมูลนครราชสีมา">
       <button className="icon-button" type="button" title="ค้นหาอำเภอ / ตำบล" aria-label="ค้นหาพื้นที่บนแผนที่" onClick={() => open('search')}><Search size={17} /></button>
-      <button className="icon-button" type="button" title="ค้นหาด้วยพิกัด" aria-label="ค้นหาด้วยพิกัด" onClick={() => open('pin')}><Crosshair size={17} /></button>
+      <button className="icon-button" type="button" title="ค้นหาด้วยพิกัด / Plus Code" aria-label="ค้นหาด้วยพิกัด" onClick={() => open('pin')}><Crosshair size={17} /></button>
       <button className="nr-tool-analysis-trigger" type="button" onClick={() => open('analysis')}><Table2 size={17} /><span>วิเคราะห์พยากรณ์</span></button>
       <button className="icon-button" type="button" title="ส่งออกแผนที่ PDF / PNG" aria-label="ส่งออกแผนที่" onClick={() => open('export')}><Download size={17} /></button>
       {onHorizonChange && <div className={`nr-map-playback${playing ? ' is-playing' : ''}`}>
@@ -135,17 +144,26 @@ export function ForecastMapTools({ archive, originPeriod, horizon, areaCode, sco
       {tool === 'search' && <><label className="nr-tool-search"><Search size={18} /><input autoFocus type="search" aria-label="ชื่อหรือรหัสพื้นที่นครราชสีมา" placeholder="ชื่ออำเภอ ตำบล หรือรหัสพื้นที่" value={query} onChange={event => setQuery(event.target.value)} /></label><p className="nr-analysis-context" role="status">พบ {choices.length} พื้นที่ในขอบเขตหน้านี้</p>
         <ul className="nr-area-search-results">{choices.map(item => <li key={item.code}><button type="button" onClick={() => focus(item.code)}><strong>{item.name}</strong><span>{item.detail} · {item.code}</span></button></li>)}</ul></>}
       {tool === 'pin' && <form className="nr-point-form" onSubmit={event => { event.preventDefault(); void locate(); }}>
-        <label>ละติจูด (WGS84)<input autoFocus required type="number" step="any" min="-90" max="90" value={lat} onChange={e => setLat(e.target.value)} /></label>
-        <label>ลองจิจูด (WGS84)<input required type="number" step="any" min="-180" max="180" value={lon} onChange={e => setLon(e.target.value)} /></label>
+        <div className="nr-tool-tabs nr-point-modes" role="group" aria-label="รูปแบบพิกัด">
+          <button type="button" aria-pressed={pointMode === 'coordinates'} onClick={() => { resetPointLookup(); setPointMode('coordinates'); }}><Crosshair size={17} />ละติจูด / ลองจิจูด</button>
+          <button type="button" aria-pressed={pointMode === 'plus-code'} onClick={() => { resetPointLookup(); setPointMode('plus-code'); }}><MapPin size={17} />Plus Code</button>
+        </div>
+        {pointMode === 'coordinates' ? <>
+          <label key="latitude">ละติจูด (WGS84)<input autoFocus required type="number" step="any" min="-90" max="90" value={lat} onChange={e => { resetPointLookup(); setLat(e.target.value); }} /></label>
+          <label>ลองจิจูด (WGS84)<input required type="number" step="any" min="-180" max="180" value={lon} onChange={e => { resetPointLookup(); setLon(e.target.value); }} /></label>
+        </> : <>
+          <label key="plus-code">Plus Code แบบเต็ม<input autoFocus required type="text" autoCapitalize="characters" autoComplete="off" spellCheck={false} placeholder="เช่น 7P64X3HQ+2M" aria-describedby={`${pointHintId}${error ? ` ${pointErrorId}` : ''}`} aria-invalid={Boolean(error)} value={plusCode} onChange={e => { resetPointLookup(); setPlusCode(e.target.value); }} /></label>
+          <p className="nr-analysis-context" id={pointHintId}>ใช้จุดกึ่งกลางของพื้นที่รหัสค้นหาตำบล · รหัสย่อต้องมีตำแหน่งอ้างอิง จึงยังไม่รองรับ</p>
+        </>}
         <p className="nr-analysis-context">เฉพาะนครราชสีมา · ผลพยากรณ์เป็นของตำบลที่ครอบคลุมพิกัด ไม่ใช่การประเมินความเสี่ยง ณ จุดหรือแปลงเกษตร</p>
-        <button className="primary-button" type="submit"><Crosshair size={17} />ค้นหาตำบล</button>
+        <button className="primary-button" type="submit" disabled={locating}><Crosshair size={17} />{locating ? 'กำลังค้นหาตำบล' : 'ค้นหาตำบล'}</button>
       </form>}
       {tool === 'export' && <><p>เดือนตั้งต้น {formatMonth(originPeriod, 'th')} · T+{horizon} · พยากรณ์ {formatMonth(forecastTargetPeriod(originPeriod, horizon), 'th')}</p>
         <AppSelect ariaLabel="รูปแบบไฟล์แผนที่" value={format} onChange={value => setFormat(value as 'png' | 'pdf')} options={[{ value: 'png', label: 'PNG' }, { value: 'pdf', label: 'PDF' }]} />
         <AppSelect ariaLabel="ขอบเขตภาพรายงาน" value={framing} onChange={value => setFraming(value as 'scope' | 'camera')} options={[{ value: 'scope', label: 'พื้นที่ทั้งหมดของหน้านี้' }, { value: 'camera', label: 'มุมมองแผนที่ปัจจุบัน' }]} />
         <p className="nr-analysis-context">รายงาน A4 จัดหน้าตามเนื้อหา · PNG หลายหน้าจะรวมเป็นไฟล์ ZIP</p>
         <button className="primary-button" type="button" disabled={exporting} onClick={() => void download()}><Download size={17} />{exporting ? 'กำลังสร้างไฟล์' : 'ดาวน์โหลด'}</button></>}
-      {error && <p className="nr-tool-error" role="alert">{error}</p>}
+      {error && <p className="nr-tool-error" id={pointErrorId} role="alert">{error}</p>}
     </WorkspaceDialog>}
   </div>;
 }

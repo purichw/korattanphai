@@ -387,10 +387,17 @@ a usable minimum plot height independently of the toolbar.
   body beneath a visible header. Other tools retain their existing sizing.
   The analysis shell stays mounted through lazy loading,
   with its scope name supplied by the map's existing administrative label.
-- `ForecastMapTools` owns local administrative search, WGS84 point lookup,
+- `ForecastMapTools` owns local administrative search, WGS84 / full Plus Code lookup,
   PNG/PDF download and an on-demand analysis entry point. Search and point results
   focus the existing camera; they never navigate outside the route's area or
   treat point coordinates as plot-level risk. The pin is transient, not saved.
+  Both input modes reuse `mapPoint.ts` and the route-scope guard. Plus Codes
+  decode locally with Open Location Code (no Google Maps API, key or geocoding
+  request), then use the code area's center with the same polygon/hole/boundary
+  checks. The UI explicitly labels this center-based lookup. Short codes are not
+  guessed from the province center; they require a full code instead. Coarse
+  codes with fewer than 10 significant characters are rejected. Existing risk
+  values, map camera ownership and native-app behavior are unchanged.
 - `ForecastAnalysisDialog` shares the existing Excel model for all six horizon
   values, district maxima, counts/denominators and same-calendar-target
   comparisons. `analysisHierarchy` sets province tables to districts (with an

@@ -305,6 +305,73 @@ test('Korat playback period stays grouped and keeps the map frame stable', async
   expect(errors).toEqual([]);
 });
 
+for (const path of ['/', '/mueang-nakhon-ratchasima', '/mueang-nakhon-ratchasima/t-300101']) {
+  test(`Korat Plus Code lookup ${path}`, async ({ page }, info) => {
+    test.setTimeout(60_000);
+    const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+    const geocodingRequests: string[] = [];
+    page.on('request', request => { if (/maps\.googleapis|places\.googleapis|plus\.codes/.test(request.url())) geocodingRequests.push(request.url()); });
+    await setup(page, `${path}?target=2025-12&horizon=1`);
+    const url = page.url();
+    const opener = page.getByRole('button', { name: 'ค้นหาด้วยพิกัด', exact: true });
+    await opener.click();
+    const dialog = page.getByRole('dialog');
+    await page.getByLabel('ละติจูด (WGS84)').fill('14.9775625');
+    await page.getByLabel('ลองจิจูด (WGS84)').fill('102.0891875');
+    await dialog.getByRole('button', { name: 'Plus Code', exact: true }).click();
+    const input = page.getByRole('textbox', { name: 'Plus Code แบบเต็ม' });
+    await expect(input).toBeFocused();
+    await input.fill('X3HQ+2M นครราชสีมา');
+    await input.press('Enter');
+    await expect(dialog.getByRole('alert')).toContainText('แบบย่อ');
+    await expect(input).toHaveValue('X3HQ+2M นครราชสีมา');
+    await expect(page.locator('.nr-coordinate-pin')).toHaveCount(0);
+    await input.fill('invalid');
+    await input.press('Enter');
+    await expect(dialog.getByRole('alert')).toContainText('ไม่ถูกต้อง');
+    await input.fill('7P52QG42+GP');
+    await input.press('Enter');
+    await expect(dialog.getByRole('alert')).toContainText('นอกขอบเขตนครราชสีมา');
+    await input.fill('  7p64x3hq+2m  ');
+    await expect(dialog.getByRole('alert')).toHaveCount(0);
+    await page.screenshot({ path: info.outputPath('plus-code-dialog.png') });
+    expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await input.press('Enter');
+    await expect(dialog).toHaveCount(0);
+    await expect(opener).toBeFocused();
+    await expect(page.locator('.nr-coordinate-pin')).toBeVisible();
+    await expect(page.locator('[data-nr-subdistrict-code="300101"]')).toHaveClass(/is-selected/);
+    await expect(page.locator('.nr-map-tools')).toContainText('จุดกึ่งกลาง Plus Code 7P64X3HQ+2M');
+    await expect(page.locator('.nr-map-tools')).toContainText('ไม่ใช่รายแปลง');
+    expect(page.url()).toBe(url);
+    await page.getByRole('button', { name: 'ล้างจุดพิกัด' }).click();
+    await expect(page.locator('.nr-coordinate-pin')).toHaveCount(0);
+    await expect(page.locator('.nr-map-tools')).not.toContainText('จุดกึ่งกลาง Plus Code');
+    await opener.click();
+    await dialog.getByRole('button', { name: 'ละติจูด / ลองจิจูด', exact: true }).click();
+    await expect(page.getByLabel('ละติจูด (WGS84)')).toHaveValue('14.9775625');
+    await page.getByRole('button', { name: 'ค้นหาตำบล', exact: true }).click();
+    await expect(page.locator('.nr-coordinate-pin')).toBeVisible();
+    await opener.click();
+    await page.keyboard.press('Escape');
+    await expect(opener).toBeFocused();
+    expect(geocodingRequests).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}
+
+test('Korat Plus Code stays within the current district scope', async ({ page }) => {
+  await setup(page);
+  await page.getByRole('button', { name: 'ค้นหาด้วยพิกัด', exact: true }).click();
+  await page.getByRole('button', { name: 'Plus Code', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Plus Code แบบเต็ม' }).fill('7P64X3HQ+2M');
+  await page.getByRole('button', { name: 'ค้นหาตำบล', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('อยู่นอกพื้นที่หน้านี้');
+  await expect(page.locator('.nr-coordinate-pin')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/soeng-sang\?/);
+});
+
 test('Korat map tools coordinates, playback, search focus and PNG/PDF download', async ({ page }, info) => {
   test.setTimeout(90_000);
   await setup(page, '/drought?mapLayer=forecast-archive&target=2025-12&horizon=1');

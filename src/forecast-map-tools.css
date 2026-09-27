@@ -98,6 +98,8 @@ html:has(.nr-tool-dialog[open]) { scrollbar-gutter: stable; }
 .nr-point-form { display: grid; gap: 12px; }
 .nr-point-form label { display: grid; gap: 6px; font-size: 14px; }
 .nr-point-form input { min-height: 44px; width: 100%; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 6px; font: inherit; }
+.nr-point-form .nr-point-modes { margin-bottom: 0; }
+.nr-point-modes svg { flex: none; }
 .nr-tool-error { color: var(--red); font-size: 13px; }
 .nr-analysis-context { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
 .nr-analysis-heading { display: flex; align-items: start; gap: 12px; }
