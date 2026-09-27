@@ -20,6 +20,34 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Full Plus Code map lookup production release (2026-09-27):
+
+- Runtime `74c5fa1` adds a Plus Code mode to the shared coordinate lookup.
+  Full codes are decoded locally with pinned `open-location-code@1.0.3`;
+  no Google Maps API/key or geocoding request is used. The code-area center
+  follows the existing Korat boundary, polygon-hole and current-page scope
+  checks. Forecasts remain tambon-level, not point or plot risk.
+- Short/place-qualified codes, invalid codes, overly coarse codes and points
+  outside Korat/current scope are rejected without losing the entered value.
+  Existing WGS84 lookup, map selection, pin clearing and dialog focus remain
+  covered on province, district and tambon routes at desktop/mobile sizes.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36315912502)
+  passed all five jobs on the exact runtime commit (attempt 2). The first
+  attempt could not start because of GitHub billing; the owner changed the
+  repository to public before rerunning. Unit tests passed all 335 checks.
+- Promoted `dpl_Aq5RepuAFryPMtc7Taa8zm4owaW6` /
+  `https://korattanphai-ostzo916x-purich-w.vercel.app`; inspection confirms the
+  primary production alias serves this Ready artifact. Protected build,
+  source-exposure and unchanged bundle budgets passed (315,602 B app gzip).
+- Candidate and production each passed 39 authenticated read-only smoke
+  checks plus eight Plus Code route/viewport checks. Desktop/mobile production
+  screenshots were reviewed; no runtime errors or Google geocoding requests.
+  Evidence: `artifacts/plus-code-release-20260927/`.
+- Built from isolated committed source. Unrelated theme, API/UAT/research and
+  local budget edits remain unshipped. No database migration, application-data
+  write or native-app change occurred. Recovery: `dpl_6QdQEAETfyEHb6EEv5bKsQpcMAfi`,
+  the hierarchy release that was live immediately before promotion.
+
 Forecast analysis hierarchy production release (2026-09-24):
 
 - Runtime `6e9c1ac` shares the geography rule: province tables start with
