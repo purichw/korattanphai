@@ -74,4 +74,25 @@ pixel-parity target; comparison crops remove its presentation/device framing.
   repeat completed all eight route/viewport pairs with populated data. No loader
   or error-recovery behavior was changed as part of the theme.
 
-This is a local implementation checkpoint, not a production release.
+The local checkpoint above precedes the production release below.
+
+## Production release (2026-09-27)
+
+Runtime `c03cd7e` on `release/brand-theme-20260927-v2` is deployed at
+`https://korattanphai.vercel.app`, artifact
+`dpl_9nxHr9FT9iYDkGQSYV95WUmontem`. This adds only the six theme files to
+the `e11c59f` production baseline, retaining its already-released Plus Code
+feature. UAT/research/API edits and local budget changes remain excluded.
+
+All five [CI jobs](https://github.com/purichw/korattanphai/actions/runs/36317441953)
+passed on the exact runtime commit, including protected builds and unchanged
+bundle/exposure gates. Candidate and production each passed 39 authenticated
+read-only smoke checks and eight route/viewport checks against the preceding
+production version: 181 component rectangles and font/padding/gap values match;
+map risk fill sets are unchanged. The hosted illustration decodes and its bytes
+match the committed asset. Production desktop/mobile captures were inspected.
+
+Evidence: `artifacts/brand-release-20260927/release-v2-state.json`,
+`production-v2/` and `comparison-v2-*.png`. Physical-device checks and unrelated
+UAT/API integration testing were not run. No database or native changes.
+Recovery artifact: `dpl_Aq5RepuAFryPMtc7Taa8zm4owaW6`.

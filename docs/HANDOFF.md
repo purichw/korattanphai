@@ -20,6 +20,40 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Shared brand surface production release (2026-09-27):
+
+- Runtime `c03cd7e` adds the shared ivory/forest/gold paint layer and one
+  reusable 118,484-byte rice-landscape WebP. Component layout, dimensions,
+  typography metrics, forecast values and map/chart risk semantics are preserved.
+- Released on `release/brand-theme-20260927-v2`, based on `e11c59f`.
+  Only the six theme files differ from that production baseline. The Plus Code
+  feature already on production is retained. Local UAT/research/API work and
+  the uncommitted bundle-budget relaxation are excluded.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36317441953)
+  passed all five jobs on the exact runtime commit: 335 unit, 148 protected
+  browser, 134 database browser and six cross-browser checks. Existing
+  provider/viewport exclusions remain (122 built-browser and two database skips).
+  Hosted protected build, source-exposure and unchanged bundle-budget gates
+  passed (316,834 B application gzip); no static forecast archive is exposed.
+- Promoted `dpl_9nxHr9FT9iYDkGQSYV95WUmontem` /
+  `https://korattanphai-2ru3k388k-purich-w.vercel.app`; inspection confirms
+  `https://korattanphai.vercel.app` serves that Ready artifact.
+- Candidate and production each passed 39 authenticated read-only smoke checks
+  and eight route/viewport visual/asset checks. All 181 measured rectangles and
+  font/padding/gap values match the preceding production baseline; risk fill
+  sets are unchanged. The deployed WebP decodes and matches committed bytes.
+  Candidate account/search/dropdown/analysis focus, playback and map-mode checks
+  also passed. Production desktop/mobile comparison screenshots were reviewed.
+- The first candidate (`4b97ee8`) passed its gates but was never promoted:
+  the pre-promotion guard detected the intervening Plus Code release. The theme
+  was applied to the new production baseline and all release gates rerun.
+  Do not use that superseded candidate as routine recovery.
+- Evidence: `artifacts/brand-release-20260927/release-v2-state.json`,
+  `candidate-v2/`, `production-v2/` and `comparison-v2-*.png`.
+  No migration, application-data write, native-app or billing change occurred.
+  Physical-device testing and unrelated UAT/API integration checks were skipped.
+  Recovery: `dpl_Aq5RepuAFryPMtc7Taa8zm4owaW6` (the preceding Plus Code release).
+
 Full Plus Code map lookup production release (2026-09-27):
 
 - Runtime `74c5fa1` adds a Plus Code mode to the shared coordinate lookup.
