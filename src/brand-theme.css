@@ -1,0 +1,292 @@
+/* Shared visual finish for Korat's existing web surfaces.
+ * Paint only: layout, type metrics, control sizes and map/data colors belong to
+ * the original component styles. Decorative art never adds a DOM/hit target.
+ */
+:root {
+  --brand-canvas: #f7f5ed;
+  --brand-paper: #fffefa;
+  --brand-forest: #194a36;
+  --brand-forest-deep: #123a2b;
+  --brand-gold: #c1a35c;
+  --brand-line: #d8dece;
+  --brand-control-line: #bdcdbc;
+  --brand-soft: #eef3e8;
+  --brand-card-shadow: 0 3px 12px rgb(50 63 35 / 6%);
+  --brand-landscape: url('/brand/korat-rice-landscape.webp');
+}
+
+.app-shell {
+  background-color: var(--brand-canvas);
+}
+
+.app-shell .main-panel {
+  background-color: var(--brand-canvas);
+  background-image:
+    linear-gradient(180deg, transparent 60%, var(--brand-canvas)),
+    linear-gradient(90deg, var(--brand-canvas) 40%, rgb(247 245 237 / 80%) 68%, rgb(247 245 237 / 45%)),
+    var(--brand-landscape);
+  background-size: 100% 218px, 100% 218px, 820px auto;
+  background-position: left top, left top, right -336px;
+  background-repeat: no-repeat;
+}
+
+.app-shell .sidebar {
+  background-color: var(--brand-forest-deep);
+  background-image:
+    linear-gradient(180deg, #173d2fff 0%, #173d2ffa 35%, #173d2fbd 55%, #14372b52 82%, #103329e8 100%),
+    var(--brand-landscape);
+  background-size: 100% 100%, auto 72%;
+  background-position: center, left bottom;
+  background-repeat: no-repeat;
+  box-shadow: inset -1px 0 rgb(228 210 149 / 40%);
+}
+
+.app-shell .nav-item,
+.app-shell .nav-subitem {
+  color: #e1eade;
+}
+
+.app-shell .nav-item:hover,
+.app-shell .nav-subitem:hover {
+  background: rgb(233 230 196 / 12%);
+  color: #fffdf2;
+}
+
+.app-shell .nav-item.active,
+.app-shell .nav-subitem.active {
+  background: linear-gradient(105deg, rgb(201 179 103 / 27%), rgb(243 235 204 / 10%));
+  color: #fffdf2;
+  box-shadow: inset 0 0 0 1px rgb(230 213 152 / 50%), 0 2px 6px rgb(8 30 19 / 10%);
+}
+
+.app-shell .nav-item.active > svg,
+.app-shell .nav-subitem.active::before {
+  color: #f1d789;
+}
+
+.app-shell .nav-subnav {
+  border-color: rgb(222 208 164 / 32%);
+}
+
+.app-shell .sidebar-note {
+  background: rgb(15 48 34 / 78%);
+  border-color: rgb(224 210 163 / 34%);
+}
+
+.app-shell :is(.nr-forecast-overview-heading, .nr-operational-header, .nr-drought-page-identity) h1 {
+  color: var(--brand-forest-deep);
+}
+
+.app-shell :is(.account-trigger, .nr-bookmarks-trigger, .operational-filter-mobile-summary,
+  .control-band, .nr-fixed-filter, .operational-fixed-field) {
+  background-color: var(--brand-paper);
+  border-color: var(--brand-line);
+  box-shadow: var(--brand-card-shadow), inset 0 1px #fff;
+}
+
+.app-shell :is(.nr-operational-filters, .is-overview-filter .operational-filter-fields) > .app-select-field {
+  background-color: var(--brand-paper);
+  border-color: var(--brand-control-line);
+  box-shadow: 0 2px 5px rgb(50 63 35 / 4%);
+}
+
+:root .app-select-trigger {
+  background-color: var(--brand-paper);
+  border-color: var(--brand-control-line);
+  box-shadow: inset 0 1px #fff;
+}
+
+.app-shell :is(.nr-operational-filters, .is-overview-filter) .app-select-trigger {
+  background: transparent;
+  box-shadow: none;
+}
+
+:root .app-select-trigger:hover,
+:root .app-select-trigger[aria-expanded="true"] {
+  border-color: #78967e;
+}
+
+:root :is(.app-select-menu, .account-menu-popover, .operational-filter-sheet) {
+  background-color: var(--brand-paper);
+  border-color: var(--brand-control-line);
+}
+
+:root .app-select-option:is(.is-active, :hover) {
+  background: var(--brand-soft);
+}
+
+:root .app-select-option.is-selected {
+  background: #e5efe1;
+  color: var(--brand-forest-deep);
+}
+
+.app-shell :is(.nr-dashboard-map-card, .nr-drought-workspace-chart-card,
+  .nr-drought-workspace-context, .nr-drought-workspace-details,
+  .nr-dashboard-section:not(.nr-drought-compact-workspace)) {
+  border-color: var(--brand-line);
+  background-color: var(--brand-paper);
+  box-shadow: var(--brand-card-shadow);
+}
+
+.app-shell .nr-forecast-overview-summary,
+.app-shell .nr-forecast-overview-attention {
+  background-color: var(--brand-paper);
+}
+
+.app-shell .nr-home-situation {
+  border-color: #d6d4b9;
+  background-color: var(--brand-paper);
+  background-image: linear-gradient(90deg, var(--brand-paper) 55%, #fffefacc 76%, #fffefa66), var(--brand-landscape);
+  background-size: 100% 100%, 560px auto;
+  background-position: center, right 76%;
+  background-repeat: no-repeat;
+  box-shadow: 0 3px 10px rgb(97 90 46 / 5%);
+}
+
+.app-shell .nr-home-situation .metric-card {
+  background: transparent;
+}
+
+.app-shell .nr-home-attention-empty {
+  background-image: linear-gradient(180deg, var(--brand-paper), #fffefaef 48%, #fffefa30 78%, #fffefa00), var(--brand-landscape);
+  background-size: 100% 100%, 100% auto;
+  background-position: center, center bottom;
+  background-repeat: no-repeat;
+}
+
+.app-shell .nr-home-attention-empty-icon {
+  color: var(--brand-forest);
+  background: #e9efe2;
+  box-shadow: inset 0 0 0 1px #d6dfcc;
+}
+
+.app-shell .metric-card:not(.is-watch, .is-danger, .is-good, .is-muted) {
+  border-color: var(--brand-line);
+}
+
+.app-shell .nr-forecast-overview-summary .metric-card.is-danger {
+  border-color: #eccfc9;
+  background: linear-gradient(135deg, #fff1ee, #fff9f7);
+}
+
+.app-shell .nr-forecast-overview-summary .metric-card.is-watch {
+  border-color: #ebd8af;
+  background: linear-gradient(135deg, #fff4dc, #fffbf3);
+}
+
+.app-shell .nr-forecast-overview-summary .metric-card.is-good {
+  border-color: #c9ddcc;
+  background: linear-gradient(135deg, #ebf5e9, #f7fbf5);
+}
+
+.app-shell .nr-forecast-overview-summary .metric-card.is-muted {
+  border-color: #d8ded8;
+  background: linear-gradient(135deg, #edf0eb, #f8f9f6);
+}
+
+:root :is(.primary-button, .nr-forecast-overview-details) {
+  border-color: var(--brand-forest-deep);
+  background: linear-gradient(180deg, #2c654b, var(--brand-forest-deep));
+  color: #fffefa;
+  box-shadow: inset 0 1px rgb(255 255 255 / 15%), 0 2px 5px rgb(20 57 38 / 12%);
+}
+
+:root :is(.primary-button, .nr-forecast-overview-details):hover {
+  background: var(--brand-forest-deep);
+}
+
+.app-shell :is(.nr-map-tool-actions > button, .nr-map-playback) {
+  background-color: #f0f3e9;
+  box-shadow: inset 0 0 0 1px #e3e9db;
+}
+
+.app-shell :is(.nr-map-tool-actions > button:hover, .nr-map-playback.is-playing) {
+  background-color: #e2ecdc;
+}
+
+:root :is(.nr-map-color-modes, .nr-map-bottom-modes, .nr-forecast-unit-control, .nr-forecast-archive-horizon-tabs, .nr-tool-tabs) {
+  border-color: var(--brand-control-line);
+  background-color: #eef2e9;
+}
+
+:root :is(.nr-map-bottom-modes, .nr-forecast-unit-control) button.active,
+:root :is(.nr-map-color-modes, .nr-tool-tabs) button[aria-pressed="true"] {
+  border-color: #82a28a;
+  color: var(--brand-forest-deep);
+  background: linear-gradient(180deg, #ffffff, #f0f6ec);
+}
+
+.app-shell .nr-forecast-archive-horizon-tabs button.active {
+  color: var(--brand-forest-deep);
+  background: #e5eee0;
+}
+
+.app-shell :is(.nr-map-controls, .nr-map-zoom-controls) .icon-button {
+  background-color: #fffefaf2;
+  box-shadow: 0 2px 5px rgb(32 64 40 / 8%);
+}
+
+:root :is(button, a, input, summary):focus-visible {
+  outline-color: #547957;
+}
+
+/* WorkspaceDialog portals into body/fullscreen; share the same paint there. */
+:root :is(.nr-tool-dialog, .nr-saved-dialog, .nr-export-dialog) {
+  background-color: var(--brand-paper);
+  border-color: var(--brand-line);
+}
+
+:root .nr-analysis-table thead th {
+  background-color: var(--brand-soft);
+}
+
+.login-page {
+  background-color: var(--brand-canvas);
+  background-image: linear-gradient(180deg, #f7f5ed75, #f7f5ed30), var(--brand-landscape);
+  background-size: cover;
+  background-position: center bottom;
+}
+
+.login-card {
+  border-color: var(--brand-line);
+  background-color: #fffefaf5;
+}
+
+.app-shell .mobile-account-slot .account-trigger {
+  border-color: rgb(225 230 205 / 40%);
+  background: rgb(235 239 218 / 9%);
+  box-shadow: inset 0 1px rgb(255 255 255 / 8%);
+}
+
+.app-shell .mobile-account-slot .account-trigger > svg:first-child {
+  color: #f5f5e9;
+}
+
+/* Keep the compact mobile header legible; its dimensions and menu stay owned
+ * by the existing responsive shell. Only the art crop changes by viewport. */
+@media (max-width: 720px) {
+  .app-shell .sidebar {
+    background-image: linear-gradient(100deg, #173d2ffa, #173d2fd9), var(--brand-landscape);
+    background-size: 100% 100%, 100% auto;
+    background-position: center, center 78%;
+    box-shadow: inset 0 -1px rgb(224 210 163 / 45%), 0 4px 12px rgb(36 55 35 / 10%);
+  }
+
+  .app-shell .main-panel {
+    background-image:
+      linear-gradient(180deg, transparent 55%, var(--brand-canvas)),
+      linear-gradient(90deg, #f7f5edf5 30%, #f7f5edcc 65%, #f7f5ed8c),
+      var(--brand-landscape);
+    background-size: 100% 220px, 100% 220px, 520px auto;
+    background-position: left top, left top, right -150px;
+  }
+
+  .app-shell .nr-forecast-overview-summary {
+    background: transparent;
+  }
+
+  .app-shell .nr-home-attention-empty {
+    background-size: 100% 100%, 100% auto;
+    background-image: linear-gradient(180deg, var(--brand-paper), #fffefae8 55%, #fffefa9c), var(--brand-landscape);
+  }
+}
