@@ -108,6 +108,16 @@ number to open the same dialog from search, with its default navigation behavior
 
 ## Local Shared Primitives
 
+`AccountControl` in `src/AuthenticatedApp.tsx` has one instance in the shared
+sidebar footer, not duplicate desktop/mobile account triggers. Desktop anchors
+it to the bottom of the sidebar with an upward menu; mobile places it after the
+scrollable navigation and retains the account bottom sheet. Its accessible name
+includes the authenticated identity; the compact trigger shows the account label
+and truncates long names, while the open menu shows full details. Escape restores
+focus without scrolling, outside clicks dismiss, and arrow/Home/End keys navigate
+menu actions. Identity and logout remain owned by the existing scoped auth callbacks.
+Navigation scrolls independently so the footer stays reachable on short screens.
+
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`
 through `6 เดือน`. Tab accessible names retain the full lead time and actual

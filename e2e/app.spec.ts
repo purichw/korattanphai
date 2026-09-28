@@ -1,13 +1,13 @@
-import { expect, test, type Locator, type Page, fillAuthForm, authTestUser } from "./fixtures";
+import { expect, test, type Locator, type Page, fillAuthForm, authTestUser, openAccountMenu } from "./fixtures";
 
 async function openPrimaryNav(page: Page) {
-  const menuToggle = page.getByRole("button", { name: "เปิดเมนูหลัก" });
+  const menuToggle = page.getByRole("button", { name: "เปิดเมนูหลัก", exact: true });
   if (await menuToggle.isVisible()) await menuToggle.click();
   return page.locator(".primary-nav");
 }
 
 async function closePrimaryNav(page: Page) {
-  const menuToggle = page.getByRole("button", { name: "ปิดเมนูหลัก" });
+  const menuToggle = page.getByRole("button", { name: "ปิดเมนูหลัก", exact: true });
   if (await menuToggle.isVisible()) await menuToggle.click();
 }
 
@@ -21,7 +21,7 @@ async function loginAs(page: Page) {
   await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
+  await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
 }
 
 async function expectProvinceOverviewHeading(page: Page) {
@@ -252,8 +252,8 @@ test("login rejects invalid credentials and uses the authenticated identity", as
   await expect(page.getByRole("alert")).toContainText("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
+  await openAccountMenu(page);
   await expect(page.getByRole("button", { name: `บัญชีผู้ใช้ ${authTestUser.user_metadata.full_name}` })).toBeVisible();
-  await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
   await page.getByRole("menuitem", { name: /ออกจากระบบ/ }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByLabel("อีเมล", { exact: true })).toHaveValue("");
@@ -267,12 +267,11 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await expect(page).toHaveTitle(/Korat Tan Phai/);
   await expectProvinceOverviewHeading(page);
   const accountTrigger = page.getByRole("button", { name: /บัญชีผู้ใช้/ });
+  const accountMenu = await openAccountMenu(page);
   await expect(accountTrigger).toBeVisible();
   await expect(page.locator(".topbar .login-session-chip")).toHaveCount(0);
   await expect(page.locator(".topbar .persona-select")).toHaveCount(0);
   await expect(page.locator(".topbar .secondary-button")).toHaveCount(0);
-  await accountTrigger.click();
-  const accountMenu = page.getByRole("menu", { name: "บัญชีผู้ใช้" });
   await expect(accountMenu).toContainText(authTestUser.email);
   await expect(accountMenu.getByRole("menuitemradio")).toHaveCount(0);
   await expect(accountMenu).not.toContainText(".demo");
@@ -282,6 +281,7 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
   await page.keyboard.press("Escape");
   await expect(accountMenu).toHaveCount(0);
   await expect(accountTrigger).toBeFocused();
+  await closePrimaryNav(page);
   const overviewViewport = page.viewportSize();
   const isPhoneLayout = (overviewViewport?.width ?? 1440) <= 720;
   if (isPhoneLayout) {

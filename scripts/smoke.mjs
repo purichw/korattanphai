@@ -340,6 +340,8 @@ try {
       assert.equal(operationalReads, 0, "Forecast routes must not depend on the parked Actual API");
       await Promise.all(assetChecks);
       assert.deepEqual(errors, [], `${name}: browser errors`);
+      const navigationToggle = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
+      if (await navigationToggle.isVisible()) await navigationToggle.click();
       await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
       assert.equal(await page.getByRole("menuitem").count(), 1, `${name}: no demo account actions`);
       await page.getByRole("menuitem", { name: "ออกจากระบบ", exact: true }).click();

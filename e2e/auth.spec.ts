@@ -1,4 +1,4 @@
-import { test, expect, authTestEmail, authTestUser, authStorageKey, seedAuthSession, fillAuthForm } from "./fixtures";
+import { test, expect, authTestEmail, authTestUser, authStorageKey, seedAuthSession, fillAuthForm, openAccountMenu } from "./fixtures";
 
 test("legacy demo login cannot bypass auth; password visibility, keyboard submit and refresh work", async ({ page }, testInfo) => {
   await page.addInitScript(() => {
@@ -28,8 +28,7 @@ test("legacy demo login cannot bypass auth; password visibility, keyboard submit
   await page.reload();
   await expect(page.getByRole("heading", { name: /ภัยแล้ง.*บ้านเก่า/, level: 1 })).toBeVisible();
   await expect(page).toHaveURL(new URL(requested, page.url()).href);
-  await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
-  const menu = page.getByRole("menu", { name: "บัญชีผู้ใช้" });
+  const menu = await openAccountMenu(page);
   await expect(menu).toContainText(authTestEmail);
   await expect(menu).toContainText(authTestUser.user_metadata.full_name);
   await expect(menu.getByRole("group", { name: "มุมมองการแสดงผล" })).toHaveCount(0);
@@ -70,7 +69,7 @@ test("logout server failure reflects the SDK local signout and never leaves acco
   await seedAuthSession(page);
   authMock.logoutError = true;
   await page.goto("/");
-  await page.getByRole("button", { name: /บัญชีผู้ใช้/ }).click();
+  await openAccountMenu(page);
   await page.getByRole("menuitem", { name: "ออกจากระบบ", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("alert")).toContainText("ออกจากระบบบนเครื่องนี้แล้ว");

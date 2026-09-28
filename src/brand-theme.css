@@ -77,7 +77,7 @@
   color: var(--brand-forest-deep);
 }
 
-.app-shell :is(.account-trigger, .nr-bookmarks-trigger, .operational-filter-mobile-summary,
+.app-shell :is(.nr-bookmarks-trigger, .operational-filter-mobile-summary,
   .control-band, .nr-fixed-filter, .operational-fixed-field) {
   background-color: var(--brand-paper);
   border-color: var(--brand-line);
@@ -252,14 +252,29 @@
   background-color: #fffefaf5;
 }
 
-.app-shell .mobile-account-slot .account-trigger {
-  border-color: rgb(225 230 205 / 40%);
-  background: rgb(235 239 218 / 9%);
-  box-shadow: inset 0 1px rgb(255 255 255 / 8%);
+.app-shell .sidebar-account {
+  border-color: rgb(224 210 163 / 26%);
 }
 
-.app-shell .mobile-account-slot .account-trigger > svg:first-child {
-  color: #f5f5e9;
+.app-shell .sidebar-account .account-trigger {
+  border-color: rgb(224 210 163 / 24%);
+  background: var(--brand-forest-deep);
+  color: var(--brand-paper);
+  box-shadow: inset 0 1px rgb(255 255 255 / 5%);
+}
+
+.app-shell .sidebar-account .account-trigger:is(:hover, [aria-expanded="true"]) {
+  border-color: var(--brand-gold);
+  background: var(--brand-forest);
+}
+
+.app-shell .account-trigger-avatar {
+  color: #f1d789;
+  background: rgb(224 210 163 / 12%);
+}
+
+.app-shell .sidebar-navigation {
+  scrollbar-color: #8da18b transparent;
 }
 
 /* Keep the compact mobile header legible; its dimensions and menu stay owned

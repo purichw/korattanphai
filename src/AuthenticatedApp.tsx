@@ -12,6 +12,7 @@ import {
   Bell,
   CheckCircle2,
   ChevronDown,
+  ChevronUp,
   ClipboardCheck,
   CloudRain,
   Database,
@@ -185,7 +186,6 @@ function AccountControl({
   loginUser,
   persona,
   language,
-  compact = false,
   demoActions = false,
   onPersonaChange,
   onResetDemo,
@@ -195,7 +195,6 @@ function AccountControl({
   loginUser: LoginUser;
   persona: UserPersona;
   language: Language;
-  compact?: boolean;
   demoActions?: boolean;
   onPersonaChange: (personaId: string) => void;
   onResetDemo: () => void;
@@ -205,6 +204,7 @@ function AccountControl({
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const menuId = useId().replaceAll(":", "");
   const roleLabel = labelPersonaRole(persona.role, language);
   const accountDisplayName = getAccountDisplayName(loginUser);
@@ -213,18 +213,22 @@ function AccountControl({
   useEffect(() => {
     if (!isOpen) return;
 
+    const frame = window.requestAnimationFrame(() => {
+      menuRef.current?.querySelector<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)')?.focus({ preventScroll: true });
+    });
     const handlePointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       setIsOpen(false);
-      window.requestAnimationFrame(() => triggerRef.current?.focus());
+      window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
     };
 
     document.addEventListener("pointerdown", handlePointerDown, true);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
+      window.cancelAnimationFrame(frame);
       document.removeEventListener("pointerdown", handlePointerDown, true);
       document.removeEventListener("keydown", handleKeyDown);
     };
@@ -232,7 +236,7 @@ function AccountControl({
 
   const closeMenu = () => {
     setIsOpen(false);
-    window.requestAnimationFrame(() => triggerRef.current?.focus());
+    window.requestAnimationFrame(() => triggerRef.current?.focus({ preventScroll: true }));
   };
 
   const choosePersona = (personaId: string) => {
@@ -241,7 +245,9 @@ function AccountControl({
   };
 
   return (
-    <div ref={rootRef} className={compact ? "account-menu is-compact" : "account-menu"}>
+    <div ref={rootRef} className="account-menu" onBlur={(event) => {
+      if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) setIsOpen(false);
+    }}>
       <button
         ref={triggerRef}
         type="button"
@@ -250,15 +256,21 @@ function AccountControl({
         aria-expanded={isOpen}
         aria-controls={isOpen ? menuId : undefined}
         aria-label={accountLabel}
-        title={compact ? accountLabel : undefined}
+        title={accountDisplayName}
         onClick={() => setIsOpen((open) => !open)}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            setIsOpen(true);
+          }
+        }}
       >
-        <UserRound size={18} aria-hidden="true" />
+        <span className="account-trigger-avatar"><UserRound size={18} aria-hidden="true" /></span>
         <span className="account-trigger-copy">
-          <strong>{accountDisplayName}</strong>
-          <small>{demoActions ? `มุมมอง: ${roleLabel}` : "บัญชีผู้ใช้"}</small>
+          <strong>{demoActions ? `มุมมอง: ${roleLabel}` : "บัญชีผู้ใช้"}</strong>
+          <small>{accountDisplayName}</small>
         </span>
-        <ChevronDown className="account-trigger-chevron" size={17} aria-hidden="true" />
+        <ChevronUp className="account-trigger-chevron" size={16} aria-hidden="true" />
       </button>
       {isOpen && (
         <>
@@ -270,7 +282,17 @@ function AccountControl({
               closeMenu();
             }}
           />
-          <div id={menuId} className="account-menu-popover" role="menu" aria-label="บัญชีผู้ใช้">
+          <div ref={menuRef} id={menuId} className="account-menu-popover" role="menu" aria-label="บัญชีผู้ใช้"
+            onKeyDown={(event) => {
+              if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+              const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role^="menuitem"]:not(:disabled)'));
+              if (!items.length) return;
+              event.preventDefault();
+              const current = items.indexOf(document.activeElement as HTMLButtonElement);
+              const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1
+                : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+              items[next]?.focus({ preventScroll: true });
+            }}>
             <div className="account-menu-heading" role="presentation">
               <span>บัญชีผู้ใช้</span>
             </div>
@@ -278,7 +300,7 @@ function AccountControl({
               <UserRound size={18} aria-hidden="true" />
               <span>
                 <strong>{accountDisplayName}</strong>
-                <small>{loginUser.email}</small>
+                {loginUser.email !== accountDisplayName && <small>{loginUser.email}</small>}
               </span>
             </div>
             <div className="account-menu-divider" role="presentation" />
@@ -406,7 +428,7 @@ function AppShell({
           type="button"
           className="mobile-menu-toggle"
           aria-expanded={isMobileMenuOpen}
-          aria-controls="primary-navigation"
+          aria-controls="sidebar-navigation"
           aria-label={isMobileMenuOpen ? "ปิดเมนูหลัก" : "เปิดเมนูหลัก"}
           onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
         >
@@ -415,70 +437,53 @@ function AppShell({
         <div className="mobile-account-slot">
           <WorkspaceSearchTrigger compact onOpen={openSearch} />
           <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
-          <AccountControl
-            compact
-            loginUser={loginUser}
-            persona={persona}
-            language={language}
-            onPersonaChange={(personaId) => dispatch({ type: "setPersona", personaId })}
-            onResetDemo={() => dispatch({ type: "resetDemo" })}
-            onLogout={onLogout}
-            signingOut={signingOut}
-          />
         </div>
-        <nav id="primary-navigation" className="primary-nav">
-          <WorkspaceSearchTrigger onOpen={openSearch} />
-          {visibleSections.map((section) => {
-            const Icon = sectionIcons[section];
-            const isOverviewSection = section === "overview";
-            const isMainItemActive = !isAdmin && state.section === section && !(isOverviewSection && isDroughtSubNavActive);
-            return (
-              <div key={section} className="nav-group">
-                <button
-                  type="button"
-                  className={isMainItemActive ? "nav-item active" : "nav-item"}
-                  aria-current={isMainItemActive ? 'page' : undefined}
-                  onClick={() => {
-                    onNavigate("/");
-                    dispatch({ type: "setSection", section });
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <Icon size={17} />
-                  <span>{sectionLabel(section)}</span>
-                </button>
-                {isOverviewSection && (
-                  <div className="nav-subnav" aria-label="เมนูย่อยภาพรวม">
-                    <button
-                      type="button"
-                      className={isDroughtSubNavActive ? "nav-subitem active" : "nav-subitem"}
-                      aria-current={isDroughtSubNavActive ? 'page' : undefined}
-                      onClick={() => {
-                        onNavigate(getNakhonRatchasimaProvinceTabPath("drought"));
-                        dispatch({ type: "setSection", section });
-                        setIsMobileMenuOpen(false);
-                      }}
-                    >
-                      <span>ภัยแล้ง</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          <ForecastExcelExport openRequest={exportRequest} onOpen={() => setIsMobileMenuOpen(false)} />
-          <button type="button" className={isAdmin ? 'nav-item active' : 'nav-item'} aria-current={isAdmin ? 'page' : undefined}
-            onClick={() => { onNavigate('/admin'); setIsMobileMenuOpen(false); }}><Database size={17} /><span>จัดการข้อมูล</span></button>
-        </nav>
-      </aside>
-
-      <main className="main-panel">
-        <header className="topbar">
-          <div className="topbar-brand">
-            <h1 className="sr-only">{t("brand", language)}</h1>
-          </div>
-          <div className="topbar-actions">
-            <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
+        <div id="sidebar-navigation" className="sidebar-navigation">
+          <nav id="primary-navigation" className="primary-nav">
+            <WorkspaceSearchTrigger onOpen={openSearch} />
+            {visibleSections.map((section) => {
+              const Icon = sectionIcons[section];
+              const isOverviewSection = section === "overview";
+              const isMainItemActive = !isAdmin && state.section === section && !(isOverviewSection && isDroughtSubNavActive);
+              return (
+                <div key={section} className="nav-group">
+                  <button
+                    type="button"
+                    className={isMainItemActive ? "nav-item active" : "nav-item"}
+                    aria-current={isMainItemActive ? 'page' : undefined}
+                    onClick={() => {
+                      onNavigate("/");
+                      dispatch({ type: "setSection", section });
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <Icon size={17} />
+                    <span>{sectionLabel(section)}</span>
+                  </button>
+                  {isOverviewSection && (
+                    <div className="nav-subnav" aria-label="เมนูย่อยภาพรวม">
+                      <button
+                        type="button"
+                        className={isDroughtSubNavActive ? "nav-subitem active" : "nav-subitem"}
+                        aria-current={isDroughtSubNavActive ? 'page' : undefined}
+                        onClick={() => {
+                          onNavigate(getNakhonRatchasimaProvinceTabPath("drought"));
+                          dispatch({ type: "setSection", section });
+                          setIsMobileMenuOpen(false);
+                        }}
+                      >
+                        <span>ภัยแล้ง</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <ForecastExcelExport openRequest={exportRequest} onOpen={() => setIsMobileMenuOpen(false)} />
+            <button type="button" className={isAdmin ? 'nav-item active' : 'nav-item'} aria-current={isAdmin ? 'page' : undefined}
+              onClick={() => { onNavigate('/admin'); setIsMobileMenuOpen(false); }}><Database size={17} /><span>จัดการข้อมูล</span></button>
+          </nav>
+          <div className="sidebar-account">
             <AccountControl
               loginUser={loginUser}
               persona={persona}
@@ -488,6 +493,17 @@ function AppShell({
               onLogout={onLogout}
               signingOut={signingOut}
             />
+          </div>
+        </div>
+      </aside>
+
+      <main className="main-panel">
+        <header className="topbar">
+          <div className="topbar-brand">
+            <h1 className="sr-only">{t("brand", language)}</h1>
+          </div>
+          <div className="topbar-actions">
+            <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
           </div>
         </header>
 

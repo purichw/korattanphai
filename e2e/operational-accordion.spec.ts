@@ -4,7 +4,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/login");
   await fillAuthForm(page);
   await page.getByRole("button", { name: "เข้าสู่ระบบ", exact: true }).click();
-  await expect(page.getByRole("button", { name: /บัญชีผู้ใช้/ })).toBeVisible();
+  await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
 });
 
 for (const [scope, path] of [["province", "/drought"], ["district", "/thepharak"]]) {

@@ -1,4 +1,4 @@
-import { test, expect, seedAuthSession, fillAuthForm, authStorageKey, adminAuthStorageKey } from './fixtures';
+import { test, expect, seedAuthSession, fillAuthForm, authStorageKey, adminAuthStorageKey, openAccountMenu } from './fixtures';
 import { cmsTestDatabase } from '../tests/fixtures/admin-data.mjs';
 
 test('Admin login is separate and signout synchronizes only tabs in the same scope', async ({ page, context }, testInfo) => {
@@ -22,21 +22,21 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     expect(await page.evaluate(keys => keys.map(key => Boolean(localStorage.getItem(key))), [authStorageKey, adminAuthStorageKey])).toEqual([true, true]);
     const visitor = await context.newPage();
     await visitor.goto('/');
-    await expect(visitor.getByRole('button', { name: /บัญชีผู้ใช้/ })).toBeVisible();
+    await expect(visitor.locator('.sidebar-account .account-trigger')).toHaveCount(1);
     const otherAdmin = await context.newPage();
     await otherAdmin.goto('/admin');
     await expect(otherAdmin.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: /บัญชีผู้ใช้/ }).click();
+    await openAccountMenu(page);
     await page.getByRole('menuitem', { name: 'ออกจากระบบ', exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/login$/);
     await expect(otherAdmin).toHaveURL(/\/admin\/login$/);
     await visitor.reload();
-    await expect(visitor.getByRole('button', { name: /บัญชีผู้ใช้/ })).toBeVisible();
+    await expect(visitor.locator('.sidebar-account .account-trigger')).toHaveCount(1);
     expect(await visitor.evaluate(key => Boolean(localStorage.getItem(key)), authStorageKey)).toBe(true);
     await fillAuthForm(page);
     await page.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
-    await visitor.getByRole('button', { name: /บัญชีผู้ใช้/ }).click();
+    await openAccountMenu(visitor);
     await visitor.getByRole('menuitem', { name: 'ออกจากระบบ', exact: true }).click();
     await expect(visitor).toHaveURL(/\/login$/);
     await page.reload();
@@ -47,7 +47,7 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     await page.locator('.primary-nav').getByRole('button', { name: 'ภาพรวม', exact: true }).click();
     await expect(page).toHaveURL(/\/login$/);
     await fillAuthForm(page); await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
-    await expect(page.getByRole('button', { name: /บัญชีผู้ใช้/ })).toBeVisible();
+    await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
     const menu = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
     if (await menu.isVisible()) await menu.click();
     await page.locator('.primary-nav').getByRole('button', { name: 'จัดการข้อมูล', exact: true }).click();

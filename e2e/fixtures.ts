@@ -1,4 +1,5 @@
 import { test as base, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { mockSupabase } from "../tests/fixtures/supabase.mjs";
 import { readFileSync } from 'node:fs';
 import { forecastRevision } from '../tests/fixtures/forecast-slice.mjs';
@@ -26,5 +27,12 @@ export const test = base.extend<{ authMock: Awaited<ReturnType<typeof mockSupaba
   }, { auto: true }],
 });
 export { expect };
+export async function openAccountMenu(page: Page) {
+  await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
+  const navigationToggle = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
+  if (await navigationToggle.isVisible()) await navigationToggle.click();
+  await page.getByRole('button', { name: /บัญชีผู้ใช้/ }).click();
+  return page.getByRole('menu', { name: 'บัญชีผู้ใช้', exact: true });
+}
 export type { Page, Locator } from "@playwright/test";
 export { authTestEmail, authTestPassword, authTestUser, authStorageKey, adminAuthStorageKey, fillAuthForm, seedAuthSession, seedAdminSession } from "../tests/fixtures/supabase.mjs";

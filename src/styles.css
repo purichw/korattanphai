@@ -238,7 +238,6 @@ summary:focus-visible {
 .login-form > .primary-button { min-height: 46px; }
 .login-form :disabled { cursor: wait; opacity: 0.65; }
 .account-menu-profile span { min-width: 0; overflow-wrap: anywhere; }
-.account-menu .account-trigger { max-width: 300px; }
 .auth-session-error {
   position: sticky;
   top: 0;
@@ -261,10 +260,11 @@ summary:focus-visible {
 .sidebar {
   position: sticky;
   top: 0;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  height: 100vh;
+  height: 100dvh;
   padding: 20px 14px;
   background: #17251f;
   color: #edf6f0;
@@ -324,6 +324,27 @@ summary:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.sidebar-navigation {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.sidebar-navigation > .primary-nav {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sidebar-account {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgb(255 255 255 / 16%);
 }
 
 .nav-group {
@@ -427,7 +448,7 @@ summary:focus-visible {
   }
 
   .main-panel:has(.nr-drought-page-header) .nr-drought-page-header {
-    padding-inline-end: 300px;
+    padding-inline-end: 64px;
   }
 }
 
@@ -511,38 +532,43 @@ summary:focus-visible {
 
 .account-trigger {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) 18px;
-  gap: 10px;
+  grid-template-columns: 32px minmax(0, 1fr) 16px;
+  gap: 8px;
   align-items: center;
-  min-width: 260px;
-  min-height: 48px;
-  padding: 7px 10px;
-  border-color: rgba(184, 199, 190, 0.95);
-  background: #ffffff;
-  color: var(--ink);
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  padding: 10px 8px;
+  border-color: rgb(255 255 255 / 16%);
+  background: #203f32;
+  color: #edf6f0;
   text-align: left;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.82) inset;
 }
 
 .account-trigger:hover,
 .account-trigger[aria-expanded="true"] {
-  border-color: #96b1a3;
-  background: #fbfdfb;
+  border-color: rgb(255 255 255 / 32%);
+  background: #294e3e;
 }
 
-.account-trigger[aria-expanded="true"] {
-  box-shadow:
-    0 0 0 3px rgba(46, 116, 133, 0.14),
-    0 7px 18px rgba(28, 55, 43, 0.08);
+.sidebar-account .account-trigger:focus-visible {
+  outline: 2px solid #d4e9da;
+  outline-offset: 3px;
 }
 
-.account-trigger > svg:first-child {
-  color: #1b463a;
+.account-trigger-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+  color: #edf6f0;
 }
 
 .account-trigger-copy {
   display: grid;
-  gap: 1px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -557,19 +583,19 @@ summary:focus-visible {
 }
 
 .account-trigger-copy strong {
-  color: var(--ink);
-  font-size: 0.9rem;
-  font-weight: 900;
+  color: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
 }
 
 .account-trigger-copy small {
-  color: var(--muted);
+  color: #c8dace;
   font-size: 0.72rem;
-  font-weight: 780;
+  font-weight: 400;
 }
 
 .account-trigger-chevron {
-  color: #53635b;
+  color: #c8dace;
   transition: transform 160ms ease;
 }
 
@@ -583,13 +609,13 @@ summary:focus-visible {
 
 .account-menu-popover {
   position: absolute;
-  top: calc(100% + 7px);
-  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
   z-index: 110;
   display: grid;
   gap: 6px;
-  width: min(320px, calc(100vw - 32px));
-  max-height: min(560px, calc(100vh - 92px));
+  width: min(288px, calc(100vw - 32px));
+  max-height: min(560px, calc(100dvh - 116px));
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 7px;
@@ -607,7 +633,7 @@ summary:focus-visible {
   padding: 7px 8px 4px;
   color: var(--ink);
   font-size: 0.78rem;
-  font-weight: 950;
+  font-weight: 600;
 }
 
 .account-menu-profile,
@@ -624,7 +650,7 @@ summary:focus-visible {
   min-height: 52px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: linear-gradient(90deg, #edf6ef, #f6fbf7);
+  background: var(--surface-muted);
 }
 
 .account-menu-profile > svg,
@@ -645,7 +671,7 @@ summary:focus-visible {
 .account-role-option strong {
   color: var(--ink);
   font-size: 0.82rem;
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1.25;
 }
 
@@ -653,7 +679,7 @@ summary:focus-visible {
 .account-role-option small {
   color: var(--muted);
   font-size: 0.7rem;
-  font-weight: 760;
+  font-weight: 400;
   line-height: 1.25;
 }
 
@@ -718,8 +744,9 @@ summary:focus-visible {
 
 .account-menu-action {
   grid-template-columns: 20px minmax(0, 1fr);
+  min-height: 44px;
   font-size: 0.82rem;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .account-menu-action.is-warning {
@@ -8576,28 +8603,7 @@ textarea {
     justify-self: end;
   }
 
-  .mobile-account-slot .account-trigger {
-    width: 48px;
-    min-width: 48px;
-    min-height: 48px;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 0;
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
-    color: #edf6f0;
-  }
-
-  .mobile-account-slot .account-trigger > svg:first-child {
-    color: #edf6f0;
-  }
-
-  .mobile-account-slot .account-trigger-copy,
-  .mobile-account-slot .account-trigger-chevron {
-    display: none;
-  }
-
-  .mobile-account-slot .account-menu-backdrop {
+  .sidebar-account .account-menu-backdrop {
     position: fixed;
     inset: 0;
     z-index: 80;
@@ -8605,7 +8611,7 @@ textarea {
     background: rgba(9, 24, 18, 0.22);
   }
 
-  .mobile-account-slot .account-menu-popover {
+  .sidebar-account .account-menu-popover {
     position: fixed;
     top: auto;
     right: 12px;
@@ -8615,31 +8621,29 @@ textarea {
     width: auto;
     max-height: min(74dvh, 600px);
     padding: 8px max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
-    border-radius: 14px;
+    border-radius: var(--radius);
     box-shadow:
       0 -1px 0 rgba(255, 255, 255, 0.9) inset,
       0 -20px 44px rgba(12, 25, 20, 0.24);
   }
 
-  .sidebar .primary-nav {
+  .sidebar .sidebar-navigation {
     display: none;
     position: absolute;
     top: calc(100% + 6px);
     right: 22px;
     left: 22px;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
-    max-height: min(58dvh, 420px);
-    overflow-y: auto;
-    padding: 8px;
+    gap: 12px;
+    max-height: min(600px, calc(100dvh - 110px - env(safe-area-inset-top)));
+    padding: 12px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--radius);
     background: #17251f;
     box-shadow: 0 16px 34px rgba(12, 25, 20, 0.32);
   }
 
-  .sidebar.mobile-menu-open .primary-nav {
-    display: grid;
+  .sidebar.mobile-menu-open .sidebar-navigation {
+    display: flex;
   }
 
   .sidebar-note {
@@ -8964,18 +8968,6 @@ textarea {
     justify-self: end;
   }
 
-  .mobile-account-slot .account-trigger {
-    width: 44px;
-    min-width: 44px;
-    min-height: 44px;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    padding: 0;
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
-    color: #edf6f0;
-  }
-
   .nr-forecast-archive-entry {
     grid-template-columns: 38px minmax(0, 1fr);
     border-radius: 16px;
@@ -9004,58 +8996,15 @@ textarea {
     min-width: 0;
   }
 
-  .mobile-account-slot .account-trigger > svg:first-child {
-    color: #edf6f0;
-  }
-
-  .mobile-account-slot .account-trigger-copy,
-  .mobile-account-slot .account-trigger-chevron {
-    display: none;
-  }
-
-  .mobile-account-slot .account-menu-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 80;
-    display: block;
-    background: rgba(9, 24, 18, 0.22);
-  }
-
-  .mobile-account-slot .account-menu-popover {
-    position: fixed;
-    top: auto;
+  .sidebar-account .account-menu-popover {
     right: 8px;
     bottom: 8px;
     left: 8px;
-    z-index: 120;
-    width: auto;
-    max-height: min(74dvh, 600px);
-    padding: 8px max(8px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
-    border-radius: 14px;
-    box-shadow:
-      0 -1px 0 rgba(255, 255, 255, 0.9) inset,
-      0 -20px 44px rgba(12, 25, 20, 0.24);
   }
 
-  .sidebar .primary-nav {
-    display: none;
-    position: absolute;
-    top: calc(100% + 6px);
+  .sidebar .sidebar-navigation {
     right: 12px;
     left: 12px;
-    grid-template-columns: 1fr;
-    gap: 4px;
-    max-height: min(58dvh, 420px);
-    overflow-y: auto;
-    padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--radius);
-    background: #17251f;
-    box-shadow: 0 16px 34px rgba(12, 25, 20, 0.32);
-  }
-
-  .sidebar.mobile-menu-open .primary-nav {
-    display: grid;
   }
 
   .sidebar .nav-item {
