@@ -20,11 +20,32 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
-Branded page loading, local implementation (2026-09-30, not deployed):
+Branded loading and top-right search release (2026-09-30):
+
+- Runtime `6791d75`, branch `feature/branded-page-loading`, is deployed as
+  `dpl_F2bJGovU3aK6bPhWx8832UDcErvo` to `https://korattanphai.vercel.app`.
+  Visitor/Admin share branded full-page loading; global search uses the existing
+  green primary style beside the aligned 44px bookmark control. Account remains
+  at the sidebar footer.
+- The exact latest production baseline `a639f2e` was retained, including its
+  risk-attention lists, Admin sidebar sizing and navigation cleanup. Unfinished
+  primary-checkout work was excluded, and no branch history was rewritten.
+- All six [Quality Gate jobs](https://github.com/purichw/korattanphai/actions/runs/36680127202)
+  pass on `45f828b`, which differs from runtime only in E2E tests and this handoff.
+  Protected build, exposure and unchanged bundle-budget gates pass.
+- Candidate and final production each pass all 39 authenticated read-only smoke
+  checks, plus focused desktop/mobile loading, search/bookmark interactions,
+  independent Admin login and preservation checks. Production screenshots were
+  reviewed; console/network checks report no failures.
+- No migration, application-data write, auth configuration or native change.
+  See [release evidence and recovery](BRANDED_LOADING_SEARCH_RELEASE_20260930.md).
+
+Branded page loading, pre-release implementation notes (2026-09-30):
 
 - Branch `feature/branded-page-loading` in the clean release checkout
   `artifacts/cms-cutover-20260928/source`, based on `7bfeb6d`. Primary-checkout
-  unfinished work is not included. Production remains the sidebar release below.
+  unfinished work is not included. Production at that checkpoint was the sidebar
+  release below; the completed release above supersedes these preparation notes.
 - Visitor and Admin share centered Korat branding and an indeterminate loading
   bar from pre-JavaScript entry through auth, CMS bootstrap and blocking page
   reads. `PageLoadBoundary` keeps incomplete content mounted/measurable but hidden
