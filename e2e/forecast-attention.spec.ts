@@ -24,7 +24,12 @@ test('risk lists match the selected forecast and scroll inside a bounded card', 
   const url = page.url();
   const pageScroll = await page.evaluate(()=>scrollY);
   const bounds = await scroll.evaluate(element=>({client:element.clientHeight,content:element.scrollHeight,overflow:getComputedStyle(element).overflowY}));
-  expect(before!.height).toBeLessThanOrEqual(360);
+  if (page.viewportSize()!.width > 720) {
+    const map = await page.locator('.nr-overview-cockpit-map .nr-dashboard-map-card').boundingBox();
+    expect(before!.y + before!.height).toBeCloseTo(map!.y + map!.height, 0);
+  } else {
+    expect(before!.height).toBeLessThanOrEqual(360);
+  }
   expect(bounds.content).toBeGreaterThan(bounds.client);
   expect(bounds.overflow).toBe('auto');
   await scroll.focus();
@@ -66,6 +71,13 @@ test('moderate-only defaults, empty high state and scope/month changes stay cons
   await card.getByRole('button',{name:'เสี่ยงสูง (0)',exact:true}).click();
   await expect(card.getByRole('status')).toContainText('ไม่พบตำบลที่พยากรณ์เสี่ยงสูง');
   await expect(card.getByRole('status')).toContainText('เสี่ยงปานกลาง 117 ตำบล');
+  const emptyCard = await card.boundingBox();
+  expect(emptyCard!.height).toBeCloseTo(shot!.height, 0);
+  if (page.viewportSize()!.width > 720) {
+    const map = await page.locator('.nr-overview-cockpit-map .nr-dashboard-map-card').boundingBox();
+    expect(emptyCard!.y + emptyCard!.height).toBeCloseTo(map!.y + map!.height, 0);
+  }
+  await page.screenshot({path:info.outputPath('attention-empty-map-alignment.png'),fullPage:true});
   const edit = page.getByRole('button',{name:'แก้ไขตัวกรองข้อมูล'});
   if(await edit.isVisible()) await edit.click();
   await page.getByRole('combobox',{name:/^(เลือก)?อำเภอ/}).click();

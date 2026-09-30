@@ -50,6 +50,10 @@
 .is-home-overview .nr-forecast-overview-summary .is-muted .metric-card-icon { background: #eaf0ef; color: #3a5c54; }
 .is-home-overview .nr-forecast-overview-scope-note { display: none; }
 .is-home-overview .nr-forecast-overview-attention { display: flex; flex-direction: column; gap: 8px; align-self: start; height: 360px; min-height: 0; padding: 6px 16px 12px; background: white; border-radius: 0 0 8px 8px; }
+@media (min-width: 721px) {
+  /* Let the map set the row height while long lists scroll inside the card. */
+  .is-home-overview .nr-forecast-overview-attention { align-self: stretch; height: auto; contain: size; }
+}
 .nr-home-attention-heading { border-top: 1px solid var(--line); padding-top: 12px; }
 .nr-home-risk-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; flex: none; }
 .nr-home-risk-toggle button { min-height: 40px; padding: 6px 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 12px; line-height: 1.5; text-align: center; }
