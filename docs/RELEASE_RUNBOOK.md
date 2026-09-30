@@ -111,8 +111,11 @@ After deploy:
    `docs/AUTH_SETUP.md`. Do not use test-only fake build values for deployments.
 3. Confirm Thai-only visible UI and Korat Tan Phai / โคราชทันภัย brand title.
 4. Confirm no console errors and no failed network requests.
-5. Confirm the primary sidebar shows `ภาพรวม`, its `ภัยแล้ง` subitem and
-   database-mode `ส่งออก Excel`, with no unrelated legacy workflow navigation.
+5. Confirm the visitor sidebar shows `ภาพรวม`, its `ภัยแล้ง` subitem and
+   database-mode `ส่งออก Excel`. In `/admin`, confirm the separate sidebar shows
+   only `จัดการข้อมูล`, `รายการนำเข้าและฉบับร่าง` and `นำเข้าข้อมูล`, with all
+   destinations under `/admin`. Visitor search, bookmarks and export must not
+   appear in the Admin shell. Verify the Admin drawer on mobile as well.
 6. Confirm `/geodata/thailand-neighbor-context.geojson` loads.
 7. Confirm `/geodata/nakhon-ratchasima-subdistricts.geojson` loads.
 8. Confirm `/geodata/nakhon-ratchasima-boundary.geojson` loads.
