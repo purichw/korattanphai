@@ -1,0 +1,3 @@
+# Excel-friendly CSV downloads intentionally use CRLF (RFC 4180).
+src/assets/rev3-import-template.csv whitespace=cr-at-eol
+outputs/cms-rev3-import-20260930/Korat_rev3_template.csv whitespace=cr-at-eol
