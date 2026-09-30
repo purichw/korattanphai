@@ -20,6 +20,20 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Sidebar account release (2026-09-30):
+
+- Runtime `fea0a2f`, branch `release/sidebar-account-20260929`, moves the account
+  control to the bottom of the shared left sidebar. Desktop opens upward; mobile
+  exposes it at the end of navigation with the existing account sheet. Identity,
+  separate visitor/Admin sessions and logout callbacks remain unchanged.
+- All six [Quality Gate jobs](https://github.com/purichw/korattanphai/actions/runs/36491550106)
+  and 16 focused local cases pass. Candidate passes 39 authenticated smoke checks
+  plus real-account sidebar/independent Admin-session checks at both viewports.
+- Promoted `dpl_8eHZVnwYySq4uUDBgBeiJqk1Abjq`; production passes all 39 smoke
+  checks and the focused real-account sidebar checks at both viewports.
+  No data migration, application-data write, auth configuration or native change.
+- See [release evidence and recovery](SIDEBAR_ACCOUNT_RELEASE_20260930.md).
+
 CMS cutover and independent Admin login (2026-09-28):
 
 - Runtime `2a84a0e`, branch `release/cms-cutover-20260928`, deployed as
