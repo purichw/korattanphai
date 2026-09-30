@@ -14,6 +14,8 @@
       href="/brand/korat-tan-phai-favicon.png?v=3"
     />
     <link rel="apple-touch-icon" sizes="180x180" href="/brand/korat-tan-phai-apple-touch-icon.png?v=3" />
+    <link rel="preload" as="image" href="/brand/korat-tan-phai-emblem.webp" />
+    <link rel="stylesheet" href="/src/app-startup.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,7 +25,18 @@
     <title>Korat Tan Phai / โคราชทันภัย</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <section class="app-startup" lang="th" aria-label="กำลังเปิดโคราชทันภัย">
+        <div class="app-startup-brand">
+          <img src="/brand/korat-tan-phai-emblem.webp" width="192" height="192" alt="" fetchpriority="high" />
+          <h1>โคราชทันภัย</h1>
+          <p class="app-startup-caption">Korat Tan Phai</p>
+          <div class="app-startup-track" aria-hidden="true"><span></span></div>
+          <p class="app-startup-message" role="status">กำลังเปิดโคราชทันภัย...</p>
+          <noscript>กรุณาเปิดใช้งาน JavaScript เพื่อใช้งานเว็บไซต์</noscript>
+        </div>
+      </section>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

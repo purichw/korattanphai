@@ -139,6 +139,7 @@ import { IrrigationStatusSelect, type ForecastMapIrrigation } from "../Irrigatio
 import { ForecastMapTools } from "./ForecastMapTools";
 import { comparisonStyles, type ForecastAnalysisOverlay } from "../../forecastAnalysis";
 import { exportRiskLabel } from "../../forecastExportModel";
+import { usePageLoading } from '../PageLoadBoundary';
 
 const subdistrictInspectionPadding = { top: 100, right: 150, bottom: 100, left: 100 };
 
@@ -199,6 +200,7 @@ export function NakhonRatchasimaLocalMap({
   const [provinceContextGeo, setProvinceContextGeo] = useState<ProvinceContextGeoCollection | null>(null);
   const [localProvinceBoundaryGeo, setLocalProvinceBoundaryGeo] = useState<LocalProvinceBoundaryGeoCollection | null>(null);
   const [error, setError] = useState(false);
+  usePageLoading(!geo && !error);
   const [geometryAttempt, setGeometryAttempt] = useState(0);
   const [transform, setTransform] = useState<LocalMapTransform>(localFitTransform);
   const [isDragging, setIsDragging] = useState(false);
