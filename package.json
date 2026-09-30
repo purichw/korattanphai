@@ -49,7 +49,8 @@
     "open-location-code": "1.0.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "web-vitals": "6.2.1"
+    "web-vitals": "6.2.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "overrides": {
     "@protobi/exceljs": {

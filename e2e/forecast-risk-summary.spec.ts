@@ -113,8 +113,10 @@ test("shared bar graph reference layout and details across six viewports", async
 test("shared bar graph preserves loading and unavailable states", async ({ page }, testInfo) => {
   const databaseMode = process.env.PLAYWRIGHT_DATA_BACKEND === "supabase";
   let release!: () => void;
+  let requestedForecast = false;
   const pending = new Promise<void>(resolve => { release = resolve; });
   if (databaseMode) await page.route("https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice", async route => {
+    requestedForecast = true;
     await pending;
     await route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) });
   });
@@ -123,6 +125,7 @@ test("shared bar graph preserves loading and unavailable states", async ({ page 
     mkdirSync("artifacts/bar-graph-v1", { recursive: true });
     let height: number | undefined;
     if (databaseMode) {
+      await expect.poll(() => requestedForecast).toBe(true);
       const startup = page.locator('.app-startup');
       await expect(startup.getByRole('status')).toBeVisible();
       await expect(page.locator('.page-load-content')).toHaveAttribute('inert', '');

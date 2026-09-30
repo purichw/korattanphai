@@ -10,7 +10,7 @@ test('CMS import, repair, reload, export, conflict and acceptance use the persis
   try {
     await seedAdminSession(page);
     await page.goto('/admin');
-    await expect(page.getByRole('heading', { name: 'ยังไม่มีรายการนำเข้า' })).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText('ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากตรวจแก้พยากรณ์ด้านบนหรือนำเข้าไฟล์', { exact: true })).toBeVisible({ timeout: 30000 });
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).first().click();
     const batch = { schemaVersion: 1, sourceId: 'cms-test', batchId: 'operator-test-v1', observations: [{
       stationId: 'TEST-001', observedAt: '2026-09-01T07:00:00+07:00', metric: 'rainfall', value: null,
@@ -23,8 +23,8 @@ test('CMS import, repair, reload, export, conflict and acceptance use the persis
     await expect(page.getByText('พบ 1 จุดที่ต้องตรวจสอบ', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'ยืนยันรับเข้าระบบ', exact: true })).toBeDisabled();
     await page.getByRole('button', { name: 'แก้ไขแถว 1', exact: true }).click();
-    await page.getByLabel('ไม่มีค่า (null)', { exact: true }).uncheck();
-    await page.getByLabel('ค่าตรวจวัด · value', { exact: true }).fill('0');
+    await page.getByLabel('ไม่มีค่าจากต้นทาง', { exact: true }).uncheck();
+    await page.getByLabel('ค่าตรวจวัด', { exact: true }).fill('0');
     await page.getByLabel('เหตุผลการแก้ไข', { exact: true }).fill('ตรวจค่าศูนย์จากต้นทางแล้ว');
     await expect(page.getByLabel('เหตุผลการแก้ไข', { exact: true })).toBeFocused();
     expect(await page.getByRole('dialog').evaluate(element => element.getBoundingClientRect().height <= window.innerHeight)).toBe(true);
@@ -36,17 +36,18 @@ test('CMS import, repair, reload, export, conflict and acceptance use the persis
     const id = new URL(page.url()).searchParams.get('draft')!;
     const original = await database.operation('original', { id });
     expect(original.payload.observations[0].value).toBeNull();
+    await page.getByText('ไฟล์สำหรับระบบอื่น', { exact: true }).click();
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'JSON', exact: true }).click();
     expect((await download).suggestedFilename()).toMatch(/r2.json$/);
     await page.getByRole('button', { name: 'แก้ไขแถว 1', exact: true }).click();
-    await page.getByLabel('ค่าตรวจวัด · value', { exact: true }).fill('5');
+    await page.getByLabel('ค่าตรวจวัด', { exact: true }).fill('5');
     await page.getByLabel('เหตุผลการแก้ไข', { exact: true }).fill('ทดสอบความขัดแย้ง');
     const current = await database.operation('get', { id });
     await database.operation('edit', { id, revision: current.revision, reason: 'Concurrent edit fixture', payload: current.payload });
     await page.getByRole('button', { name: 'บันทึกฉบับร่าง', exact: true }).click();
     await expect(page.getByRole('dialog').getByRole('alert')).toContainText('อีกหน้าต่าง');
-    await expect(page.getByLabel('ค่าตรวจวัด · value', { exact: true })).toHaveValue('5');
+    await expect(page.getByLabel('ค่าตรวจวัด', { exact: true })).toHaveValue('5');
     await page.getByRole('button', { name: 'ยกเลิก', exact: true }).click();
     await page.getByRole('button', { name: 'ปิดโดยไม่บันทึก', exact: true }).click();
     await page.getByRole('button', { name: 'โหลดฉบับล่าสุด', exact: true }).click();
@@ -80,7 +81,7 @@ test('original T+ workbook imports through a worker and preserves conflicts for 
     await seedAdminSession(page); await page.goto('/admin');
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).first().click();
     await page.getByLabel('ไฟล์ข้อมูล', { exact: true }).setInputFiles({ name: 'normalized-test.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: Buffer.from(await workbook.xlsx.writeBuffer()) });
-    await expect(page.getByRole('heading', { name: 'พยากรณ์ T+1–T+6 จากต้นฉบับ', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'พยากรณ์ล่วงหน้า 1–6 เดือนจากต้นฉบับ', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'ตรวจรายละเอียด', exact: true }).click();
     await page.getByRole('button', { name: 'สร้างฉบับร่าง', exact: true }).click();
     await expect(page).toHaveURL(/draft=/);
@@ -108,7 +109,8 @@ test('CMS reviews a published forecast origin and publishes an immutable new ver
     const cell = before.payload.predictions[index];
     await page.getByLabel('ค้นหารายการข้อมูล').fill(cell.subdistrictCode);
     await page.getByRole('button', { name: `แก้ไขแถว ${index + 1}`, exact: true }).click();
-    await page.getByLabel('ระดับความเสี่ยง (0/1/2) · riskCode', { exact: true }).fill(cell.riskCode === 2 ? '1' : '2');
+    await page.getByRole('combobox', { name: /^ผลพยากรณ์/ }).click();
+    await page.getByRole('option', { name: cell.riskCode === 2 ? 'เสี่ยงปานกลาง' : 'เสี่ยงสูง', exact: true }).click();
     await page.getByLabel('เหตุผลการแก้ไข', { exact: true }).fill('ทดสอบแก้ไขค่าพยากรณ์ในฐานข้อมูลแยก');
     await page.getByRole('button', { name: 'บันทึกฉบับร่าง', exact: true }).click();
     await expect(page.getByText('บันทึกฉบับร่างแล้ว', { exact: true })).toBeVisible();

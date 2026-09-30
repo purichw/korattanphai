@@ -1,7 +1,8 @@
 import type { ImportFile } from './workbook';
+import type { CsvEncoding, DataFileFormat } from './readDataFile';
 
 // Parsing large workbooks must not block typing, scrolling or the close button.
-export function readWorkbookInWorker(bytes: ArrayBuffer, signal: AbortSignal): Promise<ImportFile> {
+export function readWorkbookInWorker(bytes: ArrayBuffer, signal: AbortSignal, format: DataFileFormat = 'xlsx', encoding: CsvEncoding = 'utf-8'): Promise<ImportFile> {
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL('./workbook.worker.ts', import.meta.url), { type: 'module' });
     const finish = (error?: Error, result?: ImportFile) => {
@@ -13,6 +14,6 @@ export function readWorkbookInWorker(bytes: ArrayBuffer, signal: AbortSignal): P
     worker.onmessage = event => event.data.error ? finish(new Error(event.data.error)) : finish(undefined, event.data.result);
     worker.onerror = () => finish(new Error('อ่าน Excel ไม่สำเร็จ กรุณาตรวจไฟล์ต้นฉบับ'));
     signal.addEventListener('abort', cancel, { once: true });
-    if (signal.aborted) cancel(); else worker.postMessage(bytes, [bytes]);
+    if (signal.aborted) cancel(); else worker.postMessage({ bytes, format, encoding }, [bytes]);
   });
 }

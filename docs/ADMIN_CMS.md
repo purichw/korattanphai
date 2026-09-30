@@ -6,7 +6,51 @@ passed with the original data unchanged. This is the scoped CMS foundation,
 not complete no-code ownership of every data family; see remaining gates below.
 See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
 
+## Operator-facing cleanup (local, 2026-09-30)
+
+The owner requested a no-code workspace with understandable Thai names and no
+unused demo/stub inventory. This local follow-up starts from the verified sidebar
+release `7bfeb6d`; it has not been deployed or migrated.
+
+- The landing page prioritizes the published forecast, resumable imports/drafts,
+  then eight explained reference resources. Resource keys, revision hashes and
+  raw JSON paths are not the primary labels.
+- `src/admin/resourcePresentation.ts` owns the curated views. Administrative
+  names and four geometry resources support the website. Source descriptions,
+  49 source-backed station locations and station-distance coverage remain
+  inspectable, explicitly distinguished from live measurements. Only source-backed
+  rows are shown in those reference views; no null or missing value becomes zero.
+- Retained demo advisories, farmer/persona/workflow fixtures, illustrative models,
+  empty observation/research schemas, retired rev02 and duplicated internal joins
+  are removed from the everyday resource list. All 45 versioned resources,
+  bootstrap readers, original payloads and immutable audit history remain intact.
+  Hiding a resource is not deletion or a change to backend authorization.
+- Opening a resource is read-only. Editing source descriptions requires an
+  explicit draft action and named Thai form fields; save, conflict/reload,
+  reason, audit and explicit publication use the existing API. Geometry and
+  administrative identity views do not offer unsafe generic scalar editing.
+  Old deep links remain inspectable as retained history with original download.
+- Forecast corrections show area names, target month and one semantic risk
+  selector. The selector changes `status` and `riskCode` together while preserving
+  area, target and horizon. Unresolved imports require an explicit choice; null
+  out-of-scope remains distinct from the numeric no-risk value 0.
+- Excel is the primary file workflow; JSON is a secondary interoperable format.
+  Imports match both canonical keys and existing Thai field labels. The unpublishable
+  new-model-result option is removed from the import chooser; old result drafts
+  remain available for review/export. Station/satellite/crop ingestion remains
+  available because durable storage is implemented, with its non-live limitation.
+- Only the exact unpublished cutover verification draft recorded in
+  `CMS_CUTOVER_20260928.md` is omitted from the normal task list. No record is
+  deleted, and arbitrary operator drafts are never filtered by a test-like title.
+
+Checks and rendered evidence are recorded in `docs/CMS_NO_CODE_20260930.md`.
+
 ## Owner Requirements
+
+The local CSV / XLS / XLSX rev3 import follow-up is documented in
+`docs/CMS_REV3_IMPORT_20260930.md`. It adds Thai column matching, templates,
+samples and a separate dictionary sheet while keeping the existing-origin
+publication boundary. The files and UI have not been deployed.
 
 - Reuse Supabase Auth and existing staff accounts. Staff and Admin have the same
   operational role for this release; display personas never grant permission.
@@ -120,7 +164,16 @@ Source IDs join through the database crosswalk, never guessed names. Exact
 duplicates collapse; conflicting cells become visibly unresolved draft values,
 not last-row-wins. Missing areas cannot become blank/out-of-scope predictions.
 The selected origin's source rows, sheet name and workbook SHA-256 are retained
-as immutable import evidence. This does **not** retain the original XLSX binary.
+as immutable import evidence. This does **not** retain the original file binary.
+
+The local importer also accepts Thai headers from `src/admin/rev3Fields.json`,
+manually selected equivalent columns, CSV (UTF-8 or explicit Windows-874), and
+binary XLS. CSV fields remain strings until the selected rev3 field interprets
+them. Human risk labels map to the same numeric/null semantics, while unknown
+values remain visible for correction. Template placeholders `ยังไม่กรอก` are
+blocked; they cannot silently become out-of-scope. Source evidence preserves
+the uploaded column names and values and physical row numbers, including CSV
+quoted multiline fields. Helper sheets in the shipped template are not imported.
 
 Excel parsing runs in a cancellable worker with a 60-second deadline, 20 MB file
 limit, 100,000-row/100-column sheet limit. Normal API imports explicitly select

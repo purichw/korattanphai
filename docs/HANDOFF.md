@@ -57,6 +57,29 @@ Workspace officer-access foundation production release (2026-09-30):
   No database migration, production data/assignment, billing or native changes.
   Physical-device testing and future role enforcement remain outside this release.
 
+CMS clarity and rev3 spreadsheet import, production release (2026-09-30):
+
+- Runtime `7d5ee90`, branch `fix/cms-no-code-20260930`, contains Thai operator
+  tables, supported-resource filtering, semantic forecast editing and CSV/XLS/XLSX
+  imports with the explained 289-area rev3 template.
+- Read-only deployment metadata verified that production advanced through `6791d75`
+  to `d984513` (`dpl_J95CbHDWJRFS5ada4ja371u2jsdn`). Those branded-loading and
+  access-foundation releases, plus their forecast-attention predecessor, are merged
+  into this candidate. Earlier local-only checkpoints below are historical.
+- All six required CI jobs, the protected build and unchanged bundle gates pass.
+  The final candidate passed 39 real-account desktop/mobile smoke checks plus
+  CMS read-only catalogue and template-download checks. A prior smoke encountered
+  one forecast RPC HTTP 500; its evidence is retained, and the unchanged rerun
+  passed. All 69 focused merged access/CMS/reader unit checks pass.
+- Promoted `dpl_Erah1mrD3atdpDNXvcPS3KCDMR4b` after a fresh alias/ancestry guard;
+  the public alias was verified. Production passes all 39 desktop/mobile smoke
+  checks, authenticated CMS reads and byte-identical CSV/XLSX downloads. Real
+  browser inspection confirms the Thai list and 12-field import guide.
+  Credentials were used only in memory, without saving or provisioning them.
+- [Release evidence and recovery](CMS_NO_CODE_RELEASE_20260930.md) contains
+  candidate/CI links, verification results and preservation boundaries.
+  The primary dirty checkout, database and unrelated work remain untouched.
+
 Workspace officer-access foundation (2026-09-30, local only):
 
 - `src/access` separates configurable role rules, view levels, capabilities and
