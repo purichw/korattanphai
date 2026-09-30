@@ -20,6 +20,45 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Forecast risk lists and sidebar production release (2026-09-30):
+
+- Runtime `92831bb` adds high/moderate risk choices with exact scoped tambon
+  lists, an available-level default and a 360 px card with keyboard-accessible
+  internal scrolling. Month, district and irrigation scope remain synchronized
+  with the summary; links retain source T/T+ and area identity.
+- Admin now shares Home sidebar/logo dimensions. The data-management menu entry
+  is hidden; direct Admin routes and independent authentication are preserved.
+- Released from isolated branch `release/forecast-attention-20260930`, based on
+  `7bfeb6d` / production runtime `fea0a2f`. Existing CMS, brand and graph releases
+  remain intact. Unpublished CMS, UAT/API/research work and the local bundle-budget
+  relaxation are excluded.
+- Release `a639f2e` adds a lockfile-only `brace-expansion` security patch after
+  the original audit failed. Only three transitive lock entries change to
+  1.1.21/2.1.7; audit thresholds and build budgets are unchanged.
+- Protected hosted build and exposure/bundle gates pass (224,613 B application
+  gzip). Candidate real-account read-only checks pass for desktop/mobile:
+  exact 117 moderate / 75 high / 31 moderate rows, empty high state, toggle,
+  internal scrolling, reload, hidden menu and Admin/sidebar parity. No runtime
+  or relevant network errors, blocked writes or data mutations were recorded.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36676383302)
+  passed all six jobs on exact commit `a639f2e`: 360 unit/component tests and
+  321 browser checks passed; 131 existing provider/viewport exclusions were
+  skipped. API, operations, CMS publication, migration/RLS and security gates pass.
+- Promoted the verified candidate; `korattanphai.vercel.app` serves that exact
+  Ready deployment. Production repeats the desktop/mobile visitor and Admin
+  smoke successfully with no runtime/network errors or data mutations.
+- The first production desktop assertion exhausted its default 5-second wait
+  during cold loading; the failure screenshot already showed the correct list.
+  Aligning the hosted harness to a 45-second real-network wait resolved the
+  timing race; no application changes or value assertions were weakened.
+- Candidate: `dpl_F2n7g7EzjBxhXWbvovB2FeSKieJC` /
+  `https://korattanphai-31cwiieez-purich-w.vercel.app`.
+  Recovery: `dpl_8eHZVnwYySq4uUDBgBeiJqk1Abjq` (preceding sidebar-account release).
+- Evidence: `artifacts/forecast-attention-release-20260930/`, including
+  `release-state.json`, candidate/production smoke reports and visual proof.
+  No migration, billing, native-app or production-data changes. Physical-device
+  and unrelated integration verification remain outside this release.
+
 Sidebar account release (2026-09-30):
 
 - Runtime `fea0a2f`, branch `release/sidebar-account-20260929`, moves the account
