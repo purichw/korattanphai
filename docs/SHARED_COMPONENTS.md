@@ -119,6 +119,10 @@ focus without scrolling, outside clicks dismiss, and arrow/Home/End keys navigat
 menu actions. Identity and logout remain owned by the existing scoped auth callbacks.
 Navigation scrolls independently so the footer stays reachable on short screens.
 
+Admin uses the same desktop sidebar width and mobile logo dimensions as Home.
+The public navigation omits the data-management entry; direct Admin URLs and
+their independent authentication remain available.
+
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`
 through `6 เดือน`. Tab accessible names retain the full lead time and actual
@@ -182,7 +186,8 @@ recovery feedback. Neither resets persisted state automatically.
 | `OfficialMetricCard` | Nakhon-specific metric cards backed by `MetricCard`. |
 | `ProvinceDashboardHeading` | Province heading with source/readiness context. |
 | `ProvinceSituationCards` | Legacy province current-state facts; not used as forecast evidence in the overview. |
-| `ProvinceForecastOverview` | Compact Home context, read-only situation/MetricGrid, map plus four risk counts, three high-risk links with in-place all-items expansion and archive navigation in the summary heading. Readiness and source/limitations disclosures are removed; inline provenance and forecast caveats remain. Defaults to latest available source month T + T+1 (December 2025 forecasting January 2026). District scope filters map and counts; agriculture design remains province-wide but hidden without a REAL record. Duplicate archive/support rows and their loading placeholders are removed. Empty attention states distinguish no high-risk tambons from unavailable predictions and retain moderate-risk counts. Drilldowns preserve source month/horizon and selected area. Mobile order is context, counts, map and area links. |
+| `ProvinceForecastOverview` | Compact Home context, read-only situation/MetricGrid, map plus four risk counts, high/moderate risk toggle with a bounded scrolling list, and archive navigation in the summary heading. Readiness and source/limitations disclosures are removed; inline provenance and forecast caveats remain. Defaults to latest available source month T + T+1 (December 2025 forecasting January 2026). District and irrigation scope filter the summary and attention records together. Keys `ForecastRiskAttention` by source month, district and irrigation so each changed scope resets its risk choice and scroll position. Agriculture design remains province-wide but hidden without a REAL record. Duplicate archive/support rows and their loading placeholders are removed. Drilldowns preserve source month/horizon, irrigation and selected area. Mobile order is context, counts, map and area links. |
+| `ForecastRiskAttention` | Home attention panel receiving the current `DroughtForecastArchiveSummary` and a caller-owned `hrefForSubdistrict`. Native buttons expose high/moderate counts and `aria-pressed`; initial choice is high when available, otherwise moderate when available, otherwise high. Filters the summary's scoped `recordsBySubdistrict` by the selected risk and sorts every matching row by subdistrict code in a labeled, keyboard-focusable scrolling region. No three-row limit or expand/collapse step. Null/out-of-scope and missing vintages never appear as risk records. Changing risk resets scroll to the top; the overview's scope key resets selection on month/district/irrigation changes. Empty selected levels remain selectable and distinguish zero matching risk from no in-scope forecast values. Uses each record's district/tambon identity and the supplied drill-down URL. |
 | `DashboardSection` | Standard titled Nakhon dashboard section shell. |
 | `DashboardAccordionSection` | Compact disclosure section for source/detail content. |
 | `DashboardDetailPanel` | Always-visible passive preview plus a labeled toggle button with `aria-expanded`/`aria-controls`, persistent provenance and hidden/revealed detail body. Used by compact agriculture; clicking a stat preview does not navigate or expand. |

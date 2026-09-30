@@ -28,7 +28,8 @@ test("overview paints the T+1 archive, scopes districts, and preserves forecast 
   await expect(overview).not.toContainText("รอชุดข้อมูลใหม่");
   await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
   await expect(page.locator(".nr-map-shape")).toHaveCount(289);
-  await expect(overview.locator(".nr-forecast-overview-attention li")).toHaveCount(0);
+  await expect(overview.locator(".nr-forecast-overview-attention li")).toHaveCount(117);
+  await expect(overview.getByRole("button", { name: "เสี่ยงปานกลาง (117)", exact: true })).toHaveAttribute("aria-pressed", "true");
   expect(fullArchiveRequests).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath("overview-full.png"), fullPage: true });
