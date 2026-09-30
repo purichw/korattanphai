@@ -20,6 +20,19 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+CMS import alignment, production release (2026-09-30):
+
+- Runtime `69c61db` on `fix/cms-no-code-20260930` centers the template-download
+  group, gives both downloads outlined button styling, aligns file selection
+  with the data-type control at 44 px, and centers import dropdown labels/options.
+  Mobile keeps full-width stacked buttons. Only two CMS presentation files change.
+- All six required CI jobs and 39 authenticated candidate smoke checks pass.
+  Promoted `dpl_68X1eyYErhBwjmnZupoBwL6nH1Jc` after confirming production was
+  still the preserved preceding release. Production CMS reads, template downloads,
+  desktop/mobile visual measurements and console checks pass.
+- [Release evidence and recovery](CMS_IMPORT_ALIGNMENT_RELEASE_20260930.md).
+  No data, auth, publication, native-app or unrelated worktree changes.
+
 CMS clarity and rev3 spreadsheet import, production release (2026-09-30):
 
 - Runtime `7d5ee90`, branch `fix/cms-no-code-20260930`, contains Thai operator
