@@ -20,6 +20,38 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Risk attention card height, production release (2026-09-30):
+
+- Runtime `3b786cd55797eaa5b77e9176744ce2c5c1f06cc5` on
+  `feature/frontend-access-foundation` restores the province overview attention
+  card's bottom alignment with the existing map above 720 px. Size containment
+  keeps long risk lists scrolling inside the card; mobile retains 360 px.
+- Preserved the exact deployed baseline `69c61db`, including its published CMS,
+  access foundation, loading and search changes. The runtime difference is only
+  four CSS lines in `src/home-overview.css`; two browser tests now assert exact
+  map/card alignment. Unpublished root CMS/API/UAT/research work is excluded.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36704004674)
+  passes all six required jobs on the exact runtime SHA. An initial run exposed
+  one stale desktop 360 px assertion; it was corrected to the requested alignment
+  contract, verified across five viewport widths, then the full gate passed.
+  Protected hosted build, exposure checks and bundle budgets pass (225,933 B gzip).
+- Exact-candidate and production real-account read-only smoke pass on desktop and
+  mobile: 117 moderate-risk rows, empty high-risk state, risk toggling and internal
+  keyboard scrolling. Map and dropdown geometry match the previous deployment.
+  Desktop card height changes from 360 to 490.5625 px and its bottom gap from
+  130.5625 to 0 px; mobile remains 360 px. Production screenshots were inspected.
+  No prohibited application writes or relevant runtime/network errors occurred.
+- Promoted Ready deployment `dpl_CDETdbqUQZeWuSkjMiTmgxCWXn55` /
+  `https://korattanphai-b4wr35ah1-purich-w.vercel.app`; the primary production
+  alias is verified. Recovery baseline: `dpl_68X1eyYErhBwjmnZupoBwL6nH1Jc` /
+  `https://korattanphai-pmlcok2rd-purich-w.vercel.app` (runtime `69c61db`).
+- Evidence: `artifacts/attention-height-release-20260930/`, including
+  `release-state.json`, `ci-final.json`, `geometry-comparison-final.json`,
+  `candidate-final/` and `production/`. Authoritative release checkout:
+  `artifacts/forecast-attention-release-20260930/source`.
+  No database migration, production data, billing or native changes. Physical
+  device testing was not repeated for this CSS adjustment.
+
 Workspace officer-access foundation production release (2026-09-30):
 
 - Runtime `d984513` on `feature/frontend-access-foundation` releases this chat's
