@@ -8,6 +8,7 @@ import type { Json, Payload, AuditEntry } from './types';
 import { useUnsavedChanges } from './useUnsavedChanges';
 import { ConfirmAction } from './ConfirmAction';
 import { referenceTable, resourceViews, sourceFields } from './resourcePresentation';
+import { usePageLoading } from '../components/PageLoadBoundary';
 
 type Resource = { id: string; resource_key: string; title: string; resource_group: string; published_at: string; draft_id?: string | null };
 type ResourceDraft = Resource & { payload: Json; revision: number; state: 'draft' | 'published' };
@@ -26,6 +27,8 @@ export function ReferenceResources({ api, resourceId, onNavigate }: { api: Retur
   const [group, setGroup] = useState('all');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(true);
+  const [loading, setLoading] = useState(true);
+  usePageLoading(loading);
   const [reason, setReason] = useState('');
   const [publish, setPublish] = useState(false);
   const [history, setHistory] = useState<AuditEntry[] | null>(null);
@@ -43,10 +46,10 @@ export function ReferenceResources({ api, resourceId, onNavigate }: { api: Retur
   }).sort((a, b) => Object.keys(resourceViews).indexOf(a.resource_key) - Object.keys(resourceViews).indexOf(b.resource_key));
   const rows = table.rows.filter(row => row.cells.join(' ').toLocaleLowerCase('th').includes(queryText));
   useEffect(() => {
-    const controller = new AbortController(); setBusy(true); setError(''); setItem(null); setNotice(''); setReason(''); setQuery('');
+    const controller = new AbortController(); setLoading(true); setBusy(true); setError(''); setItem(null); setNotice(''); setReason(''); setQuery('');
     const load = resourceId ? api<ResourceDraft>('resource-get', { body: { id: resourceId }, signal: controller.signal }).then(setItem)
       : api<Resource[]>('resource-catalog', { signal: controller.signal }).then(setItems);
-    void load.catch(failure => { if (!controller.signal.aborted) setError(failure.message); }).finally(() => { if (!controller.signal.aborted) setBusy(false); });
+    void load.catch(failure => { if (!controller.signal.aborted) setError(failure.message); }).finally(() => { if (!controller.signal.aborted) { setBusy(false); setLoading(false); } });
     return () => controller.abort();
   }, [api, resourceId, retry]);
   useEffect(() => { setPage(0); }, [query, group, resourceId]);

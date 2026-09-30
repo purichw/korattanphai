@@ -9,7 +9,7 @@ for (const [name, path, request, title] of [
   ["district", "/dan-khun-thot?mapLayer=forecast-archive&target=2025-12&horizon=4", archiveRequest, "ด่านขุนทด"],
   ["subdistrict", "/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4", archiveRequest, "บ้านเก่า"],
 ] as const) {
-  test(`${name} loading keeps route context and neutral responsive placeholders until data arrives`, async ({ page }, testInfo) => {
+  test(`${name} loading hides incomplete content until data and geometry arrive`, async ({ page }, testInfo) => {
     await seedAuthSession(page);
     await page.emulateMedia({ reducedMotion: "reduce" });
     let release = () => {};
@@ -17,31 +17,21 @@ for (const [name, path, request, title] of [
     await page.route(request, async (route) => { await held; await route.continue(); });
     try {
       await page.goto(path);
-      // The eager startup shell now uses the same visual primitives. This test
-      // owns the later archive request, after application code has loaded.
-      await expect(page.locator(".app-startup")).toHaveCount(0);
-      const loading = page.locator(".nr-forecast-load-state");
+      const loading = page.locator(".app-startup");
       await expect(loading.getByRole("status")).toBeVisible();
-      await expect(page.getByRole("heading", { name: new RegExp(title), level: 1 })).toBeVisible();
+      await expect(page.locator('.page-load-content')).toHaveAttribute('inert', '');
+      await expect(page.getByRole("heading", { name: new RegExp(title), level: 1 })).toHaveCount(0);
       await expect(loading.getByRole("button")).toHaveCount(0);
-      await expect(loading.locator(".nr-loading-map")).toBeVisible();
-      await expect(loading.locator(".nr-loading-chart")).toHaveCount(name === "overview" || name === "subdistrict" ? 0 : 1);
-      await expect(loading.locator(".nr-loading-metrics.is-single .metric-card")).toHaveCount(name === "subdistrict" ? 1 : 0);
-      if (name !== "overview") {
-        await expect(loading.locator(".nr-loading-context small").nth(0)).toHaveText("เดือนตั้งต้น (T)");
-        await expect(loading.locator(".nr-loading-context small").nth(1)).toHaveText("เดือนที่พยากรณ์");
-      }
+      await expect(page.locator('.nr-skeleton:visible')).toHaveCount(0);
       expect(await loading.innerText()).not.toMatch(/0 ตำบล|\d+%/);
-      expect(await loading.locator(".nr-skeleton").first().evaluate(node => getComputedStyle(node).animationName)).toBe("none");
+      await expect(loading.locator('.app-startup-track > span')).toHaveCSS('animation-name', 'none');
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
-      const headingBefore = await page.getByRole("heading", { name: new RegExp(title), level: 1 }).boundingBox();
       await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: "instant" }));
       await page.screenshot({ path: testInfo.outputPath(`${name}-loading.png`), fullPage: true });
       release();
       await expect(loading).toHaveCount(0);
       await expect(page.locator(".nr-map-shape")).toHaveCount(289);
-      const headingAfter = await page.getByRole("heading", { name: new RegExp(title), level: 1 }).boundingBox();
-      expect(Math.abs(headingBefore!.y - headingAfter!.y)).toBeLessThanOrEqual(4);
+      await expect(page.getByRole("heading", { name: new RegExp(title), level: 1 })).toBeVisible();
       if (name === "subdistrict") {
         await expect(page.locator(".nr-drought-workspace-kpis .metric-card")).toHaveCount(1);
         await expect(page.locator(".nr-drought-workspace-chart-card")).toHaveCount(0);
@@ -122,12 +112,12 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   const held = new Promise<void>((resolve) => { release = resolve; });
   await page.route(archiveRequest, async (route) => { requests += 1; await held; await route.continue(); });
   await page.goto("/drought?mapLayer=forecast-archive&target=2025-12&horizon=6");
-  await expect(page.getByRole("status")).toHaveText("กำลังโหลดข้อมูลพยากรณ์ภัยแล้ง");
+  await expect(page.locator('.app-startup').getByRole("status")).toHaveText("กำลังเตรียมข้อมูลให้คุณ");
   await expect.poll(() => geometryRequests.length).toBe(4);
   await expect(page.locator(".nr-drought-compact-workspace")).toHaveCount(0);
-  const menu = page.getByRole('button', { name: 'เปิดเมนูหลัก' });
-  if (await menu.isVisible()) await menu.click();
-  await page.locator('.primary-nav').getByRole('button', { name: 'ภาพรวม', exact: true }).click();
+  // Full-page loading makes underlying navigation inert; browser navigation
+  // must still abandon the old reader without keeping the new route blocked.
+  await page.evaluate(() => { history.pushState(null, '', '/'); dispatchEvent(new PopStateEvent('popstate')); });
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
   const response = page.waitForResponse(archiveRequest);
   release();

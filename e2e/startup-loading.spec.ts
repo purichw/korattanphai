@@ -15,15 +15,13 @@ function gate() {
 }
 
 async function expectStartup(page: Page, testInfo: TestInfo, screenshot: string) {
-  const startup = page.locator('.app-startup.app-shell');
+  const startup = page.locator('.app-startup');
   await expect(startup).toBeVisible();
   await expect(startup.getByRole('status').filter({ hasText: 'กำลังเปิดโคราชทันภัย...' })).toBeVisible();
   await expect(startup.locator('img[src*="/brand/"]').first()).toBeVisible();
-  await expect(startup.locator('.nr-loading-map')).toBeVisible();
-  const contentSkeleton = startup.locator('.content-area .nr-skeleton').first();
-  await expect(contentSkeleton).toBeVisible();
-  expect(await contentSkeleton.evaluate(node => getComputedStyle(node).animationName)).toBe('none');
-  await expect(startup.getByRole('heading', { name: 'จังหวัดนครราชสีมา', level: 1 })).toBeVisible();
+  await expect(startup.locator('.nr-skeleton')).toHaveCount(0);
+  await expect(startup.locator('.app-startup-track > span')).toHaveCSS('animation-name', 'none');
+  await expect(startup.getByRole('heading', { name: 'โคราชทันภัย', level: 1 })).toBeVisible();
   await expect(page.locator('.app-recovery, .nr-map-shape')).toHaveCount(0);
   await expect(startup).not.toContainText(authTestEmail);
   await expect(startup).not.toContainText(authTestUser.user_metadata.full_name);
@@ -42,7 +40,7 @@ async function expectOverviewReady(page: Page) {
   await expect(page).toHaveURL(new URL(requestedOverview, page.url()).href);
 }
 
-test('cold entry and uncached refresh keep a neutral app shell until the authenticated chunk loads', async ({ page, context }, testInfo) => {
+test('cold entry and uncached refresh keep branded loading until the authenticated chunk and page are ready', async ({ page, context }, testInfo) => {
   await seedAuthSession(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const errors: string[] = [];

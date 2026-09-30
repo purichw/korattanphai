@@ -5,6 +5,7 @@ import { MonthSelect } from '../components/MonthSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
 import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
 import { Skeleton } from '../components/nakhon-ratchasima/ForecastLoadingPrimitives';
+import { usePageLoading } from '../components/PageLoadBoundary';
 import { createAdminClient } from './client';
 import { AdminImport } from './AdminImport';
 import { ReferenceResources } from './ReferenceResources';
@@ -33,6 +34,7 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
   const [offset, setOffset] = useState(0);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [loading, setLoading] = useState(true);
+  usePageLoading(loading);
   const [error, setError] = useState('');
   const [generation, setGeneration] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
@@ -85,6 +87,7 @@ function PublishedForecasts({ api, onCreated }: { api: ReturnType<typeof createA
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [retry, setRetry] = useState(0);
+  usePageLoading(!catalog && !error);
   useEffect(() => {
     const request = new AbortController(); setError('');
     void api<NonNullable<typeof catalog>>('forecast-catalog', { signal: request.signal }).then(value => { setCatalog(value); setPeriod(value.periods[0] ?? ''); })
