@@ -20,8 +20,11 @@ test('a stalled map times out and retries in place without losing the selected f
     await page.goto('/dan-khun-thot/t-300806?mapLayer=forecast-archive&target=2025-12&horizon=4');
     await expect(page.locator('.nr-drought-workspace-kpis')).toContainText('เสี่ยงสูง');
     await expect(page.locator('.nr-map-loading')).toContainText('กำลังโหลดขอบเขต');
+    await expect(page.locator('.app-startup')).toBeVisible();
+    await expect(page.locator('.nr-drought-workspace-kpis')).not.toBeVisible();
     await page.clock.fastForward(30_001);
     await expect(page.getByRole('alert')).toContainText('ไม่สามารถโหลดขอบเขตตำบลนครราชสีมาได้');
+    await expect(page.locator('.app-startup')).toHaveCount(0);
     await page.screenshot({ path: testInfo.outputPath('map-timeout-recovery.png'), fullPage: true });
     await page.getByRole('button', { name: 'ลองโหลดแผนที่ใหม่', exact: true }).click();
     await expect(page.locator('.nr-map-shape')).toHaveCount(289);
@@ -48,10 +51,12 @@ test('a stalled forecast times out and recovers the same source month and horizo
   });
   try {
     await page.goto('/drought?mapLayer=forecast-archive&target=2025-11&horizon=3');
-    await expect(page.getByRole('status')).toHaveText('กำลังโหลดข้อมูลพยากรณ์ภัยแล้ง');
+    await expect(page.locator('.app-startup').getByRole('status')).toHaveText('กำลังเตรียมข้อมูลให้คุณ');
+    await expect(page.locator('.page-load-content')).toHaveAttribute('inert', '');
     await expect.poll(() => attempts).toBe(1);
     await page.clock.fastForward(30_001);
     await expect(page.getByRole('alert')).toHaveText('โหลดข้อมูลพยากรณ์ไม่สำเร็จ กรุณาลองใหม่');
+    await expect(page.locator('.app-startup')).toHaveCount(0);
     await expect(page.locator('.nr-drought-compact-workspace')).toHaveCount(0);
     await page.getByRole('button', { name: 'ลองใหม่', exact: true }).click();
     await expect(page.locator('.nr-drought-workspace-horizon').getByRole('tab', { selected: true })).toContainText('3 เดือน');

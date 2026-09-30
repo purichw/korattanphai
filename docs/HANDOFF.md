@@ -48,6 +48,13 @@ Branded page loading, local implementation (2026-09-30, not deployed):
   mobile toolbar checks. The lockfile updates only transitive `brace-expansion`
   patch versions (1.1.21 and 2.1.7); production dependency audit passes. Remote CI,
   authenticated candidate smoke and final alias verification remain required.
+- The pre-promotion guard detected production advancing to `a639f2e` /
+  `dpl_F2n7g7EzjBxhXWbvovB2FeSKieJC`. That exact released baseline was merged
+  without rewriting either branch, preserving its risk lists and Admin sidebar.
+  The original `0c7a031` candidate is superseded and must not be promoted.
+  Compatibility recovery tests now expect branded loading while retaining the
+  timeout/retry/source-month/horizon assertions; the initial failure expected
+  the retired skeleton's status copy. Final merged-source gates remain pending.
 
 Sidebar account release (2026-09-30):
 
