@@ -1,8 +1,9 @@
 # CMS operator clarity — 2026-09-30
 
-Status: local implementation on `fix/cms-no-code-20260930`, based on production
-source `7bfeb6d` in an isolated checkout. No production migration, data deletion,
-publication, account change or deployment is part of this pass.
+Initial implementation checkpoint: `fix/cms-no-code-20260930`, based on source
+`7bfeb6d` in an isolated checkout. The owner subsequently authorized push/deploy;
+see [current release checkpoint](CMS_NO_CODE_RELEASE_20260930.md). No production
+migration, data deletion, publication or account change is part of this work.
 
 The supplied screenshot showed a generic inventory of 45 internal resources,
 including retained English-named demo data and empty stubs. The operator's task

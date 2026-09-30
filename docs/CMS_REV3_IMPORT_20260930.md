@@ -1,7 +1,9 @@
 # Rev3 CSV and Excel import
 
-Local implementation on `fix/cms-no-code-20260930`, continuing the no-code CMS
-cleanup. No commit, production write, migration or deployment was performed.
+Implementation on `fix/cms-no-code-20260930`, continuing the no-code CMS cleanup.
+The initial verification below was local; see the subsequent authorized
+[push/deployment checkpoint](CMS_NO_CODE_RELEASE_20260930.md) for current status.
+No production data write or migration is included.
 
 ## Operator workflow
 

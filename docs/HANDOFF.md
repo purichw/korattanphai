@@ -20,6 +20,23 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+CMS clarity and rev3 spreadsheet import, pushed candidate (2026-09-30):
+
+- Runtime `4e7cd59`, branch `fix/cms-no-code-20260930`, contains Thai operator
+  tables, supported-resource filtering, semantic forecast editing and CSV/XLS/XLSX
+  imports with the explained 289-area rev3 template.
+- Read-only deployment metadata verified that production advanced to `6791d75`
+  (`dpl_F2bJGovU3aK6bPhWx8832UDcErvo`). That deployed branded-loading release and
+  its forecast-attention predecessor are merged into this candidate. The older
+  local-only branded-loading checkpoint below is historical evidence.
+- Ready candidate `dpl_GUfeoxsq9QVuw9qegaBWG6xAHQ9C` is **not promoted**.
+  CMS CI passes 29 checks (one intentional skip); remaining required CI and
+  authenticated candidate smoke are still required. The owner has been asked
+  to sign in to the candidate. No credentials were saved or provisioned.
+- [Release checkpoint and next steps](CMS_NO_CODE_RELEASE_20260930.md) contains
+  candidate/CI links, preservation boundaries and the mandatory alias recheck.
+  The primary dirty checkout, database and unrelated work remain untouched.
+
 Branded page loading, local implementation (2026-09-30, not deployed):
 
 - Branch `feature/branded-page-loading` in the clean release checkout
