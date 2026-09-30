@@ -29,6 +29,9 @@ export const test = base.extend<{ authMock: Awaited<ReturnType<typeof mockSupaba
 export { expect };
 export async function openAccountMenu(page: Page) {
   await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
+  // Mounted navigation is hidden/inert during the shared page loader. Wait for
+  // readiness before deciding whether the mobile menu toggle is visible.
+  await expect(page.locator('.app-shell')).toBeVisible();
   const navigationToggle = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
   if (await navigationToggle.isVisible()) await navigationToggle.click();
   await page.getByRole('button', { name: /บัญชีผู้ใช้/ }).click();

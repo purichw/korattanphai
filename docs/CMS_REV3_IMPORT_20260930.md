@@ -86,9 +86,11 @@ runtime. Run the builder with that runtime's Node executable and set
   original workbook and immutable publication checks also passed.
   After the final error-message adjustment, the two desktop/mobile CSV journeys
   were rerun successfully and their screenshots refreshed.
-- TypeScript and the CMS test build passed. The worker grew to about 2.03 MB
-  uncompressed due to legacy XLS support and stays off the main thread. Normal
-  Vite chunk advisories remain. No release, whole-site or native suites were run.
+- TypeScript and the CMS test build passed. The final shared CSV/XLS/XLSX reader
+  uses native browser codepage decoding and keeps the worker near 487 KB raw
+  / 197 KB gzip. The existing styled exporter remains unchanged. Protected-build,
+  bundle, CI and real-account smoke evidence is tracked in the
+  [release record](CMS_NO_CODE_RELEASE_20260930.md); no native suites were run.
 - The four workbook sheets and current upload dialogs were visually inspected.
   Screenshots use localhost and an isolated fixture database, not production.
   See `artifacts/rev3-import/desktop-upload.png` and `mobile-upload.png`.
