@@ -81,7 +81,13 @@ saved `target_period` keys still identify T, with forward dates derived at runti
 session. A visitor login alone does not open the CMS. Scope transitions reload
 the document, and logout synchronizes only tabs in the same scope.
 
-The shared navigation offers `จัดการข้อมูล`; API access additionally requires
+Admin navigation offers `จัดการข้อมูล` (`/admin`), `รายการนำเข้าและฉบับร่าง`
+(`?view=imports`) and `นำเข้าข้อมูล` (`?view=upload`, the existing import dialog).
+Closing import returns to the draft list; saving opens the created draft. Unsaved
+edits still block navigation until saved or explicitly discarded. Reload and
+browser history preserve the selected Admin destination. No Admin navigation or
+toolbar opens visitor overview, drought, export, bookmarks or geographic search.
+Visitor routes keep their existing navigation. API access additionally requires
 server-verified `ktp_cms_operators` membership. Retained simulated personas are
 not authorization. See [ADMIN_CMS.md](ADMIN_CMS.md) for workflows/limitations
 and [CMS_CUTOVER_20260928.md](CMS_CUTOVER_20260928.md) for activation status.

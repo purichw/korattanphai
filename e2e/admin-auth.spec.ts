@@ -17,14 +17,13 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await fillAuthForm(page);
     await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
-    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'รายการนำเข้าและฉบับร่าง', exact: true })).toBeVisible();
     await expect(page).toHaveURL(/\/admin\?view=imports#workspace-content$/);
     expect(await page.evaluate(keys => keys.map(key => Boolean(localStorage.getItem(key))), [authStorageKey, adminAuthStorageKey])).toEqual([true, true]);
     const visitor = await context.newPage();
     await visitor.goto('/');
     await expect(visitor.locator('.sidebar-account .account-trigger')).toHaveCount(1);
     const [adminSidebar, visitorSidebar] = await Promise.all([page, visitor].map(async currentPage => {
-      await expect(currentPage.locator('.primary-nav').getByRole('button', { name: 'จัดการข้อมูล', exact: true, includeHidden: true })).toHaveCount(0);
       await currentPage.locator('.brand-mark img').evaluate((image: HTMLImageElement) => image.decode());
       return currentPage.locator('.sidebar').evaluate(sidebar => {
         const logo = sidebar.querySelector('.brand-mark')!;
@@ -37,6 +36,9 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     expect(adminSidebar.logoWidth).toBeCloseTo(visitorSidebar.logoWidth, 1);
     expect(adminSidebar.logoHeight).toBeCloseTo(visitorSidebar.logoHeight, 1);
     expect(adminSidebar.imageSrc).toBe(visitorSidebar.imageSrc);
+    await expect(page.locator('.primary-nav').getByRole('link', { name: 'จัดการข้อมูล', exact: true, includeHidden: true })).toHaveCount(1);
+    await expect(page.locator('.primary-nav').getByRole('button', { name: 'ภาพรวม', exact: true, includeHidden: true })).toHaveCount(0);
+    await expect(visitor.locator('.admin-navigation')).toHaveCount(0);
     const otherAdmin = await context.newPage();
     await otherAdmin.goto('/admin');
     await expect(otherAdmin.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
@@ -56,9 +58,9 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     await page.reload();
     await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     expect(await page.evaluate(keys => keys.map(key => Boolean(localStorage.getItem(key))), [authStorageKey, adminAuthStorageKey])).toEqual([false, true]);
-    const adminMenu = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
-    if (await adminMenu.isVisible()) await adminMenu.click();
-    await page.locator('.primary-nav').getByRole('button', { name: 'ภาพรวม', exact: true }).click();
+    // Explicitly leaving Admin still respects the independent visitor session;
+    // the Admin navigation itself no longer offers visitor destinations.
+    await page.goto('/');
     await expect(page).toHaveURL(/\/login$/);
     await fillAuthForm(page); await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
     await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);

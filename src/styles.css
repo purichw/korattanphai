@@ -326,6 +326,19 @@ summary:focus-visible {
   gap: 5px;
 }
 
+.admin-navigation-label {
+  margin: 0 10px 8px;
+  color: #e1eade;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-navigation .nav-item {
+  border-radius: 7px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .sidebar-navigation {
   display: flex;
   flex: 1;

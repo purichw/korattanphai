@@ -14,6 +14,6 @@ export function useUnsavedChanges(dirty: boolean, onBlocked: (message: string) =
     window.addEventListener('ktp:before-navigation', navigate);
     return () => { window.removeEventListener('beforeunload', unload); window.removeEventListener('ktp:before-navigation', navigate); };
   }, [dirty, onBlocked]);
-  // Only a successful durable save may bypass the guard before unmount cleanup.
+  // Only a durable save or an explicit discard confirmation may bypass cleanup.
   return () => { departureAllowed.current = true; };
 }

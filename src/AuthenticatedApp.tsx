@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { getAccountDisplayName, type LoginUser } from "./auth";
 import { authScopeForPath } from './authScope';
+import { AdminNavigation, adminViewFromSearch } from './admin/AdminNavigation';
 import { DataProvenanceChip, DataProvenanceLegend, dataProvenanceChipKindFromText } from "./components/DataProvenanceChip";
 import { NakhonRatchasimaWorkspaceSummary } from "./components/NakhonRatchasimaWorkspaceSummary";
 import { NakhonRatchasimaWorkspace } from "./components/NakhonRatchasimaWorkspace";
@@ -372,13 +373,15 @@ export default function AuthenticatedApp(props: {
     if (isWorkspaceAppRoute(props.path)) window.scrollTo(0, 0);
   }, [props.path]);
   const app = <PageLoadBoundary path={props.path}><AppStateProvider><AppShell {...props} /></AppStateProvider></PageLoadBoundary>;
+  // CMS has its own client and navigation; visitor forecast/saved services do
+  // not belong to an Admin session even though the visual shell is shared.
+  if (authScopeForPath(props.path) === 'admin') return app;
   const workspace = import.meta.env.VITE_DATA_BACKEND === "supabase"
     ? <DatabaseWorkspaceProvider key={props.loginUser.id} userId={props.loginUser.id}>{app}</DatabaseWorkspaceProvider>
     : app;
   // Officer eligibility is a separate domain from Admin sessions/CMS membership.
   // Do not enable configured roles until data-side enforcement is deployed.
-  return authScopeForPath(props.path) === 'admin' ? workspace
-    : <WorkspaceAccessProvider userId={props.loginUser.id} state={{ status: 'compatibility' }}>{workspace}</WorkspaceAccessProvider>;
+  return <WorkspaceAccessProvider userId={props.loginUser.id} state={{ status: 'compatibility' }}>{workspace}</WorkspaceAccessProvider>;
 }
 
 function AppShell({
@@ -413,6 +416,7 @@ function AppShell({
   };
   const appRoute = resolveAppRoute(path);
   const isAdmin = authScopeForPath(path) === 'admin';
+  const adminView = adminViewFromSearch(window.location.search);
   const nakhonRoute = appRoute.kind === "nakhon-ratchasima" ? appRoute.target : null;
   const provinceRoute = appRoute.kind === "province-workspace" ? appRoute.target : null;
   const isDroughtSubNavActive = Boolean(
@@ -440,12 +444,15 @@ function AppShell({
         >
           {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
-        <div className="mobile-account-slot">
+        {!isAdmin && <div className="mobile-account-slot">
           <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
           <WorkspaceSearchTrigger compact onOpen={openSearch} />
-        </div>
+        </div>}
         <div id="sidebar-navigation" className="sidebar-navigation">
-          <nav id="primary-navigation" className="primary-nav">
+          {isAdmin ? <AdminNavigation view={adminView} onNavigate={destination => {
+            onNavigate(destination);
+            setIsMobileMenuOpen(false);
+          }} /> : <nav id="primary-navigation" className="primary-nav">
             {visibleSections.map((section) => {
               const Icon = sectionIcons[section];
               const isOverviewSection = section === "overview";
@@ -485,7 +492,7 @@ function AppShell({
               );
             })}
             <ForecastExcelExport openRequest={exportRequest} onOpen={() => setIsMobileMenuOpen(false)} />
-          </nav>
+          </nav>}
           <div className="sidebar-account">
             <AccountControl
               loginUser={loginUser}
@@ -501,7 +508,7 @@ function AppShell({
       </aside>
 
       <main className="main-panel">
-        <header className="topbar">
+        {!isAdmin && <header className="topbar">
           <div className="topbar-brand">
             <h1 className="sr-only">{t("brand", language)}</h1>
           </div>
@@ -509,7 +516,7 @@ function AppShell({
             <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
             <WorkspaceSearchTrigger onOpen={openSearch} />
           </div>
-        </header>
+        </header>}
 
         {!isAdmin && !appRoute.isWorkspace && (
           <OperationalFilters
@@ -541,7 +548,7 @@ function AppShell({
         }}>
           <AppErrorBoundary resetKey={`${path}:${state.section}:${state.personaId}`}>
           {isAdmin ? <Suspense fallback={<PageLoadPending />}>
-            <AdminWorkspace userId={loginUser.id} draftId={new URLSearchParams(window.location.search).get('draft')} onNavigate={onNavigate} />
+            <AdminWorkspace userId={loginUser.id} draftId={new URLSearchParams(window.location.search).get('draft')} view={adminView} onNavigate={onNavigate} />
           </Suspense> : nakhonRoute ? (
             <NakhonRatchasimaWorkspace key={savedSelectionVersion} route={nakhonRoute} onNavigate={onNavigate} />
           ) : provinceRoute ? (
@@ -554,7 +561,7 @@ function AppShell({
           </AppErrorBoundary>
         </div>
       </main>
-      {searchOpen && <WorkspaceSearch userId={loginUser.id} includeExport={Boolean(databaseWorkspace)}
+      {!isAdmin && searchOpen && <WorkspaceSearch userId={loginUser.id} includeExport={Boolean(databaseWorkspace)}
         onNavigate={destination => { setIsMobileMenuOpen(false); restoreSavedWorkspace(destination); }}
         onExport={() => setExportRequest(value => value + 1)} onClose={() => setSearchOpen(false)} />}
     </div>

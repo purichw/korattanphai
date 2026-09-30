@@ -20,6 +20,23 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Admin navigation reconstruction (2026-10-01):
+
+- Isolated branch `fix/admin-navigation-20261001` starts from verified production
+  runtime `3b786cd` in `artifacts/admin-navigation-20261001`. The root checkout's
+  unrelated pending work is excluded.
+- `AdminNavigation` exposes only data management, imports/drafts and upload.
+  Visitor overview/drought/Excel export, search, bookmarks and their database
+  workspace provider no longer mount in Admin. Existing branding, responsive
+  drawer, account menu and independent authentication remain shared/preserved.
+- `?view=imports` and `?view=upload` are restorable CMS destinations. Saved drafts
+  highlight imports; import close returns to the list. Navigation still blocks
+  unsaved edits, and explicit discard permits leaving the import dialog.
+- Targeted browser coverage exercises history/reload, upload/discard and session
+  isolation. `scripts/smoke-admin-navigation.mjs` provides a separate real-account,
+  read-only deployment check. Publication status must be confirmed by a later
+  release checkpoint; this implementation note alone is not deployment proof.
+
 Workspace officer-access foundation production release (2026-09-30):
 
 - Runtime `d984513` on `feature/frontend-access-foundation` releases this chat's

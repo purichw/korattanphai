@@ -8,6 +8,7 @@ import { Skeleton } from '../components/nakhon-ratchasima/ForecastLoadingPrimiti
 import { usePageLoading } from '../components/PageLoadBoundary';
 import { createAdminClient } from './client';
 import { AdminImport } from './AdminImport';
+import type { AdminView } from './AdminNavigation';
 import { ReferenceResources } from './ReferenceResources';
 import { ConfirmAction } from './ConfirmAction';
 import { useUnsavedChanges } from './useUnsavedChanges';
@@ -27,7 +28,7 @@ function download(bytes: BlobPart, name: string, mime: string) {
 const errorText = (error: unknown) => error instanceof Error ? error.message : 'ดำเนินการไม่สำเร็จ';
 const dateLabel = (value: string) => new Date(value).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
 
-export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId: string; draftId: string | null; onNavigate: (url: string) => void }) {
+export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { userId: string; draftId: string | null; view: AdminView; onNavigate: (url: string) => void }) {
   const api = useMemo(() => createAdminClient(userId), [userId]);
   const [items, setItems] = useState<DraftSummary[]>([]);
   const [total, setTotal] = useState(0);
@@ -37,7 +38,6 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
   usePageLoading(loading);
   const [error, setError] = useState('');
   const [generation, setGeneration] = useState(0);
-  const [importOpen, setImportOpen] = useState(false);
   const resourceId = new URLSearchParams(window.location.search).get('resource');
   const visibleItems = items.filter(item => !isCutoverVerification(item));
   useEffect(() => {
@@ -49,13 +49,15 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [api, draftId, offset, generation]);
-  const openDraft = (next: Draft) => { setImportOpen(false); onNavigate(`/admin?draft=${encodeURIComponent(next.id)}`); };
+  const openDraft = (next: Draft) => onNavigate(`/admin?draft=${encodeURIComponent(next.id)}`);
+  const importsView = view === 'imports' || view === 'upload';
+  const title = draft?.title ?? (importsView ? 'รายการนำเข้าและฉบับร่าง' : 'จัดการข้อมูล');
   return <section className="cms-workspace" aria-labelledby="cms-title">
-    <header className="cms-page-header"><div><p className="eyebrow">นครราชสีมา</p><h1 id="cms-title">{draft?.title ?? 'จัดการข้อมูล'}</h1>
-      {!draft && !resourceId && <p>ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้</p>}
+    <header className="cms-page-header"><div><p className="eyebrow">พื้นที่ผู้ดูแล · นครราชสีมา</p><h1 id="cms-title">{title}</h1>
+      {!draft && !resourceId && <p>{importsView ? 'เปิดรายการที่บันทึกไว้เพื่อตรวจข้อมูล แก้ไข และเผยแพร่' : 'ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้'}</p>}
       {draft && <p>{kindLabels[draft.kind]} · รุ่นแก้ไข {draft.revision} · {draft.state === 'accepted' ? 'รับเข้าระบบแล้ว' : 'ฉบับร่าง'}</p>}</div>
-      <div className="cms-actions">{draftId ? <button className="secondary-button" onClick={() => onNavigate('/admin')}><ArrowLeft size={18} />ชุดข้อมูล</button>
-        : !resourceId && <button className="primary-button" onClick={() => setImportOpen(true)} disabled={loading || Boolean(error)}><FileUp size={18} />นำเข้าข้อมูล</button>}
+      <div className="cms-actions">{draftId ? <button className="secondary-button" onClick={() => onNavigate('/admin?view=imports')}><ArrowLeft size={18} />รายการนำเข้าและฉบับร่าง</button>
+        : !resourceId && <button className="primary-button" onClick={() => onNavigate('/admin?view=upload')} disabled={loading || Boolean(error)}><FileUp size={18} />นำเข้าข้อมูล</button>}
         <button type="button" className="icon-button" title="โหลดฉบับล่าสุด" aria-label="โหลดฉบับล่าสุด" disabled={loading}
           onClick={() => setGeneration(value => value + 1)}><RefreshCw size={18} /></button></div>
     </header>
@@ -65,9 +67,9 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
       : draft ? <DraftEditor key={draft.id} draft={draft} api={api} onSaved={setDraft} />
       : resourceId ? <ReferenceResources api={api} resourceId={resourceId} onNavigate={onNavigate} />
       : <>
-        <PublishedForecasts api={api} onCreated={openDraft} />
-        <div className="cms-list-heading"><div><h2>รายการนำเข้าและฉบับร่าง</h2><p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
-        {!visibleItems.length ? <p className="cms-help cms-no-drafts">ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากตรวจแก้พยากรณ์ด้านบนหรือนำเข้าไฟล์</p>
+        {!importsView && <PublishedForecasts api={api} onCreated={openDraft} />}
+        <div className="cms-list-heading"><div>{!importsView && <h2>รายการนำเข้าและฉบับร่าง</h2>}<p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
+        {!visibleItems.length ? <p className="cms-help cms-no-drafts">ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากนำเข้าไฟล์ หรือตรวจแก้พยากรณ์ในหน้าจัดการข้อมูล</p>
           : <div className="cms-table-scroll"><table className="cms-table"><thead><tr><th>ชุดข้อมูล</th><th>ประเภท</th><th>สถานะ</th><th>แก้ไขล่าสุด</th><th><span className="sr-only">เปิด</span></th></tr></thead>
             <tbody>{visibleItems.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename === 'published-database' ? 'สำเนาพยากรณ์ที่เผยแพร่' : item.source_filename}</small></td>
               <td>{kindLabels[item.kind]}</td><td><span className={`cms-status ${item.state}`}>{item.state === 'accepted' ? (item.kind === 'archive' ? 'เผยแพร่แล้ว' : 'รับเข้าระบบแล้ว') : 'ฉบับร่าง'}</span></td>
@@ -75,9 +77,9 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
                 onClick={() => onNavigate(`/admin?draft=${item.id}`)}><ArrowRight size={18} /></button></td></tr>)}</tbody></table></div>}
         {total > 50 && <div className="cms-pagination"><button className="icon-button" aria-label="หน้าก่อน" disabled={offset === 0} onClick={() => setOffset(value => value - 50)}><ArrowLeft size={18} /></button>
           <span>{offset + 1}–{Math.min(total, offset + 50)} / {total}</span><button className="icon-button" aria-label="หน้าถัดไป" disabled={offset + 50 >= total} onClick={() => setOffset(value => value + 50)}><ArrowRight size={18} /></button></div>}
-        <ReferenceResources api={api} resourceId={null} onNavigate={onNavigate} />
+        {!importsView && <ReferenceResources api={api} resourceId={null} onNavigate={onNavigate} />}
       </>}
-    {importOpen && <AdminImport api={api} onClose={() => setImportOpen(false)} onCreated={openDraft} />}
+    {view === 'upload' && !loading && !error && <AdminImport api={api} onClose={() => onNavigate('/admin?view=imports')} onCreated={openDraft} />}
   </section>;
 }
 

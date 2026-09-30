@@ -120,8 +120,14 @@ menu actions. Identity and logout remain owned by the existing scoped auth callb
 Navigation scrolls independently so the footer stays reachable on short screens.
 
 Admin uses the same desktop sidebar width and mobile logo dimensions as Home.
-The public navigation omits the data-management entry; direct Admin URLs and
-their independent authentication remain available.
+`AdminNavigation` owns only CMS destinations: data management, imports/drafts,
+and upload. Its links share the existing navigation styling and mobile drawer,
+with active state derived from the URL (draft details belong to imports).
+Visitor overview/drought/export, bookmarks and geographic search are not mounted
+in Admin, including its mobile toolbar. Admin also omits the visitor database
+workspace provider; its API and independent authentication retain ownership.
+The public navigation omits the data-management entry; direct Admin URLs remain
+available. Shared brand/account presentation does not imply shared navigation.
 
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`

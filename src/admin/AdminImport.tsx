@@ -189,5 +189,5 @@ export function AdminImport({ api, onClose, onCreated }: { api: ReturnType<typeo
       </>}
     </fieldset>
   </WorkspaceDialog>{confirmDiscard && <ConfirmAction title="ยังไม่บันทึกฉบับร่าง" message="ไฟล์ที่เลือกยังไม่ถูกบันทึกเข้าระบบ"
-    confirmLabel="ปิดโดยไม่บันทึก" onCancel={() => setConfirmDiscard(false)} onConfirm={onClose} />}</>;
+    confirmLabel="ปิดโดยไม่บันทึก" onCancel={() => setConfirmDiscard(false)} onConfirm={() => { allowSavedNavigation(); onClose(); }} />}</>;
 }

@@ -73,6 +73,16 @@ Set `SMOKE_OUTPUT_DIR` to a separate artifact directory when checks run concurre
 The process exits nonzero on failure. A green smoke run describes that target
 at that time; it does not prove that an unpushed local change is deployed.
 
+## Admin Navigation
+
+For Admin navigation changes, `node scripts/smoke-admin-navigation.mjs` uses the
+same target, credential, protection-cookie and output-directory environment
+variables. It checks desktop/mobile CMS destinations, draft-list reload, the
+upload dialog and template download, plus independent visitor/Admin sessions.
+It blocks application writes and never uploads or creates a production draft.
+Local `e2e/admin-navigation.spec.ts` covers unsaved-file/history/discard behavior
+against the isolated database; the real-account check stays read-only.
+
 ## CI
 
 `quality.yml` runs unit/data tests, the protected build, exposure/bundle checks,
