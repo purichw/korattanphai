@@ -62,8 +62,7 @@ test("home layout retains centered stats and usable map geometry at every breakp
     expect(svg!.y + svg!.height).toBeLessThanOrEqual(map!.y + map!.height + 1);
     if (viewport.width > 720) {
       const panel = await page.locator(".nr-forecast-overview-attention").boundingBox();
-      expect(panel!.height).toBeLessThanOrEqual(360);
-      expect(panel!.y + panel!.height).toBeLessThanOrEqual(map!.y + map!.height + 2);
+      expect(panel!.y + panel!.height).toBeCloseTo(map!.y + map!.height, 0);
     }
     const styles = await page.locator(".nr-forecast-overview-summary .metric-card-value").evaluateAll((elements) => elements.map((element) => getComputedStyle(element).textAlign));
     expect(styles.every((style) => style === "center")).toBe(true);
