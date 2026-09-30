@@ -20,6 +20,27 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Workspace officer-access foundation (2026-09-30, local only):
+
+- `src/access` separates configurable role rules, view levels, capabilities and
+  explicit geographic grants. Five starter roles, strict eligibility evaluation,
+  a React provider/boundary and canonical-route adapter are prepared.
+- Visitor shell remains explicitly in compatibility mode, preserving existing
+  account behavior. CMS sessions/operator authorization are untouched.
+- See [WORKSPACE_ACCESS.md](WORKSPACE_ACCESS.md) for the bilingual field dictionary,
+  examples and remaining trusted-server/RLS, cache, route and action enforcement
+  work. This is not live geographic data authorization or a deployed role editor.
+- Work is isolated on `feature/frontend-access-foundation` in
+  `artifacts/forecast-attention-release-20260930/source`, based on `b545db6`.
+  No production data, account assignments, migrations, push or deploy changed.
+- Verification: TypeScript and 81 distinct targeted policy/provider/route/auth
+  checks pass. One existing desktop overview browser journey passes through
+  district filtering, reload, back navigation and tambon drilldown without page
+  errors. Local fake-auth/static-source screenshots are under
+  `artifacts/access-foundation-smoke/`; the current viewport was inspected.
+  Backend authorization, real role accounts, mobile/native and whole-site
+  release suites were not exercised because enforcement remains inactive.
+
 Forecast risk lists and sidebar production release (2026-09-30):
 
 - Runtime `92831bb` adds high/moderate risk choices with exact scoped tambon

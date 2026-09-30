@@ -3,6 +3,7 @@ const AdminWorkspace = lazy(() => import('./admin/AdminWorkspace'));
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { SidebarBrand } from "./components/SidebarBrand";
 import { DatabaseWorkspaceProvider, useDatabaseWorkspace } from "./DatabaseWorkspaceProvider";
+import { WorkspaceAccessProvider } from './access/WorkspaceAccessProvider';
 import { WorkspaceBookmarks } from "./components/WorkspaceBookmarks";
 import { ForecastExcelExport } from "./components/ForecastExcelExport";
 import { WorkspaceSearch, WorkspaceSearchTrigger } from "./components/WorkspaceSearch";
@@ -370,9 +371,13 @@ export default function AuthenticatedApp(props: {
     if (isWorkspaceAppRoute(props.path)) window.scrollTo(0, 0);
   }, [props.path]);
   const app = <AppStateProvider><AppShell {...props} /></AppStateProvider>;
-  return import.meta.env.VITE_DATA_BACKEND === "supabase"
+  const workspace = import.meta.env.VITE_DATA_BACKEND === "supabase"
     ? <DatabaseWorkspaceProvider key={props.loginUser.id} userId={props.loginUser.id}>{app}</DatabaseWorkspaceProvider>
     : app;
+  // Officer eligibility is a separate domain from Admin sessions/CMS membership.
+  // Do not enable configured roles until data-side enforcement is deployed.
+  return authScopeForPath(props.path) === 'admin' ? workspace
+    : <WorkspaceAccessProvider userId={props.loginUser.id} state={{ status: 'compatibility' }}>{workspace}</WorkspaceAccessProvider>;
 }
 
 function AppShell({

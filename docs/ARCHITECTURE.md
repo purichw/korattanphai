@@ -47,6 +47,12 @@ parked and unconfigured; it is not a dependency of forecast navigation.
 
 ## Runtime Boundaries
 
+Future officer roles are scaffolded in `src/access`; see
+[Workspace access](WORKSPACE_ACCESS.md) for configurable roles, capabilities and
+administrative area grants. The visitor shell currently mounts explicit
+compatibility mode. No officer restrictions or new backend authorization have
+been activated; CMS sessions/membership stay separate.
+
 ```mermaid
 flowchart TD
   Browser["Browser"] --> Login["App: lightweight login"]
