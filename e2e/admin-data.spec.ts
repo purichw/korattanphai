@@ -10,7 +10,7 @@ test('CMS import, repair, reload, export, conflict and acceptance use the persis
   try {
     await seedAdminSession(page);
     await page.goto('/admin');
-    await expect(page.getByText('ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากตรวจแก้พยากรณ์ด้านบนหรือนำเข้าไฟล์', { exact: true })).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText('ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากนำเข้าไฟล์ หรือตรวจแก้พยากรณ์ในหน้าจัดการข้อมูล', { exact: true })).toBeVisible({ timeout: 30000 });
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).first().click();
     const batch = { schemaVersion: 1, sourceId: 'cms-test', batchId: 'operator-test-v1', observations: [{
       stationId: 'TEST-001', observedAt: '2026-09-01T07:00:00+07:00', metric: 'rainfall', value: null,

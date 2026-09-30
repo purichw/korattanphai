@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { chromium, expect } from '@playwright/test';
+import { chromium, expect as baseExpect } from '@playwright/test';
 import { validateSmokeTarget } from './smoke-target.mjs';
 
 const base = validateSmokeTarget(process.env.SMOKE_URL ?? 'https://korattanphai.vercel.app', process.env.SMOKE_ALLOWED_PREVIEW_ORIGINS);
@@ -9,6 +9,7 @@ const email = process.env.SMOKE_AUTH_EMAIL;
 const password = process.env.SMOKE_AUTH_PASSWORD;
 assert.ok(email && password, 'Provide the real smoke account through environment variables.');
 const output = path.resolve(process.env.SMOKE_OUTPUT_DIR ?? 'smoke-results/admin-navigation');
+const expect = baseExpect.configure({ timeout: 30000 });
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch();
 const report = { url: base.origin, at: new Date().toISOString(), checks: [] };
@@ -44,6 +45,7 @@ try {
     });
     const login = async (current, destination) => {
       await current.goto(new URL(destination, base).href);
+      assert.equal(new URL(current.url()).origin, base.origin, 'Deployment must be accessible before login.');
       await current.getByLabel('อีเมล', { exact: true }).fill(email);
       await current.getByLabel('รหัสผ่าน', { exact: true }).fill(password);
       await current.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
@@ -102,4 +104,7 @@ try {
   }
   await writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report));
+} catch (error) {
+  console.error(String(error.message ?? error).replaceAll(password, '[redacted]').replaceAll(email, '[redacted]'));
+  process.exitCode = 1;
 } finally { await browser.close(); }
