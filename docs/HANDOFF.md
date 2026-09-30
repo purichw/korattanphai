@@ -20,6 +20,43 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Workspace officer-access foundation production release (2026-09-30):
+
+- Runtime `d984513` on `feature/frontend-access-foundation` releases this chat's
+  five configurable officer/user role presets, capabilities, geographic levels
+  and area grants, strict eligibility checks, React provider/boundary and route
+  adapter. The bilingual contract is in `docs/WORKSPACE_ACCESS.md` in the release
+  checkout `artifacts/forecast-attention-release-20260930/source`.
+- Visitor accounts remain in explicit compatibility mode. No live role assignment,
+  geographic restriction, role editor or new server authorization is enabled.
+  Admin membership and independent sessions remain unchanged.
+- Preserved the current production runtime `6791d75`, including branded page
+  loading and toolbar search. Two existing browser assertions were aligned with
+  those deployed behaviors; no loading/search runtime change was added here.
+  Unpublished root CMS, UAT/API/research work is excluded.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36686782974)
+  passes all six jobs on the exact runtime commit: 413 unit/component tests,
+  174 built-browser tests and 136 database-browser tests, plus CMS, compatibility,
+  API, operations, security and database/RLS checks. Existing exclusions remain.
+  TypeScript and 84 targeted policy/provider/route/auth/loading tests also pass.
+- Protected hosted build, source-exposure checks and unchanged bundle budgets
+  pass (225,981 B application gzip); the database build emits no static archive.
+- Candidate and production real-account read-only smoke pass on desktop/mobile:
+  exact forecast/risk rows, search, saved-list reads, district/tambon navigation
+  and reload, Admin authorized reads and sidebar parity, and separate session
+  logout behavior. No application mutations, prohibited requests, relevant network
+  errors or runtime errors were recorded. Screenshots were visually reviewed.
+  Navigation-aborted logout requests are recorded separately; UI session isolation
+  passes without claiming server-side token invalidation was observed.
+- Promoted Ready deployment `dpl_J95CbHDWJRFS5ada4ja371u2jsdn` /
+  `https://korattanphai-5piolegin-purich-w.vercel.app`; the primary production alias
+  is verified on it. Recovery baseline: `dpl_F2bJGovU3aK6bPhWx8832UDcErvo` /
+  `https://korattanphai-kkqx2w3wq-purich-w.vercel.app` (runtime `6791d75`).
+- Evidence: `artifacts/access-foundation-release-20260930/`, including
+  `release-state.json`, `ci-final.json`, `candidate-final/` and `production/`.
+  No database migration, production data/assignment, billing or native changes.
+  Physical-device testing and future role enforcement remain outside this release.
+
 Workspace officer-access foundation (2026-09-30, local only):
 
 - `src/access` separates configurable role rules, view levels, capabilities and

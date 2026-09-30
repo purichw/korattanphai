@@ -1,8 +1,9 @@
 # บทบาทและสิทธิ์หน้าบ้าน / Workspace access foundation
 
-Status: **local foundation; production authorization is unchanged** (2026-09-30).
-No database migration, account assignment, new endpoint, billing change or deploy
-is included. Current accounts remain in explicit `compatibility` mode.
+Status: **foundation deployed; production authorization is unchanged** (2026-09-30).
+Runtime `d984513` is released at `https://korattanphai.vercel.app`. Current accounts
+remain in explicit `compatibility` mode. No database migration, account assignment,
+new endpoint or billing change is included; officer restrictions are not enabled.
 
 ## Business model / หลักการใช้งาน
 
@@ -194,11 +195,18 @@ must define the intended grants for existing accounts before enabling enforcemen
 
 ## Verification scope
 
-TypeScript and 81 distinct targeted policy/provider/route and existing auth tests
-pass. An existing desktop overview browser journey also passes (filter, reload,
-back and tambon drilldown; no page errors), using local fake auth/static source
-data. Its inspected screenshots are under `artifacts/access-foundation-smoke/`.
-No user-visible design or component dimensions change. Mobile and broad release
-suites were intentionally skipped for this non-enforcing foundation.
+TypeScript and 84 targeted policy/provider/route/auth/loading tests pass after
+preserving the current production loading and search changes. The exact release
+commit passes all six [Quality Gate jobs](https://github.com/purichw/korattanphai/actions/runs/36686782974),
+including 413 unit/component tests, 174 built-browser tests and 136 database-browser
+tests, plus CMS, migration/RLS, API, operations, security and compatibility checks.
+Existing provider/viewport exclusions remain unchanged.
+
+The ready candidate and production pass read-only real-account checks on desktop and mobile:
+login, exact forecast/risk rows, search, saved-list reads, district/tambon routes,
+reload and independent visitor/Admin sessions. No application data is mutated.
+No user-visible design or component dimensions change. Release evidence is under
+`artifacts/access-foundation-release-20260930/`; see `HANDOFF.md` for deployment
+identity and the final production check. Physical-device testing was not run.
 Live backend enforcement, a role-management screen, nationwide data and native
 app integration are separate follow-up work, not delivered features here.
