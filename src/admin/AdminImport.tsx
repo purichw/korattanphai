@@ -140,7 +140,7 @@ export function AdminImport({ api, onClose, onCreated }: { api: ReturnType<typeo
         {kind !== 'archive' && <p className="cms-help">ข้อมูลประเภทนี้รับเก็บจากไฟล์เท่านั้น ยังไม่ใช้สร้างพยากรณ์หรือแสดงบนแผนที่อัตโนมัติ</p>}
         {kind === 'archive' && <section className="cms-import-guide" aria-labelledby="cms-import-guide-title"><h3 id="cms-import-guide-title">เริ่มจากแม่แบบพยากรณ์ rev3</h3>
           <p>เตรียมรายชื่อ 289 ตำบลให้แล้ว กรอกปี–เดือนต้นทางและผลล่วงหน้า 1–6 เดือนในชีต “ข้อมูลพยากรณ์” ดูตัวอย่างและคำอธิบายได้ในชีตแยก</p>
-          <div className="cms-actions"><a className="secondary-button" href={templateUrl} download="Korat_rev3_template.xlsx"><Download size={16} />แม่แบบ Excel พร้อมคำอธิบาย</a>
+          <div className="cms-actions cms-template-downloads"><a className="secondary-button" href={templateUrl} download="Korat_rev3_template.xlsx"><Download size={16} />แม่แบบ Excel พร้อมคำอธิบาย</a>
             <a className="secondary-button" href={csvTemplateUrl} download="Korat_rev3_template.csv"><Download size={16} />แม่แบบ CSV</a></div>
           <p className="cms-help">CSV มีได้เพียงตารางเดียว ใช้คำอธิบายด้านล่างหรือในแม่แบบ Excel ประกอบ กรอกให้ครบ 289 ตำบลต่อรอบเดือน ระบบยังรับเฉพาะเดือนต้นทางที่มีอยู่ในคลัง</p>
           <details className="cms-import-dictionary"><summary>ความหมายของ 12 คอลัมน์และตัวอย่าง</summary><p>{riskHelp}</p>
@@ -156,7 +156,7 @@ export function AdminImport({ api, onClose, onCreated }: { api: ReturnType<typeo
             <details className="cms-import-mapping" open={rev3Fields.some(field => !mapping[field.key]) ? true : undefined}><summary>ตรวจการจับคู่คอลัมน์ ({rev3Fields.filter(field => mapping[field.key]).length} / 12 ช่อง)</summary>
               <div className="cms-mapping">{rev3Fields.map(field => <div key={field.key}><div><strong>{field.label}</strong><p>{field.description}</p><small>ตัวอย่างที่กรอกได้: {field.example}</small>
                 {mapping[field.key] && <small>พบในไฟล์: {sheet.rows.slice(0, 3).map(row => String(row[mapping[field.key]] ?? '') || 'ช่องว่าง').join(' · ')}</small>}</div>
-                <AppSelect ariaLabel={`คอลัมน์ ${field.label}`} value={mapping[field.key] ?? ''} align="start" searchable options={[{ value: '', label: 'เลือกคอลัมน์ในไฟล์' }, ...sheet.columns.map(column => ({ value: column, label: column }))]}
+                <AppSelect ariaLabel={`คอลัมน์ ${field.label}`} value={mapping[field.key] ?? ''} searchable options={[{ value: '', label: 'เลือกคอลัมน์ในไฟล์' }, ...sheet.columns.map(column => ({ value: column, label: column }))]}
                   onChange={value => setMapping(current => ({ ...current, [field.key]: value }))} /></div>)}</div>
             </details>
             {parsed.error && <p className="cms-warning" role="status">{parsed.error}</p>}
@@ -166,7 +166,7 @@ export function AdminImport({ api, onClose, onCreated }: { api: ReturnType<typeo
             <p className="cms-help">{riskHelp}</p>
           </> : <><h3>จับคู่คอลัมน์</h3><div className="cms-mapping">{DATA_FIELDS[kind].map(field => <div key={field.key}>
             <span>{field.label}{field.optional && <small>ไม่บังคับ</small>}</span>
-            <AppSelect ariaLabel={`คอลัมน์ ${field.label}`} value={mapping[field.key] ?? ''} align="start" searchable
+            <AppSelect ariaLabel={`คอลัมน์ ${field.label}`} value={mapping[field.key] ?? ''} searchable
               options={[{ value: '', label: 'ยังไม่จับคู่' }, ...sheet.columns.map(column => ({ value: column, label: column }))]}
               onChange={value => setMapping(current => ({ ...current, [field.key]: value }))} />
           </div>)}</div>

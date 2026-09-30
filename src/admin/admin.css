@@ -51,7 +51,11 @@
 .cms-table tr.has-issue { background: #fffaf0; }
 .cms-editor-footer { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 16px; }
 .cms-import, .cms-form { padding: 4px 0; }
-.cms-import-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; margin-bottom: 24px; }
+.cms-import-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; margin-bottom: 24px; }
+.cms-import .cms-import-controls :is(.app-select-trigger, .primary-button) { min-height: 44px; font-size: 14px; }
+.cms-import .app-select-field.is-align-center .app-select-option { grid-template-columns: 18px minmax(0, 1fr) 18px; padding-inline: 10px; text-align: center; }
+.cms-import .app-select-field.is-align-center .app-select-option-copy { grid-column: 2; }
+.cms-import .app-select-field.is-align-center .app-select-option > svg { grid-column: 3; }
 .cms-import-summary { display: grid; gap: 4px; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .cms-import-summary span { color: var(--muted); }
 .cms-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
@@ -96,7 +100,9 @@
 .cms-import { border: 0; margin: 0; min-width: 0; }
 .cms-import-guide h3 { margin-top: 0; }
 .cms-import-guide p, .cms-import-mapping p { line-height: 1.6; }
-.cms-import-guide a { text-decoration: none; }
+.cms-template-downloads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 600px; gap: 12px; margin: 16px auto; }
+.cms-template-downloads .secondary-button { min-width: 0; min-height: 44px; border: 1px solid var(--line-strong); border-radius: 7px; font: inherit; font-weight: 700; line-height: 1.5; text-align: center; text-decoration: none; }
+.cms-template-downloads .secondary-button > svg { flex-shrink: 0; }
 .cms-import-dictionary summary, .cms-import-mapping summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
 .cms-import-dictionary dl { margin: 0; }
 .cms-import-dictionary dl > div { padding: 12px 0; border-top: 1px solid var(--line); }
@@ -128,6 +134,7 @@
 .cms-forecast-edit dd { margin: 0; font-size: 16px; font-weight: 600; }
 .cms-forecast-edit .app-select { width: 100%; }
 @media (max-width: 800px) {
+  .cms-template-downloads { grid-template-columns: minmax(0, 1fr); max-width: none; }
   .cms-reference-filters { grid-template-columns: minmax(0, 1fr); }
   .cms-resource-row { align-items: flex-start; flex-direction: column; gap: 10px; padding-block: 16px; }
   .cms-resource-row button { align-self: flex-start; }
