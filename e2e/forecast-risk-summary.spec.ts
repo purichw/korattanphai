@@ -113,27 +113,31 @@ test("shared bar graph reference layout and details across six viewports", async
 test("shared bar graph preserves loading and unavailable states", async ({ page }, testInfo) => {
   const databaseMode = process.env.PLAYWRIGHT_DATA_BACKEND === "supabase";
   let release!: () => void;
+  let requestedForecast = false;
   const pending = new Promise<void>(resolve => { release = resolve; });
   if (databaseMode) await page.route("https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice", async route => {
+    requestedForecast = true;
     await pending;
     await route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) });
   });
   try {
     await page.goto("/chok-chai?mapLayer=forecast-archive&target=2025-12&horizon=1");
     mkdirSync("artifacts/bar-graph-v1", { recursive: true });
-    let height: number | undefined;
     if (databaseMode) {
-      const loading = page.locator(".nr-loading-chart");
+      await expect.poll(() => requestedForecast).toBe(true);
+      // The initial forecast read is covered by the shared branded page loader.
+      const loading = page.locator(".app-startup");
       await expect(loading).toBeVisible();
-      height = (await loading.boundingBox())!.height;
-      await expect(loading.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
+      await expect(page.locator(".nr-loading-chart")).not.toBeVisible();
+      await expect(page.locator(".nr-drought-forecast-bar:visible, .nr-drought-forecast-zero:visible")).toHaveCount(0);
       await loading.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-loading.png` });
     }
     release();
     const chart = page.locator(".nr-drought-workspace-chart-card");
+    await expect(page.locator(".app-startup")).toHaveCount(0);
     await expect(chart.getByRole("status")).toContainText("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
     await expect(chart.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
-    if (height !== undefined) expect((await chart.boundingBox())!.height).toBeCloseTo(height, 0);
+    await expect(chart).toBeVisible();
     await chart.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-empty.png` });
   } finally { release(); }
 });

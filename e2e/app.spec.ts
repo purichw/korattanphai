@@ -315,8 +315,9 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     expect(overviewSummaryRailBox.width).toBeGreaterThan(overviewWorkspaceBox.width * 0.26);
   }
   const nav = await openPrimaryNav(page);
-  await expect(nav.getByRole("button")).toHaveCount(3);
-  await expect(nav.getByRole("button", { name: "ค้นหาข้อมูล", exact: true })).toBeVisible();
+  await expect(nav.getByRole("button")).toHaveCount(2);
+  // Search now lives in the header; the sidebar contains the page destinations.
+  await expect(page.getByRole("button", { name: "ค้นหาข้อมูล", exact: true }).filter({ visible: true })).toHaveCount(1);
   await expect(nav.getByRole("button", { name: "ภาพรวม", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "จัดการข้อมูล", exact: true })).toHaveCount(0);

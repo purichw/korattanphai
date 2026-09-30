@@ -69,7 +69,7 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
         <div className="cms-list-heading"><div><h2>รายการนำเข้าและฉบับร่าง</h2><p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
         {!visibleItems.length ? <p className="cms-help cms-no-drafts">ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากตรวจแก้พยากรณ์ด้านบนหรือนำเข้าไฟล์</p>
           : <div className="cms-table-scroll"><table className="cms-table"><thead><tr><th>ชุดข้อมูล</th><th>ประเภท</th><th>สถานะ</th><th>แก้ไขล่าสุด</th><th><span className="sr-only">เปิด</span></th></tr></thead>
-            <tbody>{visibleItems.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename}</small></td>
+            <tbody>{visibleItems.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename === 'published-database' ? 'สำเนาพยากรณ์ที่เผยแพร่' : item.source_filename}</small></td>
               <td>{kindLabels[item.kind]}</td><td><span className={`cms-status ${item.state}`}>{item.state === 'accepted' ? (item.kind === 'archive' ? 'เผยแพร่แล้ว' : 'รับเข้าระบบแล้ว') : 'ฉบับร่าง'}</span></td>
               <td>{dateLabel(item.updated_at)}<small>รุ่นแก้ไข {item.revision}</small></td><td><button className="icon-button" title={`เปิด ${item.title}`} aria-label={`เปิด ${item.title}`}
                 onClick={() => onNavigate(`/admin?draft=${item.id}`)}><ArrowRight size={18} /></button></td></tr>)}</tbody></table></div>}
