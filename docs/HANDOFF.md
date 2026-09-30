@@ -20,7 +20,7 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
-Admin navigation reconstruction (2026-10-01):
+Admin navigation reconstruction, production release (2026-10-01):
 
 - Isolated branch `fix/admin-navigation-20261001` starts from verified production
   runtime `3b786cd` in `artifacts/admin-navigation-20261001`. The root checkout's
@@ -32,10 +32,34 @@ Admin navigation reconstruction (2026-10-01):
 - `?view=imports` and `?view=upload` are restorable CMS destinations. Saved drafts
   highlight imports; import close returns to the list. Navigation still blocks
   unsaved edits, and explicit discard permits leaving the import dialog.
-- Targeted browser coverage exercises history/reload, upload/discard and session
-  isolation. `scripts/smoke-admin-navigation.mjs` provides a separate real-account,
-  read-only deployment check. Publication status must be confirmed by a later
-  release checkpoint; this implementation note alone is not deployment proof.
+- Runtime `93367df25ce22d7926363139c97e9b6796b25f6f` is pushed on the isolated
+  branch. All 20 targeted local browser checks pass across Admin navigation,
+  authentication, rev3 imports, CMS editing, loading and the visitor sidebar;
+  TypeScript and seven targeted auth/unsaved-change unit checks also pass.
+- Two assertion-only follow-ups aligned the old empty-state copy in the CMS and
+  loading suites. No test thresholds or runtime behavior were weakened.
+- Ready candidate `dpl_CEAjKzMrtrXnCwzZ3Zk8o9UZVsYR` /
+  `https://korattanphai-8bdydqagl-purich-w.vercel.app` has the exact runtime commit.
+  The hosted protected build, source-exposure and unchanged bundle gates pass
+  (226,930 B application gzip); the database build emits no static archive.
+- `scripts/smoke-admin-navigation.mjs` passes on the candidate with a real account
+  at desktop/mobile widths: Admin-only navigation, imports/reload, Excel template
+  download and independent Admin/visitor sessions. Application writes are blocked;
+  no data mutations, runtime errors or horizontal overflow were observed.
+- [Exact-commit Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36762537574)
+  passes all six required jobs, including 188 built-browser and 136 database-browser
+  checks; existing provider/viewport exclusions remain unchanged.
+- Promoted the exact Ready candidate after confirming that the primary alias was
+  still on the recorded baseline. `https://korattanphai.vercel.app` is verified on
+  `dpl_CEAjKzMrtrXnCwzZ3Zk8o9UZVsYR`. Production repeats the real-account desktop/mobile
+  checks successfully with zero application writes. Sidebar screenshots were
+  visually inspected. The root checkout and unrelated pending work remain untouched.
+- Recovery baseline: `dpl_CDETdbqUQZeWuSkjMiTmgxCWXn55` /
+  `https://korattanphai-b4wr35ah1-purich-w.vercel.app` (runtime `3b786cd`).
+- Evidence: `artifacts/admin-navigation-evidence/`, including `candidate-release/`,
+  `production/` and `ci-release-final.json`.
+  No database migration, role assignment, production draft/forecast edit or native
+  change is included. Physical-device testing is outside this release.
 
 Workspace officer-access foundation production release (2026-09-30):
 
