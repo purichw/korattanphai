@@ -37,6 +37,66 @@ CMS clarity and rev3 spreadsheet import, pushed candidate (2026-09-30):
   candidate/CI links, preservation boundaries and the mandatory alias recheck.
   The primary dirty checkout, database and unrelated work remain untouched.
 
+Workspace officer-access foundation (2026-09-30, local only):
+
+- `src/access` separates configurable role rules, view levels, capabilities and
+  explicit geographic grants. Five starter roles, strict eligibility evaluation,
+  a React provider/boundary and canonical-route adapter are prepared.
+- Visitor shell remains explicitly in compatibility mode, preserving existing
+  account behavior. CMS sessions/operator authorization are untouched.
+- See [WORKSPACE_ACCESS.md](WORKSPACE_ACCESS.md) for the bilingual field dictionary,
+  examples and remaining trusted-server/RLS, cache, route and action enforcement
+  work. This is not live geographic data authorization or a deployed role editor.
+- Work is isolated on `feature/frontend-access-foundation` in
+  `artifacts/forecast-attention-release-20260930/source`, based on `b545db6`.
+  No production data, account assignments, migrations, push or deploy changed.
+- Verification: TypeScript and 81 distinct targeted policy/provider/route/auth
+  checks pass. One existing desktop overview browser journey passes through
+  district filtering, reload, back navigation and tambon drilldown without page
+  errors. Local fake-auth/static-source screenshots are under
+  `artifacts/access-foundation-smoke/`; the current viewport was inspected.
+  Backend authorization, real role accounts, mobile/native and whole-site
+  release suites were not exercised because enforcement remains inactive.
+
+Forecast risk lists and sidebar production release (2026-09-30):
+
+- Runtime `92831bb` adds high/moderate risk choices with exact scoped tambon
+  lists, an available-level default and a 360 px card with keyboard-accessible
+  internal scrolling. Month, district and irrigation scope remain synchronized
+  with the summary; links retain source T/T+ and area identity.
+- Admin now shares Home sidebar/logo dimensions. The data-management menu entry
+  is hidden; direct Admin routes and independent authentication are preserved.
+- Released from isolated branch `release/forecast-attention-20260930`, based on
+  `7bfeb6d` / production runtime `fea0a2f`. Existing CMS, brand and graph releases
+  remain intact. Unpublished CMS, UAT/API/research work and the local bundle-budget
+  relaxation are excluded.
+- Release `a639f2e` adds a lockfile-only `brace-expansion` security patch after
+  the original audit failed. Only three transitive lock entries change to
+  1.1.21/2.1.7; audit thresholds and build budgets are unchanged.
+- Protected hosted build and exposure/bundle gates pass (224,613 B application
+  gzip). Candidate real-account read-only checks pass for desktop/mobile:
+  exact 117 moderate / 75 high / 31 moderate rows, empty high state, toggle,
+  internal scrolling, reload, hidden menu and Admin/sidebar parity. No runtime
+  or relevant network errors, blocked writes or data mutations were recorded.
+- [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36676383302)
+  passed all six jobs on exact commit `a639f2e`: 360 unit/component tests and
+  321 browser checks passed; 131 existing provider/viewport exclusions were
+  skipped. API, operations, CMS publication, migration/RLS and security gates pass.
+- Promoted the verified candidate; `korattanphai.vercel.app` serves that exact
+  Ready deployment. Production repeats the desktop/mobile visitor and Admin
+  smoke successfully with no runtime/network errors or data mutations.
+- The first production desktop assertion exhausted its default 5-second wait
+  during cold loading; the failure screenshot already showed the correct list.
+  Aligning the hosted harness to a 45-second real-network wait resolved the
+  timing race; no application changes or value assertions were weakened.
+- Candidate: `dpl_F2n7g7EzjBxhXWbvovB2FeSKieJC` /
+  `https://korattanphai-31cwiieez-purich-w.vercel.app`.
+  Recovery: `dpl_8eHZVnwYySq4uUDBgBeiJqk1Abjq` (preceding sidebar-account release).
+- Evidence: `artifacts/forecast-attention-release-20260930/`, including
+  `release-state.json`, candidate/production smoke reports and visual proof.
+  No migration, billing, native-app or production-data changes. Physical-device
+  and unrelated integration verification remain outside this release.
+
 Branded page loading, local implementation (2026-09-30, not deployed):
 
 - Branch `feature/branded-page-loading` in the clean release checkout
