@@ -1,6 +1,7 @@
 import { expect, test, type Page, seedAuthSession } from "./fixtures";
 
 async function selectArea(page: Page, name: string) {
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
   if (await edit.isVisible()) await edit.click();
   await page.getByRole("combobox", { name: /^(เลือก)?อำเภอ/ }).click();
@@ -77,6 +78,9 @@ test("overview failures remain empty and retry preserves the requested target", 
 test("changing month updates map counts and risk filtering uses the same forecast", async ({ page }) => {
   await page.goto("/?mapLayer=forecast-archive");
   await expect(page.locator(".nr-forecast-overview-summary")).toContainText("117/289 ตำบล");
+  // Forecast text can be mounted while the essential geometry still keeps
+  // the page hidden. Determine the responsive controls only once visible.
+  await expect(page.locator('.nr-forecast-overview')).toBeVisible();
   const edit = page.getByRole("button", { name: "แก้ไขตัวกรองข้อมูล" });
   if (await edit.isVisible()) await edit.click();
   await page.getByRole("combobox", { name: /^เดือนตั้งต้น |^เลือกเดือนตั้งต้น$/ }).click();

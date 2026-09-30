@@ -1,12 +1,14 @@
 import { expect, test, type Locator, type Page, fillAuthForm, authTestUser, openAccountMenu } from "./fixtures";
 
 async function openPrimaryNav(page: Page) {
+  await expect(page.locator('.app-shell')).toBeVisible();
   const menuToggle = page.getByRole("button", { name: "เปิดเมนูหลัก", exact: true });
   if (await menuToggle.isVisible()) await menuToggle.click();
   return page.locator(".primary-nav");
 }
 
 async function closePrimaryNav(page: Page) {
+  await expect(page.locator('.app-shell')).toBeVisible();
   const menuToggle = page.getByRole("button", { name: "ปิดเมนูหลัก", exact: true });
   if (await menuToggle.isVisible()) await menuToggle.click();
 }
