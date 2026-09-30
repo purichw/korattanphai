@@ -417,13 +417,13 @@ function AppShell({
   const sectionLabel = (section: AppSection) => t(section, language);
 
   return (
-    <div className={`app-shell${isDroughtSubNavActive ? " is-operational-drought" : ""}${isHomeOverview ? " is-home-overview" : ""}`} lang={language}>
+    <div className={`app-shell${isDroughtSubNavActive ? " is-operational-drought" : ""}${isHomeOverview ? " is-home-overview" : ""}${isAdmin ? " is-admin-workspace" : ""}`} lang={language}>
       <a className="skip-link" href="#workspace-content" onClick={(event) => {
         event.preventDefault();
         document.getElementById('workspace-content')?.focus();
       }}>ข้ามไปเนื้อหาหลัก</a>
       <aside className={isMobileMenuOpen ? "sidebar mobile-menu-open" : "sidebar"} aria-label="เมนูหลัก">
-        <SidebarBrand compactMobileLogo={isDroughtSubNavActive || isHomeOverview} label={t("brand", language)} />
+        <SidebarBrand compactMobileLogo={isDroughtSubNavActive || isHomeOverview || isAdmin} label={t("brand", language)} />
         <button
           type="button"
           className="mobile-menu-toggle"
@@ -480,8 +480,6 @@ function AppShell({
               );
             })}
             <ForecastExcelExport openRequest={exportRequest} onOpen={() => setIsMobileMenuOpen(false)} />
-            <button type="button" className={isAdmin ? 'nav-item active' : 'nav-item'} aria-current={isAdmin ? 'page' : undefined}
-              onClick={() => { onNavigate('/admin'); setIsMobileMenuOpen(false); }}><Database size={17} /><span>จัดการข้อมูล</span></button>
           </nav>
           <div className="sidebar-account">
             <AccountControl

@@ -87,7 +87,7 @@ export function ForecastOverviewLoading({ failed, retry, message = "กำลั
         <div className="nr-loading-summary"><h3>สรุปพยากรณ์พื้นที่ที่เลือก</h3><Skeleton className="is-line" />
           <LoadingMetrics labels={["เสี่ยงสูง", "เสี่ยงปานกลาง", "ไม่มีความเสี่ยง", "นอกขอบเขต"]} />
         </div>
-        <div className="nr-loading-attention"><h3>ตำบลที่พยากรณ์เสี่ยงสูง</h3>
+        <div className="nr-loading-attention"><h3>ตำบลที่พยากรณ์มีความเสี่ยง</h3>
           {[1, 2, 3].map((row) => <div className="nr-loading-list-row" key={row}><Skeleton className="is-icon" /><span><Skeleton /><Skeleton className="is-line" /></span></div>)}
         </div>
       </div>

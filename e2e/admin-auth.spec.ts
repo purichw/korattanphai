@@ -23,6 +23,20 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     const visitor = await context.newPage();
     await visitor.goto('/');
     await expect(visitor.locator('.sidebar-account .account-trigger')).toHaveCount(1);
+    const [adminSidebar, visitorSidebar] = await Promise.all([page, visitor].map(async currentPage => {
+      await expect(currentPage.locator('.primary-nav').getByRole('button', { name: 'จัดการข้อมูล', exact: true, includeHidden: true })).toHaveCount(0);
+      await currentPage.locator('.brand-mark img').evaluate((image: HTMLImageElement) => image.decode());
+      return currentPage.locator('.sidebar').evaluate(sidebar => {
+        const logo = sidebar.querySelector('.brand-mark')!;
+        const image = logo.querySelector('img')!;
+        return { width: sidebar.getBoundingClientRect().width, logoWidth: logo.getBoundingClientRect().width,
+          logoHeight: logo.getBoundingClientRect().height, imageSrc: image.currentSrc };
+      });
+    }));
+    expect(adminSidebar.width).toBeCloseTo(visitorSidebar.width, 1);
+    expect(adminSidebar.logoWidth).toBeCloseTo(visitorSidebar.logoWidth, 1);
+    expect(adminSidebar.logoHeight).toBeCloseTo(visitorSidebar.logoHeight, 1);
+    expect(adminSidebar.imageSrc).toBe(visitorSidebar.imageSrc);
     const otherAdmin = await context.newPage();
     await otherAdmin.goto('/admin');
     await expect(otherAdmin.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
@@ -48,9 +62,8 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     await expect(page).toHaveURL(/\/login$/);
     await fillAuthForm(page); await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
     await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
-    const menu = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
-    if (await menu.isVisible()) await menu.click();
-    await page.locator('.primary-nav').getByRole('button', { name: 'จัดการข้อมูล', exact: true }).click();
+    await expect(page.locator('.primary-nav').getByRole('button', { name: 'จัดการข้อมูล', exact: true, includeHidden: true })).toHaveCount(0);
+    await page.goto('/admin');
     await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
     await page.goto('/admin/datasets');
     await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();

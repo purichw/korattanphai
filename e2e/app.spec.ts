@@ -315,11 +315,11 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     expect(overviewSummaryRailBox.width).toBeGreaterThan(overviewWorkspaceBox.width * 0.26);
   }
   const nav = await openPrimaryNav(page);
-  await expect(nav.getByRole("button")).toHaveCount(4);
+  await expect(nav.getByRole("button")).toHaveCount(3);
   await expect(nav.getByRole("button", { name: "ค้นหาข้อมูล", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "ภาพรวม", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toBeVisible();
-  await expect(nav.getByRole("button", { name: "จัดการข้อมูล", exact: true })).toBeVisible();
+  await expect(nav.getByRole("button", { name: "จัดการข้อมูล", exact: true })).toHaveCount(0);
   await nav.getByRole("button", { name: "ภัยแล้ง", exact: true }).click();
   await expect(page).toHaveURL(/\/drought(?:\?|$)/);
   await expect(page.locator('.nr-drought-compact-workspace')).toBeVisible();
