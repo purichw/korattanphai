@@ -17,7 +17,7 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await fillAuthForm(page);
     await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await expect(page).toHaveURL(/\/admin\?view=imports#workspace-content$/);
     expect(await page.evaluate(keys => keys.map(key => Boolean(localStorage.getItem(key))), [authStorageKey, adminAuthStorageKey])).toEqual([true, true]);
     const visitor = await context.newPage();
@@ -39,7 +39,7 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     expect(adminSidebar.imageSrc).toBe(visitorSidebar.imageSrc);
     const otherAdmin = await context.newPage();
     await otherAdmin.goto('/admin');
-    await expect(otherAdmin.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(otherAdmin.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await openAccountMenu(page);
     await page.getByRole('menuitem', { name: 'ออกจากระบบ', exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/login$/);
@@ -49,12 +49,12 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     expect(await visitor.evaluate(key => Boolean(localStorage.getItem(key)), authStorageKey)).toBe(true);
     await fillAuthForm(page);
     await page.getByRole('button', { name: 'เข้าสู่ระบบ', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await openAccountMenu(visitor);
     await visitor.getByRole('menuitem', { name: 'ออกจากระบบ', exact: true }).click();
     await expect(visitor).toHaveURL(/\/login$/);
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     expect(await page.evaluate(keys => keys.map(key => Boolean(localStorage.getItem(key))), [authStorageKey, adminAuthStorageKey])).toEqual([false, true]);
     const adminMenu = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
     if (await adminMenu.isVisible()) await adminMenu.click();
@@ -64,9 +64,9 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
     await expect(page.locator('.primary-nav').getByRole('button', { name: 'จัดการข้อมูล', exact: true, includeHidden: true })).toHaveCount(0);
     await page.goto('/admin');
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await page.goto('/admin/datasets');
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
   } finally { await database.close(); }
 });
 
@@ -84,7 +84,7 @@ test('admin login rejects unsafe return paths and shares password/error interact
     expect(new URL(page.url()).pathname).toBe('/admin/login');
     await fillAuthForm(page); await page.getByLabel('รหัสผ่าน', { exact: true }).press('Enter');
     await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     expect(await page.evaluate(key => localStorage.getItem(key), authStorageKey)).toBeNull();
   } finally { await database.close(); }
 });
