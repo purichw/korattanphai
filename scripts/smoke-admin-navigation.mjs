@@ -58,6 +58,9 @@ try {
       await login(page, '/admin');
       await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
       await expect(page.locator('.cms-resource-row').first()).toBeVisible();
+      await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นที่จะตรวจแก้', exact: true })).toBeVisible();
+      await expect(page.locator('.cms-forecast-metrics')).toContainText('เผยแพร่แล้ว');
+      await expect(page.locator('.cms-published [role="alert"]')).toHaveCount(0);
       await page.evaluate(() => document.fonts.ready);
       await page.locator('.brand-mark img').evaluate(image => image.decode());
       const resourceCount = await page.locator('.cms-resource-row').count();

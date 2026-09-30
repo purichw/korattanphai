@@ -20,7 +20,7 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
-Admin data-home reference redesign (2026-10-01; release verification pending):
+Admin data-home reference redesign, production release (2026-10-01):
 
 - Adopts the supplied desktop/mobile mockups' icon-led header, three white panels,
   green review action, aligned month controls, draft status rows and reference
@@ -39,9 +39,40 @@ Admin data-home reference redesign (2026-10-01; release verification pending):
   template download and session separation. No production content writes.
 - Isolated source remains in `artifacts/admin-navigation-20261001` on
   `fix/admin-navigation-20261001`, preserving the verified `93367df` release and
-  the root checkout's unrelated changes. Evidence is in
-  `artifacts/admin-design-evidence-20261001/`. Candidate/CI/production details
-  must be recorded after verification; this checkpoint does not assert deployment.
+  the root checkout's unrelated changes. Runtime
+  `06f2d8dd76bab853abc9e7d4e136c0f6974bee13` is pushed and deployed.
+- TypeScript, syntax/diff checks and 24 targeted local browser cases pass across
+  design/search/disclosure, navigation, authentication, rev3 CSV/XLS/XLSX,
+  no-code forecast editing, workbook roundtrip and loading/error states.
+  [Exact-runtime Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36767087460)
+  passes all six required jobs without changing budgets or exclusions.
+- Ready candidate `dpl_GpuVxqnMkSz2v2yZaNCByWxmaDvh` /
+  `https://korattanphai-6purvg7t0-purich-w.vercel.app` has the exact runtime commit.
+  Protected hosted build, source-exposure and unchanged bundle gates pass
+  (226,546 B application gzip); the database build emits no static archive.
+- The first candidate smoke recorded one forecast-catalog HTTP 503 and failed.
+  Its cause was not established. A fresh full run passed on both widths, followed
+  by a successful full production run with no HTTP/runtime errors. The smoke
+  harness now explicitly waits for the month selector and published metrics before
+  screenshots, so an error/loading card cannot be mistaken for visual completion.
+- After confirming the primary alias was still on the recorded baseline,
+  promoted that exact Ready candidate. `https://korattanphai.vercel.app` is verified
+  on `dpl_GpuVxqnMkSz2v2yZaNCByWxmaDvh`. Real-account desktop/mobile smoke passes
+  for published forecasts, eight real resources, mobile expansion/search,
+  Admin-only navigation, imports/reload, Excel template download and independent
+  sessions. Application writes are blocked; no production content was changed.
+- Full-page and viewport production screenshots were visually inspected against
+  both supplied references. Evidence in `artifacts/admin-design-evidence-20261001/`
+  includes `candidate-verified/`, `production/`, `comparisons/` with crop/scale
+  provenance, `ci-release.json` and deployment/alias metadata. Reference crop
+  geometry is inferred from the supplied raster; this is an adaptive product
+  implementation, not a claim of exact pixel parity.
+- Recovery baseline: `dpl_CEAjKzMrtrXnCwzZ3Zk8o9UZVsYR` /
+  `https://korattanphai-8bdydqagl-purich-w.vercel.app` (runtime `93367df`).
+  No database migration, role change, production draft/forecast edit or native
+  change is included. Physical-device testing is outside this release. The final
+  follow-up changes only this checkpoint and three smoke assertions; runtime
+  remains the exact commit above and does not require rebuilding.
 
 Admin navigation reconstruction, production release (2026-10-01):
 
