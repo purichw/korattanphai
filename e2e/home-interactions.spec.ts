@@ -12,13 +12,14 @@ test("home information stays passive without readiness panels or map actions", a
   await expect(page.locator(".nr-home-situation button, .nr-home-situation a")).toHaveCount(0);
   const beforeURL = page.url();
   const attention = page.locator(".nr-forecast-overview-attention");
-  await attention.getByRole("button", { name: "ดูทั้งหมด" }).click();
   await expect(attention.locator("li")).toHaveCount(60);
   await attention.locator("li").last().scrollIntoViewIfNeeded();
-  expect(await attention.locator("ul").evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  expect(await attention.locator(".nr-home-attention-scroll").evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
   expect(page.url()).toBe(beforeURL);
-  await attention.getByRole("button", { name: "ย่อรายการ" }).click();
-  await expect(attention.locator("li")).toHaveCount(3);
+  await attention.getByRole("button", { name: "เสี่ยงปานกลาง (32)", exact: true }).click();
+  await expect(attention.locator("li")).toHaveCount(32);
+  await attention.getByRole("button", { name: "เสี่ยงสูง (60)", exact: true }).click();
+  await expect(attention.locator("li")).toHaveCount(60);
 
   await expect(page.locator(".nr-home-agriculture")).toHaveCount(0);
   await expect(page.locator(".nr-home-situation .metric-card-label")).toHaveText(["ผลพยากรณ์ภัยแล้ง", "พืชที่ประเมิน"]);
@@ -61,7 +62,8 @@ test("home layout retains centered stats and usable map geometry at every breakp
     expect(svg!.y + svg!.height).toBeLessThanOrEqual(map!.y + map!.height + 1);
     if (viewport.width > 720) {
       const panel = await page.locator(".nr-forecast-overview-attention").boundingBox();
-      expect(Math.abs(panel!.y + panel!.height - map!.y - map!.height)).toBeLessThanOrEqual(2);
+      expect(panel!.height).toBeLessThanOrEqual(360);
+      expect(panel!.y + panel!.height).toBeLessThanOrEqual(map!.y + map!.height + 2);
     }
     const styles = await page.locator(".nr-forecast-overview-summary .metric-card-value").evaluateAll((elements) => elements.map((element) => getComputedStyle(element).textAlign));
     expect(styles.every((style) => style === "center")).toBe(true);
