@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from "react";
+import { PageLoadBoundary, PageLoadPending } from './components/PageLoadBoundary';
 const AdminWorkspace = lazy(() => import('./admin/AdminWorkspace'));
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { SidebarBrand } from "./components/SidebarBrand";
@@ -370,7 +371,7 @@ export default function AuthenticatedApp(props: {
   useEffect(() => {
     if (isWorkspaceAppRoute(props.path)) window.scrollTo(0, 0);
   }, [props.path]);
-  const app = <AppStateProvider><AppShell {...props} /></AppStateProvider>;
+  const app = <PageLoadBoundary path={props.path}><AppStateProvider><AppShell {...props} /></AppStateProvider></PageLoadBoundary>;
   const workspace = import.meta.env.VITE_DATA_BACKEND === "supabase"
     ? <DatabaseWorkspaceProvider key={props.loginUser.id} userId={props.loginUser.id}>{app}</DatabaseWorkspaceProvider>
     : app;
@@ -440,12 +441,11 @@ function AppShell({
           {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
         <div className="mobile-account-slot">
-          <WorkspaceSearchTrigger compact onOpen={openSearch} />
           <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
+          <WorkspaceSearchTrigger compact onOpen={openSearch} />
         </div>
         <div id="sidebar-navigation" className="sidebar-navigation">
           <nav id="primary-navigation" className="primary-nav">
-            <WorkspaceSearchTrigger onOpen={openSearch} />
             {visibleSections.map((section) => {
               const Icon = sectionIcons[section];
               const isOverviewSection = section === "overview";
@@ -507,6 +507,7 @@ function AppShell({
           </div>
           <div className="topbar-actions">
             <WorkspaceBookmarks onNavigate={restoreSavedWorkspace} />
+            <WorkspaceSearchTrigger onOpen={openSearch} />
           </div>
         </header>
 
@@ -539,7 +540,7 @@ function AppShell({
           onNavigate(url.pathname + url.search + url.hash);
         }}>
           <AppErrorBoundary resetKey={`${path}:${state.section}:${state.personaId}`}>
-          {isAdmin ? <Suspense fallback={<p role="status">กำลังเปิดพื้นที่จัดการข้อมูล...</p>}>
+          {isAdmin ? <Suspense fallback={<PageLoadPending />}>
             <AdminWorkspace userId={loginUser.id} draftId={new URLSearchParams(window.location.search).get('draft')} onNavigate={onNavigate} />
           </Suspense> : nakhonRoute ? (
             <NakhonRatchasimaWorkspace key={savedSelectionVersion} route={nakhonRoute} onNavigate={onNavigate} />

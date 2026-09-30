@@ -53,10 +53,11 @@ files.
 | --- | --- | --- | --- |
 | `LoginFrame` / `LoginPage` | `src/components/LoginScreen.tsx` | Visitor and Admin sign-in | Same brand, fields, password visibility, Enter submission, busy/error behavior. `scope` changes title/return link only; `App`/Auth own routing and independent sessions. |
 | `WorkspaceEmptyState` | `src/components/WorkspaceEmptyState.tsx` | Shared empty/error presentation in CMS and irrigation | Icon, heading level, description and optional action; owner retains filtering/retry events and state. `IrrigationEmptyState` is the domain adapter, not a duplicate layout. |
-| `AppStartup` | `src/components/AppStartup.tsx` | Cold entry and refresh before the authenticated application is ready | Eager presentation only: receives `path` and status `message`; Home reuses neutral overview loading primitives, other paths use an unnamed workspace placeholder. No account values, forecast data, interactive controls or data loaders. |
-| `SidebarBrand` | `src/components/SidebarBrand.tsx` | Shared logo in live and startup sidebars | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
+| `AppStartup` | `src/components/AppStartup.tsx` | Branded full-screen loading for Visitor and Admin | Public emblem, centered brand, indeterminate bar and one live status. `path` changes the Admin caption; optional `message` names the startup phase. No session/data imports or fake progress. Offers page reload after 20 seconds; never dismisses itself on a timer. `index.html` uses the same CSS/brand for pre-JavaScript entry. |
+| `PageLoadBoundary` / `usePageLoading` | `src/components/PageLoadBoundary.tsx` | Coordinate blocking page reads behind `AppStartup` | Readers register in layout effects; release on readiness, failure or unmount. Children stay mounted/measurable but hidden, inert and removed from the accessibility tree while pending. Covers nested load waterfalls without a skeleton flash. Cached refreshes, criteria changes and mutations stay local. `PageLoadPending` covers the lazy CMS chunk. |
+| `SidebarBrand` | `src/components/SidebarBrand.tsx` | Logo in the live sidebar | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
 | `WorkspaceSearch` / `WorkspaceSearchTrigger` | `src/components/WorkspaceSearch.tsx` | Authenticated global search across geographic levels and active tools | Shared desktop/mobile dialog; loads `WorkspaceSearchContent` only on open, with dismissible loading and scoped recovery. Formal Thai, aliases/topics, contextual results, Contains/Exact, filters, explicit history commits and per-account clearing. Receives `userId`, `includeExport`, navigation/export/close callbacks. See `SEARCH_BEHAVIOR.md`. |
-| `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Shared overview/data loading placeholders and startup shell | Lightweight rendering helpers and `ForecastOverviewLoading`; optional `message` defaults to the existing forecast status. No heavy runtime imports. `ForecastArchiveLoading` reexports the overview and retains the drought header separately. |
+| `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Forecast recovery and local loading placeholders | Page placeholders mount behind `PageLoadBoundary`, not as the visible startup experience. Local analysis/modal placeholders remain scoped. `ForecastArchiveLoading` reexports the overview and retains the drought error/back-navigation header. |
 | `AppSelect` | `src/components/AppSelect.tsx` | Product dropdowns, filters, listbox controls | Center-aligned trigger text by default, mobile bottom-sheet menu from CSS, keyboard/typeahead support. Lists with 8+ options are searchable automatically; `searchable` explicitly enables/disables it. Search matches labels, codes, groups and optional `searchText`, including Thai digits, without committing selection. Option badges support `good`, `watch`, `danger`, and `muted`; `align="start"` is only for intentional scan-left text. |
 | `MonthSelect` | `src/components/MonthSelect.tsx` | Source/comparison month controls | Shared searchable `AppSelect` with full Thai/English month aliases and Buddhist/Gregorian years. Keeps existing labels and `YYYY-MM` values unchanged. Reused by `ForecastMonthSelect`, Excel export and analysis comparison; no forecast request/loading ownership of its own. |
 | `ForecastMonthSelect` | `src/components/ForecastArchiveRequest.tsx` | Forecast source-month dropdowns in page filters, Home mobile editor and map toolbars | Reuses `AppSelect.loadingLabel` for an in-place, reduced-motion-aware spinner while the shared request changes month. The loaded month stays selected until success; controls remain usable for a later selection. `ForecastArchiveRequest` announces pending changes to assistive technology without adding a visible top paragraph. Background revision checks stay quiet; error/retry and Supabase freshness behavior are unchanged. |
@@ -131,17 +132,16 @@ only: numeric horizons, URL/saved keys, source `T+` fields and Excel workbook
 formulas/labels remain unchanged. User-authored saved names are not rewritten.
 
 The workspace loads the full archive on demand with `useForecastArchive` and
-passes it to the existing province/district/subdistrict forecast views. Pending
-and failed loads use the shared `ForecastArchiveLoading.tsx` presentation:
-`ForecastOverviewLoading` and `DroughtWorkspaceLoading` retain route identity,
-compose layout-matched neutral skeletons, and share one loading announcement and
-error/retry state. No data values, risk colors, interactive placeholder controls,
-or synthetic chart/map data appear while pending. Subdistrict loading has one
-status placeholder and matches the inspection layout: a dominant map with a
-context/result rail on desktop/tablet, stacked context/result/map on mobile,
-never population charts or lists.
-Skeleton motion respects reduced motion. Back navigation reuses the ready-state
-`DroughtWorkspaceHeader`; its archive label is optional until data is available.
+passes it to the existing province/district/subdistrict forecast views.
+`PageLoadBoundary` shows one branded screen until the initial forecast and
+essential subdistrict geometry have settled. Optional map context does not block
+the page. Pending page skeletons remain hidden/inert; failed reads release the
+gate into the existing error/retry presentation. No fabricated values or percent
+complete appear. The same boundary waits for the CMS list/draft, forecast catalog
+and reference catalog/resource; CMS write operations never register as page reads.
+Reduced motion stops the loading-bar animation. Browser Back still abandons a
+pending route. Cached month changes and background publication checks retain the
+current content and existing inline month-control feedback.
 Request ownership, authentication, cache, retry, and source validation stay in
 the existing loaders. The province overview uses a generated
 T+1-only projection of every source month T. It uses the same loader, map and

@@ -80,6 +80,42 @@ Forecast risk lists and sidebar production release (2026-09-30):
   No migration, billing, native-app or production-data changes. Physical-device
   and unrelated integration verification remain outside this release.
 
+Branded page loading, local implementation (2026-09-30, not deployed):
+
+- Branch `feature/branded-page-loading` in the clean release checkout
+  `artifacts/cms-cutover-20260928/source`, based on `7bfeb6d`. Primary-checkout
+  unfinished work is not included. Production remains the sidebar release below.
+- Visitor and Admin share centered Korat branding and an indeterminate loading
+  bar from pre-JavaScript entry through auth, CMS bootstrap and blocking page
+  reads. `PageLoadBoundary` keeps incomplete content mounted/measurable but hidden
+  and inert until forecast/main geometry or CMS list/catalog/reference reads settle.
+- Errors release into existing retry states; slow startup offers reload after
+  20 seconds without claiming completion. Optional map context, cached month
+  changes and CMS writes do not block the whole page. Reduced motion is supported.
+- Type check, static and CMS-mode builds, 18 focused unit tests, 32 built-browser
+  loading cases and 6 isolated CMS/bootstrap/independent-auth cases pass. Both
+  desktop and mobile screenshots were inspected. A dev-server run hit module-load
+  deadlines and was stopped; the built runs passed with unchanged assertion limits.
+  Evidence: `artifacts/branded-loading/{built-tests,cms-tests}` in this checkout.
+- No deployment, auth policy change, database migration or production data write.
+  Local Admin still requires a configured server-side CMS backend; its loading
+  behavior was verified against the isolated test database, not a live write flow.
+- The same release scope moves global search from navigation into the upper-right
+  toolbar beside bookmarks. It reuses the existing green primary-button style,
+  with aligned 44px controls and a compact mobile icon. Account stays at the
+  sidebar footer; search opening, dismissal and focus return are unchanged.
+- Release preparation passes TypeScript, 357 unit tests and the focused desktop/
+  mobile toolbar checks. The lockfile updates only transitive `brace-expansion`
+  patch versions (1.1.21 and 2.1.7); production dependency audit passes. Remote CI,
+  authenticated candidate smoke and final alias verification remain required.
+- The pre-promotion guard detected production advancing to `a639f2e` /
+  `dpl_F2n7g7EzjBxhXWbvovB2FeSKieJC`. That exact released baseline was merged
+  without rewriting either branch, preserving its risk lists and Admin sidebar.
+  The original `0c7a031` candidate is superseded and must not be promoted.
+  Compatibility recovery tests now expect branded loading while retaining the
+  timeout/retry/source-month/horizon assertions; the initial failure expected
+  the retired skeleton's status copy. Final merged-source gates remain pending.
+
 Sidebar account release (2026-09-30):
 
 - Runtime `fea0a2f`, branch `release/sidebar-account-20260929`, moves the account

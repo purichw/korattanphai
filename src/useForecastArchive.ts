@@ -3,6 +3,7 @@ import type { NakhonRatchasimaDroughtForecastArchive } from "./types";
 import { forecastArchiveLoader, forecastOverviewLoader } from "./data/forecastArchive";
 import { useDatabaseWorkspace } from "./DatabaseWorkspaceProvider";
 import { ArchivePeriodUnavailableError } from "./data/forecastScope";
+import { usePageLoading } from './components/PageLoadBoundary';
 
 export function useForecastArchive(enabled: boolean, source: "full" | "overview" = "full", areaCode = "30") {
   const database = useDatabaseWorkspace();
@@ -51,6 +52,7 @@ export function useForecastArchive(enabled: boolean, source: "full" | "overview"
 
   const changingPeriod = pending && Boolean(archive?.loadedSelection && originPeriod && archive.loadedSelection.originPeriod !== originPeriod);
   const periodUnavailable = enabled && ((!pending && result.periodUnavailable) || Boolean(originPeriod && archive && !archive.targetMonths.some(month => month.period === originPeriod)));
+  usePageLoading(enabled && !archive && !failed && !periodUnavailable);
   return { archive, failed, pending, changingPeriod, periodUnavailable, retry: () => setAttempt((value) => value + 1),
     requestPeriod: database ? (period: string) => setSelection({ routeKey, originPeriod: period }) : undefined };
 }

@@ -4,11 +4,15 @@ import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 
 test.skip(process.env.PLAYWRIGHT_DATA_BACKEND !== 'supabase', 'Uses isolated database fixtures, never production.');
 const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
+const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
 const historyKey = `korat-tan-phai-search-history-v1:${authTestUser.id}`;
-async function setup(page: Page) {
-  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => route.fulfill({ json: forecastSlice(archive, route.request().postDataJSON()) }));
+async function setup(page: Page, path = '/drought?mapLayer=forecast-archive&target=2025-12&horizon=4') {
+  await page.route('**/rest/v1/rpc/ktp_load_forecast_slice', route => {
+    const query = route.request().postDataJSON();
+    return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 ? overview : archive, query) });
+  });
   await seedAuthSession(page);
-  await page.goto('/drought?mapLayer=forecast-archive&target=2025-12&horizon=4');
+  await page.goto(path);
   await expect(page.getByRole('button', { name: 'ค้นหาข้อมูล', exact: true }).filter({ visible: true }).first()).toBeVisible();
 }
 async function open(page: Page) {
@@ -18,6 +22,41 @@ async function open(page: Page) {
   await expect(dialog.getByRole('searchbox', { name: 'คำค้นหา', exact: true })).toBeFocused();
   return dialog;
 }
+
+test('search trigger stays in the upper-right toolbar and restores focus after dismissal', async ({ page }, info) => {
+  await setup(page, '/?mapLayer=forecast-archive&target=2025-12&horizon=1');
+  await expect(page.locator('.nr-forecast-overview-summary')).toBeVisible();
+  const trigger = page.getByRole('button', { name: 'ค้นหาข้อมูล', exact: true });
+  await expect(trigger).toHaveCount(1);
+  await expect(page.locator('#primary-navigation .workspace-search-trigger')).toHaveCount(0);
+  const toolbar = page.locator(info.project.name === 'mobile' ? '.mobile-account-slot' : '.topbar-actions');
+  await expect(toolbar.locator('.workspace-search-trigger')).toBeVisible();
+  const searchBox = (await trigger.boundingBox())!;
+  const bookmarkBox = (await toolbar.locator('.nr-bookmarks-trigger').boundingBox())!;
+  expect(searchBox.height).toBe(44);
+  expect(bookmarkBox.height).toBe(44);
+  expect(Math.abs(searchBox.y - bookmarkBox.y)).toBeLessThan(1);
+  expect(searchBox.x).toBeGreaterThan(bookmarkBox.x + bookmarkBox.width);
+  expect(searchBox.x).toBeGreaterThan(page.viewportSize()!.width / 2);
+  expect(searchBox.y).toBeLessThan(90);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: info.outputPath('search-top-right.png'), scale: 'css' });
+  await page.screenshot({ path: info.outputPath('search-toolbar-context.png'), scale: 'css', clip: { x: 0, y: 0, width: page.viewportSize()!.width, height: info.project.name === 'mobile' ? 220 : 190 } });
+  const dialog = await open(page);
+  await page.keyboard.press('Escape');
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  if (info.project.name === 'mobile') {
+    await page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true }).click();
+    await expect(trigger).toHaveCount(1);
+    await expect(page.locator('#primary-navigation .workspace-search-trigger')).toHaveCount(0);
+    await trigger.click();
+    await expect(dialog.getByRole('searchbox', { name: 'คำค้นหา', exact: true })).toBeFocused();
+    await dialog.getByRole('button', { name: 'ปิดการค้นหา', exact: true }).click();
+    await expect(trigger).toBeFocused();
+  }
+});
 
 test('search loads on demand and its loading dialog can be dismissed', async ({ page }) => {
   let requested = false;
@@ -130,11 +169,12 @@ test('aliases, tags, exact matching, empty states and keyboard dismissal remain 
   await expect(trigger).toBeFocused();
   if (info.project.name === 'mobile') {
     await page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true }).click();
-    const menuTrigger = page.locator('#primary-navigation').getByRole('button', { name: 'ค้นหาข้อมูล', exact: true });
-    await menuTrigger.click();
+    await expect(page.locator('#primary-navigation .workspace-search-trigger')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'ค้นหาข้อมูล', exact: true })).toHaveCount(1);
+    await trigger.click();
     await expect(dialog.getByRole('searchbox', { name: 'คำค้นหา', exact: true })).toBeFocused();
     await dialog.getByRole('button', { name: 'ปิดการค้นหา', exact: true }).click();
-    await expect(menuTrigger).toBeFocused();
+    await expect(trigger).toBeFocused();
   }
 });
 
