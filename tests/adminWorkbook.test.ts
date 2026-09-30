@@ -3,6 +3,7 @@ import ExcelJS from '@protobi/exceljs';
 import { createAdminWorkbook, mapImportRows, readAdminWorkbook } from '../src/admin/workbook';
 import { DATA_FIELDS } from '../shared/dataFields.mjs';
 import type { Payload } from '../src/admin/types';
+import { readDataFile } from '../src/admin/readDataFile';
 
 describe('CMS Excel/API parity', () => {
   it('round-trips zero, null, leading-zero identifiers, offsets and optional provenance', async () => {
@@ -14,6 +15,7 @@ describe('CMS Excel/API parity', () => {
     ] };
     const bytes = await createAdminWorkbook('station', payload);
     const imported = await readAdminWorkbook(new Uint8Array(bytes).buffer);
+    expect(await readDataFile(new Uint8Array(bytes).buffer, 'xlsx')).toEqual(imported);
     const mapping = Object.fromEntries(DATA_FIELDS.station.map(field => [field.key, field.key]));
     expect({ ...imported.metadata, observations: mapImportRows('station', imported.sheets[0], mapping) }).toEqual(payload);
     const book = new ExcelJS.Workbook(); await book.xlsx.load(new Uint8Array(bytes).buffer);
@@ -32,10 +34,12 @@ describe('CMS Excel/API parity', () => {
     const payload: Payload = { schemaVersion: 1, sourceId: 'test-source', batchId: 'v1', observations: [{ sourceRecordId: '=1+1' }] };
     const bytes = await createAdminWorkbook('station', payload);
     const imported = await readAdminWorkbook(new Uint8Array(bytes).buffer);
+    expect(await readDataFile(new Uint8Array(bytes).buffer, 'xlsx')).toEqual(imported);
     expect(imported.sheets[0].rows[0].sourceRecordId).toBe('=1+1');
     const workbook = new ExcelJS.Workbook(); const sheet = workbook.addWorksheet('Data');
     sheet.addRow(['value']); sheet.addRow([{ formula: '1+1', result: 2 }]);
     const bad = await workbook.xlsx.writeBuffer();
     await expect(readAdminWorkbook(new Uint8Array(bad).buffer)).rejects.toThrow('พบสูตร');
+    await expect(readDataFile(new Uint8Array(bad).buffer, 'xlsx')).rejects.toThrow('พบสูตร');
   });
 });

@@ -1,5 +1,6 @@
 import type { ImportFile, ImportSheet } from './workbook';
 import type { Json, Payload } from './types';
+import { legacyCodepages } from './legacyCodepages';
 
 export type DataFileFormat = 'xlsx' | 'xls' | 'csv';
 export type CsvEncoding = 'utf-8' | 'windows-874';
@@ -57,14 +58,16 @@ export function readCsv(text: string): ImportFile {
   return { sheets: [{ name: 'ข้อมูล CSV', columns, rows, sourceRows: sourceRows.slice(1) }], metadata: null };
 }
 
-async function readLegacyWorkbook(bytes: ArrayBuffer): Promise<ImportFile> {
+async function readExcelFile(bytes: ArrayBuffer, format: 'xls' | 'xlsx'): Promise<ImportFile> {
   const signature = new Uint8Array(bytes, 0, Math.min(8, bytes.byteLength));
-  if (!(signature[0] === 0xd0 && signature[1] === 0xcf) && !(signature[0] === 9 && [0, 2, 4, 8].includes(signature[1]))) {
+  if (format === 'xls' && !(signature[0] === 0xd0 && signature[1] === 0xcf) && !(signature[0] === 9 && [0, 2, 4, 8].includes(signature[1]))) {
     throw new Error('ไฟล์นี้ไม่ใช่ Excel .xls แบบเดิม กรุณาเปิดใน Excel แล้วบันทึกเป็น .xlsx หรือ CSV');
   }
+  if (format === 'xlsx' && !(signature[0] === 0x50 && signature[1] === 0x4b)) {
+    throw new Error('อ่านไฟล์ Excel ไม่สำเร็จ กรุณาเปิดไฟล์ต้นฉบับและบันทึกใหม่เป็น .xlsx หรือ CSV');
+  }
   const xlsx = await import('xlsx');
-  const codepages = await import('xlsx/dist/cpexcel.full.mjs');
-  xlsx.set_cptable(codepages);
+  xlsx.set_cptable(legacyCodepages);
   const book = xlsx.read(bytes, { type: 'array', cellFormula: true, cellDates: true, sheetRows: maxRows + 2 });
   const sheets: ImportSheet[] = []; let metadata: Payload | null = null;
   for (const name of book.SheetNames) {
@@ -115,7 +118,7 @@ export async function readDataFile(bytes: ArrayBuffer, format: DataFileFormat, e
     catch { throw new Error('อ่านภาษาใน CSV ไม่ได้ ลองเลือก ภาษาไทยจาก Excel รุ่นเก่า หรือบันทึกไฟล์ใหม่เป็น CSV UTF-8'); }
     result = readCsv(text);
   } else {
-    try { result = format === 'xls' ? await readLegacyWorkbook(bytes) : await (await import('./workbook')).readAdminWorkbook(bytes); }
+    try { result = await readExcelFile(bytes, format); }
     catch (error) {
       const message = error instanceof Error ? error.message : '';
       if (/[\u0E00-\u0E7F]/.test(message)) throw error;

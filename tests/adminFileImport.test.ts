@@ -6,6 +6,7 @@ import { readDataFile, readCsv } from '../src/admin/readDataFile';
 import { importOriginalForecast, matchRev3Columns, normalizeRev3Sheet, rev3Fields, workbookOrigins } from '../src/admin/normalizedForecastImport';
 import { readAdminWorkbook } from '../src/admin/workbook';
 import archive from '../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json';
+import { legacyCodepages } from '../src/admin/legacyCodepages';
 const requireAdmin = createRequire(resolve('src/admin/readDataFile.ts'));
 const xlsx = requireAdmin('xlsx');
 const buffer = (bytes: Uint8Array) => Uint8Array.from(bytes).buffer;
@@ -17,6 +18,14 @@ function legacy(rows: unknown[][]) {
   return xlsx.write(book, { type: 'array', bookType: 'biff8' }) as ArrayBuffer;
 }
 describe('CSV and legacy Excel input', () => {
+  it('decodes the Thai and Unicode code pages used in XLS without guessing unsupported encodings', () => {
+    const codepage = requireAdmin('xlsx/dist/cpexcel.js');
+    for (const cp of [874, 1200, 65001]) {
+      expect(legacyCodepages.utils.decode(cp, codepage.utils.encode(cp, 'ในเมือง'))).toBe('ในเมือง');
+    }
+    expect(legacyCodepages.utils.decode(1252, [0x63, 0x61, 0x66, 0xe9])).toBe('café');
+    expect(() => legacyCodepages.utils.decode(720, [65])).toThrow('รหัสภาษาเก่าที่ไม่รองรับ');
+  });
   it.each([',', ';', '\t'])('preserves quoted text, blanks, zero and row lineage with %s', separator => {
     const file = readCsv(csv([['รหัส', 'หมายเหตุ', 'ค่า'], ['001', 'ฝน, "เล็กน้อย"\nสองบรรทัด', 0], ['002', 'ไม่มีค่า', '']], separator));
     expect(file.sheets[0].rows).toEqual([{ รหัส: '001', หมายเหตุ: 'ฝน, "เล็กน้อย"\nสองบรรทัด', ค่า: '0' }, { รหัส: '002', หมายเหตุ: 'ไม่มีค่า', ค่า: '' }]);

@@ -51,9 +51,12 @@ The template's area labels/IDs contain no actual forecast results.
 
 ## Implementation and dependency
 
-`readDataFile.ts` routes CSV, XLS and the existing ExcelJS XLSX reader. Legacy XLS
+`readDataFile.ts` routes CSV and a shared XLS/XLSX reader. Excel imports
 uses SheetJS CE 0.20.3 from the official CDN tarball, pinned with package-lock
-integrity. Extended codepages enable older Thai files. The official installation
+integrity. Native browser decoders cover Thai Windows-874, Unicode and standard
+Windows codepages; unsupported older encodings require conversion to XLSX/UTF-8.
+The shared reader avoids shipping a second ExcelJS copy inside the import worker.
+The existing styled ExcelJS exporter remains unchanged. The official installation
 source is <https://docs.sheetjs.com/docs/getting-started/installation/nodejs/>.
 The public npm-registry build was not used. The dependency is loaded in the
 user-triggered worker; the normal page does not eagerly import the XLS parser.
