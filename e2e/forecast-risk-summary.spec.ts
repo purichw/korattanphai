@@ -123,14 +123,24 @@ test("shared bar graph preserves loading and unavailable states", async ({ page 
     mkdirSync("artifacts/bar-graph-v1", { recursive: true });
     let height: number | undefined;
     if (databaseMode) {
+      const startup = page.locator('.app-startup');
+      await expect(startup.getByRole('status')).toBeVisible();
+      await expect(page.locator('.page-load-content')).toHaveAttribute('inert', '');
+      await expect(page.locator('.page-load-content')).toHaveAttribute('aria-hidden', 'true');
       const loading = page.locator(".nr-loading-chart");
-      await expect(loading).toBeVisible();
-      height = (await loading.boundingBox())!.height;
+      await expect(loading).toHaveCount(1);
+      await expect(loading).toBeHidden();
+      // PageLoadBoundary preserves layout measurements while hiding incomplete
+      // content; the visible loading evidence is the shared branded startup.
+      height = await loading.evaluate(element => element.getBoundingClientRect().height);
       await expect(loading.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
-      await loading.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-loading.png` });
+      await startup.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-loading.png` });
     }
     release();
+    await expect(page.locator('.app-startup')).toHaveCount(0);
+    await expect(page.locator('.page-load-content')).not.toHaveAttribute('inert', '');
     const chart = page.locator(".nr-drought-workspace-chart-card");
+    await expect(chart).toBeVisible();
     await expect(chart.getByRole("status")).toContainText("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
     await expect(chart.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
     if (height !== undefined) expect((await chart.boundingBox())!.height).toBeCloseTo(height, 0);

@@ -315,10 +315,14 @@ test("Nakhon Ratchasima-only shell opens the provincial overview with nested dro
     expect(overviewSummaryRailBox.width).toBeGreaterThan(overviewWorkspaceBox.width * 0.26);
   }
   const nav = await openPrimaryNav(page);
-  await expect(nav.getByRole("button")).toHaveCount(3);
-  await expect(nav.getByRole("button", { name: "ค้นหาข้อมูล", exact: true })).toBeVisible();
+  const hasDatabaseExport = process.env.PLAYWRIGHT_DATA_BACKEND === 'supabase';
+  await expect(nav.getByRole("button")).toHaveCount(hasDatabaseExport ? 3 : 2);
+  await expect(nav.getByRole("button", { name: "ค้นหาข้อมูล", exact: true })).toHaveCount(0);
+  const searchToolbar = page.locator(isPhoneLayout ? '.mobile-account-slot' : '.topbar-actions');
+  await expect(searchToolbar.getByRole("button", { name: "ค้นหาข้อมูล", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "ภาพรวม", exact: true })).toBeVisible();
   await expect(nav.getByRole("button", { name: "ภัยแล้ง", exact: true })).toBeVisible();
+  await expect(nav.getByRole("button", { name: "ส่งออก Excel", exact: true })).toHaveCount(hasDatabaseExport ? 1 : 0);
   await expect(nav.getByRole("button", { name: "จัดการข้อมูล", exact: true })).toHaveCount(0);
   await nav.getByRole("button", { name: "ภัยแล้ง", exact: true }).click();
   await expect(page).toHaveURL(/\/drought(?:\?|$)/);
