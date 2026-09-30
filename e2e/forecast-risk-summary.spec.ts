@@ -124,14 +124,20 @@ test("shared bar graph preserves loading and unavailable states", async ({ page 
     let height: number | undefined;
     if (databaseMode) {
       const loading = page.locator(".nr-loading-chart");
-      await expect(loading).toBeVisible();
+      await expect(loading).toHaveCount(1);
+      await expect(page.locator('.app-startup')).toBeVisible();
+      await expect(page.locator('.page-load-content')).toHaveAttribute('inert', '');
+      await expect(loading).toBeHidden();
       height = (await loading.boundingBox())!.height;
       await expect(loading.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
-      await loading.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-loading.png` });
+      await page.locator('.app-startup').screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-loading.png` });
     }
     release();
     const chart = page.locator(".nr-drought-workspace-chart-card");
     await expect(chart.getByRole("status")).toContainText("ไม่มีค่าพยากรณ์ให้เปรียบเทียบ");
+    await expect(chart).toBeVisible();
+    await expect(page.locator('.app-startup')).toHaveCount(0);
+    await expect(page.locator('.page-load-content')).not.toHaveAttribute('inert', '');
     await expect(chart.locator(".nr-drought-forecast-bar, .nr-drought-forecast-zero")).toHaveCount(0);
     if (height !== undefined) expect((await chart.boundingBox())!.height).toBeCloseTo(height, 0);
     await chart.screenshot({ path: `artifacts/bar-graph-v1/${testInfo.project.name}-empty.png` });

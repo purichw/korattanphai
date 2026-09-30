@@ -29,6 +29,8 @@ export const test = base.extend<{ authMock: Awaited<ReturnType<typeof mockSupaba
 export { expect };
 export async function openAccountMenu(page: Page) {
   await expect(page.locator('.sidebar-account .account-trigger')).toHaveCount(1);
+  // The shell mounts before blocking page reads release its visibility/inert gate.
+  await expect(page.locator('.sidebar')).toBeVisible();
   const navigationToggle = page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true });
   if (await navigationToggle.isVisible()) await navigationToggle.click();
   await page.getByRole('button', { name: /บัญชีผู้ใช้/ }).click();

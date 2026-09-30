@@ -55,6 +55,12 @@ Branded page loading, local implementation (2026-09-30, not deployed):
   Compatibility recovery tests now expect branded loading while retaining the
   timeout/retry/source-month/horizon assertions; the initial failure expected
   the retired skeleton's status copy. Final merged-source gates remain pending.
+- Candidate `dpl_F2bJGovU3aK6bPhWx8832UDcErvo` (runtime `6791d75`) passes
+  all 39 authenticated smoke checks and focused desktop/mobile loading, toolbar,
+  separate Admin login and retained risk-list/sidebar checks. CI found remaining
+  stale sidebar/skeleton expectations and an account-helper readiness race;
+  the test-only corrections pass all six focused local cases. A fresh complete
+  CI run and final production identity check are still required before promotion.
 
 Sidebar account release (2026-09-30):
 
