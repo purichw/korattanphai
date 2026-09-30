@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Database, Download, FileUp, History, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, ChartNoAxesCombined, CheckCircle2, ChevronRight, Database, Download, Eye, FileText, FileUp, History, Pencil, Plus, RefreshCw, Search, ShieldCheck, Trash2, X } from 'lucide-react';
+import { MetricGrid } from '../components/PageSummary';
 import { AppSelect } from '../components/AppSelect';
 import { MonthSelect } from '../components/MonthSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
@@ -53,13 +54,15 @@ export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { 
   const importsView = view === 'imports' || view === 'upload';
   const title = draft?.title ?? (importsView ? 'รายการนำเข้าและฉบับร่าง' : 'จัดการข้อมูล');
   return <section className="cms-workspace" aria-labelledby="cms-title">
-    <header className="cms-page-header"><div><p className="eyebrow">พื้นที่ผู้ดูแล · นครราชสีมา</p><h1 id="cms-title">{title}</h1>
-      {!draft && !resourceId && <p>{importsView ? 'เปิดรายการที่บันทึกไว้เพื่อตรวจข้อมูล แก้ไข และเผยแพร่' : 'ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้'}</p>}
-      {draft && <p>{kindLabels[draft.kind]} · รุ่นแก้ไข {draft.revision} · {draft.state === 'accepted' ? 'รับเข้าระบบแล้ว' : 'ฉบับร่าง'}</p>}</div>
+    <div className="cms-context-bar"><nav aria-label="เส้นทางหน้าผู้ดูแล"><span>พื้นที่ผู้ดูแล</span><ChevronRight size={14} aria-hidden="true" /><span>{draftId ? 'ฉบับร่าง' : resourceId ? 'ข้อมูลประกอบเว็บไซต์' : title}</span></nav>
       <div className="cms-actions">{draftId ? <button className="secondary-button" onClick={() => onNavigate('/admin?view=imports')}><ArrowLeft size={18} />รายการนำเข้าและฉบับร่าง</button>
-        : !resourceId && <button className="primary-button" onClick={() => onNavigate('/admin?view=upload')} disabled={loading || Boolean(error)}><FileUp size={18} />นำเข้าข้อมูล</button>}
+        : !resourceId && <button className="primary-button cms-upload-action" aria-label="นำเข้าข้อมูล" title="นำเข้าข้อมูล" onClick={() => onNavigate('/admin?view=upload')} disabled={loading || Boolean(error)}><FileUp size={18} /><span>นำเข้าข้อมูล</span></button>}
         <button type="button" className="icon-button" title="โหลดฉบับล่าสุด" aria-label="โหลดฉบับล่าสุด" disabled={loading}
           onClick={() => setGeneration(value => value + 1)}><RefreshCw size={18} /></button></div>
+    </div>
+    <header className="cms-page-header"><Database className="cms-page-icon" size={42} strokeWidth={2} aria-hidden="true" /><div><h1 id="cms-title">{title}</h1>
+      {!draft && !resourceId && <p>{importsView ? 'เปิดรายการที่บันทึกไว้เพื่อตรวจข้อมูล แก้ไข และเผยแพร่' : 'ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้'}</p>}
+      {draft && <p>{kindLabels[draft.kind]} · รุ่นแก้ไข {draft.revision} · {draft.state === 'accepted' ? 'รับเข้าระบบแล้ว' : 'ฉบับร่าง'}</p>}</div>
     </header>
     {loading ? <div className="cms-loading" role="status" aria-label="กำลังโหลดชุดข้อมูล"><Skeleton /><Skeleton /><Skeleton /></div>
       : error ? <WorkspaceEmptyState className="cms-empty" role="alert" heading="h2" icon={Database} title="ยังเปิดชุดข้อมูลไม่ได้" description={error}
@@ -68,15 +71,18 @@ export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { 
       : resourceId ? <ReferenceResources api={api} resourceId={resourceId} onNavigate={onNavigate} />
       : <>
         {!importsView && <PublishedForecasts api={api} onCreated={openDraft} />}
-        <div className="cms-list-heading"><div>{!importsView && <h2>รายการนำเข้าและฉบับร่าง</h2>}<p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
+        <section className="cms-drafts-panel" aria-label="รายการนำเข้าและฉบับร่าง">
+        <div className="cms-list-heading"><div className="cms-section-heading"><span className="cms-section-icon"><FileText size={22} aria-hidden="true" /></span><div>{!importsView && <h2>รายการนำเข้าและฉบับร่าง</h2>}<p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
+          {!importsView && <button className="secondary-button cms-view-imports" onClick={() => onNavigate('/admin?view=imports')}>ดูทั้งหมด<ChevronRight size={16} /></button>}</div>
         {!visibleItems.length ? <p className="cms-help cms-no-drafts">ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากนำเข้าไฟล์ หรือตรวจแก้พยากรณ์ในหน้าจัดการข้อมูล</p>
-          : <div className="cms-table-scroll"><table className="cms-table"><thead><tr><th>ชุดข้อมูล</th><th>ประเภท</th><th>สถานะ</th><th>แก้ไขล่าสุด</th><th><span className="sr-only">เปิด</span></th></tr></thead>
-            <tbody>{visibleItems.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename === 'published-database' ? 'สำเนาพยากรณ์ที่เผยแพร่' : item.source_filename}</small></td>
-              <td>{kindLabels[item.kind]}</td><td><span className={`cms-status ${item.state}`}>{item.state === 'accepted' ? (item.kind === 'archive' ? 'เผยแพร่แล้ว' : 'รับเข้าระบบแล้ว') : 'ฉบับร่าง'}</span></td>
-              <td>{dateLabel(item.updated_at)}<small>รุ่นแก้ไข {item.revision}</small></td><td><button className="icon-button" title={`เปิด ${item.title}`} aria-label={`เปิด ${item.title}`}
+          : <div className="cms-table-scroll cms-draft-list"><table className="cms-table"><thead><tr><th>ชุดข้อมูล</th><th>ประเภท</th><th>สถานะ</th><th>แก้ไขล่าสุด</th><th>ดำเนินการ</th></tr></thead>
+            <tbody>{visibleItems.map(item => <tr key={item.id}><td className="cms-draft-name"><span className="cms-draft-icon"><FileText size={22} aria-hidden="true" /></span><div><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename === 'published-database' ? 'สำเนาพยากรณ์ที่เผยแพร่' : item.source_filename}</small></div></td>
+              <td className="cms-draft-kind">{kindLabels[item.kind]}</td><td className="cms-draft-state"><span className={`cms-status ${item.state}`}><span aria-hidden="true" className="cms-status-dot" />{item.state === 'accepted' ? (item.kind === 'archive' ? 'เผยแพร่แล้ว' : 'รับเข้าระบบแล้ว') : 'ฉบับร่าง'}</span></td>
+              <td className="cms-draft-date"><time dateTime={item.updated_at}>{dateLabel(item.updated_at)}</time><small>รุ่นแก้ไข {item.revision}</small></td><td className="cms-draft-open"><button className="icon-button" title={`เปิด ${item.title}`} aria-label={`เปิด ${item.title}`}
                 onClick={() => onNavigate(`/admin?draft=${item.id}`)}><ArrowRight size={18} /></button></td></tr>)}</tbody></table></div>}
         {total > 50 && <div className="cms-pagination"><button className="icon-button" aria-label="หน้าก่อน" disabled={offset === 0} onClick={() => setOffset(value => value - 50)}><ArrowLeft size={18} /></button>
           <span>{offset + 1}–{Math.min(total, offset + 50)} / {total}</span><button className="icon-button" aria-label="หน้าถัดไป" disabled={offset + 50 >= total} onClick={() => setOffset(value => value + 50)}><ArrowRight size={18} /></button></div>}
+        </section>
         {!importsView && <ReferenceResources api={api} resourceId={null} onNavigate={onNavigate} />}
       </>}
     {view === 'upload' && !loading && !error && <AdminImport api={api} onClose={() => onNavigate('/admin?view=imports')} onCreated={openDraft} />}
@@ -96,16 +102,21 @@ function PublishedForecasts({ api, onCreated }: { api: ReturnType<typeof createA
       .catch(failure => { if (!request.signal.aborted) setError(errorText(failure)); });
     return () => request.abort();
   }, [api, retry]);
-  return <section className="cms-published" aria-labelledby="cms-published-title"><div><h2 id="cms-published-title">พยากรณ์ที่แสดงบนเว็บไซต์</h2>
+  return <section className="cms-published" aria-labelledby="cms-published-title"><div className="cms-published-top"><div><div className="cms-section-heading"><span className="cms-section-icon"><ChartNoAxesCombined size={24} aria-hidden="true" /></span><h2 id="cms-published-title">พยากรณ์ที่แสดงบนเว็บไซต์</h2></div>
     {error ? <p className="cms-error" role="alert">{error}<button className="cms-text-button" onClick={() => setRetry(value => value + 1)}>ลองใหม่</button></p>
       : !catalog ? <Skeleton /> : !catalog.revision ? <p>ยังไม่มีชุดพยากรณ์ที่เผยแพร่</p>
-      : <p>ผลพยากรณ์ภัยแล้งล่วงหน้า 1–6 เดือน · มีข้อมูล {catalog.periods.length} รอบเดือน<br />เลือกเดือนต้นทางเพื่อเปิดฉบับร่างและตรวจแก้ เว็บไซต์ยังใช้ข้อมูลเดิมจนกว่าจะเผยแพร่</p>}</div>
-    {catalog?.revision && <div className="cms-actions"><MonthSelect ariaLabel="เดือนตั้งต้นที่จะตรวจแก้" value={period}
+      : <p>เลือกเดือนต้นทางเพื่อตรวจแก้ฉบับร่าง ข้อมูลเดิมยังแสดงจนกว่าจะเผยแพร่</p>}</div>
+    {catalog?.revision && <div className="cms-review-controls"><p>เลือกเดือนต้นทางที่ต้องการตรวจแก้</p><div className="cms-actions"><div className="cms-month-control"><CalendarDays size={17} aria-hidden="true" /><MonthSelect ariaLabel="เดือนตั้งต้นที่จะตรวจแก้" value={period}
       options={catalog.periods.map(value => ({ value, label: new Date(`${value}-01T12:00:00`).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }) }))} onChange={setPeriod} />
-      <button className="secondary-button" disabled={busy || !period} onClick={() => {
+      </div><button className="primary-button" disabled={busy || !period} onClick={() => {
         setBusy(true); setError(''); void api<Draft>('clone-forecast', { body: { datasetId: catalog.revision!.datasetId, originMonth: period } })
           .then(onCreated).catch(failure => setError(errorText(failure))).finally(() => setBusy(false));
-      }}><Pencil size={16} />{busy ? 'กำลังสร้างฉบับร่าง' : 'ตรวจแก้รอบนี้'}</button></div>}
+      }}><Pencil size={16} />{busy ? 'กำลังสร้างฉบับร่าง' : 'ตรวจแก้รอบนี้'}</button></div></div>}</div>
+    {catalog?.revision && <MetricGrid className="cms-forecast-metrics" ariaLabel="สรุปชุดพยากรณ์ที่เผยแพร่" metrics={[
+      { value: catalog.periods.length.toLocaleString('th-TH'), label: 'รอบเดือนทั้งหมด', icon: <FileText size={22} /> },
+      { value: '6 เดือน', label: 'ล่วงหน้า 1–6 เดือน', icon: <CheckCircle2 size={23} /> },
+      { value: 'เผยแพร่แล้ว', label: 'ชุดข้อมูลที่เว็บไซต์ใช้อยู่', icon: <Eye size={23} />, className: 'cms-publication-metric' },
+    ]} />}
   </section>;
 }
 

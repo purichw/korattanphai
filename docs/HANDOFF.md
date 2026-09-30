@@ -20,6 +20,29 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Admin data-home reference redesign (2026-10-01; release verification pending):
+
+- Adopts the supplied desktop/mobile mockups' icon-led header, three white panels,
+  green review action, aligned month controls, draft status rows and reference
+  card grid. Mobile has a light emblem/wordmark header, compact draft cards and
+  explicit resource expansion. Real search/filter matches remain reachable.
+- Reuses `MetricGrid`, `MonthSelect`, buttons and the responsive navigation.
+  The three Admin-only destinations and independent sessions remain unchanged.
+  Visitor/settings/media/notification mock elements are not new product features.
+- Values are source-backed: current forecast catalogue count, existing rev3
+  six-month horizon and current published status. Resource row totals in the
+  illustration are omitted because the catalogue API does not supply them;
+  real usage descriptions remain available in resource detail. No fake readiness
+  or record counts are substituted. Centered stats follow the owner's preference.
+- Read-only smoke now captures full-page and viewport evidence on both widths,
+  and exercises mobile resource expansion/search in addition to navigation,
+  template download and session separation. No production content writes.
+- Isolated source remains in `artifacts/admin-navigation-20261001` on
+  `fix/admin-navigation-20261001`, preserving the verified `93367df` release and
+  the root checkout's unrelated changes. Evidence is in
+  `artifacts/admin-design-evidence-20261001/`. Candidate/CI/production details
+  must be recorded after verification; this checkpoint does not assert deployment.
+
 Admin navigation reconstruction, production release (2026-10-01):
 
 - Isolated branch `fix/admin-navigation-20261001` starts from verified production

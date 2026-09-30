@@ -433,7 +433,7 @@ function AppShell({
         document.getElementById('workspace-content')?.focus();
       }}>ข้ามไปเนื้อหาหลัก</a>
       <aside className={isMobileMenuOpen ? "sidebar mobile-menu-open" : "sidebar"} aria-label="เมนูหลัก">
-        <SidebarBrand compactMobileLogo={isDroughtSubNavActive || isHomeOverview || isAdmin} label={t("brand", language)} />
+        <SidebarBrand compactMobileLogo={isDroughtSubNavActive || isHomeOverview || isAdmin} mobileWordmark={isAdmin} label={t("brand", language)} />
         <button
           type="button"
           className="mobile-menu-toggle"

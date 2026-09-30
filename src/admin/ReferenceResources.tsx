@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Download, History, Pencil, RefreshCw, Search } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Database, Download, FileText, Folder, Globe, Grid2X2, History, Map, MapPin, Pencil, Radio, RefreshCw, Search, Users } from 'lucide-react';
 import { AppSelect } from '../components/AppSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
 import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
@@ -13,6 +13,16 @@ import { usePageLoading } from '../components/PageLoadBoundary';
 type Resource = { id: string; resource_key: string; title: string; resource_group: string; published_at: string; draft_id?: string | null };
 type ResourceDraft = Resource & { payload: Json; revision: number; state: 'draft' | 'published' };
 const groupNames = { website: 'ใช้ประกอบเว็บไซต์', reference: 'ข้อมูลอ้างอิงที่มีอยู่' };
+const resourceIcons: Record<string, typeof MapPin> = {
+  'canonical/nakhon_ratchasima/admin_hierarchy': MapPin,
+  'geodata/nakhon-ratchasima-subdistricts': Users,
+  'geodata/nakhon-ratchasima-boundary': Map,
+  'geodata/thailand-adm1': Grid2X2,
+  'geodata/thailand-neighbor-context': Globe,
+  'canonical/source_registry': Database,
+  'canonical/nakhon_ratchasima/rainfall_stations': FileText,
+  'canonical/nakhon_ratchasima/subdistrict_rainfall_coverage': Radio,
+};
 function downloadResource(item: ResourceDraft) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(item.payload, null, 2)], { type: 'application/json' }));
   const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${item.resource_key.split('/').pop()}_r${item.revision}.json`; anchor.click();
@@ -36,6 +46,7 @@ export function ReferenceResources({ api, resourceId, onNavigate }: { api: Retur
   const [notice, setNotice] = useState('');
   const [edit, setEdit] = useState<{ index: number; value: Payload } | null>(null);
   const [discard, setDiscard] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   useUnsavedChanges(Boolean(edit) && item?.state === 'draft', setError);
   const view = item ? resourceViews[item.resource_key] : undefined;
   const table = useMemo(() => item ? referenceTable(item.resource_key, item.payload) : { columns: [], rows: [] }, [item]);
@@ -59,24 +70,28 @@ export function ReferenceResources({ api, resourceId, onNavigate }: { api: Retur
     try { await operation(); } catch (failure) { setError(failure instanceof Error ? failure.message : 'ดำเนินการไม่สำเร็จ'); } finally { setBusy(false); }
   }
   const title = item ? view?.title ?? 'ข้อมูลเดิมที่เก็บประวัติ' : 'ข้อมูลประกอบเว็บไซต์';
-  return <section className="cms-reference" aria-labelledby="cms-reference-title" aria-busy={busy}>
-    <div className="cms-list-heading"><div><h2 id="cms-reference-title">{title}</h2>
+  return <section className={`cms-reference${!resourceId ? ' is-catalog' : ''}`} aria-labelledby="cms-reference-title" aria-busy={busy}>
+    <div className="cms-list-heading"><div className="cms-section-heading"><span className="cms-section-icon"><Folder size={23} aria-hidden="true" /></span><div><h2 id="cms-reference-title">{title}</h2>
       <p className="cms-help">{item ? view?.description ?? 'ข้อมูลชุดนี้ไม่ได้อยู่ในรายการใช้งานปัจจุบัน ต้นฉบับและประวัติยังคงอยู่'
         : 'ชื่อพื้นที่ ขอบเขตแผนที่ และแหล่งอ้างอิง เลือกเปิดเพื่อดูความหมายและรายละเอียด'}</p>
-      {item && <p className="cms-help">รุ่นแก้ไข {item.revision} · {item.state === 'published' ? 'เผยแพร่แล้ว' : 'ฉบับร่าง ยังไม่เปลี่ยนเว็บไซต์'}</p>}</div>
+      {item && <p className="cms-help">รุ่นแก้ไข {item.revision} · {item.state === 'published' ? 'เผยแพร่แล้ว' : 'ฉบับร่าง ยังไม่เปลี่ยนเว็บไซต์'}</p>}</div></div>
       <div className="cms-actions">{item && <button className="secondary-button" disabled={Boolean(edit) || busy} onClick={() => onNavigate('/admin')}><ArrowLeft size={16} />กลับหน้าจัดการข้อมูล</button>}
+        {!resourceId && selected.length > 3 && !queryText && group === 'all' && <button className="secondary-button cms-resource-expand" aria-label={expanded ? 'แสดงน้อยลง' : 'ดูข้อมูลทั้งหมด'} aria-expanded={expanded} aria-controls="cms-resource-list" onClick={() => setExpanded(value => !value)}>
+          {expanded ? 'ย่อรายการ' : 'ดูทั้งหมด'}{expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</button>}
         <button className="icon-button" disabled={Boolean(edit) || busy} aria-label="โหลดข้อมูลประกอบใหม่" title="โหลดข้อมูลประกอบใหม่" onClick={() => setRetry(value => value + 1)}><RefreshCw size={16} /></button></div></div>
     {error && <p role="alert" className="cms-error">{error}</p>}{notice && <p role="status" className="cms-success">{notice}</p>}
     {!item && busy ? <p role="status">กำลังโหลดข้อมูลประกอบ</p> : error && !item ? null : <>
       {!item ? <>
         <div className="cms-filter-row cms-reference-filters"><label className="cms-search"><Search size={18} /><input aria-label="ค้นหาข้อมูลประกอบ" value={query} onChange={event => setQuery(event.target.value)} placeholder="ค้นหาชื่อข้อมูลหรือการใช้งาน" /></label>
           <AppSelect ariaLabel="การใช้งานข้อมูล" value={group} onChange={setGroup} options={[{ value: 'all', label: 'ทุกการใช้งาน' }, ...Object.entries(groupNames).map(([value, label]) => ({ value, label }))]} /></div>
-        <div className="cms-resource-list">{selected.map(resource => {
+        <div className="cms-resource-list" id="cms-resource-list" data-expanded={expanded || Boolean(queryText) || group !== 'all'}>{selected.map(resource => {
           const presentation = resourceViews[resource.resource_key];
-          return <article className="cms-resource-row" key={resource.id}><div><h3>{presentation.title}</h3><p>{presentation.description}</p>
-            <small>{groupNames[presentation.group]}{resource.draft_id ? ' · มีฉบับร่างที่บันทึกไว้' : ''}</small></div>
-            <button className="secondary-button" disabled={busy} onClick={() => onNavigate(`/admin?resource=${resource.draft_id ?? resource.id}`)}><ArrowRight size={16} />เปิดข้อมูล</button></article>;
+          const Icon = resourceIcons[resource.resource_key] ?? Database;
+          return <article className="cms-resource-row" key={resource.id}><span className="cms-resource-icon"><Icon size={25} strokeWidth={2} aria-hidden="true" /></span><div className="cms-resource-copy"><h3>{presentation.title}</h3><p>{presentation.description}</p>
+            <small><BookOpen size={12} aria-hidden="true" />{groupNames[presentation.group]}{resource.draft_id ? ' · มีฉบับร่างที่บันทึกไว้' : ''}</small></div>
+            <button className="secondary-button" disabled={busy} onClick={() => onNavigate(`/admin?resource=${resource.draft_id ?? resource.id}`)}>เปิดข้อมูล<ArrowRight size={16} /></button></article>;
         })}</div>
+        {selected.length > 0 && <div className="cms-resource-footer"><span>{selected.length} ชุดข้อมูล{queryText || group !== 'all' ? 'ตามตัวกรอง' : 'พร้อมตรวจสอบ'}</span></div>}
         {!selected.length && <WorkspaceEmptyState className="cms-empty" title={query || group !== 'all' ? 'ไม่พบข้อมูลตามคำค้น' : 'ยังไม่มีข้อมูลประกอบพร้อมใช้งาน'}
           action={query || group !== 'all' ? <button className="secondary-button" onClick={() => { setQuery(''); setGroup('all'); }}>ล้างตัวกรอง</button> : undefined} />}
       </> : <>

@@ -119,7 +119,10 @@ focus without scrolling, outside clicks dismiss, and arrow/Home/End keys navigat
 menu actions. Identity and logout remain owned by the existing scoped auth callbacks.
 Navigation scrolls independently so the footer stays reachable on short screens.
 
-Admin uses the same desktop sidebar width and mobile logo dimensions as Home.
+Admin uses the same desktop sidebar width and desktop logo as Home.
+`SidebarBrand.mobileWordmark` composes the existing unmodified emblem with live
+brand text on the light Admin mobile header; its default leaves other consumers
+unchanged. It owns branding only, never account or navigation state.
 `AdminNavigation` owns only CMS destinations: data management, imports/drafts,
 and upload. Its links share the existing navigation styling and mobile drawer,
 with active state derived from the URL (draft details belong to imports).
@@ -128,6 +131,17 @@ in Admin, including its mobile toolbar. Admin also omits the visitor database
 workspace provider; its API and independent authentication retain ownership.
 The public navigation omits the data-management entry; direct Admin URLs remain
 available. Shared brand/account presentation does not imply shared navigation.
+
+The Admin data home composes three scoped panels: published forecasts, saved
+imports/drafts and reference resources. Forecast facts reuse centered
+`MetricGrid`/`MetricCard`; the period uses the existing `MonthSelect`. Catalogue
+counts come from the API; the six-month lead is the existing rev3 contract and
+published status describes the current dataset, not draft readiness. Resource
+cards use the existing supported catalogue without invented row counts.
+Desktop resources use two columns; mobile initially shows three with an explicit
+expand/collapse control. Search/filter results always reveal every match. Drafts
+retain the same DOM/actions and use a mobile card layout. Presentation does not
+change import, publication, permission, auth or reference-read ownership.
 
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`

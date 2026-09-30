@@ -34,8 +34,13 @@ test('Admin login is separate and signout synchronizes only tabs in the same sco
     }));
     expect(adminSidebar.width).toBeCloseTo(visitorSidebar.width, 1);
     expect(adminSidebar.logoWidth).toBeCloseTo(visitorSidebar.logoWidth, 1);
-    expect(adminSidebar.logoHeight).toBeCloseTo(visitorSidebar.logoHeight, 1);
-    expect(adminSidebar.imageSrc).toBe(visitorSidebar.imageSrc);
+    if (testInfo.project.name === 'mobile') {
+      expect(adminSidebar.imageSrc).toContain('korat-tan-phai-emblem.webp');
+      await expect(page.locator('.brand-mobile-wordmark')).toContainText('โคราชทันภัย');
+    } else {
+      expect(adminSidebar.logoHeight).toBeCloseTo(visitorSidebar.logoHeight, 1);
+      expect(adminSidebar.imageSrc).toBe(visitorSidebar.imageSrc);
+    }
     await expect(page.locator('.primary-nav').getByRole('link', { name: 'จัดการข้อมูล', exact: true, includeHidden: true })).toHaveCount(1);
     await expect(page.locator('.primary-nav').getByRole('button', { name: 'ภาพรวม', exact: true, includeHidden: true })).toHaveCount(0);
     await expect(visitor.locator('.admin-navigation')).toHaveCount(0);

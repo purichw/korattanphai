@@ -278,6 +278,8 @@ summary:focus-visible {
   min-width: 0;
 }
 
+.brand-lockup .brand-mobile-wordmark { display: none; }
+
 .brand-lockup.is-logo-only {
   display: flex;
   justify-content: center;

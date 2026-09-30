@@ -57,6 +57,21 @@ try {
     try {
       await login(page, '/admin');
       await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
+      await expect(page.locator('.cms-resource-row').first()).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      await page.locator('.brand-mark img').evaluate(image => image.decode());
+      const resourceCount = await page.locator('.cms-resource-row').count();
+      await page.screenshot({ path: path.join(output, `${device}-admin-data-full.png`), fullPage: true });
+      await page.screenshot({ path: path.join(output, `${device}-admin-data-viewport.png`) });
+      if (device === 'mobile' && resourceCount > 3) {
+        await page.getByRole('button', { name: 'ดูข้อมูลทั้งหมด', exact: true }).click();
+        await expect(page.locator('.cms-resource-row:visible')).toHaveCount(resourceCount);
+        await page.getByRole('button', { name: 'แสดงน้อยลง', exact: true }).click();
+      }
+      await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('แหล่งข้อมูลอ้างอิง');
+      await expect(page.locator('.cms-resource-row:visible')).toHaveCount(1);
+      await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('');
+      await page.evaluate(() => scrollTo(0, 0));
       await openNavigation(page);
       const nav = page.getByRole('navigation', { name: 'เมนูผู้ดูแล' });
       await expect(nav.getByRole('link')).toHaveCount(3);
@@ -99,7 +114,7 @@ try {
       await expect(visitor).toHaveURL(/\/login$/);
       assert.deepEqual(errors, []);
       assert.deepEqual(blockedWrites, []);
-      report.checks.push({ device, navigation: 'passed', importTemplate: 'passed', independentSessions: 'passed', applicationWrites: 0 });
+      report.checks.push({ device, navigation: 'passed', resourceSearch: 'passed', resourceCount, importTemplate: 'passed', independentSessions: 'passed', applicationWrites: 0 });
     } finally { await context.close(); }
   }
   await writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
