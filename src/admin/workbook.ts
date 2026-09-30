@@ -2,7 +2,7 @@ import ExcelJS from '@protobi/exceljs';
 import { DATA_FIELDS, type DataKind } from '../../shared/dataFields.mjs';
 import { rowsKey, type Payload, type Json } from './types';
 
-export type ImportSheet = { name: string; columns: string[]; rows: Payload[] };
+export type ImportSheet = { name: string; columns: string[]; rows: Payload[]; sourceRows?: number[] };
 export type ImportFile = { sheets: ImportSheet[]; metadata: Payload | null };
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_ROWS = 100000;
@@ -14,6 +14,7 @@ export async function readAdminWorkbook(bytes: ArrayBuffer): Promise<ImportFile>
   const sheets: ImportSheet[] = [];
   let metadata: Payload | null = null;
   for (const sheet of workbook.worksheets) {
+    if (workbook.getWorksheet('ข้อมูลพยากรณ์') && ['คำอธิบาย', 'ตัวอย่าง', 'รายชื่อพื้นที่'].includes(sheet.name)) continue;
     if (sheet.name === '_Metadata') {
       metadata = {};
       const parts = new Map<string, { total: number; chunks: Map<number, string> }>();
@@ -40,7 +41,7 @@ export async function readAdminWorkbook(bytes: ArrayBuffer): Promise<ImportFile>
     sheet.getRow(1).eachCell({ includeEmpty: true }, cell => columns.push(cell.text.trim()));
     if (!columns.length || columns.some(key => !key || ['__proto__', 'constructor', 'prototype'].includes(key))
       || new Set(columns).size !== columns.length) throw new Error('หัวคอลัมน์ต้องไม่ว่างและไม่ซ้ำกัน');
-    const rows: Payload[] = [];
+    const rows: Payload[] = []; const sourceRows: number[] = [];
     for (let rowIndex = 2; rowIndex <= sheet.rowCount; rowIndex++) {
       const row = sheet.getRow(rowIndex);
       if (!row.hasValues) continue;
@@ -56,9 +57,9 @@ export async function readAdminWorkbook(bytes: ArrayBuffer): Promise<ImportFile>
         else if (value instanceof Date) throw new Error(`แถว ${rowIndex}: วันที่ต้องระบุเป็นข้อความตามรูปแบบ API พร้อมเขตเวลาถ้าจำเป็น`);
         else record[key] = cell.text;
       });
-      rows.push(record);
+      rows.push(record); sourceRows.push(rowIndex);
     }
-    sheets.push({ name: sheet.name, columns, rows });
+    sheets.push({ name: sheet.name, columns, rows, sourceRows });
   }
   if (!sheets.length) throw new Error('ไม่พบตารางข้อมูลในไฟล์');
   return { sheets, metadata };

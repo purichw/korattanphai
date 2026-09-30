@@ -90,3 +90,48 @@
 .cms-reference-value { display: flex; gap: 8px; align-items: center; white-space: normal; overflow-wrap: anywhere; }
 .cms-reference .cms-table input[type="text"], .cms-reference .cms-table input[type="number"] { width: 100%; min-width: 240px; }
 .cms-reference-save { display: grid; gap: 12px; margin-top: 16px; }
+.cms-help { color: var(--muted); font-size: 14px; line-height: 1.65; margin: 6px 0 12px; max-width: 78ch; }
+.cms-no-drafts { max-width: none; padding: 16px 0; border-block: 1px solid var(--line); }
+.cms-import-guide { padding: 16px; margin: 16px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--panel, #fff); }
+.cms-import { border: 0; margin: 0; min-width: 0; }
+.cms-import-guide h3 { margin-top: 0; }
+.cms-import-guide p, .cms-import-mapping p { line-height: 1.6; }
+.cms-import-guide a { text-decoration: none; }
+.cms-import-dictionary summary, .cms-import-mapping summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
+.cms-import-dictionary dl { margin: 0; }
+.cms-import-dictionary dl > div { padding: 12px 0; border-top: 1px solid var(--line); }
+.cms-import-dictionary dt { font-weight: 600; }
+.cms-import-dictionary dd { margin: 6px 0 0; line-height: 1.6; }
+.cms-import-dictionary small, .cms-import-mapping small { display: block; margin-top: 6px; color: var(--muted); }
+.cms-import-mapping .cms-mapping > div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.cms-published { align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.cms-published p { max-width: 66ch; font-size: 14px; line-height: 1.65; }
+.cms-reference { border-top: 1px solid var(--line); border-bottom: 0; }
+.cms-reference-filters { grid-template-columns: minmax(0, 1fr) minmax(200px, 250px); }
+.cms-resource-list { border-top: 1px solid var(--line); }
+.cms-resource-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 18px 4px; border-bottom: 1px solid var(--line); }
+.cms-resource-row > div { min-width: 0; }
+.cms-resource-row h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.5; }
+.cms-resource-row p { margin: 0 0 4px; color: var(--muted); line-height: 1.65; max-width: 78ch; font-size: 14px; }
+.cms-resource-row small { color: var(--muted); font-size: 12px; }
+.cms-resource-row button { flex-shrink: 0; }
+.cms-reference-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0; }
+.cms-reference-toolbar .cms-search { flex: 1; min-width: min(280px, 100%); }
+.cms-table-scroll .cms-reference-table td { white-space: normal; min-width: 160px; }
+.cms-reference-publish { margin-block: 20px; justify-content: space-between; }
+.cms-technical { margin-block: 12px; font-size: 14px; color: var(--muted); }
+.cms-technical summary { cursor: pointer; padding-block: 8px; }
+.cms-technical .cms-actions { margin-top: 8px; }
+.cms-forecast-edit dl { display: grid; gap: 12px; margin: 0 0 12px; }
+.cms-forecast-edit dl > div { display: grid; gap: 4px; }
+.cms-forecast-edit dt { color: var(--muted); font-size: 13px; }
+.cms-forecast-edit dd { margin: 0; font-size: 16px; font-weight: 600; }
+.cms-forecast-edit .app-select { width: 100%; }
+@media (max-width: 800px) {
+  .cms-reference-filters { grid-template-columns: minmax(0, 1fr); }
+  .cms-resource-row { align-items: flex-start; flex-direction: column; gap: 10px; padding-block: 16px; }
+  .cms-resource-row button { align-self: flex-start; }
+  .cms-published { padding: 16px; }
+  .cms-published .cms-actions, .cms-published .app-select { width: 100%; }
+  .cms-published .cms-actions > button { width: 100%; justify-content: center; }
+}

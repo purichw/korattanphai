@@ -13,6 +13,9 @@ import { useUnsavedChanges } from './useUnsavedChanges';
 import { DataRecordForm, MetadataForm } from './DataRecordForm';
 import { kindLabels, rowsKey, type Draft, type DraftSummary, type Payload, type ValidationReport, type AuditEntry } from './types';
 import { DATA_FIELDS } from '../../shared/dataFields.mjs';
+import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaSubdistrictByCode } from '../domain';
+import { displayCell, fieldLabels, monthLabel } from './dataPresentation';
+import { isCutoverVerification } from './resourcePresentation';
 import './admin.css';
 
 function download(bytes: BlobPart, name: string, mime: string) {
@@ -33,6 +36,8 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
   const [error, setError] = useState('');
   const [generation, setGeneration] = useState(0);
   const [importOpen, setImportOpen] = useState(false);
+  const resourceId = new URLSearchParams(window.location.search).get('resource');
+  const visibleItems = items.filter(item => !isCutoverVerification(item));
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true); setError(''); setDraft(null);
@@ -44,10 +49,11 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
   }, [api, draftId, offset, generation]);
   const openDraft = (next: Draft) => { setImportOpen(false); onNavigate(`/admin?draft=${encodeURIComponent(next.id)}`); };
   return <section className="cms-workspace" aria-labelledby="cms-title">
-    <header className="cms-page-header"><div><p className="eyebrow">จัดการข้อมูล · นครราชสีมา</p><h1 id="cms-title">{draft?.title ?? 'ชุดข้อมูล'}</h1>
+    <header className="cms-page-header"><div><p className="eyebrow">นครราชสีมา</p><h1 id="cms-title">{draft?.title ?? 'จัดการข้อมูล'}</h1>
+      {!draft && !resourceId && <p>ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้</p>}
       {draft && <p>{kindLabels[draft.kind]} · รุ่นแก้ไข {draft.revision} · {draft.state === 'accepted' ? 'รับเข้าระบบแล้ว' : 'ฉบับร่าง'}</p>}</div>
       <div className="cms-actions">{draftId ? <button className="secondary-button" onClick={() => onNavigate('/admin')}><ArrowLeft size={18} />ชุดข้อมูล</button>
-        : <button className="primary-button" onClick={() => setImportOpen(true)} disabled={loading || Boolean(error)}><FileUp size={18} />นำเข้าข้อมูล</button>}
+        : !resourceId && <button className="primary-button" onClick={() => setImportOpen(true)} disabled={loading || Boolean(error)}><FileUp size={18} />นำเข้าข้อมูล</button>}
         <button type="button" className="icon-button" title="โหลดฉบับล่าสุด" aria-label="โหลดฉบับล่าสุด" disabled={loading}
           onClick={() => setGeneration(value => value + 1)}><RefreshCw size={18} /></button></div>
     </header>
@@ -55,19 +61,19 @@ export default function AdminWorkspace({ userId, draftId, onNavigate }: { userId
       : error ? <WorkspaceEmptyState className="cms-empty" role="alert" heading="h2" icon={Database} title="ยังเปิดชุดข้อมูลไม่ได้" description={error}
         action={<button className="secondary-button" onClick={() => setGeneration(value => value + 1)}><RefreshCw size={16} />ลองใหม่</button>} />
       : draft ? <DraftEditor key={draft.id} draft={draft} api={api} onSaved={setDraft} />
+      : resourceId ? <ReferenceResources api={api} resourceId={resourceId} onNavigate={onNavigate} />
       : <>
         <PublishedForecasts api={api} onCreated={openDraft} />
-        <ReferenceResources api={api} resourceId={new URLSearchParams(window.location.search).get('resource')} onNavigate={onNavigate} />
-        <div className="cms-list-heading"><h2>รายการนำเข้า</h2><span>{total.toLocaleString('th-TH')} ชุดข้อมูล</span></div>
-        {!items.length ? <WorkspaceEmptyState className="cms-empty" heading="h2" icon={Database} title="ยังไม่มีรายการนำเข้า"
-          action={<button className="secondary-button" onClick={() => setImportOpen(true)}><FileUp size={16} />นำเข้าข้อมูล</button>} />
+        <div className="cms-list-heading"><div><h2>รายการนำเข้าและฉบับร่าง</h2><p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
+        {!visibleItems.length ? <p className="cms-help cms-no-drafts">ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากตรวจแก้พยากรณ์ด้านบนหรือนำเข้าไฟล์</p>
           : <div className="cms-table-scroll"><table className="cms-table"><thead><tr><th>ชุดข้อมูล</th><th>ประเภท</th><th>สถานะ</th><th>แก้ไขล่าสุด</th><th><span className="sr-only">เปิด</span></th></tr></thead>
-            <tbody>{items.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename}</small></td>
+            <tbody>{visibleItems.map(item => <tr key={item.id}><td><button className="cms-text-button" onClick={() => onNavigate(`/admin?draft=${item.id}`)}>{item.title}</button><small>{item.source_filename}</small></td>
               <td>{kindLabels[item.kind]}</td><td><span className={`cms-status ${item.state}`}>{item.state === 'accepted' ? (item.kind === 'archive' ? 'เผยแพร่แล้ว' : 'รับเข้าระบบแล้ว') : 'ฉบับร่าง'}</span></td>
               <td>{dateLabel(item.updated_at)}<small>รุ่นแก้ไข {item.revision}</small></td><td><button className="icon-button" title={`เปิด ${item.title}`} aria-label={`เปิด ${item.title}`}
                 onClick={() => onNavigate(`/admin?draft=${item.id}`)}><ArrowRight size={18} /></button></td></tr>)}</tbody></table></div>}
         {total > 50 && <div className="cms-pagination"><button className="icon-button" aria-label="หน้าก่อน" disabled={offset === 0} onClick={() => setOffset(value => value - 50)}><ArrowLeft size={18} /></button>
           <span>{offset + 1}–{Math.min(total, offset + 50)} / {total}</span><button className="icon-button" aria-label="หน้าถัดไป" disabled={offset + 50 >= total} onClick={() => setOffset(value => value + 50)}><ArrowRight size={18} /></button></div>}
+        <ReferenceResources api={api} resourceId={null} onNavigate={onNavigate} />
       </>}
     {importOpen && <AdminImport api={api} onClose={() => setImportOpen(false)} onCreated={openDraft} />}
   </section>;
@@ -88,7 +94,7 @@ function PublishedForecasts({ api, onCreated }: { api: ReturnType<typeof createA
   return <section className="cms-published" aria-labelledby="cms-published-title"><div><h2 id="cms-published-title">พยากรณ์ที่แสดงบนเว็บไซต์</h2>
     {error ? <p className="cms-error" role="alert">{error}<button className="cms-text-button" onClick={() => setRetry(value => value + 1)}>ลองใหม่</button></p>
       : !catalog ? <Skeleton /> : !catalog.revision ? <p>ยังไม่มีชุดพยากรณ์ที่เผยแพร่</p>
-      : <p>{catalog.revision.datasetVersion} · {catalog.periods.length} เดือนตั้งต้น</p>}</div>
+      : <p>ผลพยากรณ์ภัยแล้งล่วงหน้า 1–6 เดือน · มีข้อมูล {catalog.periods.length} รอบเดือน<br />เลือกเดือนต้นทางเพื่อเปิดฉบับร่างและตรวจแก้ เว็บไซต์ยังใช้ข้อมูลเดิมจนกว่าจะเผยแพร่</p>}</div>
     {catalog?.revision && <div className="cms-actions"><MonthSelect ariaLabel="เดือนตั้งต้นที่จะตรวจแก้" value={period}
       options={catalog.periods.map(value => ({ value, label: new Date(`${value}-01T12:00:00`).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }) }))} onChange={setPeriod} />
       <button className="secondary-button" disabled={busy || !period} onClick={() => {
@@ -114,9 +120,14 @@ function DraftEditor({ draft, api, onSaved }: { draft: Draft; api: ReturnType<ty
   useUnsavedChanges(Boolean(edit), setError);
   const rowKey = rowsKey(draft.kind);
   const rows = draft.payload[rowKey] as Payload[];
+  const areaLabel = (value: Payload) => {
+    const area = getNakhonRatchasimaSubdistrictByCode(String(value.subdistrictCode ?? ''));
+    const district = getNakhonRatchasimaDistrictByCode(area?.districtCode);
+    return area ? `ต.${area.nameTh} · อ.${district?.nameTh ?? ''}` : String(value.subdistrictCode ?? 'ไม่ระบุพื้นที่');
+  };
   const issueRows = new Set(report?.issues.flatMap(issue => issue.row == null ? [] : [issue.row]) ?? []);
   const filtered = rows.map((value, index) => ({ value, index })).filter(({ value, index }) => (mode !== 'issues' || issueRows.has(index + 1))
-    && JSON.stringify(value).toLocaleLowerCase('th').includes(query.trim().toLocaleLowerCase('th')));
+    && `${areaLabel(value)} ${JSON.stringify(value)}`.toLocaleLowerCase('th').includes(query.trim().toLocaleLowerCase('th')));
   const fields = DATA_FIELDS[draft.kind].filter(field => ['stationId', 'subdistrictCode', 'observedAt', 'period', 'cropCode', 'horizonMonths', 'targetMonth', 'metric', 'value', 'unit', 'quality', 'riskCode', 'status'].includes(field.key));
   useEffect(() => { setPage(0); }, [query, mode, draft.revision]);
   const closeEdit = () => { if (!busy) setPendingAction('discard'); };
@@ -139,14 +150,16 @@ function DraftEditor({ draft, api, onSaved }: { draft: Draft; api: ReturnType<ty
     onSaved(saved); setReport(null); setEdit(null); setNotice('นำรายการออกจากฉบับร่างแล้ว ต้นฉบับยังอยู่ในประวัติ');
   }
   return <div className="cms-editor">
-    <div className="cms-draft-strip"><span>{draft.source_filename || 'ข้อมูลจากฟอร์ม'} · {rows.length.toLocaleString('th-TH')} รายการ</span>
+    <div className="cms-draft-strip"><span>{draft.source_filename === 'published-database' ? 'สำเนาพยากรณ์ที่เผยแพร่' : draft.source_filename || 'ข้อมูลจากฟอร์ม'} · {rows.length.toLocaleString('th-TH')} รายการ</span>
       <div className="cms-actions"><button className="secondary-button" disabled={busy} onClick={() => { void run(async () => {
         const { createAdminWorkbook } = await import('./workbook'); const bytes = await createAdminWorkbook(draft.kind, draft.payload);
         download(new Uint8Array(bytes).buffer, `Korat_${draft.kind}_r${draft.revision}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       }); }}><Download size={16} />Excel</button>
-        <button className="secondary-button" disabled={busy} onClick={() => download(JSON.stringify(draft.payload, null, 2), `Korat_${draft.kind}_r${draft.revision}.json`, 'application/json')}><Download size={16} />JSON</button>
+        <details className="cms-technical"><summary>ไฟล์สำหรับระบบอื่น</summary><button className="secondary-button" disabled={busy} onClick={() => download(JSON.stringify(draft.payload, null, 2), `Korat_${draft.kind}_r${draft.revision}.json`, 'application/json')}><Download size={16} />JSON</button></details>
         <button className="icon-button" title="ประวัติการแก้ไข" aria-label="ประวัติการแก้ไข" disabled={busy} onClick={() => { void run(async () => setAudit(await api<AuditEntry[]>('audit', { id: draft.id }))); }}><History size={18} /></button></div>
     </div>
+    {draft.kind === 'archive' && <p className="cms-help">ข้อมูลต้นทาง {monthLabel(draft.payload.originMonth)} · เลือกตำบลและเดือนที่ต้องแก้ แล้วเลือกระดับความเสี่ยงจากรายการ</p>}
+    {draft.kind !== 'archive' && <p className="cms-help">{draft.kind === 'forecast' ? 'เก็บผลพยากรณ์เพื่อทบทวน การเผยแพร่ผลแบบจำลองใหม่ยังไม่เปิดใช้' : 'รับเก็บข้อมูลจากไฟล์ ไม่ได้เชื่อมข้อมูลสดหรือเปลี่ยนพยากรณ์บนแผนที่โดยอัตโนมัติ'}</p>}
     {error && <p className="cms-error" role="alert">{error}</p>}{notice && <p className="cms-success" role="status"><CheckCircle2 size={18} />{notice}</p>}
     <div className="cms-validation-bar"><div>{report ? <><strong>{report.valid ? 'ผ่านการตรวจรูปแบบข้อมูล' : `พบ ${report.issues.length} จุดที่ต้องตรวจสอบ`}</strong>
       <span>รุ่นแก้ไข {report.revision}</span></> : <strong>รอตรวจรูปแบบและความครบถ้วน</strong>}</div>
@@ -155,16 +168,16 @@ function DraftEditor({ draft, api, onSaved }: { draft: Draft; api: ReturnType<ty
     {report && !report.valid && <details className="cms-issues" open><summary>รายละเอียดที่ต้องแก้ไข</summary><ul>{report.issues.slice(0, 100).map((issue, index) => <li key={index}>
       {issue.row != null && <button className="cms-text-button" disabled={busy || draft.state === 'accepted'} onClick={() => { setReason(''); setEdit({ index: issue.row! - 1, value: structuredClone(rows[issue.row! - 1]) }); }}>แถว {issue.row}</button>}
       <span>{issue.message}</span></li>)}</ul>{report.issues.length > 100 && <p>แสดง 100 จาก {report.issues.length} จุด</p>}</details>}
-    <div className="cms-filter-row"><label className="cms-search"><Search size={18} /><input aria-label="ค้นหารายการข้อมูล" placeholder="รหัสพื้นที่ สถานี เดือน หรือตัวแปร" value={query} onChange={event => setQuery(event.target.value)} />
+    <div className="cms-filter-row"><label className="cms-search"><Search size={18} /><input aria-label="ค้นหารายการข้อมูล" placeholder="ชื่อตำบล อำเภอ สถานี หรือรหัสพื้นที่" value={query} onChange={event => setQuery(event.target.value)} />
       {query && <button className="icon-button" aria-label="ล้างคำค้น" onClick={() => setQuery('')}><X size={16} /></button>}</label>
       <AppSelect ariaLabel="กรองปัญหาข้อมูล" value={mode} options={[{ value: 'all', label: 'ทุกรายการ' }, { value: 'issues', label: 'รายการที่ต้องแก้ไข', disabled: !report }]}
-        onChange={setMode} /><button className="secondary-button" disabled={busy || draft.state === 'accepted' || draft.kind === 'archive'} onClick={() => { setReason(''); setEdit({ index: null, value: structuredClone(draft.payload), metadata: true }); }}><Pencil size={16} />รายละเอียดชุดข้อมูล</button>
+        onChange={setMode} />{draft.kind !== 'archive' && <button className="secondary-button" disabled={busy || draft.state === 'accepted'} onClick={() => { setReason(''); setEdit({ index: null, value: structuredClone(draft.payload), metadata: true }); }}><Pencil size={16} />รายละเอียดชุดข้อมูล</button>}
     </div>
     <div className="cms-result-count"><span>{filtered.length.toLocaleString('th-TH')} / {rows.length.toLocaleString('th-TH')} รายการ</span>
-      <button className="secondary-button" disabled={busy || rows.length >= 2000 || draft.state === 'accepted' || draft.kind === 'archive'} onClick={() => { setReason(''); setEdit({ index: null, value: {} }); }}><Plus size={16} />เพิ่มรายการ</button></div>
-    {filtered.length ? <div className="cms-table-scroll is-records"><table className="cms-table"><thead><tr><th>แถว</th>{fields.map(field => <th key={field.key}>{field.label}</th>)}<th>แก้ไข</th></tr></thead>
+      {draft.kind !== 'archive' && <button className="secondary-button" disabled={busy || rows.length >= 2000 || draft.state === 'accepted'} onClick={() => { setReason(''); setEdit({ index: null, value: {} }); }}><Plus size={16} />เพิ่มรายการ</button>}</div>
+    {filtered.length ? <div className="cms-table-scroll is-records"><table className="cms-table"><thead><tr><th>แถว</th>{fields.map(field => <th key={field.key}>{fieldLabels[field.key] ?? field.label}</th>)}<th>แก้ไข</th></tr></thead>
       <tbody>{filtered.slice(page * 25, page * 25 + 25).map(({ value, index }) => <tr key={index} className={issueRows.has(index + 1) ? 'has-issue' : ''}><td>{index + 1}</td>
-        {fields.map(field => <td key={field.key}>{value[field.key] === null ? <span className="cms-null">ไม่มีค่า</span> : value[field.key] === undefined ? <span className="cms-null">ไม่ระบุ</span> : String(value[field.key])}</td>)}
+        {fields.map(field => <td key={field.key}>{field.key === 'subdistrictCode' ? <>{areaLabel(value)}<small>{String(value[field.key])}</small></> : displayCell(field.key, value[field.key])}</td>)}
         <td><button className="icon-button" title={`แก้ไขแถว ${index + 1}`} aria-label={`แก้ไขแถว ${index + 1}`} disabled={busy || draft.state === 'accepted'}
           onClick={() => { setReason(''); setEdit({ index, value: structuredClone(value) }); }}><Pencil size={16} /></button></td></tr>)}</tbody></table></div>
       : <WorkspaceEmptyState className="cms-empty" heading="h2" title="ไม่พบรายการตามตัวกรอง"
