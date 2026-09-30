@@ -72,8 +72,8 @@ test('Admin keeps one splash through list, forecast catalogue and reference read
     await page.screenshot({ path: testInfo.outputPath('admin-loading.png') });
     references.release();
     await expect(page.locator('.app-startup')).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'ชุดข้อมูล', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'ยังไม่มีรายการนำเข้า' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
+    await expect(page.getByText('ยังไม่มีรายการนำเข้าที่ต้องดำเนินการ เริ่มจากตรวจแก้พยากรณ์ด้านบนหรือนำเข้าไฟล์', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).first().click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.locator('.app-startup')).toHaveCount(0);

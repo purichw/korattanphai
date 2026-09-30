@@ -108,7 +108,7 @@ jobs:
         env:
           CMS_FULL_ARCHIVE_TEST: '1'
       - run: npm run build:protected
-      - run: npm run test:e2e:built -- e2e/admin-data.spec.ts e2e/cms-references.spec.ts e2e/admin-auth.spec.ts e2e/admin-clarity.spec.ts e2e/admin-rev3-import.spec.ts
+      - run: npm run test:e2e:built -- e2e/admin-data.spec.ts e2e/cms-references.spec.ts e2e/admin-auth.spec.ts e2e/admin-clarity.spec.ts e2e/admin-rev3-import.spec.ts e2e/page-loading-database.spec.ts
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
