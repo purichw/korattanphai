@@ -11,6 +11,7 @@ import { referenceCatalogGroups, referenceTable, resourceGroups, resourceViews, 
 import { useAdminRead } from './useAdminRead';
 import { MetricGrid } from '../components/PageSummary';
 import { ReferenceRecords } from './ReferenceRecords';
+import { ReferenceRecordDialog } from './ReferenceRecordDialog';
 import type { ReferenceRow } from './resourcePresentation';
 
 type Resource = { id: string; resource_key: string; title: string; resource_group: string; published_at: string | null; updated_at?: string; draft_id?: string | null };
@@ -132,9 +133,7 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
           <button className="secondary-button" disabled={busy} onClick={() => void run(async () => setHistory(await api<AuditEntry[]>('resource-history', { body: { id: item.id } })))}><History size={16} />ประวัติการแก้ไข</button></div></details>
       </>}
     </>}
-    {inspect && item && <WorkspaceDialog title="รายละเอียดรายการ" bounded onClose={() => setInspect(null)} closeLabel="ปิดรายละเอียดรายการ"><div className="cms-form"><p className="cms-help">{title}</p>
-      <dl className="cms-record-details">{table.columns.map((column, index) => <div key={column}><dt>{column}</dt><dd>{inspect.cells[index]}</dd></div>)}</dl>
-      <p className="cms-help">{view?.description}</p><p className="cms-help">ข้อมูลอ้างอิงสำหรับตรวจสอบ · รุ่นแก้ไข {item.revision}</p></div></WorkspaceDialog>}
+    {inspect && item && <ReferenceRecordDialog title={title} view={view} columns={table.columns} row={inspect} revision={item.revision} state={item.state} onClose={() => setInspect(null)} />}
     {edit && item && <WorkspaceDialog title={item.state === 'draft' ? 'แก้ไขแหล่งข้อมูลอ้างอิง' : 'รายละเอียดแหล่งข้อมูล'} bounded wide onClose={() => { if (!busy) item.state === 'draft' ? setDiscard(true) : setEdit(null); }} closeLabel="ปิดรายละเอียดแหล่งข้อมูล">
       <div className="cms-form">{error && <p role="alert" className="cms-error">{error}</p>}<div className="cms-field-grid">{sourceFields.filter(field => typeof edit.value[field.key] === 'string').map(field => <label className="cms-field" key={field.key}>{field.label}
         {item.state === 'published' ? <span>{String(edit.value[field.key]) || 'ไม่ระบุ'}</span> : <textarea aria-label={field.label} disabled={busy} value={String(edit.value[field.key])} onChange={event => setEdit({ ...edit, value: { ...edit.value, [field.key]: event.target.value } })} />}</label>)}</div>

@@ -285,10 +285,36 @@
 .cms-resource-history[open] summary::after { content: '⌃'; }
 .cms-resource-history summary::-webkit-details-marker { display: none; }
 .cms-resource-history summary small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 3px; }
-.cms-record-details { display: grid; gap: 12px; margin: 16px 0; }
-.cms-record-details > div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
-.cms-record-details dt { color: var(--muted); font-size: 13px; }
-.cms-record-details dd { margin: 0; overflow-wrap: anywhere; font-weight: 600; }
+.nr-tool-dialog.cms-record-dialog { width: min(560px, calc(100vw - 32px)); border-color: #d5dfda; background: #fff; box-shadow: 0 24px 80px #122d3552; }
+.cms-record-dialog::backdrop { background: rgb(19 39 35 / 58%); }
+.cms-record-dialog > header { align-items: flex-start; padding: 20px 22px 16px; border: 0; }
+.cms-record-dialog .nr-tool-dialog-heading { flex: 1; min-width: 0; }
+.cms-record-dialog .nr-tool-dialog-heading h2 { font-size: 21px; color: #173d39; }
+.cms-record-dialog .nr-tool-dialog-heading p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.cms-record-dialog > header .icon-button { flex: 0 0 44px; width: 44px; height: 44px; border-color: #cedbd6; background: #fff; }
+.cms-record-dialog > .nr-tool-dialog-content { display: grid; gap: 14px; padding: 0 22px 18px; }
+.cms-record-dialog-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; background: #eef5f1; color: #385c53; font-size: 13px; }
+.cms-record-dialog-meta > span { display: inline-flex; align-items: center; gap: 6px; }
+.cms-record-dialog-meta > span:nth-child(2) { padding-left: 10px; border-left: 1px solid #c8d8d0; }
+.cms-record-dialog-meta .cms-record-dialog-status { margin-left: auto; padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.cms-record-dialog-status.is-published { background: #dcefe5; color: #185b43; }
+.cms-record-dialog-status.is-draft { background: #fff1d9; color: #805516; }
+.cms-record-dialog-fields { padding: 12px; border: 1px solid #d8e4df; border-radius: 8px; }
+.cms-record-dialog-fields h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; color: #193f37; font-size: 15px; line-height: 1.5; }
+.cms-record-dialog-fields dl { margin: 0; border: 1px solid #e0e8e3; border-radius: 5px; overflow: hidden; }
+.cms-record-dialog-fields dl > div { display: grid; grid-template-columns: 146px minmax(0, 1fr); }
+.cms-record-dialog-fields dl > div + div { border-top: 1px solid #e0e8e3; }
+.cms-record-dialog-fields dt { display: flex; align-items: center; gap: 10px; padding: 11px 10px; background: #f7faf8; color: #50695f; font-size: 14px; }
+.cms-record-dialog-fields dt svg { flex-shrink: 0; color: var(--primary); }
+.cms-record-dialog-fields dd { margin: 0; align-self: center; padding: 11px 12px; overflow-wrap: anywhere; font-size: 16px; font-weight: 600; line-height: 1.5; }
+.cms-record-dialog-description { display: flex; align-items: flex-start; gap: 10px; padding: 13px 14px; border: 1px solid #d8e7df; border-radius: 8px; background: #eef5f1; }
+.cms-record-dialog-description > svg { flex-shrink: 0; margin-top: 2px; color: #fff; fill: var(--primary); }
+.cms-record-dialog-description h3 { margin: 0 0 4px; font-size: 14px; color: #254b3e; }
+.cms-record-dialog-description p { margin: 0; font-size: 13px; color: #536b60; }
+.cms-record-dialog > .nr-tool-dialog-footer { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 22px 18px; background: #fff; }
+.cms-record-dialog > .nr-tool-dialog-footer p { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 12px; }
+.cms-record-dialog > .nr-tool-dialog-footer p svg { flex-shrink: 0; }
+.cms-record-dialog > .nr-tool-dialog-footer button { min-width: 86px; min-height: 44px; }
 @media (max-width: 1050px) {
   .cms-record-filters { flex-wrap: wrap; }
   .cms-record-filters .cms-search { flex-basis: 100%; }
@@ -362,7 +388,26 @@
   .cms-resource-history { padding: 6px 12px; margin-top: 12px; }
   .cms-resource-history summary { font-size: 13px; min-height: 44px; }
   .cms-resource-history summary small { display: none; }
-  .cms-record-details > div { grid-template-columns: 90px minmax(0, 1fr); gap: 12px; }
+  .nr-tool-dialog.cms-record-dialog { inset: auto 0 0; margin: 0; width: 100%; max-width: none; max-height: calc(100dvh - 48px); border: 0; border-radius: 18px 18px 0 0; }
+  .cms-record-dialog > header { position: relative; padding: 26px 18px 14px; }
+  .cms-record-dialog > header::before { content: ''; position: absolute; top: 10px; left: calc(50% - 21px); width: 42px; height: 4px; border-radius: 4px; background: #bcc9c5; }
+  .cms-record-dialog .nr-tool-dialog-heading h2 { font-size: 20px; }
+  .cms-record-dialog .nr-tool-dialog-heading p { font-size: 12px; }
+  .cms-record-dialog > .nr-tool-dialog-content { padding: 0 18px 16px; gap: 12px; }
+  .cms-record-dialog-meta { font-size: 13px; padding: 7px 8px; gap: 6px; }
+  .cms-record-dialog-meta > span { gap: 5px; }
+  .cms-record-dialog-meta > span:nth-child(2) { padding-left: 7px; }
+  .cms-record-dialog-meta .cms-record-dialog-status { padding: 4px 6px; font-size: 12px; }
+  .cms-record-dialog-fields { padding: 10px; }
+  .cms-record-dialog-fields h3 { font-size: 14px; }
+  .cms-record-dialog-fields dl > div { grid-template-columns: 112px minmax(0, 1fr); }
+  .cms-record-dialog-fields dt { gap: 8px; padding: 10px 8px; font-size: 13px; }
+  .cms-record-dialog-fields dd { padding: 10px; font-size: 15px; }
+  .cms-record-dialog-description { padding: 12px; }
+  .cms-record-dialog-description h3 { font-size: 14px; }
+  .cms-record-dialog-description p { font-size: 13px; }
+  .cms-record-dialog > .nr-tool-dialog-footer { align-items: stretch; flex-direction: column; gap: 12px; padding: 0 18px calc(14px + env(safe-area-inset-bottom)); }
+  .cms-record-dialog > .nr-tool-dialog-footer button { width: 100%; min-height: 44px; border-color: var(--primary); background: var(--primary); color: #fff; }
 }
 
 @media (max-width: 1180px) {

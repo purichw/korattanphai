@@ -21,6 +21,7 @@ test('resource details filter, paginate, inspect and export selected original ro
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', level: 1, exact: true })).toBeVisible();
+    const resource = await database.operation('resource:get', { id: new URL(page.url()).searchParams.get('resource') });
     await expect(page.locator('.cms-resource-metrics')).toContainText('289');
     await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(20);
     await expect(page.getByText('หน้า 1 / 15', { exact: true })).toBeVisible();
@@ -100,9 +101,64 @@ test('resource details filter, paginate, inspect and export selected original ro
     await choose('จำนวนรายการต่อหน้า', '10 ต่อหน้า');
     await expect(page.getByText('หน้า 1 / 29', { exact: true })).toBeVisible();
     const open = page.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).first();
+    const fieldValues = await page.locator('.cms-reference-table tbody tr').first().locator('.cms-record-cell').evaluateAll(cells =>
+      cells.map(cell => (cell.textContent ?? '').replace(cell.querySelector('.cms-record-mobile-label')?.textContent ?? '', '').trim()));
     await open.focus(); await page.keyboard.press('Enter');
-    await expect(page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true })).toContainText('300101');
-    await page.keyboard.press('Escape'); await expect(open).toBeFocused();
+    const recordDialog = page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true });
+    await expect(recordDialog).toBeVisible();
+    await expect(recordDialog).toHaveAccessibleDescription('ข้อมูลอำเภอและตำบลในจังหวัดนครราชสีมา');
+    expect(await recordDialog.evaluate(element => element.tagName === 'DIALOG' && element.matches(':modal'))).toBe(true);
+    expect(resource.state).toBe('published');
+    await expect(recordDialog.locator('.cms-record-dialog-meta')).toContainText(`รุ่นแก้ไข ${resource.revision}`);
+    await expect(recordDialog.locator('.cms-record-dialog-status')).toHaveText('เผยแพร่แล้ว');
+    await expect(recordDialog.locator('dt')).toHaveText(['อำเภอ', 'ตำบล', 'รหัสตำบล']);
+    await expect(recordDialog.locator('dt svg[aria-hidden="true"]')).toHaveCount(3);
+    await expect(recordDialog.locator('dd')).toHaveText(fieldValues);
+    await expect(recordDialog.locator('.cms-record-dialog-description')).toContainText('ชื่อและรหัสพื้นที่ที่ใช้ค้นหา เลือกพื้นที่ และเชื่อมกับค่าพยากรณ์');
+    await expect(recordDialog.locator('footer')).toContainText(`ข้อมูลอ้างอิงสำหรับตรวจสอบ · รุ่นแก้ไข ${resource.revision}`);
+    const dialogGeometry = () => recordDialog.evaluate(element => {
+      const content = element.querySelector('.nr-tool-dialog-content')!;
+      const footer = element.querySelector('footer')!;
+      return { viewport: { width: innerWidth, height: innerHeight }, dialog: element.getBoundingClientRect().toJSON(),
+        content: { clientHeight: content.clientHeight, scrollHeight: content.scrollHeight, scrollTop: content.scrollTop },
+        footer: footer.getBoundingClientRect().toJSON(), pageOverflow: document.documentElement.scrollWidth > innerWidth };
+    });
+    const normalGeometry = await dialogGeometry();
+    expect(normalGeometry.pageOverflow).toBe(false);
+    if (info.project.name === 'mobile') {
+      expect(Math.abs(normalGeometry.dialog.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(normalGeometry.dialog.width - normalGeometry.viewport.width)).toBeLessThanOrEqual(1);
+      expect(Math.abs(normalGeometry.dialog.bottom - normalGeometry.viewport.height)).toBeLessThanOrEqual(1);
+    }
+    await page.mouse.move(0, 0);
+    await page.screenshot({ path: info.outputPath('resource-record-dialog-viewport.png') });
+    // Native modal/backdrop evidence must stay within one viewport; full-page stitching misplaces it.
+    await page.screenshot({ path: info.outputPath('resource-record-dialog-context.png') });
+    await page.keyboard.press('Escape');
+    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
+    await page.keyboard.press('Enter');
+    await recordDialog.getByRole('button', { name: 'ปิดรายละเอียดรายการ', exact: true }).click();
+    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
+    await page.keyboard.press('Enter');
+    let shortGeometry: Awaited<ReturnType<typeof dialogGeometry>> | null = null;
+    const originalViewport = page.viewportSize()!;
+    if (info.project.name === 'mobile') {
+      await page.setViewportSize({ width: originalViewport.width, height: 480 });
+      await expect.poll(async () => Math.abs((await dialogGeometry()).dialog.bottom - 480) <= 1).toBe(true);
+      const content = recordDialog.locator('.nr-tool-dialog-content');
+      expect(await content.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
+      await content.evaluate(element => { element.scrollTop = element.scrollHeight; });
+      await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+      shortGeometry = await dialogGeometry();
+      expect(shortGeometry.footer.top).toBeGreaterThanOrEqual(0);
+      expect(shortGeometry.footer.bottom).toBeLessThanOrEqual(480);
+      await expect(recordDialog.getByRole('button', { name: 'ปิด', exact: true })).toBeInViewport();
+      await page.screenshot({ path: info.outputPath('resource-record-dialog-short-mobile.png') });
+    }
+    await recordDialog.getByRole('button', { name: 'ปิด', exact: true }).click();
+    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
+    if (info.project.name === 'mobile') await page.setViewportSize(originalViewport);
+    await writeFile(info.outputPath('resource-record-dialog-geometry.json'), JSON.stringify({ normal: normalGeometry, short: shortGeometry }, null, 2));
     await page.reload();
     await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
     await page.locator('summary').filter({ hasText: 'ประวัติและไฟล์ต้นฉบับ' }).click();

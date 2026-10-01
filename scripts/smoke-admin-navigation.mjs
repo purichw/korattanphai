@@ -168,8 +168,14 @@ try {
       await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
       await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
+      const areaRead = page.waitForResponse(response => {
+        const url = new URL(response.url());
+        return url.origin === base.origin && url.pathname === '/api/admin-data' && url.searchParams.get('action') === 'resource-get' && response.ok();
+      });
       await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', level: 1, exact: true })).toBeVisible();
+      const areaResource = await (await areaRead).json();
+      assert.equal(areaResource.resource_key, 'canonical/nakhon_ratchasima/admin_hierarchy');
       await expect(page.locator('.cms-resource-total-metric')).toContainText('289');
       await expect(page.locator('.cms-resource-total-metric')).toContainText('ตำบลใน 32 อำเภอ');
       await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(20);
@@ -270,11 +276,65 @@ try {
         assert.ok(dimensions.button.width < dimensions.row.width * 0.7, 'Detail action must remain compact within the mobile row.');
         assert.ok(dimensions.button.height >= 44, 'Compact detail action must retain a 44px touch target.');
       }
+      const recordValues = await page.locator('.cms-reference-table tbody tr').first().locator('.cms-record-cell').evaluateAll(cells =>
+        cells.map(cell => (cell.textContent ?? '').replace(cell.querySelector('.cms-record-mobile-label')?.textContent ?? '', '').trim()));
       await openDetails.focus(); await page.keyboard.press('Enter');
-      await expect(page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true })).toBeVisible();
+      const recordDialog = page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true });
+      await expect(recordDialog).toBeVisible();
+      await expect(recordDialog).toHaveAccessibleDescription('ข้อมูลอำเภอและตำบลในจังหวัดนครราชสีมา');
+      assert.equal(await recordDialog.evaluate(element => element.tagName === 'DIALOG' && element.matches(':modal')), true);
+      await expect(recordDialog.locator('.cms-record-dialog-meta')).toContainText(`รุ่นแก้ไข ${areaResource.revision}`);
+      await expect(recordDialog.locator('.cms-record-dialog-status')).toHaveText(areaResource.state === 'published' ? 'เผยแพร่แล้ว' : 'ฉบับร่าง');
+      await expect(recordDialog.locator('dt')).toHaveText(['อำเภอ', 'ตำบล', 'รหัสตำบล']);
+      await expect(recordDialog.locator('dt svg[aria-hidden="true"]')).toHaveCount(3);
+      await expect(recordDialog.locator('dd')).toHaveText(recordValues);
+      await expect(recordDialog.locator('.cms-record-dialog-description')).toContainText('ชื่อและรหัสพื้นที่ที่ใช้ค้นหา เลือกพื้นที่ และเชื่อมกับค่าพยากรณ์');
+      await expect(recordDialog.locator('footer')).toContainText(`ข้อมูลอ้างอิงสำหรับตรวจสอบ · รุ่นแก้ไข ${areaResource.revision}`);
+      const getDialogGeometry = () => recordDialog.evaluate(element => {
+        const content = element.querySelector('.nr-tool-dialog-content');
+        return { viewport: { width: innerWidth, height: innerHeight }, dialog: element.getBoundingClientRect().toJSON(),
+          content: { clientHeight: content.clientHeight, scrollHeight: content.scrollHeight, scrollTop: content.scrollTop },
+          footer: element.querySelector('footer').getBoundingClientRect().toJSON(), pageOverflow: document.documentElement.scrollWidth > innerWidth };
+      });
+      const recordDialogGeometry = { normal: await getDialogGeometry(), short: null };
+      assert.equal(recordDialogGeometry.normal.pageOverflow, false);
+      if (device === 'mobile') {
+        assert.ok(Math.abs(recordDialogGeometry.normal.dialog.x) <= 1, 'Mobile record dialog starts at the viewport left edge.');
+        assert.ok(Math.abs(recordDialogGeometry.normal.dialog.width - viewport.width) <= 1, 'Mobile record dialog spans the viewport width.');
+        assert.ok(Math.abs(recordDialogGeometry.normal.dialog.bottom - viewport.height) <= 1, 'Mobile record dialog is anchored to the viewport bottom.');
+      }
+      const recordDialogScreenshots = {
+        viewport: path.join(output, `${device}-admin-record-dialog-viewport.png`),
+        context: path.join(output, `${device}-admin-record-dialog-context.png`),
+      };
+      await page.mouse.move(0, 0);
+      await page.screenshot({ path: recordDialogScreenshots.viewport });
+      // Native modal/backdrop evidence must stay within one viewport; full-page stitching misplaces it.
+      await page.screenshot({ path: recordDialogScreenshots.context });
       await page.keyboard.press('Escape');
-      await expect(page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true })).toHaveCount(0);
+      await expect(recordDialog).toHaveCount(0);
       await expect(openDetails).toBeFocused();
+      await page.keyboard.press('Enter');
+      await recordDialog.getByRole('button', { name: 'ปิดรายละเอียดรายการ', exact: true }).click();
+      await expect(recordDialog).toHaveCount(0); await expect(openDetails).toBeFocused();
+      await page.keyboard.press('Enter');
+      if (device === 'mobile') {
+        await page.setViewportSize({ width: viewport.width, height: 480 });
+        await expect.poll(async () => Math.abs((await getDialogGeometry()).dialog.bottom - 480) <= 1).toBe(true);
+        const content = recordDialog.locator('.nr-tool-dialog-content');
+        assert.equal(await content.evaluate(element => element.scrollHeight > element.clientHeight), true, 'Short mobile dialog content must scroll independently.');
+        await content.evaluate(element => { element.scrollTop = element.scrollHeight; });
+        await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+        recordDialogGeometry.short = await getDialogGeometry();
+        assert.ok(recordDialogGeometry.short.footer.top >= 0 && recordDialogGeometry.short.footer.bottom <= 480, 'Dialog footer remains inside the short viewport.');
+        await expect(recordDialog.getByRole('button', { name: 'ปิด', exact: true })).toBeInViewport();
+        recordDialogScreenshots.short = path.join(output, `${device}-admin-record-dialog-short.png`);
+        await page.screenshot({ path: recordDialogScreenshots.short });
+      }
+      await recordDialog.getByRole('button', { name: 'ปิด', exact: true }).click();
+      await expect(recordDialog).toHaveCount(0); await expect(openDetails).toBeFocused();
+      if (device === 'mobile') await page.setViewportSize(viewport);
+      await writeFile(path.join(output, `${device}-admin-record-dialog-geometry.json`), JSON.stringify(recordDialogGeometry, null, 2));
       await page.reload();
       await expect(page).toHaveURL(resourceUrl);
       await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', level: 1, exact: true })).toBeVisible();
@@ -328,7 +388,8 @@ try {
       assert.deepEqual(blockedWrites, []);
       report.checks.push({ device, navigation: 'passed', resourceSearch: 'passed', resourceGroupCount: 3, mapResourceCount: 3, sourceRows: 5,
         browserTabReturn: 'passed', manualRefresh: 'passed', warmNavigation: 'passed',
-        resourceDetail: { status: 'passed', areas: 289, districts: 32, selectedCsvRows: 2, explicitSelection: 'passed', cancelClearsSelection: 'passed', keyboardDetail: 'passed', screenshot: detailScreenshots, geometry, assets },
+        resourceDetail: { status: 'passed', areas: 289, districts: 32, selectedCsvRows: 2, explicitSelection: 'passed', cancelClearsSelection: 'passed', keyboardDetail: 'passed', screenshot: detailScreenshots, geometry, assets,
+          dialog: { revision: areaResource.revision, state: areaResource.state, geometry: recordDialogGeometry, screenshots: recordDialogScreenshots, closeAndFocus: ['Escape', 'header close', 'footer close'] } },
         importTemplate: 'passed', independentSessions: 'passed', applicationWrites: 0 });
     } finally { resumeReads(); await context.close(); }
   }

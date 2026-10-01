@@ -95,6 +95,9 @@ long lists, including analysis patterns and search-topic filters, use the shared
 threshold; short status, horizon, sort and view menus retain their compact form.
 `WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
 locks background scroll and restores the opener without moving the page.
+Optional `description`, `footer` and `className` support a scoped detail variant:
+the description is connected with `aria-describedby`, and the footer remains
+outside bounded scrolling content. Default dialogs retain their existing shell.
 Its optional `closeLabel` defaults to the existing map-tool label; search supplies
 `ปิดการค้นหา`. `ForecastExcelExport` accepts an optional increasing `openRequest`
 number to open the same dialog from search, with its default navigation behavior unchanged.
@@ -166,6 +169,14 @@ leaving the Admin home shell untouched. Read-only guidance/last-save details
 remain in the History disclosure; source draft/publish controls remain visible.
 CSV is a read-only review export with Thai headers, BOM, quoting and formula
 guards. No mock linkage status or unsupported area mutations are exposed.
+
+`ReferenceRecordDialog` reuses this modal lifecycle for projected read-only rows.
+It groups original labels/values with resource-level revision and publication
+state, a view-specific category and the existing description. Desktop is a
+centered modal; mobile is a bounded bottom sheet with an independently scrolling
+body and reachable footer close action. The published badge does not assert
+row-level freshness or a new current-data guarantee. Source editing still uses
+its existing form and save/publication flow.
 
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`

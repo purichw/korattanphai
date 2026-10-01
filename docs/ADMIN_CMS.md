@@ -54,6 +54,12 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   keyboard activation and dialog focus restoration. Mobile keeps the same
   bounded list viewport and pagination. The change applies to both area and
   reference-source projections; no data or persistence contract changed.
+- The read-only record dialog adapts the supplied desktop/mobile mockups with
+  category/revision metadata, original labeled values and a separate explanation.
+  It uses the real resource state (`เผยแพร่แล้ว` / `ฉบับร่าง`), not the mockup's
+  unverified `ข้อมูลปัจจุบัน` label. The existing Korat Tan Phai branding stays.
+  Mobile uses a bottom sheet; its body scrolls while the close footer stays
+  reachable, including short viewports. All three close paths restore focus.
 
 ## Operator-facing cleanup (2026-09-30 checkpoint)
 
