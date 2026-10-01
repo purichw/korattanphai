@@ -20,6 +20,52 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Admin warm reads, catalogue and record-detail production release (2026-10-02):
+
+- Released only this chat's changes from isolated branch
+  `fix/admin-reference-groups-20261001`. Runtime
+  `6814e431ba98a5b408a9a1876d8c87903e1f92be` preserves verified production
+  baseline `3e2703a9f429234bb0e9f630c5d40bcf7de92a1c`; unrelated dirty
+  root work was excluded. The older local checkpoints below are historical.
+- Admin retains loaded account-owned data during warm navigation and manual
+  refresh. The catalogue has three task groups and five relevant source rows;
+  original hidden records, deep links and source-edit identity remain intact.
+- Record lists show checkboxes only after `เลือกเพื่อดาวน์โหลด`; cancel clears
+  selection. Detail actions are compact with 44px targets. Desktop record details
+  use a centered modal; mobile uses a bottom sheet with an independently
+  scrollable body, reachable close footer and restored opener focus.
+- The record dialog adapts the supplied mockups with grouped fields, explanation,
+  category and revision. It retains the original product brand and actual
+  publication state instead of asserting the mockup's unverified currentness.
+- Exact-runtime [Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36906281733)
+  passed all six required jobs. The first built-browser attempt exceeded its
+  20-minute job limit without an assertion failure; the unchanged exact-SHA
+  rerun passed (196 passed, 142 skipped). No tests or gate were
+  removed. Targeted local build, unit and desktop/mobile checks also passed.
+- Production is `dpl_5urVwmFMhRDg3LHebsPTdsPXsAio`,
+  `https://korattanphai-i8r1qigj4-purich-w.vercel.app`, promoted to
+  `https://korattanphai.vercel.app` after candidate smoke and exact-SHA CI.
+  The primary alias was checked immediately before and after promotion.
+- Post-promotion authenticated Chrome smoke passed at 1440×960 and 390×844:
+  groups/search, browser-tab return, held manual refresh/warm reads, 289 areas /
+  32 districts, original-row two-record CSV, selection/cancel, dialog fields,
+  revision/state, keyboard and all close/focus paths, import template and
+  independent Admin/visitor sessions. The 390×480 sheet scrolls internally and
+  keeps its footer reachable. No application data writes occurred.
+- Personally inspected production desktop/mobile reference comparisons.
+  Different selected rows (reference 300101, production 300121) and publication
+  wording are intentional; this is an adaptation, not a pixel-parity claim.
+  Evidence: `artifacts/home-clean-url-release-20261001/admin-release-production-smoke/`,
+  `admin-release-production-comparison/`, `admin-release-v3-ci-final.json`
+  and `admin-release-v3-preflight.json`.
+- Limits: real smoke covers immediate tab return, not a long idle/token-expiry
+  interval or physical devices. Fixture tests cover same-user session events;
+  baseline focus alone was not proven to cause the original loader.
+  No database migration, environment, billing or access-policy change.
+- Recovery: prior verified deployment `dpl_ASnhXFZL7e98rzAp3irav3HCDyBF`
+  remains available; no rollback was performed.
+
+
 Admin warm reads and tab-return regression (2026-10-02, local; not deployed):
 
 - Continue in `artifacts/home-clean-url-release-20261001/source`, branch

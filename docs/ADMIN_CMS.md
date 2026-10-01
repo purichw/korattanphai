@@ -6,7 +6,11 @@ passed with the original data unchanged. This is the scoped CMS foundation,
 not complete no-code ownership of every data family; see remaining gates below.
 See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
 
-## Returning to loaded Admin data (local follow-up)
+Latest Admin UI release: 2026-10-02, runtime `6814e43`, deployed to production
+after all six exact-SHA CI jobs and authenticated desktop/mobile candidate and
+production smoke passed. See `docs/HANDOFF.md` for evidence and recovery.
+
+## Returning to loaded Admin data (released 2026-10-02)
 
 - `createAdminClient` retains up to 16 successful list/detail/catalogue reads in
   memory for the mounted Admin account. No draft data is persisted in browser
@@ -25,9 +29,9 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   still verifies the session and loads from the server.
 - Baseline isolated tests reproduced the imports-to-home loading regression;
   browser focus and same-user session notifications alone did not reproduce it.
-  This change is local, not deployed; no auth policy or backend contract changed.
+  Released on 2026-10-02; no auth policy or backend contract changed.
 
-## Reference catalogue grouping (local follow-up)
+## Reference catalogue grouping (released 2026-10-02)
 
 - The reference panel now has three groups: ข้อมูลพื้นที่, ชั้นข้อมูลแผนที่ and
   แหล่งข้อมูลอ้างอิง. Map layers expand to the three active local geometries.
@@ -42,9 +46,9 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   source entries stay in the complete original payload but are omitted here.
 - Source editing retains original array indices, including gaps left by hidden
   rows. Saving changes only the selected original entry; all other rows remain.
-  This follow-up is not yet deployed.
+  Released on 2026-10-02 without changing or republishing the stored data.
 
-## Resource row controls (2026-10-02 follow-up)
+## Resource row controls (released 2026-10-02)
 
 - Resource details default to browsing without row or page checkboxes. The
   explicit `เลือกเพื่อดาวน์โหลด` action reveals selection controls; cancellation
