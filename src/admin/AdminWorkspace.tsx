@@ -6,8 +6,8 @@ import { MonthSelect } from '../components/MonthSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
 import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
 import { Skeleton } from '../components/nakhon-ratchasima/ForecastLoadingPrimitives';
-import { usePageLoading } from '../components/PageLoadBoundary';
 import { createAdminClient } from './client';
+import { useAdminRead } from './useAdminRead';
 import { AdminImport } from './AdminImport';
 import type { AdminView } from './AdminNavigation';
 import { ReferenceResources } from './ReferenceResources';
@@ -31,25 +31,16 @@ const dateLabel = (value: string) => new Date(value).toLocaleString('th-TH', { d
 
 export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { userId: string; draftId: string | null; view: AdminView; onNavigate: (url: string) => void }) {
   const api = useMemo(() => createAdminClient(userId), [userId]);
-  const [items, setItems] = useState<DraftSummary[]>([]);
-  const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [draft, setDraft] = useState<Draft | null>(null);
-  const [loading, setLoading] = useState(true);
-  usePageLoading(loading);
-  const [error, setError] = useState('');
-  const [generation, setGeneration] = useState(0);
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const read = useAdminRead<Draft | { items: DraftSummary[]; total: number }>(api, draftId ? 'get' : 'list', draftId ? { id: draftId } : { offset });
+  const { loading, error } = read;
+  const draft = draftId ? read.data as Draft | undefined : undefined;
+  const list = draftId ? undefined : read.data as { items: DraftSummary[]; total: number } | undefined;
+  const items = list?.items ?? [];
+  const total = list?.total ?? 0;
   const resourceId = new URLSearchParams(window.location.search).get('resource');
   const visibleItems = items.filter(item => !isCutoverVerification(item));
-  useEffect(() => {
-    const controller = new AbortController();
-    setLoading(true); setError(''); setDraft(null);
-    const load = draftId ? api<Draft>('get', { id: draftId, signal: controller.signal }).then(setDraft)
-      : api<{ items: DraftSummary[]; total: number }>('list', { offset, signal: controller.signal }).then(result => { setItems(result.items); setTotal(result.total); });
-    void load.catch(failure => { if (!controller.signal.aborted) setError(errorText(failure)); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [api, draftId, offset, generation]);
   const openDraft = (next: Draft) => onNavigate(`/admin?draft=${encodeURIComponent(next.id)}`);
   const importsView = view === 'imports' || view === 'upload';
   const title = draft?.title ?? (importsView ? 'รายการนำเข้าและฉบับร่าง' : 'จัดการข้อมูล');
@@ -57,20 +48,21 @@ export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { 
     <div className="cms-context-bar"><nav aria-label="เส้นทางหน้าผู้ดูแล"><span>พื้นที่ผู้ดูแล</span><ChevronRight size={14} aria-hidden="true" /><span>{draftId ? 'ฉบับร่าง' : resourceId ? 'ข้อมูลประกอบเว็บไซต์' : title}</span></nav>
       <div className="cms-actions">{draftId ? <button className="secondary-button" onClick={() => onNavigate('/admin?view=imports')}><ArrowLeft size={18} />รายการนำเข้าและฉบับร่าง</button>
         : !resourceId && <button className="primary-button cms-upload-action" aria-label="นำเข้าข้อมูล" title="นำเข้าข้อมูล" onClick={() => onNavigate('/admin?view=upload')} disabled={loading || Boolean(error)}><FileUp size={18} /><span>นำเข้าข้อมูล</span></button>}
-        <button type="button" className="icon-button" title="โหลดฉบับล่าสุด" aria-label="โหลดฉบับล่าสุด" disabled={loading}
-          onClick={() => setGeneration(value => value + 1)}><RefreshCw size={18} /></button></div>
+        <button type="button" className="icon-button" title="โหลดฉบับล่าสุด" aria-label="โหลดฉบับล่าสุด" disabled={read.refreshing} aria-busy={read.refreshing}
+          onClick={() => { if (window.dispatchEvent(new Event('ktp:before-navigation', { cancelable: true }))) { read.reload(); setRefreshVersion(value => value + 1); } }}><RefreshCw size={18} /></button></div>
     </div>
     <header className="cms-page-header"><Database className="cms-page-icon" size={42} strokeWidth={2} aria-hidden="true" /><div><h1 id="cms-title">{title}</h1>
       {!draft && !resourceId && <p>{importsView ? 'เปิดรายการที่บันทึกไว้เพื่อตรวจข้อมูล แก้ไข และเผยแพร่' : 'ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้'}</p>}
       {draft && <p>{kindLabels[draft.kind]} · รุ่นแก้ไข {draft.revision} · {draft.state === 'accepted' ? 'รับเข้าระบบแล้ว' : 'ฉบับร่าง'}</p>}</div>
     </header>
+    {error && read.data && <p className="cms-error" role="alert">{error} · กำลังแสดงข้อมูลที่โหลดไว้ก่อนหน้า</p>}
     {loading ? <div className="cms-loading" role="status" aria-label="กำลังโหลดชุดข้อมูล"><Skeleton /><Skeleton /><Skeleton /></div>
-      : error ? <WorkspaceEmptyState className="cms-empty" role="alert" heading="h2" icon={Database} title="ยังเปิดชุดข้อมูลไม่ได้" description={error}
-        action={<button className="secondary-button" onClick={() => setGeneration(value => value + 1)}><RefreshCw size={16} />ลองใหม่</button>} />
-      : draft ? <DraftEditor key={draft.id} draft={draft} api={api} onSaved={setDraft} />
-      : resourceId ? <ReferenceResources api={api} resourceId={resourceId} onNavigate={onNavigate} />
+      : error && !read.data ? <WorkspaceEmptyState className="cms-empty" role="alert" heading="h2" icon={Database} title="ยังเปิดชุดข้อมูลไม่ได้" description={error}
+        action={<button className="secondary-button" onClick={read.reload}><RefreshCw size={16} />ลองใหม่</button>} />
+      : draft ? <DraftEditor key={draft.id} draft={draft} api={api} onSaved={read.setData} refreshing={read.refreshing} />
+      : resourceId ? <ReferenceResources api={api} resourceId={resourceId} onNavigate={onNavigate} refreshVersion={refreshVersion} />
       : <>
-        {!importsView && <PublishedForecasts api={api} onCreated={openDraft} />}
+        {!importsView && <PublishedForecasts api={api} onCreated={openDraft} refreshVersion={refreshVersion} />}
         <section className="cms-drafts-panel" aria-label="รายการนำเข้าและฉบับร่าง">
         <div className="cms-list-heading"><div className="cms-section-heading"><span className="cms-section-icon"><FileText size={22} aria-hidden="true" /></span><div>{!importsView && <h2>รายการนำเข้าและฉบับร่าง</h2>}<p className="cms-help">ทำต่อจากที่บันทึกไว้ ข้อมูลจะเปลี่ยนบนเว็บไซต์เมื่อยืนยันเผยแพร่เท่านั้น</p></div></div>
           {!importsView && <button className="secondary-button cms-view-imports" onClick={() => onNavigate('/admin?view=imports')}>ดูทั้งหมด<ChevronRight size={16} /></button>}</div>
@@ -83,32 +75,28 @@ export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { 
         {total > 50 && <div className="cms-pagination"><button className="icon-button" aria-label="หน้าก่อน" disabled={offset === 0} onClick={() => setOffset(value => value - 50)}><ArrowLeft size={18} /></button>
           <span>{offset + 1}–{Math.min(total, offset + 50)} / {total}</span><button className="icon-button" aria-label="หน้าถัดไป" disabled={offset + 50 >= total} onClick={() => setOffset(value => value + 50)}><ArrowRight size={18} /></button></div>}
         </section>
-        {!importsView && <ReferenceResources api={api} resourceId={null} onNavigate={onNavigate} />}
+        {!importsView && <ReferenceResources api={api} resourceId={null} onNavigate={onNavigate} refreshVersion={refreshVersion} />}
       </>}
     {view === 'upload' && !loading && !error && <AdminImport api={api} onClose={() => onNavigate('/admin?view=imports')} onCreated={openDraft} />}
   </section>;
 }
 
-function PublishedForecasts({ api, onCreated }: { api: ReturnType<typeof createAdminClient>; onCreated: (draft: Draft) => void }) {
-  const [catalog, setCatalog] = useState<{ revision: { datasetId: string; datasetVersion: string } | null; periods: string[] } | null>(null);
+function PublishedForecasts({ api, onCreated, refreshVersion }: { api: ReturnType<typeof createAdminClient>; onCreated: (draft: Draft) => void; refreshVersion: number }) {
+  const read = useAdminRead<{ revision: { datasetId: string; datasetVersion: string } | null; periods: string[] }>(api, 'forecast-catalog', {}, refreshVersion);
+  const catalog = read.data;
   const [period, setPeriod] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [retry, setRetry] = useState(0);
-  usePageLoading(!catalog && !error);
   useEffect(() => {
-    const request = new AbortController(); setError('');
-    void api<NonNullable<typeof catalog>>('forecast-catalog', { signal: request.signal }).then(value => { setCatalog(value); setPeriod(value.periods[0] ?? ''); })
-      .catch(failure => { if (!request.signal.aborted) setError(errorText(failure)); });
-    return () => request.abort();
-  }, [api, retry]);
+    if (catalog) setPeriod(current => catalog.periods.includes(current) ? current : catalog.periods[0] ?? '');
+  }, [catalog]);
   return <section className="cms-published" aria-labelledby="cms-published-title"><div className="cms-published-top"><div><div className="cms-section-heading"><span className="cms-section-icon"><ChartNoAxesCombined size={24} aria-hidden="true" /></span><h2 id="cms-published-title">พยากรณ์ที่แสดงบนเว็บไซต์</h2></div>
-    {error ? <p className="cms-error" role="alert">{error}<button className="cms-text-button" onClick={() => setRetry(value => value + 1)}>ลองใหม่</button></p>
+    {error || read.error ? <p className="cms-error" role="alert">{error || read.error}<button className="cms-text-button" disabled={read.refreshing} onClick={() => { setError(''); read.reload(); }}>ลองใหม่</button></p>
       : !catalog ? <Skeleton /> : !catalog.revision ? <p>ยังไม่มีชุดพยากรณ์ที่เผยแพร่</p>
       : <p>เลือกเดือนต้นทางเพื่อตรวจแก้ฉบับร่าง ข้อมูลเดิมยังแสดงจนกว่าจะเผยแพร่</p>}</div>
     {catalog?.revision && <div className="cms-review-controls"><p>เลือกเดือนต้นทางที่ต้องการตรวจแก้</p><div className="cms-actions"><div className="cms-month-control"><CalendarDays size={17} aria-hidden="true" /><MonthSelect ariaLabel="เดือนตั้งต้นที่จะตรวจแก้" value={period}
       options={catalog.periods.map(value => ({ value, label: new Date(`${value}-01T12:00:00`).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }) }))} onChange={setPeriod} />
-      </div><button className="primary-button" disabled={busy || !period} onClick={() => {
+      </div><button className="primary-button" disabled={busy || read.refreshing || !period} onClick={() => {
         setBusy(true); setError(''); void api<Draft>('clone-forecast', { body: { datasetId: catalog.revision!.datasetId, originMonth: period } })
           .then(onCreated).catch(failure => setError(errorText(failure))).finally(() => setBusy(false));
       }}><Pencil size={16} />{busy ? 'กำลังสร้างฉบับร่าง' : 'ตรวจแก้รอบนี้'}</button></div></div>}</div>
@@ -120,13 +108,14 @@ function PublishedForecasts({ api, onCreated }: { api: ReturnType<typeof createA
   </section>;
 }
 
-function DraftEditor({ draft, api, onSaved }: { draft: Draft; api: ReturnType<typeof createAdminClient>; onSaved: (draft: Draft) => void }) {
+function DraftEditor({ draft, api, onSaved, refreshing }: { draft: Draft; api: ReturnType<typeof createAdminClient>; onSaved: (draft: Draft) => void; refreshing: boolean }) {
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState('all');
   const [page, setPage] = useState(0);
   const [report, setReport] = useState<ValidationReport | null>(null);
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [operationBusy, setBusy] = useState(false);
+  const busy = operationBusy || refreshing;
   const [edit, setEdit] = useState<{ index: number | null; value: Payload; metadata?: boolean } | null>(null);
   const [reason, setReason] = useState('');
   const [confirmAccept, setConfirmAccept] = useState(false);

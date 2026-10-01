@@ -20,6 +20,64 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Admin warm reads and tab-return regression (2026-10-02, local; not deployed):
+
+- Continue in `artifacts/home-clean-url-release-20261001/source`, branch
+  `fix/admin-reference-groups-20261001`, baseline `7de05a6`. This includes
+  the preceding catalogue grouping work from this chat; root runtime files
+  remain untouched.
+- `src/admin/client.ts` now retains up to 16 successful reads per mounted
+  account workspace. `useAdminRead.ts` serves matching warm data immediately
+  while rechecking the server on entry/retry. It is used by AdminWorkspace,
+  PublishedForecasts and ReferenceResources; no persisted Admin-data cache.
+- Initial uncached entry remains covered. Returning from imports/detail and
+  manual refresh keep loaded panels visible. Same-user SDK notifications and
+  browser-tab return preserve search/form DOM without new Admin requests.
+  Full document reload still loads afresh.
+- Mutation invalidation excludes late pre-save reads. Warm draft/resource
+  detail requests disable editing until the latest revision arrives. Manual
+  refresh respects unsaved edits; server session/membership checks and
+  conflict detection are unchanged. Denied reads remove their old results.
+- Baseline regression reproduced imports-to-home full-page loading; browser
+  focus/auth events alone did not reproduce the report in the isolated fixture.
+  No unverified auth workaround or automatic focus refetch was introduced.
+- Verified final implementation: TypeScript/CMS-mode build, 42 focused unit
+  checks and 12 desktop/mobile browser cases (tab/session return, sign-out,
+  unsaved edit/save, menu/detail return, delayed manual refresh, warm draft
+  revision safety, and source edit/reload/publication/public bundle).
+  All browser writes used the isolated test database.
+- Evidence: `artifacts/home-clean-url-release-20261001/admin-resume-{after,refresh}`
+  and sibling build/unit/browser logs. Personally inspected warm navigation
+  screenshots at both widths. No full-site CI, live production smoke, commit,
+  push, deployment, migration, billing change or production write.
+
+
+Admin reference catalogue grouping (local follow-up, not deployed):
+
+- Implemented the approved three task groups: ข้อมูลพื้นที่, ชั้นข้อมูลแผนที่
+  and แหล่งข้อมูลอ้างอิง. The map group discloses three active geometries;
+  nested search and category filters work on desktop and mobile.
+- Station locations, station proximity and neighboring-country geometry are
+  absent from the main catalogue/search. Their payloads, bootstrap registration,
+  historical versions, old deep links and downloads remain unchanged.
+- The source view keeps five drought/agriculture references and labels them
+  อ้างอิงประกอบ; it does not claim they feed the forecast model. Editing uses
+  original payload indices and retains all nine original source records,
+  including hidden rows.
+- Work is isolated on `fix/admin-reference-groups-20261001` in
+  `artifacts/home-clean-url-release-20261001/source`, based on `7de05a6`.
+  Root Admin files were not overwritten; unrelated dirty root work remains.
+- Verified: TypeScript/CMS-mode build; 9 focused unit checks; 6 desktop/mobile
+  browser journeys covering groups/search/filters, map disclosure, retained
+  deep-link export and filtered-source edit/reload/publication/public-bundle
+  parity. Source editing/publication used only the isolated database fixture.
+  The two catalogue journeys were repeated for expanded/collapsed snapshots.
+- Visually inspected desktop/mobile full-page and grouped-panel snapshots in
+  `artifacts/home-clean-url-release-20261001/admin-reference-groups-visual/`.
+  No overflow or runtime errors in the tested flows. Full-site CI and live
+  production smoke are deferred until a release request. No commit, push,
+  deployment, migration or production data write was performed.
+
 Clean default Home URL production release (2026-10-01):
 
 - Released only this chat's Home URL work from isolated branch

@@ -55,6 +55,7 @@ files.
 | `WorkspaceEmptyState` | `src/components/WorkspaceEmptyState.tsx` | Shared empty/error presentation in CMS and irrigation | Icon, heading level, description and optional action; owner retains filtering/retry events and state. `IrrigationEmptyState` is the domain adapter, not a duplicate layout. |
 | `AppStartup` | `src/components/AppStartup.tsx` | Branded full-screen loading for Visitor and Admin | Public emblem, centered brand, indeterminate bar and one live status. `path` changes the Admin caption; optional `message` names the startup phase. No session/data imports or fake progress. Offers page reload after 20 seconds; never dismisses itself on a timer. `index.html` uses the same CSS/brand for pre-JavaScript entry. |
 | `PageLoadBoundary` / `usePageLoading` | `src/components/PageLoadBoundary.tsx` | Coordinate blocking page reads behind `AppStartup` | Readers register in layout effects; release on readiness, failure or unmount. Children stay mounted/measurable but hidden, inert and removed from the accessibility tree while pending. Covers nested load waterfalls without a skeleton flash. Cached refreshes, criteria changes and mutations stay local. `PageLoadPending` covers the lazy CMS chunk. |
+| `useAdminRead` | `src/admin/useAdminRead.ts` | Admin lists, drafts, forecast catalogue and reference resources | Uses the account-owned in-memory `createAdminClient` cache for warm rendering; revalidates on entry/retry, blocks the page only for uncached reads, clears denied results and ignores cancelled responses. `refreshVersion` coordinates manual reload across panels; owners keep forms/mutations and disable writes while details revalidate. No public forecast cache or auth policy change. |
 | `SidebarBrand` | `src/components/SidebarBrand.tsx` | Logo in the live sidebar | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
 | `WorkspaceSearch` / `WorkspaceSearchTrigger` | `src/components/WorkspaceSearch.tsx` | Authenticated global search across geographic levels and active tools | Shared desktop/mobile dialog; loads `WorkspaceSearchContent` only on open, with dismissible loading and scoped recovery. Formal Thai, aliases/topics, contextual results, Contains/Exact, filters, explicit history commits and per-account clearing. Receives `userId`, `includeExport`, navigation/export/close callbacks. See `SEARCH_BEHAVIOR.md`. |
 | `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Forecast recovery and local loading placeholders | Page placeholders mount behind `PageLoadBoundary`, not as the visible startup experience. Local analysis/modal placeholders remain scoped. `ForecastArchiveLoading` reexports the overview and retains the drought error/back-navigation header. |
@@ -138,8 +139,13 @@ imports/drafts and reference resources. Forecast facts reuse centered
 counts come from the API; the six-month lead is the existing rev3 contract and
 published status describes the current dataset, not draft readiness. Resource
 cards use the existing supported catalogue without invented row counts.
-Desktop resources use two columns; mobile initially shows three with an explicit
-expand/collapse control. Search/filter results always reveal every match. Drafts
+The reference catalogue shows three task groups on desktop and mobile: area
+identities, map layers and source references. The map group expands to its three
+active geometries; search matches nested resources and opens their group.
+Retained station/proximity and neighboring-country resources stay accessible by
+existing deep links but are absent from everyday catalogue/search. Source rows
+are curated drought/agriculture references with original payload indices, not
+asserted model inputs. Search/filter results always reveal every match. Drafts
 retain the same DOM/actions and use a mobile card layout. Presentation does not
 change import, publication, permission, auth or reference-read ownership.
 

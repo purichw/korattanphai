@@ -1,6 +1,6 @@
 import { test, expect, seedAdminSession } from './fixtures';
 import { cmsTestDatabase } from '../tests/fixtures/admin-data.mjs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { createAdminWorkbook } from '../src/admin/workbook';
 
 test('operators see explained real resources and can inspect them without creating drafts', async ({ page, context }, testInfo) => {
@@ -12,7 +12,10 @@ test('operators see explained real resources and can inspect them without creati
   try {
     await seedAdminSession(page); await page.goto('/admin');
     await expect(page.getByRole('heading', { name: 'ข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
-    await expect(page.locator('.cms-resource-row')).toHaveCount(8);
+    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
+    for (const name of ['ข้อมูลพื้นที่', 'ชั้นข้อมูลแผนที่', 'แหล่งข้อมูลอ้างอิง']) {
+      await expect(page.locator('.cms-reference').getByRole('heading', { name, exact: true })).toBeVisible();
+    }
     await expect(page.locator('.cms-workspace')).not.toContainText('canonical/');
     await expect(page.locator('.cms-workspace')).not.toContainText('farmer profile');
     await expect(page.locator('.cms-workspace')).not.toContainText('advisory');
@@ -21,12 +24,26 @@ test('operators see explained real resources and can inspect them without creati
     await page.evaluate(() => document.fonts.ready);
     await mkdir('artifacts/admin-no-code', { recursive: true });
     await page.screenshot({ path: `artifacts/admin-no-code/${testInfo.project.name}-home.png`, fullPage: true });
-    await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่อและพิกัดสถานีฝน');
+    await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'ในเมือง', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'สร้างฉบับแก้ไข', exact: true })).toHaveCount(0);
+    // Retained resources remain inspectable and exportable through existing deep links.
+    const catalog = await database.operation('resource:catalog', {});
+    const station = catalog.find((resource: { resource_key: string }) => resource.resource_key === 'canonical/nakhon_ratchasima/rainfall_stations');
+    const original = await database.operation('resource:get', { id: station.id });
+    await page.goto(`/admin?resource=${station.id}`);
     await expect(page.getByRole('heading', { name: 'รายชื่อและพิกัดสถานีฝน', exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'บ้านเทพนิมิตร', exact: true })).toBeVisible();
     await expect(page.getByText('หน้า 1 / 3', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'สร้างฉบับแก้ไข', exact: true })).toHaveCount(0);
+    await page.locator('summary').filter({ hasText: 'ประวัติและไฟล์ต้นฉบับ' }).click();
+    const downloadReady = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'ดาวน์โหลดไฟล์ข้อมูล (JSON)', exact: true }).click();
+    const download = await downloadReady;
+    expect(download.suggestedFilename()).toMatch(/^rainfall_stations_r\d+\.json$/);
+    expect(JSON.parse(await readFile((await download.path())!, 'utf8'))).toEqual(original.payload);
     expect(clones).toEqual([]);
     await page.getByRole('button', { name: 'กลับหน้าจัดการข้อมูล', exact: true }).click();
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).click();

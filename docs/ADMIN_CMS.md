@@ -6,7 +6,45 @@ passed with the original data unchanged. This is the scoped CMS foundation,
 not complete no-code ownership of every data family; see remaining gates below.
 See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
 
-## Operator-facing cleanup (local, 2026-09-30)
+## Returning to loaded Admin data (local follow-up)
+
+- `createAdminClient` retains up to 16 successful list/detail/catalogue reads in
+  memory for the mounted Admin account. No draft data is persisted in browser
+  storage. Sign-out/account replacement discards that workspace and its cache.
+- `useAdminRead` renders a matching cached result immediately and revalidates
+  with the existing session checks and server authorization. Only uncached
+  initial reads register the full-page loader. Returning from imports or a
+  resource detail and manually refreshing keep ready panels visible.
+- Same-account session notifications and browser focus do not initiate Admin
+  reads or replace unsaved forms. Save/publish/clone/import invalidate cached
+  reads, including late responses started before a mutation. Warm detail
+  revalidation disables editing until its latest revision arrives. Manual
+  refresh respects the existing unsaved-changes guard.
+- A temporary refresh failure retains the last result with a local error;
+  rejected access/session or a missing draft removes that result. Hard reload
+  still verifies the session and loads from the server.
+- Baseline isolated tests reproduced the imports-to-home loading regression;
+  browser focus and same-user session notifications alone did not reproduce it.
+  This change is local, not deployed; no auth policy or backend contract changed.
+
+## Reference catalogue grouping (local follow-up)
+
+- The reference panel now has three groups: ข้อมูลพื้นที่, ชั้นข้อมูลแผนที่ and
+  แหล่งข้อมูลอ้างอิง. Map layers expand to the three active local geometries.
+  Search includes nested layer names; category filters use these same groups.
+- Station locations, nearest-station coverage and neighboring-country geometry
+  are hidden from the main catalogue and its search. Their original payloads,
+  stored versions, bootstrap registration, history/download and old deep links
+  remain intact. No database migration or publication is needed for this UI change.
+- Source tables show the existing TMD, GISTDA drought, RID, OAE and Agri-Map
+  references, explicitly labeled อ้างอิงประกอบ. They are not established as
+  inputs to the published forecast model. Flood, EWS, pest and observed-disaster
+  source entries stay in the complete original payload but are omitted here.
+- Source editing retains original array indices, including gaps left by hidden
+  rows. Saving changes only the selected original entry; all other rows remain.
+  This follow-up is not yet deployed.
+
+## Operator-facing cleanup (2026-09-30 checkpoint)
 
 The owner requested a no-code workspace with understandable Thai names and no
 unused demo/stub inventory. This local follow-up starts from the verified sidebar

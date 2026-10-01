@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { CMS_RESOURCES } from '../shared/cmsResources.mjs';
-import { resourceViews, referenceTable, isCutoverVerification } from '../src/admin/resourcePresentation';
+import { resourceViews, referenceCatalogGroups, referenceTable, isCutoverVerification } from '../src/admin/resourcePresentation';
 import { forecastChoice, updateForecastChoice } from '../src/admin/dataPresentation';
 import sources from '../src/data/canonical/source_registry.json';
 import hierarchy from '../src/data/canonical/nakhon_ratchasima/admin_hierarchy.json';
@@ -25,9 +25,43 @@ describe('operator-facing data inventory', () => {
     expect(referenceTable('canonical/nakhon_ratchasima/rainfall_stations', stations).rows).toHaveLength(49);
     expect(JSON.stringify(hierarchy)).toBe(before);
   });
-  it('keeps source row identity when excluding illustrative entries', () => {
-    const payload = [{ ...sources[0], dataClass: 'CANONICAL_SYNTHETIC' }, sources[0]];
-    expect(referenceTable('canonical/source_registry', payload).rows.map(row => row.index)).toEqual([1]);
+  it('groups only active resources and searches within the selected group', () => {
+    const items = CMS_RESOURCES.map(resource => ({ id: resource.key, resource_key: resource.key }));
+    const before = JSON.stringify(items);
+    const groups = referenceCatalogGroups(items);
+    expect(groups.map(group => group.id)).toEqual(['areas', 'maps', 'sources']);
+    expect(groups.flatMap(group => group.resources.map(resource => resource.resource_key))).toEqual([
+      'canonical/nakhon_ratchasima/admin_hierarchy', 'geodata/nakhon-ratchasima-subdistricts',
+      'geodata/nakhon-ratchasima-boundary', 'geodata/thailand-adm1', 'canonical/source_registry',
+    ]);
+    const maps = referenceCatalogGroups(items, 'ชั้นข้อมูลแผนที่');
+    expect(maps).toHaveLength(1);
+    expect(maps[0].resources).toHaveLength(3);
+    expect(referenceCatalogGroups(items, 'เส้นรอบจังหวัดนครราชสีมา')[0].resources.map(resource => resource.resource_key))
+      .toEqual(['geodata/nakhon-ratchasima-boundary']);
+    expect(referenceCatalogGroups(items, 'เส้นรอบจังหวัดนครราชสีมา', 'sources')).toEqual([]);
+    for (const term of ['รายชื่อและพิกัดสถานีฝน', 'สถานีฝนที่อยู่ใกล้แต่ละตำบล', 'ขอบเขตประเทศรอบข้าง']) {
+      expect(referenceCatalogGroups(items, term)).toEqual([]);
+    }
+    expect(referenceCatalogGroups([], '')).toEqual([]);
+    expect(JSON.stringify(items)).toBe(before);
+  });
+  it('shows drought references without changing retained source rows or their editor indices', () => {
+    const before = JSON.stringify(sources);
+    const table = referenceTable('canonical/source_registry', sources);
+    expect(table.rows.map(row => row.index)).toEqual([0, 1, 3, 5, 6]);
+    expect(table.rows.map(row => sources[row.index].id)).toEqual([
+      'SRC-TMD', 'SRC-GISTDA-DROUGHT', 'SRC-RID', 'SRC-OAE', 'SRC-AGRIMAP-LDD',
+    ]);
+    expect(table.columns).toContain('การใช้งาน');
+    const usageColumn = table.columns.indexOf('การใช้งาน');
+    expect(table.rows.every(row => row.cells[usageColumn] === 'อ้างอิงประกอบ')).toBe(true);
+    expect(JSON.stringify(sources)).toBe(before);
+  });
+  it('keeps original source indices after excluded, illustrative and unknown rows', () => {
+    const payload = [sources[2], { ...sources[0], dataClass: 'CANONICAL_SYNTHETIC' },
+      sources[3], { ...sources[0], id: 'SRC-UNREVIEWED' }, sources[0]];
+    expect(referenceTable('canonical/source_registry', payload).rows.map(row => row.index)).toEqual([2, 4]);
   });
   it('uses actual geometry names from each shipped schema', () => {
     const cases = [
