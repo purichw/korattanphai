@@ -118,7 +118,8 @@ jobs:
           retention-days: 7
   browser-compatibility:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Slow Ubuntu mirrors can consume the old budget before browsers are installed.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
