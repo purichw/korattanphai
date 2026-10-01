@@ -44,6 +44,17 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   rows. Saving changes only the selected original entry; all other rows remain.
   This follow-up is not yet deployed.
 
+## Resource row controls (2026-10-02 follow-up)
+
+- Resource details default to browsing without row or page checkboxes. The
+  explicit `เลือกเพื่อดาวน์โหลด` action reveals selection controls; cancellation
+  clears the selection. Original-row identities, cross-page CSV selection and
+  filter/revision clearing remain unchanged.
+- Detail actions use compact text buttons while retaining 44px touch targets,
+  keyboard activation and dialog focus restoration. Mobile keeps the same
+  bounded list viewport and pagination. The change applies to both area and
+  reference-source projections; no data or persistence contract changed.
+
 ## Operator-facing cleanup (2026-09-30 checkpoint)
 
 The owner requested a no-code workspace with understandable Thai names and no

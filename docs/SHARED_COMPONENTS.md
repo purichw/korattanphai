@@ -157,8 +157,10 @@ resource persistence. `ReferenceResources` owns source-registry edits and shared
 dialogs. Changes to resource/revision or search/district criteria clear selected
 rows; page/sort changes retain them. Mobile keeps semantic table cells in a
 scrollable card layout, with a reachable select-page control and filter toggle.
-On mobile, export controls/help appear only after selection; the select-page
-label explains their purpose. Breadcrumb return and refresh share one compact
+Browsing hides checkboxes until `เลือกเพื่อดาวน์โหลด` is activated. This explicit
+selection mode exposes `เลือกทั้งหน้านี้` and row checkboxes; cancelling clears
+the selection. Detail actions are compact text buttons with 44px touch targets.
+On mobile, export controls/help appear only after selection. Breadcrumb return and refresh share one compact
 row. Detail-only CSS scopes the dark mobile header and quiet content surface,
 leaving the Admin home shell untouched. Read-only guidance/last-save details
 remain in the History disclosure; source draft/publish controls remain visible.

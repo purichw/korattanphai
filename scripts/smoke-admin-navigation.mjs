@@ -174,6 +174,9 @@ try {
       await expect(page.locator('.cms-resource-total-metric')).toContainText('ตำบลใน 32 อำเภอ');
       await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(20);
       await expect(page.getByText('หน้า 1 / 15', { exact: true })).toBeVisible();
+      await expect(page.locator('.cms-reference-table input[type="checkbox"]')).toHaveCount(0);
+      await expect(page.getByRole('checkbox', { name: 'เลือกทุกรายการในหน้านี้', exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true })).toBeVisible();
       const resourceUrl = page.url();
       await page.evaluate(() => scrollTo(0, 0));
       await page.evaluate(() => document.fonts.ready);
@@ -220,13 +223,18 @@ try {
       await choose('อำเภอ', 'ปากช่อง');
       await expect(page.getByText('พบ 12 จาก 289 รายการ', { exact: true })).toBeVisible();
       await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(12);
-      const filterCode = (await page.locator('.cms-reference-table tbody input[type="checkbox"]').first().getAttribute('aria-label')).split(' · ').at(-1);
+      const filterCode = (await page.locator('.cms-reference-table tbody .cms-record-cell-2').first().textContent()).match(/\b\d{6}\b/)[0];
       await page.getByLabel('ค้นหาในข้อมูลชุดนี้', { exact: true }).fill(filterCode.slice(2));
       await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(1);
       await expect(page.locator('.cms-reference-table tbody tr')).toContainText(filterCode);
       await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).click();
       await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(20);
       const rowCheckboxes = page.locator('.cms-reference-table tbody input[type="checkbox"]');
+      await expect(rowCheckboxes).toHaveCount(0);
+      const startSelection = page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true });
+      await startSelection.focus(); await page.keyboard.press('Enter');
+      await expect(rowCheckboxes).toHaveCount(20);
+      if (device === 'mobile') await expect(page.getByText('เลือกทั้งหน้านี้', { exact: true })).toBeVisible();
       await rowCheckboxes.first().check();
       const firstCode = (await rowCheckboxes.first().getAttribute('aria-label')).split(' · ').at(-1);
       await page.getByRole('button', { name: 'ข้อมูลหน้าถัดไป', exact: true }).click();
@@ -248,8 +256,21 @@ try {
       await page.getByRole('button', { name: 'ล้างรายการที่เลือก', exact: true }).click();
       await expect(page.locator('.cms-reference-table tbody input[type="checkbox"]:checked')).toHaveCount(0);
       await expect(page.locator('.cms-record-selection button').filter({ hasText: 'ดาวน์โหลดที่เลือก (CSV)' })).toBeDisabled();
+      await rowCheckboxes.first().check();
+      await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
+      await expect(rowCheckboxes).toHaveCount(0);
+      await expect(page.getByRole('checkbox', { name: 'เลือกทุกรายการในหน้านี้', exact: true })).toHaveCount(0);
+      await startSelection.click();
+      await expect(page.locator('.cms-reference-table tbody input[type="checkbox"]:checked')).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'ดาวน์โหลดที่เลือก (CSV)', exact: true, includeHidden: true })).toBeDisabled();
+      await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
       const openDetails = page.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).first();
-      await openDetails.click();
+      if (device === 'mobile') {
+        const dimensions = await openDetails.evaluate(element => ({ button: element.getBoundingClientRect().toJSON(), row: element.closest('tr').getBoundingClientRect().toJSON() }));
+        assert.ok(dimensions.button.width < dimensions.row.width * 0.7, 'Detail action must remain compact within the mobile row.');
+        assert.ok(dimensions.button.height >= 44, 'Compact detail action must retain a 44px touch target.');
+      }
+      await openDetails.focus(); await page.keyboard.press('Enter');
       await expect(page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true })).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true })).toHaveCount(0);
@@ -307,7 +328,7 @@ try {
       assert.deepEqual(blockedWrites, []);
       report.checks.push({ device, navigation: 'passed', resourceSearch: 'passed', resourceGroupCount: 3, mapResourceCount: 3, sourceRows: 5,
         browserTabReturn: 'passed', manualRefresh: 'passed', warmNavigation: 'passed',
-        resourceDetail: { status: 'passed', areas: 289, districts: 32, selectedCsvRows: 2, screenshot: detailScreenshots, geometry, assets },
+        resourceDetail: { status: 'passed', areas: 289, districts: 32, selectedCsvRows: 2, explicitSelection: 'passed', cancelClearsSelection: 'passed', keyboardDetail: 'passed', screenshot: detailScreenshots, geometry, assets },
         importTemplate: 'passed', independentSessions: 'passed', applicationWrites: 0 });
     } finally { resumeReads(); await context.close(); }
   }

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Download, Filter, RotateCcw, Search, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Download, Filter, ListChecks, RotateCcw, Search, X } from 'lucide-react';
 import { AppSelect } from '../components/AppSelect';
 import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
 import type { ReferenceRow } from './resourcePresentation';
@@ -16,6 +16,7 @@ export function ReferenceRecords({ columns, rows, title, areas, busy, revision, 
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selectionMode, setSelectionMode] = useState(false);
   const [notice, setNotice] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const scroll = useRef<HTMLDivElement>(null);
@@ -33,6 +34,7 @@ export function ReferenceRecords({ columns, rows, title, areas, busy, revision, 
   const visible = filtered.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const pageSelected = visible.filter(row => selected.has(row.index)).length;
   const clearSelection = () => { setSelected(new Set()); setNotice(''); };
+  function toggleSelectionMode() { if (selectionMode) clearSelection(); setSelectionMode(value => !value); }
   function reset() { setQuery(''); setDistrict('all'); setSort('original'); setPage(0); clearSelection(); }
   function toggle(index: number, checked: boolean) {
     setNotice(''); setSelected(previous => { const next = new Set(previous); if (checked) next.add(index); else next.delete(index); return next; });
@@ -52,7 +54,7 @@ export function ReferenceRecords({ columns, rows, title, areas, busy, revision, 
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     setNotice(`ดาวน์โหลด ${chosen.length.toLocaleString('th-TH')} รายการแล้ว`);
   }
-  return <section className="cms-records-panel" aria-label="รายการข้อมูล" data-view={areas ? 'areas' : 'other'} data-has-selection={selected.size > 0}>
+  return <section className="cms-records-panel" aria-label="รายการข้อมูล" data-view={areas ? 'areas' : 'other'} data-selecting={selectionMode} data-has-selection={selected.size > 0}>
     <div className="cms-record-filters">
       <label className="cms-search"><Search size={18} aria-hidden="true" /><input aria-label="ค้นหาในข้อมูลชุดนี้" value={query}
         placeholder={areas ? 'ค้นหาอำเภอ ตำบล หรือรหัสตำบล' : 'ค้นหาชื่อพื้นที่ หน่วยงาน หรือรหัส'}
@@ -68,16 +70,19 @@ export function ReferenceRecords({ columns, rows, title, areas, busy, revision, 
       {(query || district !== 'all' || sort !== 'original') && <button className="secondary-button cms-record-reset" onClick={reset}><RotateCcw size={16} />ล้างตัวกรอง</button>}</div>
     </div>
     <div className="cms-record-count"><span role="status">พบ <strong>{filtered.length.toLocaleString('th-TH')}</strong> จาก {rows.length.toLocaleString('th-TH')} รายการ</span>
-      <span className="cms-record-selection-hint">เลือกหลายรายการเพื่อดาวน์โหลดไปใช้ใน Excel</span><label className="cms-record-checkbox cms-mobile-select-page">{pageCheckbox()}<span>เลือกหน้านี้เพื่อดาวน์โหลด</span></label></div>
+      <button className="cms-record-text-action cms-record-select-toggle" aria-pressed={selectionMode} disabled={busy} onClick={toggleSelectionMode}>
+        {selectionMode ? <X size={15} aria-hidden="true" /> : <ListChecks size={16} aria-hidden="true" />}{selectionMode ? 'ยกเลิกการเลือก' : 'เลือกเพื่อดาวน์โหลด'}
+      </button></div>
+    {selectionMode && <div className="cms-record-select-bar"><label className="cms-record-checkbox">{pageCheckbox()}<span>เลือกทั้งหน้านี้</span></label><span>เลือก {selected.size.toLocaleString('th-TH')} รายการ</span></div>}
     {filtered.length ? <>
       <div className="cms-table-scroll is-records cms-records-scroll" ref={scroll} tabIndex={0} role="region" aria-label="ตารางรายการข้อมูล เลื่อนเพื่อดูรายการในหน้านี้">
         <table className="cms-table cms-reference-table" role="table"><caption className="sr-only">{title}</caption>
-          <thead><tr role="row"><th scope="col" className="cms-record-check"><label className="cms-record-checkbox">{pageCheckbox()}</label></th>
+          <thead><tr role="row">{selectionMode && <th scope="col" className="cms-record-check"><span className="sr-only">เลือก</span></th>}
             {columns.map(column => <th scope="col" key={column}>{column}</th>)}<th scope="col">รายละเอียด</th></tr></thead>
           <tbody>{visible.map(row => <tr key={row.index} role="row" className={selected.has(row.index) ? 'is-selected' : ''}>
-            <td role="cell" className="cms-record-check"><label className="cms-record-checkbox"><input type="checkbox" aria-label={`เลือก ${row.cells.join(' · ')}`} checked={selected.has(row.index)} disabled={busy} onChange={event => toggle(row.index, event.target.checked)} /></label></td>
+            {selectionMode && <td role="cell" className="cms-record-check"><label className="cms-record-checkbox"><input type="checkbox" aria-label={`เลือก ${row.cells.join(' · ')}`} checked={selected.has(row.index)} disabled={busy} onChange={event => toggle(row.index, event.target.checked)} /></label></td>}
             {row.cells.map((cell, index) => <td role="cell" className={`cms-record-cell cms-record-cell-${index}`} key={index}><span className="cms-record-mobile-label" aria-hidden="true">{columns[index]} · </span>{cell}</td>)}
-            <td role="cell" className="cms-record-action"><button className="secondary-button" disabled={busy} onClick={() => onOpen(row)}>{actionLabel}<ArrowRight size={15} /></button></td>
+            <td role="cell" className="cms-record-action"><button className="cms-record-text-action" disabled={busy} onClick={() => onOpen(row)}>{actionLabel}<ArrowRight size={15} aria-hidden="true" /></button></td>
           </tr>)}</tbody>
         </table>
       </div>
