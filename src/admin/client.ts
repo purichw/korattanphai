@@ -22,12 +22,26 @@ const messages: Record<string, string> = {
 export class AdminRequestError extends Error {
   constructor(public code: string) { super(messages[code] ?? 'ดำเนินการไม่สำเร็จ กรุณาตรวจข้อมูลแล้วลองใหม่'); }
 }
+export type AdminReadOptions = { id?: string; offset?: number; body?: unknown };
+export const adminReadKey = (action: string, options: AdminReadOptions = {}) =>
+  JSON.stringify([action, options.id ?? null, options.offset ?? null, options.body ?? null]);
+const cachedReads = new Set(['list', 'get', 'forecast-catalog', 'resource-catalog', 'resource-get']);
+const otherReads = new Set(['audit', 'validate', 'resource-history', 'original', 'schema', 'forecast-crosswalk', 'forecast-source']);
+
 export function createAdminClient(userId: string) {
-  return async <T>(action: string, options: { id?: string; offset?: number; body?: unknown; signal?: AbortSignal } = {}): Promise<T> => {
+  // Owned by one mounted, account-keyed Admin workspace. Never persist drafts
+  // in browser storage or reuse them across sign-out/account changes.
+  const cache = new Map<string, unknown>();
+  let revision = 0;
+  const clear = () => { revision += 1; cache.clear(); };
+  const request = async <T>(action: string, options: AdminReadOptions & { signal?: AbortSignal } = {}): Promise<T> => {
+    const mutation = !cachedReads.has(action) && !otherReads.has(action);
+    if (mutation) clear();
+    const startedAt = revision;
     const client = await getSupabaseClient();
     const initial = await client?.auth.getSession();
     const session = initial?.data.session;
-    if (initial?.error || !session || session.user.id !== userId) throw new AdminRequestError('sign_in_required');
+    if (initial?.error || !session || session.user.id !== userId) { clear(); throw new AdminRequestError('sign_in_required'); }
     const query = new URLSearchParams({ action });
     if (options.id) query.set('id', options.id);
     if (options.offset != null) query.set('offset', String(options.offset));
@@ -44,9 +58,18 @@ export function createAdminClient(userId: string) {
       });
       const data = await response.json();
       const current = await client!.auth.getSession();
-      if (current.error || current.data.session?.user.id !== userId) throw new AdminRequestError('sign_in_required');
+      if (current.error || current.data.session?.user.id !== userId) { clear(); throw new AdminRequestError('sign_in_required'); }
       if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-      if (!response.ok) throw new AdminRequestError(data.error?.code ?? 'cms_unavailable');
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) clear();
+        cache.delete(adminReadKey(action, options));
+        throw new AdminRequestError(data.error?.code ?? 'cms_unavailable');
+      }
+      if (mutation) clear();
+      else if (cachedReads.has(action) && revision === startedAt) {
+        cache.set(adminReadKey(action, options), data);
+        while (cache.size > 16) cache.delete(cache.keys().next().value!);
+      }
       return data as T;
     } catch (error) {
       if (error instanceof AdminRequestError) throw error;
@@ -54,4 +77,7 @@ export function createAdminClient(userId: string) {
       throw new AdminRequestError('cms_unavailable');
     } finally { window.clearTimeout(timer); options.signal?.removeEventListener('abort', cancel); }
   };
+  return Object.assign(request, {
+    cached: <T>(action: string, options: AdminReadOptions = {}) => cache.get(adminReadKey(action, options)) as T | undefined,
+  });
 }

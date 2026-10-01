@@ -21,9 +21,23 @@ test('resource details filter, paginate, inspect and export selected original ro
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', level: 1, exact: true })).toBeVisible();
+    const resource = await database.operation('resource:get', { id: new URL(page.url()).searchParams.get('resource') });
     await expect(page.locator('.cms-resource-metrics')).toContainText('289');
     await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(20);
     await expect(page.getByText('หน้า 1 / 15', { exact: true })).toBeVisible();
+    const rowCheckboxes = page.locator('.cms-reference-table tbody input[type="checkbox"]');
+    const pageCheckbox = page.getByRole('checkbox', { name: 'เลือกทุกรายการในหน้านี้', exact: true });
+    await expect(rowCheckboxes).toHaveCount(0);
+    await expect(pageCheckbox).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true })).toBeVisible();
+    if (info.project.name === 'mobile') {
+      const detail = page.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).first();
+      const dimensions = await detail.evaluate(element => ({
+        button: element.getBoundingClientRect().toJSON(), row: element.closest('tr')!.getBoundingClientRect().toJSON(),
+      }));
+      expect(dimensions.button.width).toBeLessThan(dimensions.row.width * 0.7);
+      expect(dimensions.button.height).toBeGreaterThanOrEqual(44);
+    }
     if (info.project.name === 'mobile') {
       await page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true }).click();
       await expect(page.locator('#sidebar-navigation')).toBeVisible();
@@ -40,12 +54,14 @@ test('resource details filter, paginate, inspect and export selected original ro
         pageOverflow: document.documentElement.scrollWidth > innerWidth, listHeight: list.clientHeight, listScrollHeight: list.scrollHeight,
         rowCount: list.querySelectorAll('tbody tr').length, viewport: list.getBoundingClientRect().toJSON() };
     }), null, 2));
-    const rowCheckboxes = page.locator('.cms-reference-table tbody input[type="checkbox"]');
+    const startSelection = page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true });
+    await startSelection.focus(); await page.keyboard.press('Enter');
+    await expect(rowCheckboxes).toHaveCount(20);
+    if (info.project.name === 'mobile') await expect(page.getByText('เลือกทั้งหน้านี้', { exact: true })).toBeVisible();
     await rowCheckboxes.first().check();
     await page.mouse.move(0, 0);
     await page.screenshot({ path: info.outputPath('resource-detail-selected-full.png'), fullPage: true });
     const firstName = await rowCheckboxes.first().getAttribute('aria-label');
-    const pageCheckbox = page.getByRole('checkbox', { name: 'เลือกทุกรายการในหน้านี้', exact: true });
     expect(await pageCheckbox.evaluate((input: HTMLInputElement) => input.indeterminate)).toBe(true);
     await page.getByRole('button', { name: 'ข้อมูลหน้าถัดไป', exact: true }).click();
     await rowCheckboxes.last().check();
@@ -64,6 +80,13 @@ test('resource details filter, paginate, inspect and export selected original ro
     const exportButton = page.locator('.cms-record-selection button').filter({ hasText: 'ดาวน์โหลดที่เลือก (CSV)' });
     await expect(exportButton).toBeDisabled();
     if (info.project.name === 'mobile') await expect(exportButton).toBeHidden();
+    await rowCheckboxes.first().check();
+    await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
+    await expect(rowCheckboxes).toHaveCount(0);
+    await expect(pageCheckbox).toHaveCount(0);
+    await startSelection.click();
+    await expect(page.locator('.cms-reference-table tbody input[type="checkbox"]:checked')).toHaveCount(0);
+    await expect(exportButton).toBeDisabled();
     await choose('อำเภอ', 'ปากช่อง');
     await expect(page.getByText('พบ 12 จาก 289 รายการ', { exact: true })).toBeVisible();
     await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(12);
@@ -73,12 +96,69 @@ test('resource details filter, paginate, inspect and export selected original ro
     await expect(page.getByRole('heading', { name: 'ไม่พบรายการตามคำค้น', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).last().click();
     await expect(exportButton).toBeDisabled();
+    await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
+    await expect(rowCheckboxes).toHaveCount(0);
     await choose('จำนวนรายการต่อหน้า', '10 ต่อหน้า');
     await expect(page.getByText('หน้า 1 / 29', { exact: true })).toBeVisible();
     const open = page.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).first();
-    await open.click();
-    await expect(page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true })).toContainText('300101');
-    await page.keyboard.press('Escape'); await expect(open).toBeFocused();
+    const fieldValues = await page.locator('.cms-reference-table tbody tr').first().locator('.cms-record-cell').evaluateAll(cells =>
+      cells.map(cell => (cell.textContent ?? '').replace(cell.querySelector('.cms-record-mobile-label')?.textContent ?? '', '').trim()));
+    await open.focus(); await page.keyboard.press('Enter');
+    const recordDialog = page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true });
+    await expect(recordDialog).toBeVisible();
+    await expect(recordDialog).toHaveAccessibleDescription('ข้อมูลอำเภอและตำบลในจังหวัดนครราชสีมา');
+    expect(await recordDialog.evaluate(element => element.tagName === 'DIALOG' && element.matches(':modal'))).toBe(true);
+    expect(resource.state).toBe('published');
+    await expect(recordDialog.locator('.cms-record-dialog-meta')).toContainText(`รุ่นแก้ไข ${resource.revision}`);
+    await expect(recordDialog.locator('.cms-record-dialog-status')).toHaveText('เผยแพร่แล้ว');
+    await expect(recordDialog.locator('dt')).toHaveText(['อำเภอ', 'ตำบล', 'รหัสตำบล']);
+    await expect(recordDialog.locator('dt svg[aria-hidden="true"]')).toHaveCount(3);
+    await expect(recordDialog.locator('dd')).toHaveText(fieldValues);
+    await expect(recordDialog.locator('.cms-record-dialog-description')).toContainText('ชื่อและรหัสพื้นที่ที่ใช้ค้นหา เลือกพื้นที่ และเชื่อมกับค่าพยากรณ์');
+    await expect(recordDialog.locator('footer')).toContainText(`ข้อมูลอ้างอิงสำหรับตรวจสอบ · รุ่นแก้ไข ${resource.revision}`);
+    const dialogGeometry = () => recordDialog.evaluate(element => {
+      const content = element.querySelector('.nr-tool-dialog-content')!;
+      const footer = element.querySelector('footer')!;
+      return { viewport: { width: innerWidth, height: innerHeight }, dialog: element.getBoundingClientRect().toJSON(),
+        content: { clientHeight: content.clientHeight, scrollHeight: content.scrollHeight, scrollTop: content.scrollTop },
+        footer: footer.getBoundingClientRect().toJSON(), pageOverflow: document.documentElement.scrollWidth > innerWidth };
+    });
+    const normalGeometry = await dialogGeometry();
+    expect(normalGeometry.pageOverflow).toBe(false);
+    if (info.project.name === 'mobile') {
+      expect(Math.abs(normalGeometry.dialog.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(normalGeometry.dialog.width - normalGeometry.viewport.width)).toBeLessThanOrEqual(1);
+      expect(Math.abs(normalGeometry.dialog.bottom - normalGeometry.viewport.height)).toBeLessThanOrEqual(1);
+    }
+    await page.mouse.move(0, 0);
+    await page.screenshot({ path: info.outputPath('resource-record-dialog-viewport.png') });
+    // Native modal/backdrop evidence must stay within one viewport; full-page stitching misplaces it.
+    await page.screenshot({ path: info.outputPath('resource-record-dialog-context.png') });
+    await page.keyboard.press('Escape');
+    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
+    await page.keyboard.press('Enter');
+    await recordDialog.getByRole('button', { name: 'ปิดรายละเอียดรายการ', exact: true }).click();
+    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
+    await page.keyboard.press('Enter');
+    let shortGeometry: Awaited<ReturnType<typeof dialogGeometry>> | null = null;
+    const originalViewport = page.viewportSize()!;
+    if (info.project.name === 'mobile') {
+      await page.setViewportSize({ width: originalViewport.width, height: 480 });
+      await expect.poll(async () => Math.abs((await dialogGeometry()).dialog.bottom - 480) <= 1).toBe(true);
+      const content = recordDialog.locator('.nr-tool-dialog-content');
+      expect(await content.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
+      await content.evaluate(element => { element.scrollTop = element.scrollHeight; });
+      await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+      shortGeometry = await dialogGeometry();
+      expect(shortGeometry.footer.top).toBeGreaterThanOrEqual(0);
+      expect(shortGeometry.footer.bottom).toBeLessThanOrEqual(480);
+      await expect(recordDialog.getByRole('button', { name: 'ปิด', exact: true })).toBeInViewport();
+      await page.screenshot({ path: info.outputPath('resource-record-dialog-short-mobile.png') });
+    }
+    await recordDialog.getByRole('button', { name: 'ปิด', exact: true }).click();
+    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
+    if (info.project.name === 'mobile') await page.setViewportSize(originalViewport);
+    await writeFile(info.outputPath('resource-record-dialog-geometry.json'), JSON.stringify({ normal: normalGeometry, short: shortGeometry }, null, 2));
     await page.reload();
     await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
     await page.locator('summary').filter({ hasText: 'ประวัติและไฟล์ต้นฉบับ' }).click();

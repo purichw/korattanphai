@@ -55,6 +55,7 @@ files.
 | `WorkspaceEmptyState` | `src/components/WorkspaceEmptyState.tsx` | Shared empty/error presentation in CMS and irrigation | Icon, heading level, description and optional action; owner retains filtering/retry events and state. `IrrigationEmptyState` is the domain adapter, not a duplicate layout. |
 | `AppStartup` | `src/components/AppStartup.tsx` | Branded full-screen loading for Visitor and Admin | Public emblem, centered brand, indeterminate bar and one live status. `path` changes the Admin caption; optional `message` names the startup phase. No session/data imports or fake progress. Offers page reload after 20 seconds; never dismisses itself on a timer. `index.html` uses the same CSS/brand for pre-JavaScript entry. |
 | `PageLoadBoundary` / `usePageLoading` | `src/components/PageLoadBoundary.tsx` | Coordinate blocking page reads behind `AppStartup` | Readers register in layout effects; release on readiness, failure or unmount. Children stay mounted/measurable but hidden, inert and removed from the accessibility tree while pending. Covers nested load waterfalls without a skeleton flash. Cached refreshes, criteria changes and mutations stay local. `PageLoadPending` covers the lazy CMS chunk. |
+| `useAdminRead` | `src/admin/useAdminRead.ts` | Admin lists, drafts, forecast catalogue and reference resources | Uses the account-owned in-memory `createAdminClient` cache for warm rendering; revalidates on entry/retry, blocks the page only for uncached reads, clears denied results and ignores cancelled responses. `refreshVersion` coordinates manual reload across panels; owners keep forms/mutations and disable writes while details revalidate. No public forecast cache or auth policy change. |
 | `SidebarBrand` | `src/components/SidebarBrand.tsx` | Logo in the live sidebar | Receives accessible `label` and `compactMobileLogo`; owns the existing responsive picture markup with unchanged image sizes/paths. |
 | `WorkspaceSearch` / `WorkspaceSearchTrigger` | `src/components/WorkspaceSearch.tsx` | Authenticated global search across geographic levels and active tools | Shared desktop/mobile dialog; loads `WorkspaceSearchContent` only on open, with dismissible loading and scoped recovery. Formal Thai, aliases/topics, contextual results, Contains/Exact, filters, explicit history commits and per-account clearing. Receives `userId`, `includeExport`, navigation/export/close callbacks. See `SEARCH_BEHAVIOR.md`. |
 | `ForecastLoadingPrimitives` | `src/components/nakhon-ratchasima/ForecastLoadingPrimitives.tsx` | Forecast recovery and local loading placeholders | Page placeholders mount behind `PageLoadBoundary`, not as the visible startup experience. Local analysis/modal placeholders remain scoped. `ForecastArchiveLoading` reexports the overview and retains the drought error/back-navigation header. |
@@ -94,6 +95,9 @@ long lists, including analysis patterns and search-topic filters, use the shared
 threshold; short status, horizon, sort and view menus retain their compact form.
 `WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
 locks background scroll and restores the opener without moving the page.
+Optional `description`, `footer` and `className` support a scoped detail variant:
+the description is connected with `aria-describedby`, and the footer remains
+outside bounded scrolling content. Default dialogs retain their existing shell.
 Its optional `closeLabel` defaults to the existing map-tool label; search supplies
 `ปิดการค้นหา`. `ForecastExcelExport` accepts an optional increasing `openRequest`
 number to open the same dialog from search, with its default navigation behavior unchanged.
@@ -138,8 +142,13 @@ imports/drafts and reference resources. Forecast facts reuse centered
 counts come from the API; the six-month lead is the existing rev3 contract and
 published status describes the current dataset, not draft readiness. Resource
 cards use the existing supported catalogue without invented row counts.
-Desktop resources use two columns; mobile initially shows three with an explicit
-expand/collapse control. Search/filter results always reveal every match. Drafts
+The reference catalogue shows three task groups on desktop and mobile: area
+identities, map layers and source references. The map group expands to its three
+active geometries; search matches nested resources and opens their group.
+Retained station/proximity and neighboring-country resources stay accessible by
+existing deep links but are absent from everyday catalogue/search. Source rows
+are curated drought/agriculture references with original payload indices, not
+asserted model inputs. Search/filter results always reveal every match. Drafts
 retain the same DOM/actions and use a mobile card layout. Presentation does not
 change import, publication, permission, auth or reference-read ownership.
 
@@ -151,13 +160,23 @@ resource persistence. `ReferenceResources` owns source-registry edits and shared
 dialogs. Changes to resource/revision or search/district criteria clear selected
 rows; page/sort changes retain them. Mobile keeps semantic table cells in a
 scrollable card layout, with a reachable select-page control and filter toggle.
-On mobile, export controls/help appear only after selection; the select-page
-label explains their purpose. Breadcrumb return and refresh share one compact
+Browsing hides checkboxes until `เลือกเพื่อดาวน์โหลด` is activated. This explicit
+selection mode exposes `เลือกทั้งหน้านี้` and row checkboxes; cancelling clears
+the selection. Detail actions are compact text buttons with 44px touch targets.
+On mobile, export controls/help appear only after selection. Breadcrumb return and refresh share one compact
 row. Detail-only CSS scopes the dark mobile header and quiet content surface,
 leaving the Admin home shell untouched. Read-only guidance/last-save details
 remain in the History disclosure; source draft/publish controls remain visible.
 CSV is a read-only review export with Thai headers, BOM, quoting and formula
 guards. No mock linkage status or unsupported area mutations are exposed.
+
+`ReferenceRecordDialog` reuses this modal lifecycle for projected read-only rows.
+It groups original labels/values with resource-level revision and publication
+state, a view-specific category and the existing description. Desktop is a
+centered modal; mobile is a bounded bottom sheet with an independently scrolling
+body and reachable footer close action. The published badge does not assert
+row-level freshness or a new current-data guarantee. Source editing still uses
+its existing form and save/publication flow.
 
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`

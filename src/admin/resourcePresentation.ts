@@ -8,10 +8,37 @@ export const resourceViews: Record<string, { title: string; description: string;
   'geodata/nakhon-ratchasima-boundary': { title: 'เส้นรอบจังหวัดนครราชสีมา', description: 'เส้นขอบรอบนอกของพื้นที่จังหวัดบนแผนที่', group: 'website', view: 'geometry' },
   'geodata/thailand-adm1': { title: 'ขอบเขตจังหวัดรอบข้าง', description: 'แผนที่ประกอบสำหรับบอกตำแหน่งจังหวัด ไม่ใช่ค่าความเสี่ยง', group: 'website', view: 'geometry' },
   'geodata/thailand-neighbor-context': { title: 'ขอบเขตประเทศรอบข้าง', description: 'พื้นหลังแผนที่สำหรับบอกตำแหน่งประเทศไทย', group: 'website', view: 'geometry' },
-  'canonical/source_registry': { title: 'แหล่งข้อมูลอ้างอิง', description: 'ชื่อหน่วยงาน เว็บไซต์ และข้อจำกัดของแหล่งอ้างอิง ไม่ได้หมายถึงการเชื่อมข้อมูลสด', group: 'reference', view: 'sources' },
+  'canonical/source_registry': { title: 'แหล่งข้อมูลอ้างอิง', description: 'แหล่งอ้างอิงด้านอากาศ ภัยแล้ง น้ำ และพื้นที่เกษตร สำหรับอ่านประกอบ', group: 'reference', view: 'sources' },
   'canonical/nakhon_ratchasima/rainfall_stations': { title: 'รายชื่อและพิกัดสถานีฝน', description: 'ทะเบียนสถานีที่มีแหล่งอ้างอิง ใช้ตรวจตำแหน่ง ยังไม่มีค่าฝนสด', group: 'reference', view: 'stations' },
   'canonical/nakhon_ratchasima/subdistrict_rainfall_coverage': { title: 'สถานีฝนที่อยู่ใกล้แต่ละตำบล', description: 'ระยะห่างและสถานีอ้างอิง สถานีใกล้เคียงไม่ใช่ค่าฝนที่วัดในตำบล', group: 'reference', view: 'coverage' },
 };
+
+// The everyday catalogue is separate from retained deep-link views and storage.
+export const resourceGroups = [
+  { id: 'areas', title: 'ข้อมูลพื้นที่', description: 'รายชื่อและรหัสอำเภอและตำบล สำหรับค้นหา เลือกพื้นที่ และเชื่อมกับข้อมูลพยากรณ์',
+    keys: ['canonical/nakhon_ratchasima/admin_hierarchy'] },
+  { id: 'maps', title: 'ชั้นข้อมูลแผนที่', description: 'ขอบเขตตำบล เส้นรอบจังหวัด และจังหวัดรอบข้างที่ใช้แสดงบนแผนที่',
+    keys: ['geodata/nakhon-ratchasima-subdistricts', 'geodata/nakhon-ratchasima-boundary', 'geodata/thailand-adm1'] },
+  { id: 'sources', title: 'แหล่งข้อมูลอ้างอิง', description: resourceViews['canonical/source_registry'].description,
+    keys: ['canonical/source_registry'] },
+] as const;
+
+export function referenceCatalogGroups<T extends { resource_key: string }>(items: readonly T[], query = '', group = 'all') {
+  const term = query.trim().toLocaleLowerCase('th');
+  return resourceGroups.flatMap(category => {
+    if (group !== 'all' && group !== category.id) return [];
+    const categoryMatch = category.title.toLocaleLowerCase('th').includes(term);
+    const resources = category.keys.flatMap(key => {
+      const item = items.find(value => value.resource_key === key);
+      const view = resourceViews[key];
+      return item && (!term || categoryMatch || `${view.title} ${view.description}`.toLocaleLowerCase('th').includes(term)) ? [item] : [];
+    });
+    return resources.length ? [{ ...category, resources }] : [];
+  });
+}
+
+// These are contextual references, not verified inputs to the published model.
+const droughtReferenceSourceIds = new Set(['SRC-TMD', 'SRC-GISTDA-DROUGHT', 'SRC-RID', 'SRC-OAE', 'SRC-AGRIMAP-LDD']);
 
 export const sourceFields = [
   { key: 'nameTh', label: 'ชื่อแหล่งข้อมูล' }, { key: 'ownerTh', label: 'หน่วยงานเจ้าของข้อมูล' },
@@ -31,9 +58,10 @@ export function referenceTable(key: string, payload: Json): { columns: string[];
     const item = record(district);
     return array(item.subdistricts).map(area => ({ index: 0, cells: [text(item.nameTh), text(record(area).nameTh), text(record(area).subdistrictCode)] }));
   }).map((row, index) => ({ ...row, index })) };
-  if (view === 'sources') return { columns: ['แหล่งข้อมูล', 'หน่วยงาน', 'พื้นที่ที่ครอบคลุม'], rows: array(payload).flatMap((item, index) => {
+  if (view === 'sources') return { columns: ['แหล่งข้อมูล', 'หน่วยงาน', 'พื้นที่ที่ครอบคลุม', 'การใช้งาน'], rows: array(payload).flatMap((item, index) => {
     const source = record(item);
-    return source.dataClass === 'REAL' ? [{ index, cells: [text(source.nameTh), text(source.ownerTh), text(source.coverageTh)] }] : [];
+    return source.dataClass === 'REAL' && typeof source.id === 'string' && droughtReferenceSourceIds.has(source.id)
+      ? [{ index, cells: [text(source.nameTh), text(source.ownerTh), text(source.coverageTh), 'อ้างอิงประกอบ'] }] : [];
   }) };
   if (view === 'stations') return { columns: ['สถานี', 'อำเภอ / ตำบล', 'ละติจูด', 'ลองจิจูด'], rows: array(root.stations).flatMap((item, index) => {
     const station = record(item);
