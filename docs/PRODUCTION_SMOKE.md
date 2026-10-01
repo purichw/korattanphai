@@ -89,6 +89,21 @@ It blocks application writes and never uploads or creates a production draft.
 Local `e2e/admin-navigation.spec.ts` covers unsaved-file/history/discard behavior
 against the isolated database; the real-account check stays read-only.
 
+## Mobile Map Labels
+
+For map-name visibility changes, `node scripts/smoke-map-labels.mjs` uses the
+same authenticated target, preview allow-list and protected-cookie environment
+variables as the other hosted checks. It blocks application writes and loads
+real CMS geometry and forecast slices without mocks.
+
+The check covers province zoom, unselected tambon labels after a two-finger
+mobile pinch, district scope and a selected tambon on desktop/mobile. It measures
+font sizes after both SVG and camera transforms, verifies the 289 named map
+polygons and route-specific forecast coverage, and captures contextual map and
+viewport screenshots. Full geometry, source and label metrics are saved in
+`SMOKE_OUTPUT_DIR/report.json`; stdout prints a compact summary. Use a fresh
+output directory for candidate and production checks and inspect the images.
+
 ## CI
 
 `quality.yml` runs unit/data tests, the protected build, exposure/bundle checks,
