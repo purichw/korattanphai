@@ -187,9 +187,12 @@
   .is-home-overview .nr-forecast-overview-summary-heading p { margin: 2px 0 0; }
   .is-home-overview .nr-forecast-overview-scope-note { display: none; }
   .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card { height: 480px; }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map:has(.nr-map-tools) { min-height: 0; }
   .is-home-overview .nr-dashboard-map-header { padding: 10px; }
   .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card .nr-dashboard-map-header { display: grid; }
-  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map .nr-map-svg { height: 100%; min-height: 0; }
+  /* Avoid percentage SVG sizing in an auto-height grid on mobile WebKit.
+     Clip only the drawing; sibling dropdowns and previews must remain visible. */
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card.is-overview-map .nr-map-panel.has-criteria-map:not(:fullscreen) .nr-map-svg { height: var(--nr-tools-plot-height, 260px); min-height: 0; clip-path: inset(0); }
   .is-home-overview .nr-dashboard-map-header > div { max-width: none; }
   .is-home-overview .nr-dashboard-map-header h2 { font-size: 15px; }
   .is-home-overview .nr-dashboard-map-header span { display: none; }
@@ -198,9 +201,9 @@
   .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-select .app-select-trigger { width: 100%; min-width: 0; min-height: 44px; border-radius: 6px; padding: 6px 24px; box-shadow: none; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-reset { display: inline-flex; align-items: center; justify-content: center; width: 36px; min-height: 38px; padding: 6px; border-radius: 6px; box-shadow: none; }
   .is-home-overview .nr-map-panel.has-criteria-map .nr-local-map-filter-status { grid-column: 1 / -1; min-height: 18px; padding: 0; margin: 0; border-radius: 0; background: none; font-size: 11px; }
-  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls { top: 10px; left: 10px; bottom: auto; right: auto; }
-  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { min-width: 36px; min-height: 36px; border: 1px solid transparent; border-radius: 5px; }
-  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-legend { bottom: 7px; left: 7px; right: 7px; width: auto; max-width: none; margin: 0; padding: 6px; gap: 5px 8px; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls { top: 10px; left: 10px; bottom: auto; right: auto; grid-template-columns: 44px; width: 44px; padding: 0; gap: 0; }
+  .is-home-overview .nr-map-panel.has-criteria-map .nr-map-controls .icon-button { display: grid; place-items: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 5px; background: transparent; box-shadow: none; }
+  .is-home-overview .nr-overview-cockpit-map .nr-dashboard-map-card .nr-map-panel.has-criteria-map .nr-map-legend { bottom: 7px; left: 7px; right: 7px; width: auto; max-width: none; min-height: 0; margin: 0; padding: 8px 10px; gap: 5px 8px; line-height: 1.4; box-shadow: none; }
   .is-home-overview .nr-map-panel .nr-map-legend span { font-size: 10px; }
   .is-home-overview .nr-map-preview-card.is-touch { max-height: calc(100% - 12px); padding: 12px 10px; border-radius: 8px; }
   .is-home-overview .nr-map-preview-card.is-touch dl { max-height: none; min-height: 0; }

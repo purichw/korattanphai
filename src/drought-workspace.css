@@ -127,7 +127,7 @@
 .is-drought-route .nr-drought-workspace-map-card .app-select-trigger { min-height: 34px; height: auto; font-size: 12px; padding: 4px 22px; }
 .is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset { min-width: 32px; min-height: 34px; padding: 6px; }
 .is-drought-route .nr-drought-workspace-map-card .nr-local-map-reset span { display: none; }
-.is-drought-route .nr-drought-workspace-map-card .nr-map-controls { position: absolute; grid-row: 2; top: 6px; right: 6px; left: auto; bottom: auto; display: grid; grid-template-columns: 32px; gap: 4px; width: 32px; max-width: none; padding: 0; overflow: visible; background: none; box-shadow: none; }
+.is-drought-route .nr-drought-workspace-map-card .nr-map-controls { position: absolute; grid-row: 2; top: 6px; right: 6px; left: auto; bottom: auto; display: grid; grid-template-columns: 32px; gap: 4px; width: 32px; max-width: none; padding: 0; border: 0; overflow: visible; background: none; box-shadow: none; }
 .is-drought-route .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 5px; }
 .is-drought-route .nr-drought-workspace-map-card .nr-map-panel .nr-map-legend { position: static; grid-row: 3; display: flex; flex-wrap: wrap; justify-content: center; width: 100%; max-width: none; margin: 0; padding: 6px 2px 0; gap: 5px 10px; border: 0; border-radius: 0; background: #fff; box-shadow: none; }
 .is-drought-route .nr-drought-workspace-map-card .nr-map-legend > strong { display: none; }
@@ -342,7 +342,7 @@
   .nr-operational-filters .app-select-icon { display: none; }
   .nr-operational-filters .app-select-label, .nr-operational-filters .app-select-trigger { grid-column: 1; }
   .nr-operational-filters .app-select-label { font-size: 11px; }
-  .nr-operational-filters .app-select-trigger { font-size: 13px; padding: 0 15px 0 0; }
+  .nr-operational-filters .app-select-trigger { font-size: 13px; padding: 0 20px; }
   .nr-fixed-filter { grid-template-columns: 18px minmax(0,1fr); gap: 3px; }
   .nr-fixed-filter > svg { width: 18px; }
   .nr-fixed-filter strong { font-size: 14px; }
@@ -430,7 +430,7 @@
 .is-drought-route .is-subdistrict .nr-drought-workspace-map-card { height: 500px; padding: 14px; gap: 10px; }
 .is-drought-route .is-subdistrict .nr-drought-workspace-card-heading h3 { font-size: 16px; }
 .is-drought-route .is-subdistrict .nr-map-color-modes button { min-height: 40px; font-size: 14px; }
-.is-drought-route .is-subdistrict .nr-drought-workspace-map-card .app-select-trigger { min-height: 42px; padding-inline: 8px 22px; font-size: 13px; }
+.is-drought-route .is-subdistrict .nr-drought-workspace-map-card .app-select-trigger { min-height: 42px; padding-inline: 22px; font-size: 13px; }
 .is-drought-route .is-subdistrict .nr-drought-workspace-map-card .nr-local-map-reset { width: 100%; min-height: 42px; }
 .is-drought-route .is-subdistrict .nr-drought-workspace-map-card .nr-map-controls { grid-template-columns: 40px; width: 40px; }
 .is-drought-route .is-subdistrict .nr-drought-workspace-map-card .nr-map-controls .icon-button { width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
