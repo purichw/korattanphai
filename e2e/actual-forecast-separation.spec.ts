@@ -155,3 +155,19 @@ test('explicit archive links remain forecasts and missing origins never substitu
   await expect(page.getByRole('heading', { name: 'ระยะพยากรณ์ในลิงก์ไม่ถูกต้อง' })).toBeVisible();
   await expect(page.locator('.nr-map-shape')).toHaveCount(0);
 });
+
+test('missing-origin recovery resets the failed query on the current route', async ({ page }) => {
+  test.setTimeout(90_000);
+  await setup(page);
+  for (const path of ['/', '/drought', '/phimai', '/phimai/t-301503']) {
+    await page.goto(`${path}?target=2030-01&horizon=1`);
+    await expect(page.getByRole('heading', { name: 'ไม่มีเดือนตั้งต้นที่เลือกในคลังพยากรณ์' })).toBeVisible();
+    await page.getByRole('link', { name: 'เลือกเดือนในคลังใหม่' }).click();
+    await expect(page.locator('.nr-forecast-overview, .nr-drought-compact-workspace')).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)').first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole('heading', { name: 'ไม่มีเดือนตั้งต้นที่เลือกในคลังพยากรณ์' })).toHaveCount(0);
+    await expect(page).toHaveURL(url => url.pathname === path && (path === '/'
+      ? !url.searchParams.has('target') && !url.searchParams.has('horizon')
+      : url.searchParams.get('target') === '2025-12' && url.searchParams.get('horizon') === '1'));
+  }
+});

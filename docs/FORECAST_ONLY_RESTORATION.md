@@ -21,6 +21,8 @@ from `8357b02`, not the whole commit. Preserve shared UI fixes and source data.
 - No origin supplied selects the latest published origin. Retired `period` is
   ignored, never reinterpreted as an origin; canonical forecast URLs remove it.
 - Missing origins and invalid horizons show recovery rather than latest/zero data.
+  The recovery link starts a fresh load on the same route so a rejected query
+  cannot remain in the mounted workspace after its URL has been cleared.
 - Login, global search, area navigation and saved filters preserve the forecast
   origin/horizon. Existing Supabase Auth/RLS and dataset freshness checks remain.
 
