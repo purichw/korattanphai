@@ -3,11 +3,12 @@ import { test, expect, seedAuthSession, type Locator, type Page } from './fixtur
 import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 
 const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
+const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
 
 test.beforeEach(async ({ page }) => {
   await seedAuthSession(page);
   await page.route('https://ktp-auth-test.supabase.co/rest/v1/rpc/ktp_load_forecast_slice', route =>
-    route.fulfill({ json: forecastSlice(overview, route.request().postDataJSON()) }));
+    route.fulfill({ json: forecastSlice(route.request().postDataJSON().p_horizon_count === 1 ? overview : archive, route.request().postDataJSON()) }));
 });
 
 async function settledTransform(layer: Locator) {
@@ -105,6 +106,12 @@ for (const size of ['default', 'narrow'] as const) {
     await expect(card.getByRole('combobox', { name: 'สถานะพยากรณ์ภัยแล้ง', exact: true })).toContainText('ปานกลาง');
     await card.getByRole('button', { name: 'รีเซ็ต', exact: true }).click();
     await expectContainedMap(page, card);
+    await card.locator('.nr-irrigation-filter').getByRole('combobox').click();
+    await page.getByRole('option', { name: 'เข้าถึงชลประทาน', exact: true }).click();
+    await expect(card.locator('.nr-map-legend [data-report-label="พึ่งน้ำฝน (ไม่มีชลประทาน)"]')).toBeVisible();
+    await expectContainedMap(page, card);
+    await card.locator('.nr-irrigation-filter').getByRole('combobox').click();
+    await page.getByRole('option', { name: 'ทุกสถานะ', exact: true }).click();
     const area = map.locator('[data-nr-subdistrict-code="300116"]');
     if (info.project.use.hasTouch) await area.tap();
     else await area.click();
@@ -112,5 +119,28 @@ for (const size of ['default', 'narrow'] as const) {
     await expect(preview).toBeVisible();
     await expect(preview.getByRole('button', { name: /เปิด/ })).toBeVisible();
     expect(errors).toEqual([]);
+  });
+}
+
+for (const route of ['/drought', '/wang-nam-khiao', '/wang-nam-khiao/t-302504']) {
+  test(`Map control icons center inside buttons and toolbar: ${route}`, async ({ page }) => {
+    await page.goto(`${route}?mapLayer=forecast-archive&target=2025-12&horizon=1`);
+    await expect(page.locator('.nr-map-shape').first()).toBeVisible();
+    const offsets = await page.locator('.nr-map-controls').evaluate(toolbar => {
+      const parent = toolbar.getBoundingClientRect();
+      return Array.from(toolbar.querySelectorAll('button')).map(button => {
+        const box = button.getBoundingClientRect(), icon = button.querySelector('svg')!.getBoundingClientRect();
+        return [icon.x + icon.width / 2 - box.x - box.width / 2,
+          icon.y + icon.height / 2 - box.y - box.height / 2,
+          icon.x + icon.width / 2 - parent.x - parent.width / 2];
+      });
+    });
+    expect(offsets).toHaveLength(4);
+    for (const offset of offsets.flat()) expect(Math.abs(offset)).toBeLessThanOrEqual(0.5);
+    const values = await page.locator('.nr-dashboard-map-card .app-select-trigger, .nr-operational-filters .app-select-trigger').evaluateAll(buttons => buttons.map(button => {
+      const box = button.getBoundingClientRect(), value = button.querySelector('.app-select-value')!.getBoundingClientRect();
+      return [value.x + value.width / 2 - box.x - box.width / 2, value.y + value.height / 2 - box.y - box.height / 2];
+    }));
+    for (const offset of values.flat()) expect(Math.abs(offset)).toBeLessThanOrEqual(0.5);
   });
 }

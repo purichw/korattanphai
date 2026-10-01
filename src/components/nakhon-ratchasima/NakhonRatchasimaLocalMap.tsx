@@ -1808,7 +1808,7 @@ export function NakhonRatchasimaLocalMap({
           </>
         )}
         {activeAnalysis?.comparison ? Object.entries(comparisonStyles).map(([key, item]) => <span key={key}><i className={key === "NOT_COMPARABLE" ? "is-forecast-out-of-scope" : undefined} style={{ backgroundColor: item.color }} />{item.label}</span>) : useIrrigationColors ? (["irrigated", "rainfed", "unknown"] as const).map((status) => (
-          <span key={status}><i style={{ backgroundColor: irrigationColors[status] }} />{irrigationLabels[status]}</span>
+          <span key={status} title={irrigationLabels[status]} data-report-label={irrigationLabels[status]}><i style={{ backgroundColor: irrigationColors[status] }} />{isMobileMap && status === "rainfed" ? "พึ่งน้ำฝน" : irrigationLabels[status]}</span>
         )) : (useForecastArchiveMap
           ? forecastArchiveLegendStatuses
           : useResearchCriteriaMap
