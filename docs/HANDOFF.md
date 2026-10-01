@@ -20,6 +20,53 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Clean default Home URL production release (2026-10-01):
+
+- Released only this chat's Home URL work from isolated branch
+  `fix/home-clean-url-20261001`, based on verified production `06f2d8d`.
+  Runtime `02d8f6243c752b199ccc303f27c3995742d0b284` preserves the already
+  published Admin, design, data, access and layout changes. Unrelated dirty root
+  work is excluded.
+- Latest-origin T+1 Home normalizes to `/`. Historical months and other
+  horizons remain explicit; filters/hash, search, bookmarks and Excel export
+  retain the displayed origin. Fresh entry/reload resolves the latest archive.
+- Required smoke exposed the same pre-existing missing-origin recovery failure
+  on the baseline and first candidate. The recovery link now uses native
+  navigation to clear stale same-route state. Four-route regression passes at
+  desktop/mobile widths. The first candidate was never promoted.
+- Local evidence: 45 focused Home/unit-hook checks, TypeScript/diff checks and
+  two database browser journeys covering recovery at Home, province, district
+  and tambon levels. The local browser runner uses installed Chrome; the default
+  downloaded Playwright binary was unavailable. A cold dev-module wait was
+  aligned with the existing workspace readiness checks.
+- [Exact-runtime Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36824228091)
+  passes all six required jobs: contracts, built-browser, database-browser,
+  cms-browser, browser-compatibility and regression. The hosted protected build,
+  exposure and unchanged bundle gates pass (application gzip 227,170 bytes;
+  database build emits no static forecast archive).
+- Ready candidate `dpl_CjRrs1vbxNytUuYz3ks1wz24Zxhh` /
+  `https://korattanphai-k661nhzwm-purich-w.vercel.app` passed authenticated
+  read-only desktop/mobile smoke before promotion. The primary alias baseline
+  and candidate SHA/project identity were checked immediately before promotion.
+- `https://korattanphai.vercel.app` is verified on that exact deployment.
+  Candidate and production each pass 22 checks per viewport: legacy/default
+  Home, reload, historical selection, bookmarks read-only, geographic search,
+  Back, legacy T+4 and explicit missing-origin recovery. Production's mobile
+  logout setup needed a harness readiness correction and a successful mobile
+  rerun; the initial report is retained rather than counted as a pass.
+- Current production desktop/mobile screenshots were visually inspected.
+  Map, dropdown and card geometry matches the baseline, including aligned
+  desktop map/card bottoms. No application writes, runtime/network errors,
+  operational reads or horizontal overflow were observed. No migration,
+  production content edit, role assignment, billing or native change is included.
+  Physical-device checks and live saved-filter writes are outside this release.
+- Evidence: `artifacts/home-clean-url-release-20261001/`, including isolated
+  `source/`, `ci-final.json`, `candidate-final/`, `production/`, successful
+  mobile-rerun evidence, and deployment guards. Recovery baseline:
+  `dpl_GpuVxqnMkSz2v2yZaNCByWxmaDvh` /
+  `https://korattanphai-6purvg7t0-purich-w.vercel.app` (`06f2d8d`).
+  This release supersedes the earlier local-only Home URL checkpoint.
+
 Admin data-home reference redesign (2026-10-01; release verification pending):
 
 - Adopts the supplied desktop/mobile mockups' icon-led header, three white panels,
