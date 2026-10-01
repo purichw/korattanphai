@@ -238,21 +238,22 @@ export function NakhonRatchasimaLocalMap({
   const pinchStart = useRef<PinchStart | null>(null);
   const { isFullscreen, toggleFullscreen } = useFullscreenTarget(canvasRef);
   const isMobileMap = useMediaQuery("(max-width: 720px)");
-  const [inspectionPlotScale, setInspectionPlotScale] = useState(1);
+  const [labelPlotScale, setLabelPlotScale] = useState(1);
 
   useEffect(() => {
     const svg = svgRef.current;
-    if (!singleAreaInspection || !geo || !svg) return;
-    // Label sizes are in viewBox units; keep the selected place readable on phones.
+    if (!geo || !svg) return;
+    // SVG viewBox units shrink with the map. Keep mobile labels in readable CSS
+    // pixels, including after a rotation or entering/leaving fullscreen.
     const updateScale = () => {
       const rect = svg.getBoundingClientRect();
-      setInspectionPlotScale(Math.min(rect.width / localMapWidth, rect.height / localMapHeight) || 1);
+      setLabelPlotScale(Math.min(rect.width / localMapWidth, rect.height / localMapHeight) || 1);
     };
     updateScale();
     const observer = new ResizeObserver(updateScale);
     observer.observe(svg);
     return () => observer.disconnect();
-  }, [geo, singleAreaInspection]);
+  }, [geo]);
 
   useEffect(() => {
     let active = true;
@@ -1067,7 +1068,7 @@ export function NakhonRatchasimaLocalMap({
       const provinceGeometries = geo.features.map((feature) => feature.geometry);
       const provincePoint = projectedLabelPointForGeometries(provinceGeometries, projection);
 
-      candidates.push({
+      if (transform.k < (isMobileMap ? 1.72 : 1.14)) candidates.push({
         id: "province-nakhon-ratchasima",
         text: "นครราชสีมา",
         x: provincePoint.x,
@@ -1128,9 +1129,14 @@ export function NakhonRatchasimaLocalMap({
         [activeSelectedSubdistrictCode, selectedCode, preview?.subdistrictCode].filter(Boolean),
       );
 
+      // Zooming the province must reveal place names without first selecting a
+      // polygon. Fit/collision checks keep the additional labels from crowding.
+      const subdistrictLabelZoom = 3.2;
       featureModels
-        .filter((model) => highlightedSubdistrictCodes.has(model.subdistrictCode))
+        .filter((model) => highlightedSubdistrictCodes.has(model.subdistrictCode)
+          || (transform.k >= subdistrictLabelZoom && (!useFilterCriteriaMap || model.matchesCriteria)))
         .forEach((model) => {
+          const isHighlighted = highlightedSubdistrictCodes.has(model.subdistrictCode);
           const point = projectedLabelPointForGeometry(model.feature.geometry, projection);
           candidates.push({
             id: `subdistrict-${model.subdistrictCode}`,
@@ -1138,13 +1144,13 @@ export function NakhonRatchasimaLocalMap({
             x: point.x,
             y: point.y,
             bounds: projectedBoundsForGeometries([model.feature.geometry], projection),
-            minZoom: localFitZoom,
+            minZoom: isHighlighted ? localFitZoom : subdistrictLabelZoom,
             maxWidthRatio: 0.88,
             maxHeightRatio: 0.74,
             minFeatureArea: 420,
-            force: true,
-            priority: 260 + localLabelPriorityForStatus(model.status),
-            className: "is-subdistrict-label is-featured-label",
+            force: isHighlighted,
+            priority: (isHighlighted ? 260 : 120) + localLabelPriorityForStatus(model.status),
+            className: `is-subdistrict-label${isHighlighted ? " is-featured-label" : ""}`,
           });
         });
     } else {
@@ -1180,15 +1186,16 @@ export function NakhonRatchasimaLocalMap({
       });
     }
 
+    const labelScale = singleAreaInspection || isMobileMap ? labelPlotScale : 1;
     return makeVisibleMapLabels(candidates, transform, {
       viewportWidth: localMapWidth,
       viewportHeight: localMapHeight,
-      baseScreenFontSize: singleAreaInspection ? 14 / inspectionPlotScale : 10.2,
-      minScreenFontSize: singleAreaInspection ? 12 / inspectionPlotScale : 8.8,
-      maxScreenFontSize: singleAreaInspection ? 16 / inspectionPlotScale : 12.1,
-      zoomFontBoost: 0.62,
-      haloStrokeWidth: 3,
-      collisionPadding: 7,
+      baseScreenFontSize: (singleAreaInspection ? 14 : isMobileMap ? 12 : 10.2) / labelScale,
+      minScreenFontSize: (singleAreaInspection ? 12 : isMobileMap ? 12 : 8.8) / labelScale,
+      maxScreenFontSize: (singleAreaInspection ? 16 : isMobileMap ? 13 : 12.1) / labelScale,
+      zoomFontBoost: 0.62 / labelScale,
+      haloStrokeWidth: isMobileMap ? 2.5 / labelScale : 3,
+      collisionPadding: isMobileMap ? 5 / labelScale : 7,
     });
   })();
 
