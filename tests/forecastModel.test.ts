@@ -15,6 +15,35 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
 });
 
+it.each(['/', '/?mapLayer=forecast-archive&target=2025-12&horizon=1', '/?period=2026-08'])("keeps the latest Home forecast clean for %s", (path) => {
+  window.history.replaceState({ existing: 'preserved' }, '', path);
+  const { result } = renderHook(() => useDroughtForecastArchiveSelection(archive, 1));
+  expect(window.location.pathname + window.location.search).toBe('/');
+  expect(result.current.selectedMonth?.period).toBe('2025-12');
+  expect(result.current.selectedHorizon).toBe(1);
+  expect(window.history.state).toMatchObject({ existing: 'preserved', ktpHomeForecastOrigin: '2025-12' });
+});
+
+it('retains historical Home links and cleans only forecast defaults when returning to the latest month', () => {
+  window.history.replaceState({}, '', '/?target=2025-11&horizon=1&district=3008&mapRisk=forecast-high#map');
+  const { result } = renderHook(() => useDroughtForecastArchiveSelection(archive, 1));
+  expect(result.current.selectedMonth?.period).toBe('2025-11');
+  expect(new URLSearchParams(window.location.search).get('target')).toBe('2025-11');
+  act(() => result.current.changeTargetMonth('2025-12'));
+  expect(window.location.search + window.location.hash).toBe('?district=3008&mapRisk=forecast-high#map');
+  act(() => result.current.changeTargetMonth('2025-10'));
+  expect(new URLSearchParams(window.location.search).get('target')).toBe('2025-10');
+  expect(window.history.state.ktpHomeForecastOrigin).toBeNull();
+});
+
+it('derives the clean Home default from the archive rather than a hardcoded month', () => {
+  const earlier = { ...archive, meta: { ...archive.meta, targetMonthEnd: '2025-11' } };
+  const { result } = renderHook(() => useDroughtForecastArchiveSelection(earlier, 1));
+  expect(result.current.selectedMonth?.period).toBe('2025-11');
+  expect(window.location.search).toBe('');
+  expect(window.history.state.ktpHomeForecastOrigin).toBe('2025-11');
+});
+
 it.each([undefined, 1] as const)("shows source month/year in shared origin options with fixed horizon %s", (fixedHorizon) => {
   window.history.replaceState({}, "", "/drought?target=2025-12&horizon=4");
   const { result } = renderHook(() => useDroughtForecastArchiveSelection(archive, fixedHorizon));

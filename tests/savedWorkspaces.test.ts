@@ -6,6 +6,18 @@ const datasetId = '11111111-1111-4111-8111-111111111111';
 const displayedState = { ktpForecastDatasetId: datasetId };
 
 describe('saved forecast selections', () => {
+  it('saves and exports the displayed Home default without requiring query parameters', () => {
+    const state = { ...displayedState, ktpHomeForecastOrigin: '2025-12' };
+    const selected = readWorkspaceSelection({ pathname: '/', search: '?district=3008&mapRisk=forecast-high' }, state)!;
+    expect(selected).toMatchObject({ target_period: '2025-12-01', horizon: 1, area_code: '3008', risk_criterion: 'forecast-high', dataset_id: datasetId });
+    expect(readWorkspaceSelection(new URL(savedFilterPath(selected)!, 'https://local.test'), displayedState)).toEqual(selected);
+    expect(readWorkspaceSelection({ pathname: '/', search: '' }, { ktpHomeForecastOrigin: '2025-12' })).toBeNull();
+    expect(readWorkspaceSelection({ pathname: '/drought', search: '' }, state)).toBeNull();
+    for (const search of ['?target=', '?horizon=6', '?target=2025-99', '?target=2025-12&target=2025-11', '?horizon=1&horizon=2']) {
+      expect(readWorkspaceSelection({ pathname: '/', search }, state)).toBeNull();
+    }
+    expect(readWorkspaceSelection({ pathname: '/', search: '?target=2025-10&horizon=1' }, state)?.target_period).toBe('2025-10-01');
+  });
   it('cannot save a forecast before its actual published revision is loaded', () => {
     const location = { pathname: '/drought', search: '?target=2025-12&horizon=1' };
     expect(readWorkspaceSelection(location)).toBeNull();

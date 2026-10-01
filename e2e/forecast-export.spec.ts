@@ -52,7 +52,7 @@ test('Excel export filters, real download and fresh revision gate', async ({ pag
   await expect(dialog.getByRole('status')).toContainText('1 อำเภอ · 6 ตำบล');
   expect(requests.some(query => query.p_area_code === '3003' && query.p_origin_period === '2025-12' && query.p_horizon_count === 6)).toBe(true);
   expect(downloads.length).toBeGreaterThan(0);
-  await expect(page).toHaveURL(/\/\?mapLayer=forecast-archive&target=2025-12&horizon=1/);
+  await expect(page).toHaveURL(new URL('/', page.url()).href);
   offline = true;
   await dialog.getByRole('button', { name: 'ดาวน์โหลด Excel' }).click();
   await expect(dialog.getByRole('alert')).toContainText('จะไม่ใช้ข้อมูลเก่าแทน');

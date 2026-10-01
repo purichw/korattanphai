@@ -48,6 +48,12 @@ describe('workspace search identities and matching', () => {
     expect(searchDestination('/phimai', '?target=2025-12&horizon=6')).toBe('/phimai?target=2025-12&horizon=6&mapLayer=forecast-archive');
     expect(searchDestination('/drought?mapLayer=forecast-archive', '?period=2026-08')).toBe('/drought?horizon=1&mapLayer=forecast-archive');
   });
+  it('carries the displayed clean Home forecast into search results without overriding explicit links', () => {
+    const state = { ktpHomeForecastOrigin: '2025-12', ktpIrrigation: 'rainfed' };
+    expect(searchDestination('/phimai', '', state, '/')).toBe('/phimai?target=2025-12&horizon=1&mapLayer=forecast-archive&irrigation=rainfed');
+    expect(searchDestination('/phimai', '?target=2025-10&horizon=4', state, '/')).toContain('target=2025-10&horizon=4');
+    expect(searchDestination('/phimai', '', state, '/drought')).not.toContain('target=');
+  });
 });
 
 describe('per-account search history', () => {

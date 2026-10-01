@@ -118,7 +118,8 @@ try {
         await page.locator('.nr-map-shape').first().waitFor();
         await expect(page.locator('.nr-map-shape')).toHaveCount(289);
         await expect(page.locator('.nr-primary-workspace, .nr-archive-context')).toHaveCount(0);
-        await expect(page).toHaveURL(/target=2025-12&horizon=1/);
+        if (route === '/') await expect(page).toHaveURL(new URL('/', base).href);
+        else await expect(page).toHaveURL(/target=2025-12&horizon=1/);
         assert.equal(new URL(page.url()).searchParams.has('period'), false);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false);
         if (route === '/') await page.screenshot({ path: path.join(output, `${name}-forecast-default.png`), fullPage: true });
@@ -130,8 +131,9 @@ try {
         assert.equal(await page.locator(".nr-map-shape").count(), 289, `${name}: polygon count`);
         await expect(page.locator('.nr-home-readiness, .nr-data-readiness-section, .nr-prediction-readiness, .nr-readiness-map-action, .nr-return-forecast')).toHaveCount(0);
         if (databaseMode) {
-          const target = new URL(page.url()).searchParams.get("target");
-          const horizon = Number(new URL(page.url()).searchParams.get("horizon"));
+          const url = new URL(page.url());
+          const target = url.searchParams.get("target") ?? (url.pathname === "/" ? await page.evaluate(() => window.history.state?.ktpHomeForecastOrigin) : null);
+          const horizon = Number(url.searchParams.get("horizon") ?? (url.pathname === "/" ? "1" : ""));
           const actual = await page.locator(".nr-map-shape").evaluateAll(nodes => nodes.map(node => ({
             code: node.getAttribute("data-nr-subdistrict-code"),
             filtered: node.classList.contains("is-criteria-filtered"),
@@ -149,8 +151,8 @@ try {
           assert.deepEqual(await summary.locator(".metric-card-value").allTextContents(), ["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"], `${name}: latest T+1 forecast counts`);
           await expect(page.locator(".nr-forecast-overview-context")).toContainText("พยากรณ์ ม.ค. 2569");
           await expect(page.locator(".nr-forecast-overview-context")).toContainText("เดือนตั้งต้น (T) ธ.ค. 2568");
-          assert.equal(new URL(page.url()).searchParams.get("target"), "2025-12");
-          assert.equal(new URL(page.url()).searchParams.get("horizon"), "1");
+          await expect(page).toHaveURL(new URL('/', base).href);
+          assert.equal(await page.evaluate(() => window.history.state?.ktpHomeForecastOrigin), "2025-12");
           await page.screenshot({ path: path.join(output, `${name}-overview.png`), fullPage: true });
           if (databaseMode) {
             const mapMonth = page.locator('.nr-map-panel').getByRole('combobox', { name: /เดือนตั้งต้น/ });
@@ -168,7 +170,7 @@ try {
             await expect(mapMonth).toContainText("ธ.ค. 2568");
             if (name === "mobile") await page.getByRole("button", { name: "แสดงผล", exact: true }).click();
             await expect(summary.locator(".metric-card-value")).toHaveText(["0 ตำบล", "117 ตำบล", "0 ตำบล", "172 ตำบล"]);
-            await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
+            await expect(page).toHaveURL(new URL('/', base).href);
             await page.locator(".nr-forecast-overview-map").screenshot({ path: path.join(output, `${name}-overview-month-filter.png`) });
             report.checks.push({ viewport: name, overviewMonthSync: "page and map controls update the same selection", forecastHorizon: 1 });
             report.checks.push(await smokeExcelExport({ page, viewport: name, output, archive: expectedArchive }));

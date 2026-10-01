@@ -32,7 +32,8 @@ test('forecast-only defaults across overview, province, districts and tambons', 
     // Cold CI also parses the full boundary geometry after the workspace loads.
     await expect(page.locator('.nr-map-shape')).toHaveCount(289, { timeout: 30_000 });
     await expect(page.locator('.nr-map-shape:not(.is-criteria-filtered)')).toHaveCount(count);
-    await expect(page).toHaveURL(/target=2025-12&horizon=1/);
+    if (path === '/') await expect(page).toHaveURL(url => url.pathname === '/' && url.search === '');
+    else await expect(page).toHaveURL(/target=2025-12&horizon=1/);
     expect(new URL(page.url()).searchParams.has('period')).toBe(false);
     await expect(page.locator('.nr-primary-workspace, .nr-archive-context')).toHaveCount(0);
     const shapes = await page.locator('.nr-map-shape:not(.is-criteria-filtered)').evaluateAll(nodes => nodes.map(node => ({
@@ -46,6 +47,45 @@ test('forecast-only defaults across overview, province, districts and tambons', 
       await page.screenshot({ path: `artifacts/forecast-restored-${info.project.name}-${count}.png`, fullPage: true });
   }
   expect(reads()).toBe(0);
+  expect(errors).toEqual([]);
+});
+
+test('Home removes default forecast parameters and retains reload, historical filters and Back navigation', async ({ page }, info) => {
+  test.setTimeout(90_000);
+  await setup(page);
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/?mapLayer=forecast-archive&target=2025-12&horizon=1');
+  const month = page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true });
+  await expect(month).toContainText('ธ.ค. 2568');
+  await expect(page).toHaveURL(url => url.pathname === '/' && url.search === '');
+  await page.reload();
+  await expect(month).toContainText('ธ.ค. 2568');
+  await expect(page).toHaveURL(url => url.pathname === '/' && url.search === '');
+  await month.click();
+  await page.getByRole('option', { name: 'พ.ย. 2568', exact: true }).click();
+  await expect(month).toContainText('พ.ย. 2568');
+  await expect(page).toHaveURL(/target=2025-11&horizon=1/);
+  await page.reload();
+  await expect(month).toContainText('พ.ย. 2568');
+  await month.click();
+  await page.getByRole('option', { name: 'ธ.ค. 2568', exact: true }).click();
+  await expect(page).toHaveURL(url => url.pathname === '/' && url.search === '');
+  if (process.env.PLAYWRIGHT_DATA_BACKEND === 'supabase') {
+    await page.getByRole('button', { name: 'รายการที่บันทึก', exact: true }).filter({ visible: true }).first().click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('tab', { name: 'ตัวกรองที่บันทึก', exact: true }).click();
+    await expect(dialog.getByLabel('ชื่อตัวกรอง', { exact: true })).toHaveValue(/ธ.ค. 2568.*ล่วงหน้า 1 เดือน/);
+    await expect(dialog.getByRole('button', { name: 'บันทึก', exact: true })).toBeEnabled();
+    await dialog.getByRole('button', { name: 'ปิดรายการที่บันทึก', exact: true }).click();
+  }
+  await page.goto('/phimai?target=2025-11&horizon=4');
+  await expect(page.getByRole('tab', { name: 'ล่วงหน้า 4 เดือน · มี.ค. 2569' })).toHaveAttribute('aria-selected', 'true');
+  await page.goBack();
+  await expect(month).toContainText('ธ.ค. 2568');
+  await expect(page).toHaveURL(url => url.pathname === '/' && url.search === '');
+  await expect(page.locator('.nr-map-shape')).toHaveCount(289);
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: info.outputPath('home-clean-url.png'), fullPage: true });
   expect(errors).toEqual([]);
 });
 
