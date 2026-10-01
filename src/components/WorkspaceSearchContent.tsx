@@ -61,7 +61,7 @@ export function WorkspaceSearchContent({ userId, includeExport, onNavigate, onEx
   function openResult(entry: SearchEntry) {
     remember(); onClose();
     if (entry.action === 'export') onExport();
-    else if (entry.path) onNavigate(searchDestination(entry.path, window.location.search, window.history.state));
+    else if (entry.path) onNavigate(searchDestination(entry.path, window.location.search, window.history.state, window.location.pathname));
   }
   return <div className="workspace-search">
       <p className="workspace-search-intro">ค้นหาชื่อพื้นที่ รหัสพื้นที่ ชื่อเรียกอื่น หรือหัวข้อที่เกี่ยวข้องในจังหวัดนครราชสีมา</p>

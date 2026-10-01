@@ -14,7 +14,7 @@ function gate() {
   return { promise, release };
 }
 
-async function expectStartup(page: Page, testInfo: TestInfo, screenshot: string) {
+async function expectStartup(page: Page, testInfo: TestInfo, screenshot: string, expectedPath = requestedOverview) {
   const startup = page.locator('.app-startup');
   await expect(startup).toBeVisible();
   await expect(startup.getByRole('status').filter({ hasText: 'กำลังเปิดโคราชทันภัย...' })).toBeVisible();
@@ -28,7 +28,7 @@ async function expectStartup(page: Page, testInfo: TestInfo, screenshot: string)
   await expect(page.getByRole('button', { name: /บัญชีผู้ใช้/ })).toHaveCount(0);
   expect(await startup.innerText()).not.toMatch(/\d+\s*ตำบล|\d+\s*%/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
-  await expect(page).toHaveURL(new URL(requestedOverview, page.url()).href);
+  await expect(page).toHaveURL(new URL(expectedPath, page.url()).href);
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: testInfo.outputPath(screenshot), fullPage: true });
 }
@@ -37,7 +37,7 @@ async function expectOverviewReady(page: Page) {
   await expect(page.locator('.app-startup')).toHaveCount(0);
   await expect(page.locator('.nr-map-shape')).toHaveCount(289);
   await expect(page.locator('.nr-forecast-overview-summary')).toBeVisible();
-  await expect(page).toHaveURL(new URL(requestedOverview, page.url()).href);
+  await expect(page).toHaveURL(new URL('/', page.url()).href);
 }
 
 test('cold entry and uncached refresh keep branded loading until the authenticated chunk and page are ready', async ({ page, context }, testInfo) => {
@@ -65,7 +65,7 @@ test('cold entry and uncached refresh keep branded loading until the authenticat
     held = gate();
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect.poll(() => chunkRequests).toBe(2);
-    await expectStartup(page, testInfo, 'uncached-refresh-app-startup.png');
+    await expectStartup(page, testInfo, 'uncached-refresh-app-startup.png', '/');
     held.release();
     await expectOverviewReady(page);
     expect(errors).toEqual([]);

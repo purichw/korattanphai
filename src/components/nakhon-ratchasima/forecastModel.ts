@@ -96,14 +96,17 @@ export function readForecastArchiveInitialSelection(archive: NakhonRatchasimaDro
   };
 }
 
-export function writeForecastArchiveLocation(month: NakhonRatchasimaDroughtForecastArchiveTargetMonth, horizon: ForecastArchiveHorizon) {
+export function writeForecastArchiveLocation(month: NakhonRatchasimaDroughtForecastArchiveTargetMonth, horizon: ForecastArchiveHorizon, defaultPeriod?: string) {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
   url.searchParams.set("mapLayer", "forecast-archive");
   url.searchParams.set("target", month.period);
   url.searchParams.delete("period");
   url.searchParams.set("horizon", String(horizon));
-  window.history.replaceState(window.history.state, "", `${url.pathname}?${url.searchParams.toString()}${url.hash}`);
+  const defaultHome = url.pathname === "/" && month.period === defaultPeriod && horizon === 1;
+  if (defaultHome) for (const key of ["mapLayer", "target", "horizon"]) url.searchParams.delete(key);
+  const state = { ...window.history.state, ktpHomeForecastOrigin: defaultHome ? month.period : null };
+  window.history.replaceState(state, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
 export function pathWithForecastSelection(path: string, period: string, horizon: ForecastArchiveHorizon, irrigation: IrrigationCriterion = "all") {
@@ -140,6 +143,7 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     return { ...initial, selectedHorizon: fixedHorizon ?? initial.selectedHorizon };
   });
   const selectedHorizon = selection.selectedHorizon;
+  const defaultPeriod = forecastArchiveDefaultTargetMonth(archive)?.period;
   const selectedMonth =
     archive.targetMonths.find((month) => month.period === (archive.loadedSelection?.originPeriod ?? selection.selectedTargetPeriod)) ??
     forecastArchiveDefaultTargetMonth(archive);
@@ -147,11 +151,11 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     if (selectedMonth) {
       if (archive.loadedSelection) window.history.replaceState({ ...window.history.state, ktpForecastDatasetId: archive.meta.datasetId }, "");
       const params = new URLSearchParams(window.location.search);
-      if (params.has("period") || params.get("target") !== selectedMonth.period || Number(params.get("horizon") ?? "1") !== selectedHorizon) {
-        writeForecastArchiveLocation(selectedMonth, selectedHorizon);
+      if (window.location.pathname === "/" || params.has("period") || params.get("target") !== selectedMonth.period || Number(params.get("horizon") ?? "1") !== selectedHorizon) {
+        writeForecastArchiveLocation(selectedMonth, selectedHorizon, defaultPeriod);
       }
     }
-  }, [archive.loadedSelection, archive.meta.datasetId, selectedMonth, selectedHorizon]);
+  }, [archive.loadedSelection, archive.meta.datasetId, selectedMonth, selectedHorizon, defaultPeriod]);
   const selectedIssueMonth = selectedMonth?.period ?? archive.meta.targetMonthEnd;
   const targetMonthOptions = useMemo<AppSelectOption[]>(
     () =>
@@ -167,7 +171,7 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     if (fixedHorizon !== undefined) return;
     const month = selectedMonth ?? forecastArchiveDefaultTargetMonth(archive);
     setSelection((current) => ({ ...current, selectedHorizon: horizon, selectedTargetPeriod: current.selectedTargetPeriod || month?.period || "" }));
-    if (month) writeForecastArchiveLocation(month, horizon);
+    if (month) writeForecastArchiveLocation(month, horizon, defaultPeriod);
   };
 
   const changeTargetMonth = (period: string) => {
@@ -175,7 +179,7 @@ export function useDroughtForecastArchiveSelection(archive: NakhonRatchasimaDrou
     if (!month) return;
     if (requestPeriod) { requestPeriod(period); return; }
     setSelection((current) => ({ ...current, selectedTargetPeriod: month.period }));
-    writeForecastArchiveLocation(month, selectedHorizon);
+    writeForecastArchiveLocation(month, selectedHorizon, defaultPeriod);
   };
 
   const changeIrrigation = (criterion: IrrigationCriterion) => {

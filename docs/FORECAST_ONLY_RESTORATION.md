@@ -7,6 +7,13 @@ from `8357b02`, not the whole commit. Preserve shared UI fixes and source data.
 ## Active Routes
 
 - `/`: compact province/district-filtered T+1 forecast overview.
+- Home omits `mapLayer`, `target` and `horizon` when displaying the latest
+  archive origin at T+1, so the default URL is `/`. Successful legacy default
+  links normalize with `replaceState`; other filters and hashes remain intact.
+  Historical months and T+2..T+6 keep explicit parameters. A fresh `/` or reload
+  resolves the latest published origin, while saved-filter links pin their origin.
+  The displayed clean-Home origin is retained in that history entry for bookmarks,
+  Excel export and search; explicit URL selections take precedence.
 - `/drought`, district and tambon paths: existing six-horizon forecast workspace.
 - `target=YYYY-MM` is origin T; `horizon=1..6` is a forward lead time.
   Plain legacy URLs and `mapLayer=forecast-archive` URLs mean the same thing.
@@ -14,6 +21,8 @@ from `8357b02`, not the whole commit. Preserve shared UI fixes and source data.
 - No origin supplied selects the latest published origin. Retired `period` is
   ignored, never reinterpreted as an origin; canonical forecast URLs remove it.
 - Missing origins and invalid horizons show recovery rather than latest/zero data.
+  The recovery link starts a fresh load on the same route so a rejected query
+  cannot remain in the mounted workspace after its URL has been cleared.
 - Login, global search, area navigation and saved filters preserve the forecast
   origin/horizon. Existing Supabase Auth/RLS and dataset freshness checks remain.
 

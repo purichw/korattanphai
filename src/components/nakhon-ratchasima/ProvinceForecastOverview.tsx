@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle, ArrowRight, Gauge, Leaf, ShieldAlert } from "lucide-react";
 import { formatRai, getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaDistricts, type NakhonRatchasimaRouteTarget } from "../../domain";
 import type { NakhonRatchasimaDroughtForecastArchive, NakhonRatchasimaMapLayer, ProvinceMonthRisk } from "../../types";
@@ -10,7 +10,7 @@ import { DataProvenanceChip, dataProvenanceChipKindFromText } from "../DataProve
 import { DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
 import { AgricultureImpactPanel, ProvinceDashboardMapCard } from "./ResearchPanels";
 import { MetricGrid, type SummaryMetric } from "../PageSummary";
-import { forecastArchiveSummaryForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection, writeForecastArchiveLocation } from "./forecastModel";
+import { forecastArchiveSummaryForSelection, pathWithForecastSelection, useDroughtForecastArchiveSelection } from "./forecastModel";
 import { formatThaiNumber, pathForDistrictCode, pathForSubdistrictCode, type LocalMapMode } from "./workspaceModel";
 import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import { ForecastOverviewLoading } from "./ForecastArchiveLoading";
@@ -47,7 +47,6 @@ function ForecastOverviewContent({ archive, layer, mapMode, onMapModeChange, onN
   const month = forecast.selectedMonth;
   const codes = useMemo(() => forecastSubdistrictCodesForIrrigation(archive, forecast.selectedIrrigation, district?.subdistricts.map((area) => area.subdistrictCode)), [archive, forecast.selectedIrrigation, district]);
   const summary = useMemo(() => month ? forecastArchiveSummaryForSelection(archive, month, 1, codes) : null, [archive, month, codes]);
-  useEffect(() => { if (month) writeForecastArchiveLocation(month, 1); }, [month]);
   if (!month || !summary) return <section className="nr-archive-load-state"><p role="status">ยังไม่มีข้อมูลพยากรณ์สำหรับรอบนี้</p><a href="/drought" className="secondary-button">ดูคลังพยากรณ์ย้อนหลัง<ArrowRight size={16} /></a></section>;
 
   const scopeLabel = district ? `อ.${district.nameTh}` : "จ.นครราชสีมา";

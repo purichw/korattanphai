@@ -102,7 +102,7 @@ test('overview has one month owner synchronized with scoped T+1 map data', async
   await expect(mapMonth).toHaveAttribute('aria-busy', 'true');
   await expect(mapMonth.locator('.app-select-spinner')).toBeVisible();
   await expect(mapMonth).toContainText('ธ.ค. 2568');
-  await expect(page).toHaveURL(/target=2025-12/);
+  await expect(page).toHaveURL(new URL('/', page.url()).href);
   await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText(['0 ตำบล', '117 ตำบล', '0 ตำบล', '172 ตำบล']);
   expect(await heading.evaluate(el => el.getBoundingClientRect().top + scrollY)).toBeCloseTo(headerTop, 0);
   await expect(page.getByRole('status').filter({ hasText: 'กำลังโหลดรอบที่เลือก' })).toHaveCSS('position', 'absolute');
@@ -128,7 +128,7 @@ test('overview has one month owner synchronized with scoped T+1 map data', async
   await expect(mapMonth).toContainText('ธ.ค. 2568');
   if (mobile) await page.getByRole('button', { name: 'แสดงผล', exact: true }).click();
   await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นบนแผนที่พยากรณ์ภัยแล้ง', exact: true })).toContainText('ธ.ค. 2568');
-  await expect(page).toHaveURL(/target=2025-12.*horizon=1/);
+  await expect(page).toHaveURL(new URL('/', page.url()).href);
   await expect(page.locator('.nr-forecast-overview-summary .metric-card-value')).toHaveText(['0 ตำบล', '117 ตำบล', '0 ตำบล', '172 ตำบล']);
   expect(requests.map(r => r.p_origin_period)).toEqual(['2025-12', '2025-11']);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

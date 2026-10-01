@@ -1,6 +1,7 @@
 import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaPath, resolveAppRoute } from './domain';
 import { isSavedSelection, savedRiskCriteria, type SavedForecastSelection, type SavedRiskCriterion } from './data/savedWorkspaces';
 import { readIrrigationSelection } from './irrigation';
+import { forecastLocationParams } from './forecastLocation';
 
 export function savedAreaInfo(code: string): { label: string; path: string } | null {
   if (code === '30') return { label: 'จังหวัดนครราชสีมา', path: '/drought' };
@@ -23,7 +24,7 @@ export function readWorkspaceAreaCode(location: Pick<Location, 'pathname' | 'sea
 }
 
 export function readWorkspaceSelection(location: Pick<Location, 'pathname' | 'search'>, historyState?: unknown): SavedForecastSelection | null {
-  const params = new URLSearchParams(location.search);
+  const params = forecastLocationParams(location, historyState);
   if (params.getAll('target').length !== 1 || params.getAll('horizon').length > 1) return null;
   const code = readWorkspaceAreaCode(location);
   if (!code) return null;

@@ -1,5 +1,6 @@
 import hierarchy from './data/canonical/nakhon_ratchasima/admin_hierarchy.json';
 import { readIrrigationSelection } from './irrigation';
+import { forecastLocationParams } from './forecastLocation';
 
 export const searchKinds = { province: 'จังหวัด', district: 'อำเภอ', subdistrict: 'ตำบล', tool: 'หน้าและเครื่องมือ' } as const;
 export type SearchKind = keyof typeof searchKinds;
@@ -86,9 +87,9 @@ export function searchWorkspace(entries: SearchEntry[], query: string, mode: Sea
 }
 
 /** Preserve origin and lead time when changing geography; Home uses T+1. */
-export function searchDestination(path: string, search: string, historyState?: unknown) {
+export function searchDestination(path: string, search: string, historyState?: unknown, sourcePath = '') {
   const destination = new URL(path, 'https://local.invalid');
-  const current = new URLSearchParams(search);
+  const current = forecastLocationParams({ pathname: sourcePath, search }, historyState);
   const next = new URLSearchParams();
   const period = current.get('target') ?? '';
   if (/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) next.set('target', period);
