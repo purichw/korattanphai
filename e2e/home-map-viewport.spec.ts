@@ -40,6 +40,22 @@ async function expectContainedMap(page: Page, card: Locator) {
   if (page.viewportSize()!.width < 721) {
     const attention = await page.locator('.nr-forecast-overview-attention').boundingBox();
     expect(bounds['.nr-map-panel'].bottom).toBeLessThanOrEqual(attention!.y);
+    expect(bounds['.nr-map-legend'].height).toBeLessThanOrEqual(36);
+    expect(bounds['.nr-map-legend'].top - bounds['.nr-map-svg'].bottom).toBeLessThanOrEqual(1);
+    const controls = await card.locator('.nr-map-controls').evaluate(element => {
+      const toolbar = element.getBoundingClientRect();
+      return Array.from(element.querySelectorAll('button')).map(button => {
+        const rect = button.getBoundingClientRect();
+        const icon = button.querySelector('svg')!.getBoundingClientRect();
+        return { width: rect.width, height: rect.height, x: icon.x + icon.width / 2 - (toolbar.x + toolbar.width / 2), y: icon.y + icon.height / 2 - (rect.y + rect.height / 2) };
+      });
+    });
+    for (const control of controls) {
+      expect(control.width).toBe(44);
+      expect(control.height).toBe(44);
+      expect(Math.abs(control.x)).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(control.y)).toBeLessThanOrEqual(0.5);
+    }
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 }
