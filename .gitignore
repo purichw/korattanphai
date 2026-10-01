@@ -21,3 +21,7 @@ supabase/.temp/
 .local/backups/
 .local/restore-drills/
 .local/policies/
+.local/api-uat/
+.local/postman-demo/
+.local/npm-cache/
+scripts/__pycache__/

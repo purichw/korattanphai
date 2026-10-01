@@ -1,0 +1,247 @@
+{
+  "info": {
+    "name": "Korat Tan Phai — V1 Local Postman Demo",
+    "description": "ทดลอง API V1 ที่มีอยู่ด้วยข้อมูลสมมติเท่านั้น / Synthetic local-only examples of the implemented V1 API. Run items in order. Does not implement V2.1, VHI forecasts, providers or publication. Token is a public local-demo value, not a production credential. Start the server as documented in docs/POSTMAN_LOCAL_TESTING.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8787",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "postman-local-demo-only-2026-09-09",
+      "type": "string"
+    },
+    {
+      "key": "sourceId",
+      "value": "postman-demo",
+      "type": "string"
+    },
+    {
+      "key": "batchId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 POST — ส่ง NDVI สมมติ / create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.62,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-NDVI\",\n      \"productVersion\": \"postman-demo-v1\",\n      \"processingVersion\": \"postman-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"batchId\", \"postman-ndvi-\" + pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"New batch\", function () { pm.expect(pm.response.json().created).to.eql(true); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 POST — ส่งเดิมซ้ำ / idempotent retry",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.62,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-NDVI\",\n      \"productVersion\": \"postman-demo-v1\",\n      \"processingVersion\": \"postman-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Same batch reused\", function () { pm.expect(pm.response.json().created).to.eql(false); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 GET — อ่านค่าที่เก็บ / read batch",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs?batchId={{batchId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Stored NDVI is unchanged\", function () { pm.expect(pm.response.json().observations[0].value).to.eql(0.62); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 POST — เปลี่ยนค่าแต่ใช้ ID เดิม / conflict",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.55,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-NDVI\",\n      \"productVersion\": \"postman-demo-v1\",\n      \"processingVersion\": \"postman-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Immutable batch\", function () { pm.expect(pm.response.json().error.code).to.eql(\"batch_conflict\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 POST — NDVI นอกช่วง / invalid value",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 2,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-NDVI\",\n      \"productVersion\": \"postman-demo-v1\",\n      \"processingVersion\": \"postman-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 GET — ไม่มี token / unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 GET — ดูรายการ batches / list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs?limit=10"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Batch list\", function () { pm.expect(pm.response.json().items).to.be.an(\"array\"); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

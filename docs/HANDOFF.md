@@ -20,6 +20,55 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+API UAT toolkit source release (2026-10-01):
+
+- Source-only release branch: `chore/api-uat-readiness-20261001-clean`, based on
+  `384fc11` (verified production runtime `3b786cd` plus its release notes).
+  Includes only the prepared API UAT/local Postman kit, focused tests, ignore
+  rules and this chat's cleanup/operations notes. Unrelated root source and
+  research drafts are excluded; the existing checkout/index stay untouched.
+- The user chose push only. No website deployment, UAT activation, credentials,
+  database migration or billing change is part of this source release. The
+  deployed application and all ten packaged API runtime files are unchanged.
+- Fifteen UAT package/helper checks pass before push; the preceding local pass
+  also recorded 112 model-input and 19 operations checks. Hosted UAT and Postman
+  desktop acceptance remain deferred. CI status must be checked separately on
+  the pushed commit; this note does not claim a production release or CI pass.
+- GitHub rejected the initial local commit `37ffa55` because a synthetic test
+  key resembled a Supabase secret. It was replaced with an unmistakable dummy
+  value and retested. The rejected commit/branch is retained locally, not sent
+  as an ancestor of the clean release. No scanner bypass or real key was used.
+
+Project cleanup and API UAT package refresh (2026-10-01, local only):
+
+- Removed the approved generated Python cache and pruned 16 stale worktree
+  registrations whose checkout directories were already absent. Immediately
+  after cleanup only the root checkout remained; cleanup changed no branch/tag
+  refs. New worktrees/source edits appeared later and were left untouched.
+  Recovery inventory
+  and archive: [rollback note](rollback-parking-lot.md#2026-10-01---retired-local-worktree-metadata-and-python-cache).
+  Older checkout/evidence paths below are historical, not guaranteed to exist.
+- The root remains on `fix/nr-map-zoom-performance` at `e11c59f` with pre-existing
+  mixed work. Many dirty files already match deployed work; others are older
+  drafts. Dirty does not mean unpublished. Do not discard them or release the
+  entire root as a new production build. No committed-only local work was found
+  ahead of remote branches during the project status audit.
+- Repaired the genuinely unpublished API UAT packager to include
+  `shared/dataFields.mjs` and support immutable `--source-ref` packaging while
+  retaining the default dirty-runtime guard. Isolated test fixtures cover
+  production exclusion, source provenance, path safety and package integrity.
+- Verification: 112 model-input tests and 19 operations tests pass on local
+  Node 26.0.0. The pinned production runtime `3b786cd` packages/imports successfully
+  as 19 files using synthetic settings only. Hosted Node 24, frontend/mobile,
+  full-site and production smoke were not rerun for this local tooling change.
+- [API UAT operations](API_UAT_OPERATIONS.md) records current commands, package
+  provenance and activation gates. UAT remains deferred pending an authorized
+  separate database/billing decision. Research V2.1 remains documentation-only,
+  awaiting target/recipe/coverage decisions; no new ingestion, model execution
+  or public Actual Archive is enabled. Preserve these drafts, not delete them.
+- This pass made no commit, push, deploy, database change or billing change.
+  The last verified production release is the checkpoint immediately below.
+
 Risk attention card height, production release (2026-09-30):
 
 - Runtime `3b786cd55797eaa5b77e9176744ce2c5c1f06cc5` on

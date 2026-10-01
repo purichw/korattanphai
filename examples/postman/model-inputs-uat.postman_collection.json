@@ -1,0 +1,520 @@
+{
+  "info": {
+    "name": "Korat Tan Phai — Shared V1 API UAT",
+    "description": "รอเปิดใช้งาน UAT / Awaiting environment activation; no live URL or hosted verification yet. Synthetic shared UAT batches only. Once activated, import the separate UAT environment and set its authorized HTTPS origin plus local/current integration tokens. Run 01–10 in order with both roles, or reader requests 07–09 with a peerBatchId created by another tester. Every 01 creates a new ID; retry using 02. This collection exercises implemented V1 only, not V2, VHI prediction or publication. No credentials are included.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{writerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "batchId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "batchHash",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lastRequestId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const base = String(pm.environment.get(\"baseUrl\") || \"\").replace(/\\/+$/, \"\");",
+          "if (!/^https:\\/\\/[A-Za-z0-9.-]+(?::[0-9]+)?$/.test(base)) throw new Error(\"Set baseUrl to the authorized UAT HTTPS origin only, with no path, query or credentials.\");",
+          "const source = pm.environment.get(\"sourceId\");",
+          "if (typeof source !== \"string\" || !/^[a-z][a-z0-9_-]{0,63}$/.test(source)) throw new Error(\"Set sourceId to the source configured by the UAT owner.\");",
+          "pm.variables.set(\"baseUrl\", base);",
+          "pm.variables.set(\"sourceId\", source);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const requestId = pm.response.headers.get(\"X-Request-ID\");",
+          "if (requestId) pm.collectionVariables.set(\"lastRequestId\", requestId);",
+          "pm.test(\"Server request ID for support\", function () { pm.expect(requestId).to.match(/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i); });",
+          "pm.test(\"JSON response, no cached batch data\", function () {",
+          "  pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.match(/application\\/json/i);",
+          "  pm.expect(pm.response.headers.get(\"Cache-Control\") || \"\").to.match(/no-store/i);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 POST — สร้างข้อมูลสมมติ / create",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"writerToken\")) throw new Error(\"Set writerToken in the selected UAT environment using a local/current value.\");",
+              "const id = \"uat-ndvi-\" + pm.variables.replaceIn(\"{{$guid}}\");",
+              "pm.collectionVariables.set(\"batchId\", id);",
+              "pm.collectionVariables.unset(\"batchHash\");",
+              "pm.variables.set(\"batchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+              "pm.test(\"New immutable batch receipt\", function () { const body = pm.response.json(); pm.expect(body.created).to.eql(true); pm.expect(body.batch.sourceId).to.eql(pm.environment.get(\"sourceId\")); pm.expect(body.batch.batchId).to.eql(pm.variables.get(\"batchId\")); pm.expect(body.batch.observationCount).to.eql(1); pm.expect(body.batch.contentHash).to.match(/^[a-f0-9]{64}$/); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"batchHash\", pm.response.json().batch.contentHash);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.62,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-UAT-NDVI\",\n      \"productVersion\": \"uat-demo-v1\",\n      \"processingVersion\": \"uat-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Writer creates one synthetic NDVI batch. Each Send generates a fresh UUID. If the response is uncertain, retry request 02 instead of generating another ID."
+      }
+    },
+    {
+      "name": "02 POST — ส่งเดิมซ้ำ / idempotent retry",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"writerToken\")) throw new Error(\"Set writerToken in the selected UAT environment using a local/current value.\");",
+              "const id = pm.collectionVariables.get(\"batchId\");",
+              "if (!id) throw new Error(\"Run request 01 first; use request 02 to retry the same batch.\");",
+              "pm.variables.set(\"batchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Same content reused\", function () { const body = pm.response.json(); pm.expect(body.created).to.eql(false); pm.expect(body.batch.batchId).to.eql(pm.variables.get(\"batchId\")); const hash = pm.collectionVariables.get(\"batchHash\"); if (hash) pm.expect(body.batch.contentHash).to.eql(hash); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.62,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-UAT-NDVI\",\n      \"productVersion\": \"uat-demo-v1\",\n      \"processingVersion\": \"uat-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Same body and ID as 01. Expected 200/created:false after a successful create. This is the safe retry request."
+      }
+    },
+    {
+      "name": "03 GET — Writer อ่าน batch / read",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"writerToken\")) throw new Error(\"Set writerToken in the selected UAT environment using a local/current value.\");",
+              "const id = pm.collectionVariables.get(\"batchId\");",
+              "if (!id) throw new Error(\"Run request 01 first; use request 02 to retry the same batch.\");",
+              "pm.variables.set(\"batchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Shared UAT source and requested batch\", function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.sourceId).to.eql(pm.environment.get(\"sourceId\"));",
+              "  pm.expect(body.batchId).to.eql(pm.variables.get(\"batchId\"));",
+              "  pm.expect(body.kind).to.eql(\"satellite\");",
+              "  pm.expect(body.observations).to.have.length(1);",
+              "  pm.expect(body.observations[0].product).to.eql(\"SYNTHETIC-UAT-NDVI\");",
+              "  pm.expect(body.observations[0].value).to.be.a(\"number\").and.eql(0.62);",
+              "  pm.expect(body.contentHash).to.match(/^[a-f0-9]{64}$/);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs?batchId={{batchId}}",
+        "description": "Read the writer's current fixture from durable UAT storage."
+      }
+    },
+    {
+      "name": "04 POST — ID เดิมแต่ข้อมูลเปลี่ยน / conflict",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"writerToken\")) throw new Error(\"Set writerToken in the selected UAT environment using a local/current value.\");",
+              "const id = pm.collectionVariables.get(\"batchId\");",
+              "if (!id) throw new Error(\"Run request 01 first; use request 02 to retry the same batch.\");",
+              "pm.variables.set(\"batchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });",
+              "pm.test(\"Expected error code\", function () { pm.expect(pm.response.json().error.code).to.eql(\"batch_conflict\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.55,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-UAT-NDVI\",\n      \"productVersion\": \"uat-demo-v1\",\n      \"processingVersion\": \"uat-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Changing NDVI to 0.55 under the accepted ID must be rejected without overwriting it."
+      }
+    },
+    {
+      "name": "05 POST — ค่าผิดช่วง / invalid NDVI",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"writerToken\")) throw new Error(\"Set writerToken in the selected UAT environment using a local/current value.\");",
+              "const id = pm.collectionVariables.get(\"batchId\");",
+              "if (!id) throw new Error(\"Run request 01 first; use request 02 to retry the same batch.\");",
+              "pm.variables.set(\"batchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Expected error code\", function () { pm.expect(pm.response.json().error.code).to.eql(\"invalid_batch\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{batchId}}-invalid\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 2,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-UAT-NDVI\",\n      \"productVersion\": \"uat-demo-v1\",\n      \"processingVersion\": \"uat-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "NDVI 2 is outside the accepted range. A separate derived ID isolates validation from an existing-ID conflict."
+      }
+    },
+    {
+      "name": "06 GET — ไม่ส่ง token / unauthorized",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": []
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", function () { pm.response.to.have.status(401); });",
+              "pm.test(\"Expected error code\", function () { pm.expect(pm.response.json().error.code).to.eql(\"unauthorized\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "auth": {
+          "type": "noauth"
+        },
+        "description": "Explicit No Auth overrides collection authentication. Server must reject the request."
+      }
+    },
+    {
+      "name": "07 POST — Reader ห้ามเขียน / forbidden",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"readerToken\")) throw new Error(\"Set readerToken in the selected UAT environment using a local/current value.\");",
+              "pm.variables.set(\"readerAttemptBatchId\", \"uat-reader-denied-\" + pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });",
+              "pm.test(\"Expected error code\", function () { pm.expect(pm.response.json().error.code).to.eql(\"forbidden\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/model-inputs",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{readerToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"schemaVersion\": 1,\n  \"kind\": \"satellite\",\n  \"sourceId\": \"{{sourceId}}\",\n  \"batchId\": \"{{readerAttemptBatchId}}\",\n  \"observations\": [\n    {\n      \"subdistrictCode\": \"300806\",\n      \"period\": \"2026-08\",\n      \"availableAt\": \"2026-09-02T02:00:00Z\",\n      \"metric\": \"ndvi\",\n      \"value\": 0.62,\n      \"unit\": \"1\",\n      \"quality\": \"reported\",\n      \"validPixelFraction\": 0.95,\n      \"product\": \"SYNTHETIC-UAT-NDVI\",\n      \"productVersion\": \"uat-demo-v1\",\n      \"processingVersion\": \"uat-demo-v1\",\n      \"resolutionMeters\": 250,\n      \"nativeSupportMeters\": 250,\n      \"spatialAggregation\": \"area_weighted_mean\",\n      \"temporalAggregation\": \"mean\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Reader credentials attempt an otherwise valid synthetic batch. Server must reject the write. This case can run independently with a reader token."
+      }
+    },
+    {
+      "name": "08 GET — Reader อ่านข้อมูลร่วม / shared read",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"readerToken\")) throw new Error(\"Set readerToken in the selected UAT environment using a local/current value.\");",
+              "const id = pm.environment.get(\"peerBatchId\") || pm.collectionVariables.get(\"batchId\");",
+              "if (!id || !/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/.test(id)) throw new Error(\"Set peerBatchId to a fixture batch ID from another tester, or run 01 first.\");",
+              "pm.variables.set(\"readBatchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Shared UAT source and requested batch\", function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.sourceId).to.eql(pm.environment.get(\"sourceId\"));",
+              "  pm.expect(body.batchId).to.eql(pm.variables.get(\"readBatchId\"));",
+              "  pm.expect(body.kind).to.eql(\"satellite\");",
+              "  pm.expect(body.observations).to.have.length(1);",
+              "  pm.expect(body.observations[0].product).to.eql(\"SYNTHETIC-UAT-NDVI\");",
+              "  pm.expect(body.observations[0].value).to.be.a(\"number\").and.eql(0.62);",
+              "  pm.expect(body.contentHash).to.match(/^[a-f0-9]{64}$/);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs?batchId={{readBatchId}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{readerToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Reads peerBatchId when provided, otherwise the current run's batchId. Both accounts must belong to the configured UAT source. Peer batch must come from request 01 of this collection."
+      }
+    },
+    {
+      "name": "09 GET — Reader ดูรายการร่วม / list",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"readerToken\")) throw new Error(\"Set readerToken in the selected UAT environment using a local/current value.\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Only configured UAT source is listed\", function () { const body = pm.response.json(); pm.expect(body.items).to.be.an(\"array\"); pm.expect(body.items.length).to.be.at.most(10); body.items.forEach(function (item) { pm.expect(item.sourceId).to.eql(pm.environment.get(\"sourceId\")); }); pm.expect(body.nextCursor === null || typeof body.nextCursor === \"string\").to.eql(true); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs?limit=10",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{readerToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "description": "Newest metadata for the shared source; other testers' accepted batches may appear. The list is not a complete history."
+      }
+    },
+    {
+      "name": "10 GET — ยืนยันข้อมูลไม่ถูกแก้ / unchanged after rejections",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (!pm.environment.get(\"writerToken\")) throw new Error(\"Set writerToken in the selected UAT environment using a local/current value.\");",
+              "const id = pm.collectionVariables.get(\"batchId\");",
+              "if (!id) throw new Error(\"Run request 01 first; use request 02 to retry the same batch.\");",
+              "pm.variables.set(\"batchId\", id);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Shared UAT source and requested batch\", function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.sourceId).to.eql(pm.environment.get(\"sourceId\"));",
+              "  pm.expect(body.batchId).to.eql(pm.variables.get(\"batchId\"));",
+              "  pm.expect(body.kind).to.eql(\"satellite\");",
+              "  pm.expect(body.observations).to.have.length(1);",
+              "  pm.expect(body.observations[0].product).to.eql(\"SYNTHETIC-UAT-NDVI\");",
+              "  pm.expect(body.observations[0].value).to.be.a(\"number\").and.eql(0.62);",
+              "  pm.expect(body.contentHash).to.match(/^[a-f0-9]{64}$/);",
+              "});",
+              "pm.test(\"Original accepted content hash remains\", function () { const hash = pm.collectionVariables.get(\"batchHash\"); pm.expect(hash).to.be.a(\"string\").and.match(/^[a-f0-9]{64}$/); pm.expect(pm.response.json().contentHash).to.eql(hash); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/model-inputs?batchId={{batchId}}",
+        "description": "After rejected writes, the original NDVI value and accepted hash must remain unchanged."
+      }
+    }
+  ]
+}
