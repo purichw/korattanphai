@@ -20,6 +20,66 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Admin detail visual rework after mockup comparison (2026-10-01; local only):
+
+- Revisited both supplied internal-page references and the prior rendered
+  screenshots. Removes the duplicate back-button row, uses the breadcrumb as
+  the return path, and puts refresh alongside it. Read-only guidance and the
+  mobile last-save timestamp remain reachable inside History; source editing
+  guidance and publication controls remain visible in their existing flow.
+- Desktop now separates the slim search/filter surface from the compact table;
+  real metrics keep centered contents with distinct icon tints and a publication
+  badge. Mobile uses a dark compact header scoped to resource details, individual
+  bordered record cards and a shorter internal list viewport. Twenty rows remain
+  reachable per page; no data/status/action was invented from the mock.
+- Mobile shows selected-row export controls/help when rows are selected; the
+  select-page label explicitly explains downloading. Search, filtering, selection
+  across pages, CSV, detail dialog focus, reload/back navigation and mobile menu
+  are verified. First-list position changes from y604 to y382 at 390px width;
+  the unselected page changes from 1334px to 882px in the final capture.
+- Twelve scoped browser cases pass (detail, home navigation, reference reads,
+  no-code forecast correction, station workbook import and source save/reload/
+  publication) across desktop/mobile; the detail cases were refreshed after the
+  final mobile type adjustment. TypeScript and diff checks pass. No full-site
+  suite, release CI or production writes/deployment for this visual follow-up.
+- Evidence: `artifacts/admin-resource-evidence-20261001/polish-confirmed/`,
+  `polish-final/`, `polish-source-check/` and `polish-comparisons/`. Both full-page
+  and viewport renders, active mobile selection, and the three-way reference /
+  earlier screenshot / current development comparison were personally inspected.
+  Remaining intentional differences: centered metrics, real 289/32 counts,
+  fewer supported columns/actions and 20 rows/page. Production is unchanged.
+
+Admin resource-detail adaptation (2026-10-01; local, not pushed or deployed):
+
+- Adopts the new internal-page desktop/mobile references where backed by the
+  existing resource contract: one specific page heading and breadcrumb, real
+  projected row counts, revision/publication state, CMS last-save time, district
+  filtering, sorting and 10/20/50-row page size. The default remains 20 rows and
+  original source order. Mobile uses scrollable record cards and a filter toggle.
+- `ReferenceRecords` owns read-only browsing and selection, reusing shared
+  `AppSelect`, `WorkspaceEmptyState` and dialog behavior. `ReferenceResources`
+  still owns fetching, source-registry draft edits, history and publication.
+- Checkboxes select original payload row identities across pages and sorting;
+  CSV downloads exactly the selected projected rows in the current sort order.
+  Search/district changes clear selection, as do resource/revision changes.
+  CSV has Thai column labels, UTF-8 BOM, escaping and spreadsheet-formula guards.
+  It is a readable review export, not an editable source/import replacement.
+- Actual hierarchy contains 289 subdistricts and 32 districts; the illustrated
+  304 count, per-row linked/active status and 100% linkage are not asserted.
+  Area link/unlink/delete/edit actions have no supporting product contract and
+  were not introduced. Source-registry edit/save/publish remains available.
+- All eight distinct scoped desktop/mobile browser cases pass: detail selection,
+  CSV download, search/filter/sort/page size, last-row scrolling, dialog focus,
+  route reload/history/return, home navigation, station reads and source edits
+  through publication/public reload in an isolated CMS database. All 21 focused
+  presentation/CSV unit cases pass; TypeScript and diff checks pass.
+- Evidence: `artifacts/admin-resource-evidence-20261001/confirmed/`, `final/` and
+  `final-comparisons/`. Full-page/viewport screenshots were personally inspected;
+  comparison reference crops are inferred from annotated raster images, not
+  exact CSS measurements. Physical devices, full-site/release CI and production
+  smoke were not rerun for this local follow-up. Production remains the release
+  recorded below; this checkpoint does not assert new deployment.
+
 Admin data-home reference redesign, production release (2026-10-01):
 
 - Adopts the supplied desktop/mobile mockups' icon-led header, three white panels,

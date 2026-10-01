@@ -28,7 +28,7 @@ test('operators see explained real resources and can inspect them without creati
     await expect(page.getByText('หน้า 1 / 3', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'สร้างฉบับแก้ไข', exact: true })).toHaveCount(0);
     expect(clones).toEqual([]);
-    await page.getByRole('button', { name: 'กลับหน้าจัดการข้อมูล', exact: true }).click();
+    await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).click();
     await page.getByRole('combobox', { name: /^ประเภทข้อมูล/ }).click();
     await expect(page.getByRole('option', { name: 'ผลพยากรณ์จากแบบจำลอง', exact: true })).toHaveCount(0);

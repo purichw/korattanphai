@@ -143,6 +143,22 @@ expand/collapse control. Search/filter results always reveal every match. Drafts
 retain the same DOM/actions and use a mobile card layout. Presentation does not
 change import, publication, permission, auth or reference-read ownership.
 
+`ReferenceRecords` is the Admin resource-detail browsing adapter. It receives the
+existing `referenceTable` projection and retains each row's original payload
+index through search, district filter, sort, pagination and CSV selection. It
+reuses `AppSelect`, `WorkspaceEmptyState` and existing controls; it does not own
+resource persistence. `ReferenceResources` owns source-registry edits and shared
+dialogs. Changes to resource/revision or search/district criteria clear selected
+rows; page/sort changes retain them. Mobile keeps semantic table cells in a
+scrollable card layout, with a reachable select-page control and filter toggle.
+On mobile, export controls/help appear only after selection; the select-page
+label explains their purpose. Breadcrumb return and refresh share one compact
+row. Detail-only CSS scopes the dark mobile header and quiet content surface,
+leaving the Admin home shell untouched. Read-only guidance/last-save details
+remain in the History disclosure; source draft/publish controls remain visible.
+CSV is a read-only review export with Thai headers, BOM, quoting and formula
+guards. No mock linkage status or unsupported area mutations are exposed.
+
 Forecast UI uses `forecastHorizonLabel` from `src/forecastPeriod.ts`: full
 labels read `ล่วงหน้า 1 เดือน`; six-slot tabs and chart axes use `1 เดือน`
 through `6 เดือน`. Tab accessible names retain the full lead time and actual

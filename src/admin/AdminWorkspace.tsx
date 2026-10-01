@@ -53,8 +53,8 @@ export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { 
   const openDraft = (next: Draft) => onNavigate(`/admin?draft=${encodeURIComponent(next.id)}`);
   const importsView = view === 'imports' || view === 'upload';
   const title = draft?.title ?? (importsView ? 'รายการนำเข้าและฉบับร่าง' : 'จัดการข้อมูล');
-  return <section className="cms-workspace" aria-labelledby="cms-title">
-    <div className="cms-context-bar"><nav aria-label="เส้นทางหน้าผู้ดูแล"><span>พื้นที่ผู้ดูแล</span><ChevronRight size={14} aria-hidden="true" /><span>{draftId ? 'ฉบับร่าง' : resourceId ? 'ข้อมูลประกอบเว็บไซต์' : title}</span></nav>
+  return <section className="cms-workspace" aria-labelledby={resourceId ? undefined : 'cms-title'} aria-label={resourceId ? 'รายละเอียดข้อมูลประกอบเว็บไซต์' : undefined}>
+    {!resourceId && <><div className="cms-context-bar"><nav aria-label="เส้นทางหน้าผู้ดูแล"><span>พื้นที่ผู้ดูแล</span><ChevronRight size={14} aria-hidden="true" /><span>{draftId ? 'ฉบับร่าง' : title}</span></nav>
       <div className="cms-actions">{draftId ? <button className="secondary-button" onClick={() => onNavigate('/admin?view=imports')}><ArrowLeft size={18} />รายการนำเข้าและฉบับร่าง</button>
         : !resourceId && <button className="primary-button cms-upload-action" aria-label="นำเข้าข้อมูล" title="นำเข้าข้อมูล" onClick={() => onNavigate('/admin?view=upload')} disabled={loading || Boolean(error)}><FileUp size={18} /><span>นำเข้าข้อมูล</span></button>}
         <button type="button" className="icon-button" title="โหลดฉบับล่าสุด" aria-label="โหลดฉบับล่าสุด" disabled={loading}
@@ -63,7 +63,7 @@ export default function AdminWorkspace({ userId, draftId, view, onNavigate }: { 
     <header className="cms-page-header"><Database className="cms-page-icon" size={42} strokeWidth={2} aria-hidden="true" /><div><h1 id="cms-title">{title}</h1>
       {!draft && !resourceId && <p>{importsView ? 'เปิดรายการที่บันทึกไว้เพื่อตรวจข้อมูล แก้ไข และเผยแพร่' : 'ตรวจแก้พยากรณ์ นำเข้าไฟล์ และตรวจข้อมูลที่เว็บไซต์ใช้'}</p>}
       {draft && <p>{kindLabels[draft.kind]} · รุ่นแก้ไข {draft.revision} · {draft.state === 'accepted' ? 'รับเข้าระบบแล้ว' : 'ฉบับร่าง'}</p>}</div>
-    </header>
+    </header></>}
     {loading ? <div className="cms-loading" role="status" aria-label="กำลังโหลดชุดข้อมูล"><Skeleton /><Skeleton /><Skeleton /></div>
       : error ? <WorkspaceEmptyState className="cms-empty" role="alert" heading="h2" icon={Database} title="ยังเปิดชุดข้อมูลไม่ได้" description={error}
         action={<button className="secondary-button" onClick={() => setGeneration(value => value + 1)}><RefreshCw size={16} />ลองใหม่</button>} />
