@@ -67,14 +67,15 @@ for (const size of ['default', 'narrow'] as const) {
     }
     expect(await settledTransform(layer)).not.toBe(initialTransform);
     const viewport = page.viewportSize()!;
+    await map.evaluate(element => window.scrollTo(0, scrollY + element.getBoundingClientRect().top - 110));
+    await expectContainedMap(page, card);
+    await page.screenshot({ path: info.outputPath('home-map-zoomed.png'), scale: 'css' });
     if (viewport.width < 721) {
       await page.setViewportSize({ width: viewport.height, height: viewport.width });
       await expectContainedMap(page, card);
       await page.setViewportSize(viewport);
+      await expectContainedMap(page, card);
     }
-    await map.evaluate(element => window.scrollTo(0, scrollY + element.getBoundingClientRect().top - 110));
-    await expectContainedMap(page, card);
-    await page.screenshot({ path: info.outputPath('home-map-zoomed.png'), scale: 'css' });
 
     const zoomedTransform = await settledTransform(layer);
     await card.getByRole('button', { name: 'ย่อแผนที่', exact: true }).click();
