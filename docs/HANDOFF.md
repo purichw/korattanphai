@@ -20,6 +20,45 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Mobile map-label production release (2026-10-02):
+
+- Released this chat's mobile zoom-label fix from
+  `fix/admin-navigation-20261001`, runtime commit
+  `ab9cb7352fc0c6bdf08cc700a0a87613d96c17de`. Production changed while the
+  release was being verified, so the published Admin baseline
+  `6814e431ba98a5b408a9a1876d8c87903e1f92be` was merged before the final
+  candidate and CI run. Admin runtime and its CI configuration are unchanged
+  relative to that baseline. Root checkout and unrelated work were untouched.
+- Mobile map names now maintain readable screen sizes while zooming; ordinary
+  labels are 12–13 CSS pixels and selected-area labels are 14–16 pixels.
+  Province view reveals district names and then unselected tambon names at
+  appropriate zoom levels, retaining filtering, collision handling and selection.
+  Lazy geometry caching reuses projected label anchors/bounds without caching
+  current labels, filters, selection or visibility decisions.
+- The tracked-source archive passed protected build, exposure and unchanged
+  bundle-budget checks. All six required jobs passed for the exact runtime
+  commit in [Quality Gate 36915299968](https://github.com/purichw/korattanphai/actions/runs/36915299968).
+  An earlier built-browser attempt timed out without assertion failures;
+  redundant geometry work was addressed and the final run passed under the
+  original time limits, with no tests removed or gates relaxed.
+- Authenticated, read-only candidate smoke passed before promotion. Immediately
+  before promotion, the primary alias still pointed to the preserved Admin
+  baseline. Promoted `dpl_DFz1JmBoNQGFJUpycBNj9gRU2xkf`
+  (`https://korattanphai-q166gyd27-purich-w.vercel.app`) and confirmed the primary
+  `https://korattanphai.vercel.app` alias resolves to that deployment/commit.
+- Authenticated production smoke passed on desktop and mobile: province district
+  names, unselected tambon names after zoom, district view and selected-area
+  labels. Mobile two-finger pinch passed in browser emulation; physical-device
+  testing was not performed. Real CMS geometry/forecast reads, decoded branding,
+  viewport visibility and no horizontal overflow/application errors were checked.
+  Both device runs recorded zero application writes. No data migration or ACL
+  change was made.
+- Evidence: `artifacts/map-labels-release-20261002/quality-gate.json`,
+  `production-before-promotion.json`, `promotion.json`, `candidate-v3/` and
+  `production/`. Production desktop/mobile screenshots were personally inspected
+  after promotion. Source archive: `source-v3.tar`. Six targeted local browser
+  cases and TypeScript also passed before the final hosted checks.
+
 Admin resource-detail production release (2026-10-01):
 
 - Released this chat's Admin detail work from `fix/admin-navigation-20261001`.
