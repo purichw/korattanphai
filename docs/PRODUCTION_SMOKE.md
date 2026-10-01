@@ -79,6 +79,12 @@ For Admin navigation changes, `node scripts/smoke-admin-navigation.mjs` uses the
 same target, credential, protection-cookie and output-directory environment
 variables. It checks desktop/mobile CMS destinations, draft-list reload, the
 upload dialog and template download, plus independent visitor/Admin sessions.
+It also inspects the real hierarchy resource: source-backed counts, visible
+images/backgrounds, district/substring filtering, cross-page selected CSV,
+dialog focus restoration, resource reload and History reachability. Resource
+`get`/`history` POST requests are explicitly read-only allowlisted; write
+operations remain blocked. Detail full-page/viewport captures and geometry
+are included in the report for both widths.
 It blocks application writes and never uploads or creates a production draft.
 Local `e2e/admin-navigation.spec.ts` covers unsaved-file/history/discard behavior
 against the isolated database; the real-account check stays read-only.

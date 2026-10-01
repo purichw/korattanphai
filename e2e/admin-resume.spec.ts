@@ -208,10 +208,10 @@ test('manual refresh and returning from source detail keep cached panels visible
 
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'แหล่งข้อมูลอ้างอิง', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'กลับหน้าจัดการข้อมูล', exact: true })).toBeEnabled();
+    await expect(page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await watchStartup(page);
     delay.hold('forecast-catalog', 'resource-catalog');
-    await page.getByRole('button', { name: 'กลับหน้าจัดการข้อมูล', exact: true }).click();
+    await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await delay.waitFor('forecast-catalog', 'resource-catalog');
     await expect(page.getByRole('heading', { name: 'ข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
     await expect(page.locator('.cms-resource-group')).toHaveCount(3);

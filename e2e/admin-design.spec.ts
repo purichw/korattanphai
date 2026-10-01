@@ -74,7 +74,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
     await maps.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'เส้นรอบจังหวัดนครราชสีมา', exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'จังหวัดนครราชสีมา', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'กลับหน้าจัดการข้อมูล', exact: true }).click();
+    await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
 
     for (const hidden of ['รายชื่อและพิกัดสถานีฝน', 'สถานีฝนที่อยู่ใกล้แต่ละตำบล', 'ขอบเขตประเทศรอบข้าง']) {
       await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill(hidden);
@@ -86,7 +86,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page).toHaveURL(/resource=/);
     await expect(page.getByRole('heading', { name: 'แหล่งข้อมูลอ้างอิง', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'กลับหน้าจัดการข้อมูล', exact: true }).click();
+    await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('ไม่ตรงกับข้อมูลใด');
     await expect(page.getByText('ไม่พบข้อมูลตามคำค้น', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).click();

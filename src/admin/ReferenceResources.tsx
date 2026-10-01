@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronUp, Database, Download, Folder, History, Map, MapPin, Pencil, RefreshCw, Search } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Clock, Database, Download, FileText, Folder, Globe, Grid2X2, History, Map, MapPin, MapPinned, Pencil, Radio, RefreshCw, Search, Users } from 'lucide-react';
 import { AppSelect } from '../components/AppSelect';
 import { WorkspaceDialog } from '../components/WorkspaceDialog';
 import { WorkspaceEmptyState } from '../components/WorkspaceEmptyState';
@@ -9,10 +9,23 @@ import { useUnsavedChanges } from './useUnsavedChanges';
 import { ConfirmAction } from './ConfirmAction';
 import { referenceCatalogGroups, referenceTable, resourceGroups, resourceViews, sourceFields } from './resourcePresentation';
 import { useAdminRead } from './useAdminRead';
+import { MetricGrid } from '../components/PageSummary';
+import { ReferenceRecords } from './ReferenceRecords';
+import type { ReferenceRow } from './resourcePresentation';
 
-type Resource = { id: string; resource_key: string; title: string; resource_group: string; published_at: string; draft_id?: string | null };
+type Resource = { id: string; resource_key: string; title: string; resource_group: string; published_at: string | null; updated_at?: string; draft_id?: string | null };
 type ResourceDraft = Resource & { payload: Json; revision: number; state: 'draft' | 'published' };
 const groupIcons = { areas: MapPin, maps: Map, sources: Database };
+const resourceIcons: Record<string, typeof MapPin> = {
+  'canonical/nakhon_ratchasima/admin_hierarchy': MapPinned,
+  'geodata/nakhon-ratchasima-subdistricts': Users,
+  'geodata/nakhon-ratchasima-boundary': Map,
+  'geodata/thailand-adm1': Grid2X2,
+  'geodata/thailand-neighbor-context': Globe,
+  'canonical/source_registry': Database,
+  'canonical/nakhon_ratchasima/rainfall_stations': FileText,
+  'canonical/nakhon_ratchasima/subdistrict_rainfall_coverage': Radio,
+};
 function downloadResource(item: ResourceDraft) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(item.payload, null, 2)], { type: 'application/json' }));
   const anchor = document.createElement('a'); anchor.href = url; anchor.download = `${item.resource_key.split('/').pop()}_r${item.revision}.json`; anchor.click();
@@ -25,7 +38,6 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
   const item = resourceId ? read.data as ResourceDraft | undefined : undefined;
   const setItem = read.setData;
   const [query, setQuery] = useState('');
-  const [page, setPage] = useState(0);
   const [group, setGroup] = useState('all');
   const [error, setError] = useState('');
   const [operationBusy, setBusy] = useState(false);
@@ -37,17 +49,16 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
   const [edit, setEdit] = useState<{ index: number; value: Payload } | null>(null);
   const [discard, setDiscard] = useState(false);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [inspect, setInspect] = useState<ReferenceRow | null>(null);
   useUnsavedChanges(Boolean(edit) && item?.state === 'draft', setError);
   const view = item ? resourceViews[item.resource_key] : undefined;
   const table = useMemo(() => item ? referenceTable(item.resource_key, item.payload) : { columns: [], rows: [] }, [item]);
   const queryText = query.trim().toLocaleLowerCase('th');
   const selected = referenceCatalogGroups(items, queryText, group);
   const resourceCount = selected.reduce((count, category) => count + category.resources.length, 0);
-  const rows = table.rows.filter(row => row.cells.join(' ').toLocaleLowerCase('th').includes(queryText));
   useEffect(() => {
-    setError(''); setNotice(''); setReason(''); setQuery('');
+    setError(''); setNotice(''); setReason(''); setQuery(''); setInspect(null);
   }, [api, resourceId]);
-  useEffect(() => { setPage(0); }, [query, group, resourceId]);
   useEffect(() => { setMapExpanded(Boolean(queryText) || group === 'maps'); }, [queryText, group]);
   async function run(operation: () => Promise<void>) {
     if (busy) return;
@@ -55,13 +66,21 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
     try { await operation(); } catch (failure) { setError(failure instanceof Error ? failure.message : 'ดำเนินการไม่สำเร็จ'); } finally { setBusy(false); }
   }
   const title = item ? view?.title ?? 'ข้อมูลเดิมที่เก็บประวัติ' : 'ข้อมูลประกอบเว็บไซต์';
-  return <section className={`cms-reference${!resourceId ? ' is-catalog' : ''}`} aria-labelledby="cms-reference-title" aria-busy={busy}>
-    <div className="cms-list-heading"><div className="cms-section-heading"><span className="cms-section-icon"><Folder size={23} aria-hidden="true" /></span><div><h2 id="cms-reference-title">{title}</h2>
+  const Icon = item ? resourceIcons[item.resource_key] ?? Database : Folder;
+  const Heading = resourceId ? 'h1' : 'h2';
+  const updated = item?.updated_at || item?.published_at;
+  const updatedDate = updated && Number.isFinite(Date.parse(updated)) ? new Date(updated) : null;
+  const dateTitle = item?.updated_at ? 'บันทึกล่าสุด' : 'เผยแพร่เมื่อ';
+  const districtCount = view?.view === 'areas' ? new Set(table.rows.map(row => row.cells[0])).size : null;
+  return <section className={`cms-reference${!resourceId ? ' is-catalog' : ' is-detail'}`} aria-labelledby="cms-reference-title" aria-busy={busy}>
+    {resourceId && <div className="cms-context-bar cms-reference-context"><nav aria-label="เส้นทางหน้าผู้ดูแล"><a href="/admin" onClick={event => { event.preventDefault(); onNavigate('/admin'); }}><ArrowLeft size={15} aria-hidden="true" />จัดการข้อมูล</a><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{title}</span></nav>
+      <button className="icon-button" disabled={Boolean(edit) || busy} aria-busy={read.refreshing} aria-label="โหลดข้อมูลประกอบใหม่" title="โหลดข้อมูลประกอบใหม่" onClick={() => { setError(''); read.reload(); }}><RefreshCw size={16} /></button></div>}
+    <div className="cms-list-heading"><div className="cms-section-heading"><span className="cms-section-icon"><Icon size={resourceId ? 28 : 23} aria-hidden="true" /></span><div><Heading id="cms-reference-title">{title}</Heading>
       <p className="cms-help">{item ? view?.description ?? 'ข้อมูลชุดนี้ไม่ได้อยู่ในรายการใช้งานปัจจุบัน ต้นฉบับและประวัติยังคงอยู่'
         : 'ชื่อพื้นที่ ขอบเขตแผนที่ และแหล่งอ้างอิง เลือกเปิดเพื่อดูความหมายและรายละเอียด'}</p>
-      {item && <p className="cms-help">รุ่นแก้ไข {item.revision} · {item.state === 'published' ? 'เผยแพร่แล้ว' : 'ฉบับร่าง ยังไม่เปลี่ยนเว็บไซต์'}</p>}</div></div>
-      <div className="cms-actions">{item && <button className="secondary-button" disabled={Boolean(edit) || busy} onClick={() => onNavigate('/admin')}><ArrowLeft size={16} />กลับหน้าจัดการข้อมูล</button>}
-        <button className="icon-button" disabled={Boolean(edit) || busy} aria-busy={read.refreshing} aria-label="โหลดข้อมูลประกอบใหม่" title="โหลดข้อมูลประกอบใหม่" onClick={() => { setError(''); read.reload(); }}><RefreshCw size={16} /></button></div></div>
+      {item && !view && <p className="cms-help">รุ่นแก้ไข {item.revision} · {item.state === 'published' ? 'เผยแพร่แล้ว' : 'ฉบับร่าง ยังไม่เปลี่ยนเว็บไซต์'}</p>}</div></div>
+      {!resourceId && <div className="cms-actions">
+        <button className="icon-button" disabled={Boolean(edit) || busy} aria-busy={read.refreshing} aria-label="โหลดข้อมูลประกอบใหม่" title="โหลดข้อมูลประกอบใหม่" onClick={() => { setError(''); read.reload(); }}><RefreshCw size={16} /></button></div>}</div>
     {(error || read.error) && <p role="alert" className="cms-error">{error || read.error}{read.error && read.data ? ' · กำลังแสดงข้อมูลที่โหลดไว้ก่อนหน้า' : ''}</p>}{notice && <p role="status" className="cms-success">{notice}</p>}
     {read.loading ? <p role="status">กำลังโหลดข้อมูลประกอบ</p> : read.error && !read.data ? null : <>
       {!item ? <>
@@ -89,26 +108,33 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
           action={query || group !== 'all' ? <button className="secondary-button" onClick={() => { setQuery(''); setGroup('all'); }}>ล้างตัวกรอง</button> : undefined} />}
       </> : <>
         {view && <>
-          <div className="cms-reference-toolbar"><label className="cms-search"><Search size={18} /><input aria-label="ค้นหาในข้อมูลชุดนี้" value={query} onChange={event => setQuery(event.target.value)} placeholder="ค้นหาชื่อพื้นที่ หน่วยงาน หรือรหัส" /></label>
+          <MetricGrid className="cms-resource-metrics" ariaLabel="สรุปข้อมูลชุดนี้" metrics={[
+            { value: table.rows.length.toLocaleString('th-TH'), label: districtCount !== null ? `ตำบลใน ${districtCount} อำเภอ` : 'รายการทั้งหมด', icon: <FileText size={23} />, className: 'cms-resource-total-metric' },
+            { value: `รุ่นแก้ไข ${item.revision}`, label: <span className={`cms-resource-state ${item.state === 'published' ? 'is-published' : 'is-draft'}`}><span aria-hidden="true" />{item.state === 'published' ? 'เผยแพร่แล้ว' : 'ฉบับร่าง'}</span>, icon: <Database size={23} /> },
+            ...(districtCount !== null ? [{ value: districtCount, label: 'อำเภอในชุดข้อมูล', icon: <MapPin size={23} />, className: 'cms-resource-secondary-metric cms-resource-area-metric' }] : []),
+            ...(updatedDate ? [{ value: updatedDate.toLocaleDateString('th-TH', { dateStyle: 'medium' }), label: dateTitle, detail: `เวลา ${updatedDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}`, icon: <Clock size={23} />, className: 'cms-resource-secondary-metric cms-resource-date-metric' }] : []),
+          ]} />
+          {view.view === 'sources' && <div className="cms-reference-guidance"><p className="cms-help">ดูข้อมูลอ้างอิงได้ทันที หากต้องการเปลี่ยนข้อมูล ให้แก้ไขในฉบับร่างแล้วเผยแพร่</p>
             {view.view === 'sources' && item.state === 'published' && <button className="secondary-button" disabled={busy} onClick={() => void run(async () => {
               const draft = await api<ResourceDraft>('resource-clone', { body: { key: item.resource_key } }); onNavigate(`/admin?resource=${draft.id}`);
-            })}><Pencil size={16} />สร้างฉบับแก้ไข</button>}</div>
-          {view.view !== 'sources' && <p className="cms-help">ข้อมูลอ้างอิงสำหรับตรวจสอบ การเปลี่ยนขอบเขตหรือรหัสพื้นที่ต้องตรวจความสัมพันธ์กับข้อมูลพยากรณ์ก่อน</p>}
+            })}><Pencil size={16} />สร้างฉบับแก้ไข</button>}</div>}
           {view.view === 'sources' && <p className="cms-help">รายการนี้เป็นแหล่งอ้างอิงประกอบด้านภัยแล้งและการเกษตร ยังไม่ได้ยืนยันว่าเป็นข้อมูลนำเข้าของแบบจำลอง ค่าพยากรณ์ที่แสดงมาจากชุดข้อมูลพยากรณ์ที่เผยแพร่ในระบบ</p>}
-          <div className="cms-table-scroll is-records"><table className="cms-table cms-reference-table"><thead><tr>{table.columns.map(column => <th key={column}>{column}</th>)}{view.view === 'sources' && <th>รายละเอียด</th>}</tr></thead>
-            <tbody>{rows.slice(page * 20, page * 20 + 20).map(row => <tr key={row.index}>{row.cells.map((cell, index) => <td key={index}>{cell}</td>)}
-              {view.view === 'sources' && <td><button className="secondary-button" disabled={busy} onClick={() => { setReason(''); setEdit({ index: row.index, value: structuredClone((item.payload as Payload[])[row.index]) }); }}>
-                {item.state === 'draft' ? <Pencil size={16} /> : <ArrowRight size={16} />}{item.state === 'draft' ? 'แก้ไข' : 'อ่านรายละเอียด'}</button></td>}</tr>)}</tbody></table></div>
-          {!rows.length && <p role="status" className="cms-help">{query ? 'ไม่พบรายการตามคำค้น' : 'ยังไม่มีรายการที่มีข้อมูลอ้างอิงในชุดนี้'}</p>}
-          {rows.length > 20 && <div className="cms-pagination"><button className="icon-button" aria-label="ข้อมูลหน้าก่อน" disabled={page === 0} onClick={() => setPage(value => value - 1)}><ArrowLeft size={16} /></button>
-            <span>หน้า {page + 1} / {Math.ceil(rows.length / 20)}</span><button className="icon-button" aria-label="ข้อมูลหน้าถัดไป" disabled={(page + 1) * 20 >= rows.length} onClick={() => setPage(value => value + 1)}><ArrowRight size={16} /></button></div>}
+          <ReferenceRecords key={item.id} columns={table.columns} rows={table.rows} title={title} areas={view.view === 'areas'} busy={busy} revision={item.revision}
+            actionLabel={view.view === 'sources' ? item.state === 'draft' ? 'แก้ไข' : 'อ่านรายละเอียด' : 'ดูรายละเอียด'}
+            onOpen={row => { if (view.view === 'sources') { setReason(''); setEdit({ index: row.index, value: structuredClone((item.payload as Payload[])[row.index]) }); } else setInspect(row); }} />
           {view.view === 'sources' && item.state === 'draft' && <div className="cms-actions cms-reference-publish"><p className="cms-help">บันทึกการแก้ไขแต่ละรายการก่อน แล้วจึงเผยแพร่ให้เว็บไซต์ใช้</p>
             <button className="primary-button" disabled={busy || Boolean(edit)} onClick={() => { setReason(''); setPublish(true); }}><CheckCircle2 size={16} />เผยแพร่ข้อมูลอ้างอิง</button></div>}
         </>}
-        <details className="cms-technical"><summary>ประวัติและไฟล์ต้นฉบับ</summary><div className="cms-actions"><button className="secondary-button" onClick={() => downloadResource(item)}><Download size={16} />ดาวน์โหลดไฟล์ข้อมูล (JSON)</button>
+        <details className="cms-technical cms-resource-history"><summary><History size={19} aria-hidden="true" /><span>ประวัติและไฟล์ต้นฉบับ<small>ตรวจสอบการแก้ไขหรือดาวน์โหลดข้อมูลชุดเต็ม</small></span></summary>
+          {updatedDate && <p className="cms-help">{dateTitle} {updatedDate.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })}</p>}
+          {view && view.view !== 'sources' && <p className="cms-help">ข้อมูลชุดนี้เปิดดูและดาวน์โหลดได้ การเปลี่ยนรหัสหรือขอบเขตพื้นที่ต้องตรวจความสัมพันธ์กับข้อมูลพยากรณ์ก่อน</p>}
+          <div className="cms-actions"><button className="secondary-button" onClick={() => downloadResource(item)}><Download size={16} />ดาวน์โหลดไฟล์ข้อมูล (JSON)</button>
           <button className="secondary-button" disabled={busy} onClick={() => void run(async () => setHistory(await api<AuditEntry[]>('resource-history', { body: { id: item.id } })))}><History size={16} />ประวัติการแก้ไข</button></div></details>
       </>}
     </>}
+    {inspect && item && <WorkspaceDialog title="รายละเอียดรายการ" bounded onClose={() => setInspect(null)} closeLabel="ปิดรายละเอียดรายการ"><div className="cms-form"><p className="cms-help">{title}</p>
+      <dl className="cms-record-details">{table.columns.map((column, index) => <div key={column}><dt>{column}</dt><dd>{inspect.cells[index]}</dd></div>)}</dl>
+      <p className="cms-help">{view?.description}</p><p className="cms-help">ข้อมูลอ้างอิงสำหรับตรวจสอบ · รุ่นแก้ไข {item.revision}</p></div></WorkspaceDialog>}
     {edit && item && <WorkspaceDialog title={item.state === 'draft' ? 'แก้ไขแหล่งข้อมูลอ้างอิง' : 'รายละเอียดแหล่งข้อมูล'} bounded wide onClose={() => { if (!busy) item.state === 'draft' ? setDiscard(true) : setEdit(null); }} closeLabel="ปิดรายละเอียดแหล่งข้อมูล">
       <div className="cms-form">{error && <p role="alert" className="cms-error">{error}</p>}<div className="cms-field-grid">{sourceFields.filter(field => typeof edit.value[field.key] === 'string').map(field => <label className="cms-field" key={field.key}>{field.label}
         {item.state === 'published' ? <span>{String(edit.value[field.key]) || 'ไม่ระบุ'}</span> : <textarea aria-label={field.label} disabled={busy} value={String(edit.value[field.key])} onChange={event => setEdit({ ...edit, value: { ...edit.value, [field.key]: event.target.value } })} />}</label>)}</div>

@@ -77,6 +77,65 @@ Admin reference catalogue grouping (local follow-up, not deployed):
   No overflow or runtime errors in the tested flows. Full-site CI and live
   production smoke are deferred until a release request. No commit, push,
   deployment, migration or production data write was performed.
+Admin detail visual rework after mockup comparison (2026-10-01; local only):
+
+- Revisited both supplied internal-page references and the prior rendered
+  screenshots. Removes the duplicate back-button row, uses the breadcrumb as
+  the return path, and puts refresh alongside it. Read-only guidance and the
+  mobile last-save timestamp remain reachable inside History; source editing
+  guidance and publication controls remain visible in their existing flow.
+- Desktop now separates the slim search/filter surface from the compact table;
+  real metrics keep centered contents with distinct icon tints and a publication
+  badge. Mobile uses a dark compact header scoped to resource details, individual
+  bordered record cards and a shorter internal list viewport. Twenty rows remain
+  reachable per page; no data/status/action was invented from the mock.
+- Mobile shows selected-row export controls/help when rows are selected; the
+  select-page label explicitly explains downloading. Search, filtering, selection
+  across pages, CSV, detail dialog focus, reload/back navigation and mobile menu
+  are verified. First-list position changes from y604 to y382 at 390px width;
+  the unselected page changes from 1334px to 882px in the final capture.
+- Twelve scoped browser cases pass (detail, home navigation, reference reads,
+  no-code forecast correction, station workbook import and source save/reload/
+  publication) across desktop/mobile; the detail cases were refreshed after the
+  final mobile type adjustment. TypeScript and diff checks pass. No full-site
+  suite, release CI or production writes/deployment for this visual follow-up.
+- Evidence: `artifacts/admin-resource-evidence-20261001/polish-confirmed/`,
+  `polish-final/`, `polish-source-check/` and `polish-comparisons/`. Both full-page
+  and viewport renders, active mobile selection, and the three-way reference /
+  earlier screenshot / current development comparison were personally inspected.
+  Remaining intentional differences: centered metrics, real 289/32 counts,
+  fewer supported columns/actions and 20 rows/page. Production is unchanged.
+
+Admin resource-detail adaptation (2026-10-01; local, not pushed or deployed):
+
+- Adopts the new internal-page desktop/mobile references where backed by the
+  existing resource contract: one specific page heading and breadcrumb, real
+  projected row counts, revision/publication state, CMS last-save time, district
+  filtering, sorting and 10/20/50-row page size. The default remains 20 rows and
+  original source order. Mobile uses scrollable record cards and a filter toggle.
+- `ReferenceRecords` owns read-only browsing and selection, reusing shared
+  `AppSelect`, `WorkspaceEmptyState` and dialog behavior. `ReferenceResources`
+  still owns fetching, source-registry draft edits, history and publication.
+- Checkboxes select original payload row identities across pages and sorting;
+  CSV downloads exactly the selected projected rows in the current sort order.
+  Search/district changes clear selection, as do resource/revision changes.
+  CSV has Thai column labels, UTF-8 BOM, escaping and spreadsheet-formula guards.
+  It is a readable review export, not an editable source/import replacement.
+- Actual hierarchy contains 289 subdistricts and 32 districts; the illustrated
+  304 count, per-row linked/active status and 100% linkage are not asserted.
+  Area link/unlink/delete/edit actions have no supporting product contract and
+  were not introduced. Source-registry edit/save/publish remains available.
+- All eight distinct scoped desktop/mobile browser cases pass: detail selection,
+  CSV download, search/filter/sort/page size, last-row scrolling, dialog focus,
+  route reload/history/return, home navigation, station reads and source edits
+  through publication/public reload in an isolated CMS database. All 21 focused
+  presentation/CSV unit cases pass; TypeScript and diff checks pass.
+- Evidence: `artifacts/admin-resource-evidence-20261001/confirmed/`, `final/` and
+  `final-comparisons/`. Full-page/viewport screenshots were personally inspected;
+  comparison reference crops are inferred from annotated raster images, not
+  exact CSS measurements. Physical devices, full-site/release CI and production
+  smoke were not rerun for this local follow-up. Production remains the release
+  recorded below; this checkpoint does not assert new deployment.
 
 Clean default Home URL production release (2026-10-01):
 
@@ -125,7 +184,7 @@ Clean default Home URL production release (2026-10-01):
   `https://korattanphai-6purvg7t0-purich-w.vercel.app` (`06f2d8d`).
   This release supersedes the earlier local-only Home URL checkpoint.
 
-Admin data-home reference redesign (2026-10-01; release verification pending):
+Admin data-home reference redesign, production release (2026-10-01):
 
 - Adopts the supplied desktop/mobile mockups' icon-led header, three white panels,
   green review action, aligned month controls, draft status rows and reference
@@ -144,9 +203,40 @@ Admin data-home reference redesign (2026-10-01; release verification pending):
   template download and session separation. No production content writes.
 - Isolated source remains in `artifacts/admin-navigation-20261001` on
   `fix/admin-navigation-20261001`, preserving the verified `93367df` release and
-  the root checkout's unrelated changes. Evidence is in
-  `artifacts/admin-design-evidence-20261001/`. Candidate/CI/production details
-  must be recorded after verification; this checkpoint does not assert deployment.
+  the root checkout's unrelated changes. Runtime
+  `06f2d8dd76bab853abc9e7d4e136c0f6974bee13` is pushed and deployed.
+- TypeScript, syntax/diff checks and 24 targeted local browser cases pass across
+  design/search/disclosure, navigation, authentication, rev3 CSV/XLS/XLSX,
+  no-code forecast editing, workbook roundtrip and loading/error states.
+  [Exact-runtime Quality Gate](https://github.com/purichw/korattanphai/actions/runs/36767087460)
+  passes all six required jobs without changing budgets or exclusions.
+- Ready candidate `dpl_GpuVxqnMkSz2v2yZaNCByWxmaDvh` /
+  `https://korattanphai-6purvg7t0-purich-w.vercel.app` has the exact runtime commit.
+  Protected hosted build, source-exposure and unchanged bundle gates pass
+  (226,546 B application gzip); the database build emits no static archive.
+- The first candidate smoke recorded one forecast-catalog HTTP 503 and failed.
+  Its cause was not established. A fresh full run passed on both widths, followed
+  by a successful full production run with no HTTP/runtime errors. The smoke
+  harness now explicitly waits for the month selector and published metrics before
+  screenshots, so an error/loading card cannot be mistaken for visual completion.
+- After confirming the primary alias was still on the recorded baseline,
+  promoted that exact Ready candidate. `https://korattanphai.vercel.app` is verified
+  on `dpl_GpuVxqnMkSz2v2yZaNCByWxmaDvh`. Real-account desktop/mobile smoke passes
+  for published forecasts, eight real resources, mobile expansion/search,
+  Admin-only navigation, imports/reload, Excel template download and independent
+  sessions. Application writes are blocked; no production content was changed.
+- Full-page and viewport production screenshots were visually inspected against
+  both supplied references. Evidence in `artifacts/admin-design-evidence-20261001/`
+  includes `candidate-verified/`, `production/`, `comparisons/` with crop/scale
+  provenance, `ci-release.json` and deployment/alias metadata. Reference crop
+  geometry is inferred from the supplied raster; this is an adaptive product
+  implementation, not a claim of exact pixel parity.
+- Recovery baseline: `dpl_CEAjKzMrtrXnCwzZ3Zk8o9UZVsYR` /
+  `https://korattanphai-8bdydqagl-purich-w.vercel.app` (runtime `93367df`).
+  No database migration, role change, production draft/forecast edit or native
+  change is included. Physical-device testing is outside this release. The final
+  follow-up changes only this checkpoint and three smoke assertions; runtime
+  remains the exact commit above and does not require rebuilding.
 
 Admin navigation reconstruction, production release (2026-10-01):
 

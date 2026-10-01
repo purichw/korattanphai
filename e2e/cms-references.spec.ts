@@ -27,7 +27,7 @@ test('editing a filtered source preserves hidden rows through reload, publicatio
     await expect(page).toHaveURL(/resource=/);
     await expect(page.getByRole('heading', { name: 'แหล่งข้อมูลอ้างอิง', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'แก้ไข', exact: true })).toHaveCount(5);
-    await expect(page.getByRole('columnheader', { name: 'การใช้งาน', exact: true })).toBeVisible();
+    await expect(page.locator('.cms-reference-table th').filter({ hasText: /^การใช้งาน$/ })).toBeAttached();
     await expect(page.getByRole('cell', { name: 'อ้างอิงประกอบ', exact: true })).toHaveCount(5);
     const id = new URL(page.url()).searchParams.get('resource')!;
     const draft = await database.operation('resource:get', { id });
