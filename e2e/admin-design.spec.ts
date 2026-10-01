@@ -34,6 +34,11 @@ test('Admin cards preserve draft review and searchable resource access at each v
     ].map(locator => locator.boundingBox()));
     expect(Math.abs(controls[0]!.y - controls[1]!.y)).toBeLessThanOrEqual(2);
     expect(Math.abs(controls[0]!.height - controls[1]!.height)).toBeLessThanOrEqual(2);
+    const monthOffset = await page.locator('.cms-month-control .app-select-trigger').evaluate(button => {
+      const box = button.getBoundingClientRect(), value = button.querySelector('.app-select-value')!.getBoundingClientRect();
+      return [value.x + value.width / 2 - box.x - box.width / 2, value.y + value.height / 2 - box.y - box.height / 2];
+    });
+    for (const offset of monthOffset) expect(Math.abs(offset)).toBeLessThanOrEqual(0.5);
     await expect(page.locator('.cms-resource-group:visible')).toHaveCount(3);
     await expect(page.getByRole('button', { name: 'ดูข้อมูลทั้งหมด', exact: true })).toHaveCount(0);
     const maps = page.locator('.cms-resource-group[data-group="maps"]');

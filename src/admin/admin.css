@@ -176,7 +176,7 @@
 .cms-review-controls .cms-actions > button, .cms-month-control .app-select-trigger { width: 100%; min-height: 44px; height: 100%; font-size: 14px; }
 .cms-month-control { position: relative; min-width: 0; }
 .cms-month-control > svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 1; pointer-events: none; color: var(--primary); }
-.cms-month-control .app-select-trigger { padding-left: 36px; }
+.cms-month-control .app-select-trigger { padding-inline: 36px; }
 .cms-forecast-metrics.metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .cms-forecast-metrics .metric-card { display: flex; flex-direction: column; justify-content: center; min-height: 108px; padding: 12px; gap: 4px; background: #fcfefd; }
 .cms-forecast-metrics .metric-card-icon { order: 0; width: 34px; height: 34px; border-radius: 50%; margin: 0; background: #e4f5e9; color: var(--primary); }

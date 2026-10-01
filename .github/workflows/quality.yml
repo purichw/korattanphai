@@ -33,7 +33,8 @@ jobs:
       - run: npm run test:database
   built-browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Keep the full built suite; build plus browser coverage can exceed 20 minutes.
+    timeout-minutes: 30
     env:
       VITE_SUPABASE_URL: https://ktp-auth-test.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_test_only
@@ -117,7 +118,8 @@ jobs:
           retention-days: 7
   browser-compatibility:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Slow Ubuntu mirrors can consume the old budget before browsers are installed.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
