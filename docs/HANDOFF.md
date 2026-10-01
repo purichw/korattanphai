@@ -20,6 +20,37 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Admin resource-detail production release (2026-10-01):
+
+- Released this chat's Admin detail work from `fix/admin-navigation-20261001`.
+  Runtime commit `3e2703a9f429234bb0e9f630c5d40bcf7de92a1c` includes the
+  published Home URL baseline `02d8f6243c752b199ccc303f27c3995742d0b284`;
+  the root checkout and unrelated worktrees were not changed. The deployed
+  detail screen includes the reviewed desktop/mobile layout, real metrics,
+  search/filter/sort/pagination, row details and selected-record CSV export.
+- A tracked-source archive was built with production configuration and the
+  protected build, exposure and unchanged bundle-budget gates passed. All six
+  required jobs passed in [Quality Gate 36851888162](https://github.com/purichw/korattanphai/actions/runs/36851888162).
+  Authenticated read-only candidate checks passed before promotion. The primary
+  alias was checked again immediately beforehand and still pointed at the
+  preserved Home URL baseline.
+- Promoted deployment `dpl_ASnhXFZL7e98rzAp3irav3HCDyBF`
+  (`https://korattanphai-mhjjf611a-purich-w.vercel.app`). Confirmed
+  `https://korattanphai.vercel.app` resolves to that deployment and exact runtime
+  commit. This supersedes the local-only checkpoints below.
+- Authenticated production checks passed at desktop and mobile widths: Admin
+  navigation, resource search/district filtering, selection across pages,
+  exact two-record CSV download, row dialog/focus, reload/history/back,
+  import template download and independent Admin/visitor sessions. Images
+  loaded, pages had no horizontal overflow or application errors, and the
+  harness recorded zero application writes on both devices. No migration,
+  ACL change or production data edit was performed.
+- Evidence: `artifacts/admin-resource-release-20261001/quality-gate.json`,
+  `candidate/` and `production/` contain deployment identities, smoke reports,
+  geometry and screenshots. Production desktop/mobile full-page detail images
+  were personally inspected after promotion and match the reviewed candidate.
+  Physical-device testing was not repeated for this web release.
+
 Admin detail visual rework after mockup comparison (2026-10-01; local only):
 
 - Revisited both supplied internal-page references and the prior rendered
