@@ -108,7 +108,8 @@ try {
     try {
       await login(page, '/admin');
       await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
-      await expect(page.locator('.cms-resource-group:visible')).toHaveCount(3);
+      await expect(page.locator('.cms-resource-group:visible')).toHaveCount(2);
+      await expect(page.locator('.cms-reference')).not.toContainText('แหล่งข้อมูลอ้างอิง');
       await expect(page.getByRole('combobox', { name: 'เดือนตั้งต้นที่จะตรวจแก้', exact: true })).toBeVisible();
       await expect(page.locator('.cms-forecast-metrics')).toContainText('เผยแพร่แล้ว');
       await expect(page.locator('.cms-published [role="alert"]')).toHaveCount(0);
@@ -121,7 +122,7 @@ try {
       await expect(mapGroup.locator('.cms-map-resource:visible')).toHaveCount(3);
       await mapGroup.getByRole('button', { name: 'ย่อชั้นข้อมูล', exact: true }).click();
       await expect(mapGroup.locator('.cms-map-resource:visible')).toHaveCount(0);
-      await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('แหล่งข้อมูลอ้างอิง');
+      await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('ข้อมูลพื้นที่');
       await expect(page.locator('.cms-resource-group:visible')).toHaveCount(1);
       const search = page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true });
       const originalSearch = await search.elementHandle();
@@ -129,7 +130,7 @@ try {
       const away = await context.newPage();
       await away.bringToFront();
       await page.bringToFront();
-      await expect(search).toHaveValue('แหล่งข้อมูลอ้างอิง');
+      await expect(search).toHaveValue('ข้อมูลพื้นที่');
       assert.equal(await originalSearch.evaluate(element => element.isConnected), true, 'Browser tab return must retain the existing Admin view.');
       await noNewStartup();
       await away.close();
@@ -139,7 +140,7 @@ try {
       await expect.poll(() => ['list', 'forecast-catalog', 'resource-catalog'].every(action => arrivedActions.has(action))).toBe(true);
       await expect(page.locator('.cms-resource-group:visible')).toHaveCount(1);
       await expect(page.getByRole('heading', { name: 'พยากรณ์ที่แสดงบนเว็บไซต์', exact: true })).toBeVisible();
-      await expect(search).toHaveValue('แหล่งข้อมูลอ้างอิง');
+      await expect(search).toHaveValue('ข้อมูลพื้นที่');
       assert.equal(await originalSearch.evaluate(element => element.isConnected), true, 'Manual refresh must retain the search control.');
       await noNewStartup();
       await page.screenshot({ path: path.join(output, `${device}-admin-manual-refresh.png`), fullPage: true });
@@ -153,7 +154,7 @@ try {
       holdReads('forecast-catalog', 'resource-catalog');
       await navigate('จัดการข้อมูล');
       await expect.poll(() => ['forecast-catalog', 'resource-catalog'].every(action => arrivedActions.has(action))).toBe(true);
-      await expect(page.locator('.cms-resource-group:visible')).toHaveCount(3);
+      await expect(page.locator('.cms-resource-group:visible')).toHaveCount(2);
       await expect(page.getByRole('heading', { name: 'พยากรณ์ที่แสดงบนเว็บไซต์', exact: true })).toBeVisible();
       await noNewStartup();
       await page.screenshot({ path: path.join(output, `${device}-admin-warm-navigation.png`), fullPage: true });
@@ -161,12 +162,6 @@ try {
       await expect(page.locator('.cms-reference')).toHaveAttribute('aria-busy', 'false');
       await noNewStartup();
 
-      await search.fill('แหล่งข้อมูลอ้างอิง');
-      await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
-      await expect(page.getByRole('heading', { name: 'แหล่งข้อมูลอ้างอิง', level: 1, exact: true })).toBeVisible();
-      await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(5);
-      await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
-      await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
       await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
       const areaRead = page.waitForResponse(response => {
         const url = new URL(response.url());
@@ -386,7 +381,7 @@ try {
       await expect(visitor).toHaveURL(/\/login$/);
       assert.deepEqual(errors, []);
       assert.deepEqual(blockedWrites, []);
-      report.checks.push({ device, navigation: 'passed', resourceSearch: 'passed', resourceGroupCount: 3, mapResourceCount: 3, sourceRows: 5,
+      report.checks.push({ device, navigation: 'passed', resourceSearch: 'passed', resourceGroupCount: 2, mapResourceCount: 3, retiredSourceCategory: 'absent',
         browserTabReturn: 'passed', manualRefresh: 'passed', warmNavigation: 'passed',
         resourceDetail: { status: 'passed', areas: 289, districts: 32, selectedCsvRows: 2, explicitSelection: 'passed', cancelClearsSelection: 'passed', keyboardDetail: 'passed', screenshot: detailScreenshots, geometry, assets,
           dialog: { revision: areaResource.revision, state: areaResource.state, geometry: recordDialogGeometry, screenshots: recordDialogScreenshots, closeAndFocus: ['Escape', 'header close', 'footer close'] } },

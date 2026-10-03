@@ -2,15 +2,11 @@ import type { Json, Payload } from './types';
 
 // Operator-facing views are deliberately separate from the complete runtime registry.
 // An import dependency, empty schema or retained demo is not an operational dataset.
-export const resourceViews: Record<string, { title: string; description: string; group: 'website' | 'reference'; view: 'areas' | 'geometry' | 'sources' | 'stations' | 'coverage' }> = {
+export const resourceViews: Record<string, { title: string; description: string; group: 'website'; view: 'areas' | 'geometry' }> = {
   'canonical/nakhon_ratchasima/admin_hierarchy': { title: 'รายชื่ออำเภอและตำบล', description: 'ชื่อและรหัสพื้นที่ที่ใช้ค้นหา เลือกพื้นที่ และเชื่อมกับค่าพยากรณ์', group: 'website', view: 'areas' },
   'geodata/nakhon-ratchasima-subdistricts': { title: 'ขอบเขตตำบลในนครราชสีมา', description: 'รูปพื้นที่สำหรับระบายสีพยากรณ์และเลือกตำบลบนแผนที่', group: 'website', view: 'geometry' },
   'geodata/nakhon-ratchasima-boundary': { title: 'เส้นรอบจังหวัดนครราชสีมา', description: 'เส้นขอบรอบนอกของพื้นที่จังหวัดบนแผนที่', group: 'website', view: 'geometry' },
   'geodata/thailand-adm1': { title: 'ขอบเขตจังหวัดรอบข้าง', description: 'แผนที่ประกอบสำหรับบอกตำแหน่งจังหวัด ไม่ใช่ค่าความเสี่ยง', group: 'website', view: 'geometry' },
-  'geodata/thailand-neighbor-context': { title: 'ขอบเขตประเทศรอบข้าง', description: 'พื้นหลังแผนที่สำหรับบอกตำแหน่งประเทศไทย', group: 'website', view: 'geometry' },
-  'canonical/source_registry': { title: 'แหล่งข้อมูลอ้างอิง', description: 'แหล่งอ้างอิงด้านอากาศ ภัยแล้ง น้ำ และพื้นที่เกษตร สำหรับอ่านประกอบ', group: 'reference', view: 'sources' },
-  'canonical/nakhon_ratchasima/rainfall_stations': { title: 'รายชื่อและพิกัดสถานีฝน', description: 'ทะเบียนสถานีที่มีแหล่งอ้างอิง ใช้ตรวจตำแหน่ง ยังไม่มีค่าฝนสด', group: 'reference', view: 'stations' },
-  'canonical/nakhon_ratchasima/subdistrict_rainfall_coverage': { title: 'สถานีฝนที่อยู่ใกล้แต่ละตำบล', description: 'ระยะห่างและสถานีอ้างอิง สถานีใกล้เคียงไม่ใช่ค่าฝนที่วัดในตำบล', group: 'reference', view: 'coverage' },
 };
 
 // The everyday catalogue is separate from retained deep-link views and storage.
@@ -19,8 +15,6 @@ export const resourceGroups = [
     keys: ['canonical/nakhon_ratchasima/admin_hierarchy'] },
   { id: 'maps', title: 'ชั้นข้อมูลแผนที่', description: 'ขอบเขตตำบล เส้นรอบจังหวัด และจังหวัดรอบข้างที่ใช้แสดงบนแผนที่',
     keys: ['geodata/nakhon-ratchasima-subdistricts', 'geodata/nakhon-ratchasima-boundary', 'geodata/thailand-adm1'] },
-  { id: 'sources', title: 'แหล่งข้อมูลอ้างอิง', description: resourceViews['canonical/source_registry'].description,
-    keys: ['canonical/source_registry'] },
 ] as const;
 
 export function referenceCatalogGroups<T extends { resource_key: string }>(items: readonly T[], query = '', group = 'all') {
@@ -37,14 +31,6 @@ export function referenceCatalogGroups<T extends { resource_key: string }>(items
   });
 }
 
-// These are contextual references, not verified inputs to the published model.
-const droughtReferenceSourceIds = new Set(['SRC-TMD', 'SRC-GISTDA-DROUGHT', 'SRC-RID', 'SRC-OAE', 'SRC-AGRIMAP-LDD']);
-
-export const sourceFields = [
-  { key: 'nameTh', label: 'ชื่อแหล่งข้อมูล' }, { key: 'ownerTh', label: 'หน่วยงานเจ้าของข้อมูล' },
-  { key: 'coverageTh', label: 'พื้นที่ที่ครอบคลุม' }, { key: 'freshnessTh', label: 'รอบปรับปรุงและวันที่อ้างอิง' },
-  { key: 'limitationTh', label: 'ข้อจำกัดในการใช้ข้อมูล' }, { key: 'url', label: 'เว็บไซต์แหล่งข้อมูล' },
-];
 export type ReferenceRow = { index: number; cells: string[] };
 const record = (value: Json | undefined): Payload => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 const array = (value: Json | undefined): Json[] => Array.isArray(value) ? value : [];
@@ -58,19 +44,6 @@ export function referenceTable(key: string, payload: Json): { columns: string[];
     const item = record(district);
     return array(item.subdistricts).map(area => ({ index: 0, cells: [text(item.nameTh), text(record(area).nameTh), text(record(area).subdistrictCode)] }));
   }).map((row, index) => ({ ...row, index })) };
-  if (view === 'sources') return { columns: ['แหล่งข้อมูล', 'หน่วยงาน', 'พื้นที่ที่ครอบคลุม', 'การใช้งาน'], rows: array(payload).flatMap((item, index) => {
-    const source = record(item);
-    return source.dataClass === 'REAL' && typeof source.id === 'string' && droughtReferenceSourceIds.has(source.id)
-      ? [{ index, cells: [text(source.nameTh), text(source.ownerTh), text(source.coverageTh), 'อ้างอิงประกอบ'] }] : [];
-  }) };
-  if (view === 'stations') return { columns: ['สถานี', 'อำเภอ / ตำบล', 'ละติจูด', 'ลองจิจูด'], rows: array(root.stations).flatMap((item, index) => {
-    const station = record(item);
-    return station.provenance === 'REAL' ? [{ index, cells: [text(station.stationNameTh), `${text(station.districtTh)} / ${text(station.subdistrictTh)}`, text(station.latitude), text(station.longitude)] }] : [];
-  }) };
-  if (view === 'coverage') return { columns: ['อำเภอ / ตำบล', 'สถานีอ้างอิง', 'ระยะห่าง (กม.)', 'ความหมาย'], rows: array(root.records).flatMap((item, index) => {
-    const area = record(item);
-    return area.provenance === 'REAL' ? [{ index, cells: [`${text(area.districtTh)} / ${text(area.subdistrictTh)}`, text(area.nearestStationNameTh), text(area.distanceKm), area.coverageStatus === 'direct_station' ? 'มีสถานีในตำบล' : area.coverageStatus === 'nearest_station_proxy' ? 'ใช้สถานีใกล้เคียง ไม่ใช่ค่าฝนในตำบล' : 'ยังไม่มีสถานีอ้างอิง'] }] : [];
-  }) };
   if (view === 'geometry') return { columns: ['พื้นที่', 'ลักษณะข้อมูล'], rows: (root.type === 'Feature' ? [root] : array(root.features)).map((feature, index) => {
     const properties = record(record(feature).properties);
     const name = properties.T_Name_T ? [properties.T_Name_T, properties.A_Name_T].filter(Boolean).join(' · ')

@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs';
-import { test, expect, seedAuthSession, type Page } from './fixtures';
+import { test as base, expect, seedAuthSession, type Page } from './fixtures';
+import { cmsTestDatabase } from '../tests/fixtures/admin-data.mjs';
 import { forecastSlice } from '../tests/fixtures/forecast-slice.mjs';
 
+const test = base.extend<{ referenceDatabase: unknown }>({
+  referenceDatabase: [async ({ context }, use) => {
+    const database = process.env.PLAYWRIGHT_REFERENCE_BACKEND === 'cms'
+      ? await cmsTestDatabase(context, { references: true }) : null;
+    try { await use(database); } finally { await database?.close(); }
+  }, { auto: true }],
+});
 test.skip(process.env.PLAYWRIGHT_DATA_BACKEND !== 'supabase', 'Requires isolated database fixture');
 const archive = JSON.parse(readFileSync('src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json', 'utf8'));
 const overview = JSON.parse(readFileSync('src/data/generated/forecast-overview-t1.json', 'utf8'));
@@ -12,7 +20,9 @@ async function setup(page: Page, path: string) {
     return route.fulfill({ json: forecastSlice(query.p_horizon_count === 1 ? overview : archive, query) });
   });
   await seedAuthSession(page);
-  const geometry = page.waitForResponse(response => new URL(response.url()).pathname === '/geodata/nakhon-ratchasima-subdistricts.geojson');
+  const geometry = page.waitForResponse(response => process.env.PLAYWRIGHT_REFERENCE_BACKEND === 'cms'
+    ? new URL(response.url()).pathname.endsWith('/ktp_cms_reference_read')
+    : new URL(response.url()).pathname === '/geodata/nakhon-ratchasima-subdistricts.geojson');
   await page.goto(`${path}?mapLayer=forecast-archive&target=2025-12&horizon=1`);
   expect((await geometry).ok()).toBe(true);
   await expect(page.locator('.nr-map-shape').first()).toBeVisible();

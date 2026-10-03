@@ -19,8 +19,9 @@ responses are `private, no-store`. Invalid/duplicate/unknown query parameters re
 No actual source, forecast publication policy or new permission was activated.
 See [actual/forecast separation](ACTUAL_FORECAST_SEPARATION.md).
 
-The repo contains the read-only risk-fusion route, a machine-authenticated
-model-input ingestion route, health probes and opt-in operational telemetry.
+The repo contains the machine-authenticated model-input ingestion route,
+health probes and opt-in operational telemetry. The prototype risk-fusion
+route was removed in the local 2026-10-03 cleanup.
 The integration/operational handlers were deployed to
 [production](https://korattanphai.vercel.app) on 2026-09-09. Public health returns
 200; model-input ingestion returns 503 `service_not_configured`; private
@@ -42,22 +43,15 @@ and source-to-target examples for the implemented collector are documented in
 [MODEL_INPUT_DATA_MAPPING.md](MODEL_INPUT_DATA_MAPPING.md). Proposed v2 parameter
 tables are kept separately in [the v2 SPEC](MODEL_PIPELINE_DESIGN.md#parameter-reference).
 
-Network activity:
+Network activity in CMS/database mode:
 
-- The browser fetches `/geodata/thailand-adm1.geojson`.
-- The browser fetches `/geodata/thailand-neighbor-context.geojson`.
-- The browser fetches `/geodata/nakhon-ratchasima-subdistricts.geojson` for the
-  Nakhon Ratchasima local workspace.
-- The browser fetches `/geodata/nakhon-ratchasima-boundary.geojson` for the
-  visible Nakhon Ratchasima province outline in the local workspace.
-- In production, the browser fetches `/api/risk-fusion?eventId=...` for the
-  risk-fusion explanation shown in the risk detail panel.
-- Google Fonts may be requested by the browser from the stylesheet in
-  `index.html`.
-- Nakhon Ratchasima water/rainfall data is bundled as static JSON imports from
-  `src/data/canonical/nakhon_ratchasima/`; no live rainfall API is called by the
-  browser. Current bundled rainfall fixtures are station/source coverage and
-  empty observation schemas, not live province water-provider snapshots.
+- Authenticated RPCs bootstrap the five active reference heads and preload only
+  the hierarchy and forecast summary. Three geometry resources load on demand.
+- Scoped published rev03 forecast reads use `ktp_load_forecast_slice`.
+- The browser calls the Admin API only for the real import/review workflows.
+- Google Fonts may be requested from the stylesheet in `index.html`.
+- No rainfall fixture, national demo risk API or external agency feed supplies
+  the forecast displayed by the current dashboard.
 
 Server integration credentials never use `VITE_` variables and are not browser
 login credentials. The new input API does not publish or modify forecast data.
@@ -403,119 +397,27 @@ Implementation owners: `server/model-inputs/contract.mjs` (schema),
 Node integration tests live in `tests/model-inputs/` and run through
 `npm run test:model-inputs`, including isolated PGlite permissions checks.
 
-## Static Asset Contract
+## Reference Geometry Contract
 
-Rainfall fixtures:
+Production CMS mode reads authenticated, versioned geometry through
+`ktp_cms_reference_read`. Static development mode uses the matching files:
 
-- `rainfall_source_audit.json`: source audit for DWR EWS and TMD context.
-- `rainfall_stations.json`: 49 DWR EWS station points for Nakhon Ratchasima.
-- `subdistrict_rainfall_coverage.json`: 289 subdistrict coverage records.
-- `rainfall_observations_24h.json`: current-observation schema with zero
-  imported observations.
-- `rainfall_monthly_history.json`: national/regional context only.
+- `/geodata/thailand-adm1.geojson`: province polygons used for neighboring
+  province context; not a nationwide risk map.
+- `/geodata/nakhon-ratchasima-subdistricts.geojson`: genuine tambon polygons,
+  joined to the administrative hierarchy and rev03 by official codes.
+- `/geodata/nakhon-ratchasima-boundary.geojson`: province outline derived from
+  the same subdistrict geometry.
 
-These are not network endpoints. They are bundled at build time through
-`src/data/catalog.ts`.
+The hierarchy contains 32 districts and 289 tambons; polygon feature count
+is a separate geometry property. Tests cover code joins, projection, local
+bounds, cache/retry behavior and labels after zoom. Missing geometry or forecasts
+must remain unavailable, never substitute a retired registry or synthetic score.
 
-`GET /api/risk-fusion?eventId=:id`
-
-Purpose:
-
-- Returns the derived risk-fusion explanation for the selected event.
-- Keeps the production browser bundle from calling this derivation directly.
-
-Expected shape:
-
-- `RiskFusionBreakdown` from `src/types.ts`.
-- Unknown or omitted `eventId` falls back to the main demo event.
-
-Constraints:
-
-- Read-only.
-- No credentials or secrets.
-- `Cache-Control: private, no-store`.
-- This is not real authorization and does not protect public data from being
-  requested; it only moves this derivation out of direct client execution.
-
-`GET /geodata/thailand-adm1.geojson`
-
-Purpose:
-
-- Provides Thailand ADM1 province boundaries for `RiskMap`.
-
-Expected shape:
-
-- GeoJSON `FeatureCollection`.
-- 77 features.
-- Each feature has `properties.shapeName` and `properties.shapeISO`.
-
-Tests:
-
-- `tests/domain.test.ts` checks 77 features and province-name joins.
-
-`GET /geodata/thailand-neighbor-context.geojson`
-
-Purpose:
-
-- Provides low-emphasis regional country context for `RiskMap`.
-- This is an orientation underlay only, not a risk layer.
-
-Expected shape:
-
-- GeoJSON `FeatureCollection`.
-- Current fixture includes 11 Natural Earth Admin 0 country geometries around
-  Thailand.
-- Each feature has `properties.shapeName` and `properties.shapeISO`.
-
-`GET /geodata/nakhon-ratchasima-subdistricts.geojson`
-
-Purpose:
-
-- Provides subdistrict boundaries for the Nakhon Ratchasima drill-down
-  workspace.
-- This is geometry/context only; it is not a risk score source.
-
-Expected shape:
-
-- GeoJSON `FeatureCollection`.
-- 289 features for province code `30`.
-- Each feature has `properties.Admin_code`, `P_code`, `A_code`, `T_code`,
-  `P_Name_T`, `A_Name_T`, `T_Name_T`, and source metadata.
-
-Tests:
-
-- `tests/domain.test.ts` checks all 289 subdistrict codes match
-  `src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json`.
-
-`GET /geodata/nakhon-ratchasima-boundary.geojson`
-
-Purpose:
-
-- Provides the visible province outline for the Nakhon Ratchasima local SVG map.
-- The boundary is dissolved from the same 289 subdistrict geometries used for
-  the colored local map polygons.
-- `thailand-adm1.geojson` remains available for neighboring-province context
-  and the national map, but it must not be used as the visible local province
-  outline.
-
-Expected shape:
-
-- GeoJSON `FeatureCollection`.
-- One `Polygon` or `MultiPolygon` feature for province code `30`.
-- `properties.derivedFrom` points to
-  `public/geodata/nakhon-ratchasima-subdistricts.geojson`.
-- `properties.sourceFeatureCount` is `289`.
-- `properties.sourceAdminCodes` includes all 289 source subdistrict codes.
-
-Regeneration:
-
-- Run `npm run generate:nr-boundary`.
-- Do not hand-edit coordinates in the generated artifact.
-
-Tests:
-
-- `tests/domain.test.ts` checks source feature count, source code coverage,
-  ring closure, geometry type, and bbox parity with the subdistrict dataset.
+The country-context geometry, prototype risk-fusion endpoint and rainfall
+fixtures were removed from the local source in the 2026-10-03 cleanup. Historical
+CMS versions remain available for read/history/original-download; inactive or
+unknown resource keys cannot be cloned, edited or published by the Admin API.
 
 ## Future API Principles
 
@@ -531,8 +433,7 @@ PROPOSAL:
 
 ## Candidate Future Endpoints
 
-These do not exist yet, except for the already-implemented
-`GET /api/risk-fusion` read endpoint described above:
+These proposed endpoints do not exist:
 
 - `GET /api/risk-events`
 - `GET /api/risk-events/:id`

@@ -5,12 +5,10 @@ import { pathToFileURL } from 'node:url';
 import { CMS_RESOURCES, resourceSourcePath } from '../shared/cmsResources.mjs';
 
 const titles = {
-  admin_hierarchy: 'ทะเบียนจังหวัด อำเภอ และตำบล', district_subdistrict_matrix: 'ทะเบียนอ้างอิงพื้นที่วิจัย',
-  source_registry: 'ทะเบียนแหล่งข้อมูล', map_layer_catalog: 'ทะเบียนชั้นแผนที่', data_model_registry: 'ทะเบียนแบบจำลอง',
-  rainfall_stations: 'ทะเบียนสถานีฝน', rainfall_observations_24h: 'ข้อมูลฝน 24 ชั่วโมง',
-  rainfall_monthly_history: 'ข้อมูลฝนรายเดือน', evidence_records: 'หลักฐานข้อมูลพื้นที่',
+  admin_hierarchy: 'ทะเบียนจังหวัด อำเภอ และตำบล',
+  'forecast-archive-summary': 'สรุปชุดพยากรณ์ที่เผยแพร่',
   'nakhon-ratchasima-subdistricts': 'ขอบเขตตำบลนครราชสีมา', 'nakhon-ratchasima-boundary': 'ขอบเขตจังหวัดนครราชสีมา',
-  'thailand-adm1': 'ขอบเขตจังหวัดสำหรับแผนที่บริบท', 'thailand-neighbor-context': 'ขอบเขตประเทศรอบข้างสำหรับแผนที่บริบท',
+  'thailand-adm1': 'ขอบเขตจังหวัดสำหรับแผนที่บริบท',
 };
 const literal = value => `'${String(value).replaceAll("'", "''")}'`;
 export async function prepareReferenceSeed(root = process.cwd()) {

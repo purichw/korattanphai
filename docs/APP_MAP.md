@@ -88,8 +88,8 @@ edits still block navigation until saved or explicitly discarded. Reload and
 browser history preserve the selected Admin destination. No Admin navigation or
 toolbar opens visitor overview, drought, export, bookmarks or geographic search.
 Visitor routes keep their existing navigation. API access additionally requires
-server-verified `ktp_cms_operators` membership. Retained simulated personas are
-not authorization. See [ADMIN_CMS.md](ADMIN_CMS.md) for workflows/limitations
+server-verified `ktp_cms_operators` membership. Simulated personas have been
+removed. See [ADMIN_CMS.md](ADMIN_CMS.md) for workflows/limitations
 and [CMS_CUTOVER_20260928.md](CMS_CUTOVER_20260928.md) for activation status.
 
 ## Hidden / Legacy / Compatibility Routes
@@ -116,11 +116,11 @@ needs audit:
 
 - Sidebar/nav exposes overview, drought and database-only Excel export.
 - Visible UI is Thai-only; there is no language switch in the product surface.
-- Reset Demo Data restores seed state through `resetDemo`.
+- Account actions use the real Auth session; the persona/reset-demo menu was removed.
 - Login redirects unauthenticated direct links to `/login`, then returns to the
   requested path after successful Supabase email/password authentication.
-- Opening `/` hides the inherited nationwide filter band; the local workspace
-  owns its layer selector and breadcrumbs.
+- Opening `/` shows the rev03 overview; the local workspace owns origin, area,
+  horizon and forecast-status filters.
 - Forecast controls select origin month and area. The page horizon dropdown and
   horizon strip share state; the map month selector stays synchronized. Hazard `ภัยแล้ง`
   and crop `ข้าว` are fixed context, not working multi-hazard/multi-crop selectors.

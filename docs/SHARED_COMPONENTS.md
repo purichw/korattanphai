@@ -70,10 +70,9 @@ files.
 | `DataProvenanceChip` | `src/components/DataProvenanceChip.tsx` | Provenance dots/chips | Supported kinds: `REAL`, `FORECAST_ARCHIVE`, `CANONICAL_SYNTHETIC`, `DERIVED`, `RUNTIME_STATE`, `PROXY`, `PENDING_SOURCE`. Archive predictions never use the actual-observation label. Do not invent parallel provenance pills. |
 | `DataProvenanceLegend` | `src/components/DataProvenanceChip.tsx` | Provenance legends | Use the same provenance semantics as chips. |
 | `AuditTrailFootnotes` | `src/components/AuditTrail.tsx` | Evidence/source footnotes | Use when showing source notes, freshness, and audit trail sections. |
-| `OperationalFilters` | `src/components/OperationalFilters.tsx` | Page-wide operational filters | Desktop field band plus mobile compact summary and edit bottom sheet. Opt-in `compactOverview` keeps source month T/district editable and drought/rice/T+1 passive; other consumers retain existing behavior. Use for page/dashboard filters, not map-only filter rails. |
+| `OperationalFilters` | `src/components/OperationalFilters.tsx` | Page-wide operational filters | Desktop field band plus mobile compact summary and edit bottom sheet. Requires owner-supplied month options, value and change handler. `compactOverview` keeps source month T/district editable and drought/rice/T+1 passive; no demo defaults or store coupling. Use for page/dashboard filters, not map-only filter rails. |
 | `MapPreviewFooter` | `src/components/MapPreviewFooter.tsx` | Map hover/selection preview footer | Renders the shared action button or centered fallback note. Do not hand-code `.map-preview-action` or `.map-preview-note` directly. |
 | `ContentSection` | `src/components/ContentSection.tsx` | Generic titled content shell | Use for generic section containers outside the specialized Nakhon workspace panels. |
-| `RiskMap` | `src/components/RiskMap.tsx` | Inherited national/province SVG risk map | Keep for the nationwide/legacy map surface; local Nakhon maps use `NakhonRatchasimaLocalMap`. |
 | `NakhonRatchasimaWorkspace` | `src/components/NakhonRatchasimaWorkspace.tsx` | Main province/district/subdistrict workspace | Owns the local route hierarchy, data joins, local map, and Nakhon-specific dashboard modules. |
 | `NakhonRatchasimaWorkspaceSummary` | `src/components/NakhonRatchasimaWorkspaceSummary.tsx` | Compact entry summary for the Nakhon workspace | Use for a small landing/entry card that points into the local workspace. |
 | `ProvinceWorkspacePlaceholder` | `src/components/ProvinceWorkspacePlaceholder.tsx` | Route-backed placeholder for other canonical provinces | Keeps missing local evidence visible without rendering it as normal or low risk. |
@@ -109,7 +108,6 @@ number to open the same dialog from search, with its default navigation behavior
 | `DataProvenanceChipKind`, `dataProvenanceChipKindFromText` | `src/components/DataProvenanceChip.tsx` | Provenance typing and text-to-kind mapping. |
 | `AuditTrailItem`, `AuditTrailSection` | `src/components/AuditTrail.tsx` | Audit trail data typing. |
 | `MapPreviewFooterAction` | `src/components/MapPreviewFooter.tsx` | Shared map preview action typing. |
-| `provinceOptionsForMonth` | `src/components/OperationalFilters.tsx` | Province option list helper for operational filters. |
 
 ## Local Shared Primitives
 
@@ -238,22 +236,15 @@ recovery feedback. Neither resets persisted state automatically.
 
 | Primitive | Use For |
 | --- | --- |
-| `OfficialMetricCard` | Nakhon-specific metric cards backed by `MetricCard`. |
-| `ProvinceDashboardHeading` | Province heading with source/readiness context. |
-| `ProvinceSituationCards` | Legacy province current-state facts; not used as forecast evidence in the overview. |
 | `ProvinceForecastOverview` | Compact Home context, read-only situation/MetricGrid, map plus four risk counts, high/moderate risk toggle with a bounded scrolling list, and archive navigation in the summary heading. Readiness and source/limitations disclosures are removed; inline provenance and forecast caveats remain. Defaults to latest available source month T + T+1 (December 2025 forecasting January 2026). District and irrigation scope filter the summary and attention records together. Keys `ForecastRiskAttention` by source month, district and irrigation so each changed scope resets its risk choice and scroll position. Agriculture design remains province-wide but hidden without a REAL record. Duplicate archive/support rows and their loading placeholders are removed. Drilldowns preserve source month/horizon, irrigation and selected area. Mobile order is context, counts, map and area links. |
 | `ForecastRiskAttention` | Home attention panel receiving the current `DroughtForecastArchiveSummary` and a caller-owned `hrefForSubdistrict`. Native buttons expose high/moderate counts and `aria-pressed`; initial choice is high when available, otherwise moderate when available, otherwise high. Filters the summary's scoped `recordsBySubdistrict` by the selected risk and sorts every matching row by subdistrict code in a labeled, keyboard-focusable scrolling region. No three-row limit or expand/collapse step. Null/out-of-scope and missing vintages never appear as risk records. Changing risk resets scroll to the top; the overview's scope key resets selection on month/district/irrigation changes. Empty selected levels remain selectable and distinguish zero matching risk from no in-scope forecast values. Uses each record's district/tambon identity and the supplied drill-down URL. |
 | `DashboardSection` | Standard titled Nakhon dashboard section shell. |
-| `DashboardAccordionSection` | Compact disclosure section for source/detail content. |
 | `DashboardDetailPanel` | Always-visible passive preview plus a labeled toggle button with `aria-expanded`/`aria-controls`, persistent provenance and hidden/revealed detail body. Used by compact agriculture; clicking a stat preview does not navigate or expand. |
-| `DataGovernanceGuardrailList` | Guardrail list explaining readiness/source caveats. |
-| `DataGovernanceGuardrailAccordion` | Compact guardrail disclosure. |
 | `DroughtWorkspaceHeader` | Shared province/district/subdistrict drought identity, scope and back navigation. District back goes to `/drought`, subdistrict back goes to its district, and province drought back goes to `/`; forecast navigation preserves the selected source month T and T+. |
 | `DroughtWorkspaceFilters` | Archive origin/base month T, fixed drought/rice context and area navigation. Four slots; T+ is owned by the horizon strip, irrigation by `DroughtForecastArchiveMapFilters`. Dropdowns reuse `AppSelect`, including its keyboard, typeahead and mobile menus. |
 | `DroughtOperationalSummary` | Forecast-summary adapter onto `DroughtOperationalDisclosure`, shared by province/district via the compact workspace. Accepts horizon, `DroughtForecastArchiveSummary` and optional controlled disclosure state. Its collapsed header retains the risk share; expansion reveals the unchanged risk counts and administrative coverage. Uses neutral informational styling, not an overall area-severity grade. Null share means unavailable, not 0%. Short copy and numeric details remain centered. |
 | `DroughtOperationalDisclosure` | Shared native details/summary for risk summary, attention, guidance, historical evidence and source-backed agriculture across drought scopes. Short titles/descriptions center on both axes; `descriptionAlign="start"` supports long header descriptions. Expanded prose/lists stay start-aligned. Optional `open`/`onOpenChange` provide controlled grouping; standalone consumers retain independent native keyboard toggle and open state. |
 | `DroughtOperationalDisclosureGroup` | Shared province/district forecast-action group. Accepts direct, stably keyed `DroughtOperationalDisclosure`/`DroughtOperationalSummary` children; owns at most one open item, initially none. Clicking the active trigger closes it. Places closed cards before the full-width open card in both DOM and visual order, with two closed cards side by side even on mobile. Restores trigger focus after reordering, keeps mounted content, and clears selection when a filtered-out item disappears. Subdistrict guidance stays standalone and no aggregate/self-link cards are introduced. |
-| `ResearchStatGrid` | Local grid wrapper for research metric groups. |
 | `DroughtForecastTrendGraph` | Owned by `ForecastRiskBarGraph.tsx`, re-exported by `DroughtForecastWorkspace.tsx`. Six stacked columns for forward calendar months T+1-T+6 from one selected origin month T. `unit="percent"` (default) or `"count"` changes the scale only. Amber segments count source risk 1 and red segments source risk 2; totals never determine severity color. Percentages divide by each month's in-scope 0/1/2 count. Null/out-of-scope and missing are excluded, never converted to green zero bars. Valid zero risk has a green baseline marker. Container-sized SVG preserves legible labels; the four-item legend uses short labels in narrow cards. Hover/focus/tap exposes category counts, percentages and coverage without selecting a horizon. Arrow keys/Home/End move between columns; Escape, outside pointer or blur dismiss details. SVG descriptions also expose all values. Selected T+ is highlighted. No 50% severity threshold. |
 | `DroughtCompactForecastWorkspace` | Owns one selected source month/horizon for context, chart, map and KPIs; actual target month follows T+horizon. Desktop province/district composition keeps a map at least 600px tall on the left, with a compact chart and the existing selected-month KPI group stacked on the right. No duplicated KPIs or empty equal-height chart surface. Extra missing-data cards and wrapped copy may grow the map/summary rows rather than clip. At 900px and below, the existing KPI/chart/map order remains. Loading placeholders follow the same composition. No duplicate archive detail panel. Subdistrict omits aggregate chart, repeated summary and self-link attention list. Attention lists exist only for actual risk records. |
 | `DroughtForecastWorkspaceContext` | Shared origin/base month T, actual target month T+horizon, crop and in-scope forecast coverage. Single-area variant omits the population coverage count. Dates follow the user-confirmed forward meaning; they do not use the legacy manifest's backwards reference month. |
@@ -264,38 +255,16 @@ recovery feedback. Neither resets persisted state automatically.
 | `DroughtForecastArchiveHorizonSelector` | Shared six-slot T+ strip; roving keyboard selection supports arrows, Home and End. One strip per archive module; the page-level horizon dropdown remains synchronized with it. |
 | `DroughtForecastArchiveSummaryMetrics` | Shared archive summary metric grid using `MetricGrid`/`MetricCard`. Its overview variant displays high, moderate, no-risk and out-of-scope counts, plus a separate missing count when necessary; detail retains coverage and subdistrict values. |
 | `DroughtForecastArchiveMapFilters` | Shared map toolbar using `AppSelect` for source month T, forecast status and page-wide irrigation. Its segmented color control changes encoding only; irrigation selection activates the categorical palette. Narrow layouts wrap fields within the map. Month options use month/year only from `forecastModel`; open menus rise above the legend. Preserve dropdown wheel isolation from map zoom. |
-| `ResearchDroughtSituationPanel` | Province drought status summary. |
-| `ResearchDroughtDistrictPanel` | District ranking/status module. |
-| `ResearchSubdistrictAttentionPanel` | Subdistrict attention/follow-up list. |
-| `DataTransparencyPanel` | Retained source/limitations primitive; no longer composed into any page. Inline provenance and forecast caveats are unchanged. |
-| `ResearchSourceLimitsPanel` | Retained source/freshness/limitations helper; removed from the province drought page. |
-| `ResearchAreaHeading` | District/subdistrict identity header. |
-| `ResearchAreaSituationPanel` | District/subdistrict situation strip. |
-| `ResearchAreaMapSection` | District/subdistrict map section wrapper. |
-| `ResearchAreaDroughtHistoryPanel` | District/subdistrict historical drought chart. |
-| `ResearchAreaSubdistrictsPanel` | Subdistrict grid/list for an area. |
-| `ResearchAreaAttentionPanel` | Area attention/watchlist module. |
-| `ResearchSubdistrictProfilePanel` | Subdistrict profile/context module. |
-| `ResearchSubdistrictDataGapPanel` | Subdistrict data-gap module. |
-| `ResearchAreaSourceLimitsPanel` | Retained area-specific source limits helper; removed from district and subdistrict pages. |
 | `ProvinceDashboardMapCard` | Province dashboard map surface with optional scoped target and `compactOverview` layout. Forecast/irrigation encoding uses the same SVG. The former readiness mode and return action are removed from this card and `DroughtForecastWorkspaceMapCard`. |
 | `AgricultureVisibilityPanel` | Agriculture facts/KPI panel. |
-| `AgricultureImpactPanel` | Province agriculture impact panel, optional `compact` reusing its existing facts/MetricGrid with disclosure and explicit separate-source context. Design is preserved, but missing or non-REAL records render nothing; synthetic Korat rows have been deleted. Home agriculture metrics use the same REAL-only gate. |
-| `ResearchAreaAgricultureImpactPanel` | Retained district/subdistrict facts design; requires actual scoped research records and an available period. Administrative tambon count is labeled as administrative scope, not assessed farmland. |
-| `PredictionReadinessPanel` | Retained legacy supporting-evidence design, no longer composed into any page. Underlying evidence categories are unchanged; they are distinct from forecast coverage, accuracy and hazard severity. |
-| `NakhonRatchasimaLocalMap` | Shared local SVG map across province, district, and subdistrict levels. Supports normal/research criteria maps and drought forecast archive mode keyed by source month T + T+ horizon, with the derived actual target date and no-risk, moderate, high, and out-of-scope map states. Geometry loads have a 30-second deadline including body parsing; every route level offers in-place retry preserving the selected area, source month, horizon and filters. Failed or late requests cannot populate the shared cache. |
-| `NakhonRatchasimaBreadcrumbs` | Local route breadcrumbs. |
-| `NakhonRatchasimaLayerInspector` | Layer/provenance inspector. |
-| `SourceDecisionFootnotes` | Source-decision footnotes. |
-| `SourceFreshness` | Freshness/source summary. |
+| `AgricultureImpactPanel` | Province agriculture impact panel, optional `compact` reusing its existing facts/MetricGrid with disclosure and explicit separate-source context. Parked design accepts explicit source-backed props; missing or non-REAL records render nothing. Its old catalog-derived Home wiring was removed. |
+| `NakhonRatchasimaLocalMap` | Shared local SVG map across province, district, and subdistrict levels. Supports published drought forecast archive mode and a neutral no-data variant for the parked Actual component keyed by source month T + T+ horizon, with the derived actual target date and no-risk, moderate, high, and out-of-scope map states. Geometry loads have a 30-second deadline including body parsing; every route level offers in-place retry preserving the selected area, source month, horizon and filters. Failed or late requests cannot populate the shared cache. |
 | `PanelTitle` | Icon plus title label for local panels. |
 
 ## Reuse Rules
 
-- **Stat cards:** use `MetricCard` and `MetricGrid` for stat-only cards. In the
-  Nakhon workspace, prefer `OfficialMetricCard` when the surrounding file is
-  already using it. Stat card content is centered unless a richer narrative card
-  needs a different layout.
+- **Stat cards:** use `MetricCard` and `MetricGrid` for stat-only cards. Content
+  is centered unless a richer narrative card needs a different layout.
 - **Dropdowns:** use `AppSelect` for visible product dropdowns and filter
   selects. The trigger text is centered by default and the mobile bottom-sheet
   behavior is shared through its CSS. Do not add native `<select>` controls for
@@ -314,8 +283,7 @@ recovery feedback. Neither resets persisted state automatically.
 - **Map preview cards:** use `MapPreviewFooter` for preview actions and fallback
   notes. Preview cards must sit above lower sections when they overlap and the
   fallback note must remain centered.
-- **Maps:** use `RiskMap` for inherited national map behavior and
-  `NakhonRatchasimaLocalMap` for province/district/subdistrict local maps. Do
+- **Maps:** use `NakhonRatchasimaLocalMap` for all current geographic levels. Do
   not duplicate SVG map interaction logic; shared math and labels live in
   `src/mapInteraction.ts`, `src/mapLabels.ts`, and
   `src/useFullscreenTarget.ts`.
@@ -390,13 +358,11 @@ recovery feedback. Neither resets persisted state automatically.
   `#87939e`, with matching labels and legend. Choosing irrigation activates its
   color mode. Toggling back to forecast colors does not change counts or filters.
 
-- Cleared historical datasets must not mount empty analytics, administrative
-  watchlists, or a green quality-check result. Keep the designs in source and
-  gate route composition on actual records. Primary area selectors retain
-  administrative navigation independently of research-data availability.
-- The production account menu exposes identity/logout, not display personas or
-  the legacy local demo reset. `AccountControl.demoActions` defaults to false;
-  no current product shell enables it. Auth/RLS permissions are unchanged.
+- Missing data must not mount empty analytics or a green quality-check result.
+  Retired research panels/catalogs were removed; generic REAL-only agriculture
+  and Actual designs remain parked. Primary area selectors use real geography.
+- The account menu exposes identity/logout. Simulated personas, demo reset and
+  the `demoActions` branch were removed; Auth/RLS permissions are unchanged.
 - Home high-risk links use area icons, not numbered urgency ranks. Ordering is
   still administrative-code order, with context in the mobile/expanded list.
 

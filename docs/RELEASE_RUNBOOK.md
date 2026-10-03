@@ -5,7 +5,8 @@
 Do not commit, push, deploy, migrate, or touch production data unless the current
 user task explicitly instructs it.
 
-When authorized, release from `/Users/point/korattanphai`.
+When authorized, release from a scoped worktree under `/Users/point/korattanphai`.
+Preserve the current production revision before building a release candidate.
 
 ## Forecast-Only Release Scope
 
@@ -89,10 +90,10 @@ Production builds:
 
 ## Production Deploy
 
-Authorized deploy command:
+Build a production-configured candidate without moving the production alias:
 
 ```bash
-vercel --prod --yes
+vercel --prod --skip-domain --yes
 ```
 
 Expected production alias:
@@ -100,7 +101,9 @@ Expected production alias:
 - `https://korattanphai.vercel.app`
 
 Vercel project link lives locally in `.vercel/project.json` and is ignored by
-git.
+git. After required CI and authenticated read-only candidate smoke pass,
+recheck the production revision and promote this exact deployment with
+`vercel promote <candidate-url> --yes`.
 
 ## Production Smoke Checks
 
@@ -116,23 +119,25 @@ After deploy:
    only `จัดการข้อมูล`, `รายการนำเข้าและฉบับร่าง` and `นำเข้าข้อมูล`, with all
    destinations under `/admin`. Visitor search, bookmarks and export must not
    appear in the Admin shell. Verify the Admin drawer on mobile as well.
-6. Confirm `/geodata/thailand-neighbor-context.geojson` loads.
-7. Confirm `/geodata/nakhon-ratchasima-subdistricts.geojson` loads.
-8. Confirm `/geodata/nakhon-ratchasima-boundary.geojson` loads.
-9. Confirm `/api/risk-fusion?eventId=ARE-2026-0825-NE` returns JSON.
+6. Confirm the authenticated CMS geometry bundle supplies the province boundary,
+   district boundaries and 289 subdistrict boundaries. No retired country-context
+   layer or static-file fallback is expected in the protected deployment.
+7. Confirm `/api/health` returns the process-health response with `no-store`.
+8. Confirm retired research/source/station resources are absent from the active
+   Admin catalog, while original files and history remain readable.
+9. Confirm the API functions include `admin_hierarchy.json`, used by the real
+   district/subdistrict catalog, in their deployment bundles.
 10. Check desktop and mobile widths for no horizontal overflow.
 11. Confirm `/`, `/drought`, `/wang-nam-khiao`, and
     `/wang-nam-khiao/t-302504` load after login.
 12. Confirm legacy `/nakhon-ratchasima/...` URLs still load for old links.
-13. Confirm the Nakhon Ratchasima layer selector hides water, flood, reservoir,
-    weather, and rainfall layers from the current product UI.
 13. Confirm `/wang-nam-khiao/t-302504` does not show station, rainfall,
     water-level, reservoir, or irrigation detail panels.
-14. Confirm an unseeded local route such as
-    `/mueang-nakhon-ratchasima/t-300101` says local evidence
-    is not yet available and does not render as normal/low-risk.
-15. Confirm map layer selector displays provenance and separates no-data,
-   source-unavailable, unsupported, low-risk, and available states.
+14. Confirm forecast values and missing values follow the published rev03
+    data on province, district and subdistrict routes; missing values must not
+    render as normal/low-risk.
+15. Confirm forecast source-month/horizon labels and provenance remain readable,
+    and desktop/mobile zoom reveals district and subdistrict map labels.
 16. Confirm the root province overview does not show a `กลับแผนที่ประเทศ`
     route-back button.
 17. Confirm timestamp/timezone wording remains visible where shown.

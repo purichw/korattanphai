@@ -13,12 +13,35 @@ per-account followed areas/saved filters. The site brand is Korat Tan Phai /
 - Source snapshot: copied from Kaset Tan Phai commit
   `0f16794bb57d5dec93b7c6312de7d9362bb97013`.
 
-The app is Thai-only for visible product UI and responsive. Remaining demo
-workflow state/preferences still use `localStorage`; they are not part of the
-scoped database migration. Recent changes below are chronological checkpoints;
+The app is Thai-only for visible product UI and responsive. Local preferences
+store language/month only; retired demo workflow fields are no longer loaded.
+Recent changes below are chronological checkpoints;
 the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
+
+Legacy cleanup (2026-10-03, local only; not committed or deployed):
+
+- Approved cleanup is isolated in `artifacts/legacy-cleanup-20261003`, branch
+  `fix/legacy-cleanup-20261003`, from production baseline
+  `ce9d98ba021f087675ce61c8645d30c233472bae`. Root checkout remains untouched.
+- Removed 51 approved files: 39 legacy JSON resources including rev02, country
+  context geometry, two old builders, six demo/runtime/API files and three old
+  brand binaries. `OperationalFilters.tsx` was retained because Overview still
+  uses it; its synthetic defaults/store coupling were removed instead.
+- Current startup uses five genuine CMS resources, with only hierarchy and
+  forecast summary preloaded. Admin lists real area/map resources; historical
+  versions remain readable but inactive keys cannot be edited/published.
+- Removed unreachable nationwide/persona/event/advisory UI, fake workflow
+  persistence, old map/readiness branches and fixed agency source projections.
+  Forecasts, exports, CSV/Excel import, real Auth/saved workspaces, mobile map
+  labels and the parked generic Actual/agriculture designs are preserved.
+- No database data or migration was changed. The exact cutover verification
+  draft exception remains pending a separate archival policy; compatibility
+  URLs, old Excel codepages and provenance/security guards remain intentional.
+- Restore checkpoint and evidence: see `LEGACY_CLEANUP_20261003.md` and the
+  2026-10-03 entry in `rollback-parking-lot.md`.
+
 
 Admin resource-detail production release (2026-10-01):
 

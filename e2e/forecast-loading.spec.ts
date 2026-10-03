@@ -131,7 +131,6 @@ test("leaving a pending archive load keeps overview usable and reuses its result
     '/geodata/nakhon-ratchasima-boundary.geojson',
     '/geodata/nakhon-ratchasima-subdistricts.geojson',
     '/geodata/thailand-adm1.geojson',
-    '/geodata/thailand-neighbor-context.geojson',
   ]);
 });
 

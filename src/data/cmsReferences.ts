@@ -19,19 +19,21 @@ async function rpc<T>(name: string, args: Record<string, unknown> = {}): Promise
   } finally { window.clearTimeout(timeout); }
 }
 
-// Pin a coherent catalogue for this page session. No bundled-data fallback.
+// Pin only the active catalogue for this page session. Historical CMS rows may
+// still exist, but never become implicit runtime dependencies or bundled fallbacks.
 export function bootstrapCmsReferences(): Promise<void> {
   if (!cmsReferencesEnabled) return Promise.resolve();
   if (startup) return startup;
   startup = (async () => {
     const catalog = await rpc<ReferenceHead[]>('ktp_cms_reference_catalog');
-    const next = new Map(catalog.map(item => [item.resource_key, item.id]));
+    const activeKeys = new Set(CMS_RESOURCES.map(resource => resource.key));
+    const next = new Map(catalog.filter(item => activeKeys.has(item.resource_key)).map(item => [item.resource_key, item.id]));
     if (CMS_RESOURCES.some(resource => !next.has(resource.key))) throw new Error('CMS reference migration is incomplete');
     const required = CMS_RESOURCES.filter(resource => resource.preload);
     const bundle = await rpc<Record<string, unknown>>('ktp_cms_reference_bundle', { p_ids: required.map(resource => next.get(resource.key)) });
     if (required.some(resource => !Object.prototype.hasOwnProperty.call(bundle, resource.key))) throw new Error('Incomplete CMS reference bundle');
     heads = next;
-    for (const [key, value] of Object.entries(bundle)) values.set(key, value);
+    for (const resource of required) values.set(resource.key, bundle[resource.key]);
   })().catch(error => { startup = null; throw error; });
   return startup;
 }

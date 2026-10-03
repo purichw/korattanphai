@@ -13,7 +13,7 @@ export async function checkOperationalHealth({ url, healthToken, readiness = fal
   const checks = [];
   const probes = [
     { name: 'login_document', path: '/login', type: 'text/html', check: body => /<html[\s>]/i.test(body) && /<script[^>]+type=["']module["']/i.test(body) },
-    { name: 'risk_api', path: '/api/risk-fusion?eventId=ARE-2026-0825-NE', type: 'application/json', check: body => JSON.parse(body)?.id === 'fusion-ARE-2026-0825-NE' },
+    { name: 'health_liveness', path: '/api/health', type: 'application/json', check: body => { const parsed = JSON.parse(body); return parsed.status === 'ok' && parsed.scope === 'process'; } },
     ...(readiness ? [{ name: 'published_archive_readiness', path: '/api/health?mode=readiness', type: 'application/json', token: healthToken, check: body => { const parsed = JSON.parse(body); return parsed.status === 'ready' && parsed.scope === 'published_archive' && parsed.checks?.publishedArchive === 'available'; } }] : []),
   ];
   for (const probe of probes) {

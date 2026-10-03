@@ -2,11 +2,11 @@
   "buildCommand": "npm run build:protected",
   "functions": {
     "api/admin-data.js": {
-      "includeFiles": "src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json",
+      "includeFiles": "src/data/canonical/nakhon_ratchasima/admin_hierarchy.json",
       "maxDuration": 60
     },
     "api/model-inputs.js": {
-      "includeFiles": "src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json"
+      "includeFiles": "src/data/canonical/nakhon_ratchasima/admin_hierarchy.json"
     }
   },
   "headers": [

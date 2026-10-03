@@ -10,7 +10,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
   try {
     await seedAdminSession(page);
     await page.goto('/admin');
-    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group')).toHaveCount(2);
     await page.getByRole('button', { name: 'ตรวจแก้รอบนี้', exact: true }).click();
     await expect(page).toHaveURL(/draft=/);
     const draftId = new URL(page.url()).searchParams.get('draft')!;
@@ -39,7 +39,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
       return [value.x + value.width / 2 - box.x - box.width / 2, value.y + value.height / 2 - box.y - box.height / 2];
     });
     for (const offset of monthOffset) expect(Math.abs(offset)).toBeLessThanOrEqual(0.5);
-    await expect(page.locator('.cms-resource-group:visible')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group:visible')).toHaveCount(2);
     await expect(page.getByRole('button', { name: 'ดูข้อมูลทั้งหมด', exact: true })).toHaveCount(0);
     const maps = page.locator('.cms-resource-group[data-group="maps"]');
     await expect(maps.getByRole('button', { name: 'ดูชั้นข้อมูล', exact: true })).toHaveAttribute('aria-expanded', 'false');
@@ -63,7 +63,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
 
     // Each group remains reachable on mobile; filtering and child search disclose the map resources.
     const category = page.getByRole('combobox', { name: 'หมวดข้อมูล', exact: true });
-    for (const [name, key] of [['ข้อมูลพื้นที่', 'areas'], ['ชั้นข้อมูลแผนที่', 'maps'], ['แหล่งข้อมูลอ้างอิง', 'sources']]) {
+    for (const [name, key] of [['ข้อมูลพื้นที่', 'areas'], ['ชั้นข้อมูลแผนที่', 'maps']]) {
       await category.click();
       await page.getByRole('option', { name, exact: true }).click();
       await expect(page.locator('.cms-resource-group:visible')).toHaveCount(1);
@@ -71,7 +71,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
     }
     await category.click();
     await page.getByRole('option', { name: 'ทุกหมวด', exact: true }).click();
-    await expect(page.locator('.cms-resource-group:visible')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group:visible')).toHaveCount(2);
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('เส้นรอบจังหวัดนครราชสีมา');
     await expect(page.locator('.cms-resource-group:visible')).toHaveCount(1);
     await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(1);
@@ -81,21 +81,21 @@ test('Admin cards preserve draft review and searchable resource access at each v
     await expect(page.getByRole('cell', { name: 'จังหวัดนครราชสีมา', exact: true })).toBeVisible();
     await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
 
-    for (const hidden of ['รายชื่อและพิกัดสถานีฝน', 'สถานีฝนที่อยู่ใกล้แต่ละตำบล', 'ขอบเขตประเทศรอบข้าง']) {
+    for (const hidden of ['แหล่งข้อมูลอ้างอิง', 'รายชื่อและพิกัดสถานีฝน', 'สถานีฝนที่อยู่ใกล้แต่ละตำบล', 'ขอบเขตประเทศรอบข้าง']) {
       await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill(hidden);
       await expect(page.locator('.cms-resource-group')).toHaveCount(0);
       await expect(page.getByText('ไม่พบข้อมูลตามคำค้น', { exact: true })).toBeVisible();
     }
-    await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('แหล่งข้อมูลอ้างอิง');
+    await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('ข้อมูลพื้นที่');
     await expect(page.locator('.cms-resource-group:visible')).toHaveCount(1);
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page).toHaveURL(/resource=/);
-    await expect(page.getByRole('heading', { name: 'แหล่งข้อมูลอ้างอิง', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
     await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('ไม่ตรงกับข้อมูลใด');
     await expect(page.getByText('ไม่พบข้อมูลตามคำค้น', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).click();
-    await expect(page.locator('.cms-resource-group:visible')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group:visible')).toHaveCount(2);
     await page.locator('.cms-draft-open button').click();
     await expect(page).toHaveURL(new RegExp(`draft=${draftId}`));
     await page.reload();

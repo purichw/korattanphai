@@ -1,5 +1,8 @@
 # Korat Tan Phai / โคราชทันภัย Data Contract
 
+Source cleanup checkpoint: 2026-10-03. This document describes the working
+source contract; [HANDOFF.md](HANDOFF.md) records deployment evidence separately.
+
 ## Actual / Forecast Boundary
 
 [ACTUAL_FORECAST_SEPARATION.md](ACTUAL_FORECAST_SEPARATION.md) owns the source audit,
@@ -30,200 +33,89 @@ persistence model below remains active; it is not an actual-data store.
 
 ## Persistence Model
 
-Supabase Auth supplies identity. `VITE_DATA_BACKEND=supabase` selects the
-authenticated, immutable published archive and owner-only saved workspaces;
-default `static` remains available for isolated regression/recovery builds.
-Migrations and verified rev03 archive publication are complete. Current forecast
-source, lineage and release evidence are in `DROUGHT_REV03_CUTOVER.md` and
-`DROUGHT_REV03_NORMALIZATION.md`; these supersede earlier forecast import notes.
+Supabase Auth supplies identity. `VITE_DATA_BACKEND=supabase` selects published
+forecast rows and owner-only saved workspaces. Isolated `static` builds remain
+available for regression verification; they are not a database-error fallback.
+Original normalization and lineage are documented in `DROUGHT_REV03_NORMALIZATION.md`
+and `DROUGHT_REV03_CUTOVER.md`.
 
-Static source files:
+The retained canonical source artifacts are:
 
-- `src/data/canonical/advisory.json`
-- `src/data/canonical/crop_profiles.json`
-- `src/data/canonical/data_model_registry.json`
-- `src/data/canonical/data_period.json`
-- `src/data/canonical/event_detail_enrichment.json`
-- `src/data/canonical/farmer_profile.json`
-- `src/data/canonical/field_verification_tasks.json`
-- `src/data/canonical/historical_analogues.json`
-- `src/data/canonical/locations.json`
-- `src/data/canonical/long_term_climate_illustrative.json`
-- `src/data/canonical/map_layer_catalog.json`
-- `src/data/canonical/national_monthly_backbone.json`
-- `src/data/canonical/outcome_analytics.json`
-- `src/data/canonical/province_monthly_risk.json`
-- `src/data/canonical/risk_events.json`
-- `src/data/canonical/source_registry.json`
-- `src/data/canonical/users.json`
-- `src/data/canonical/nakhon_ratchasima/admin_hierarchy.json`
-- `src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json`
-- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`
-- `src/data/canonical/nakhon_ratchasima/dwr_ews_station_coverage.json`
-- `src/data/canonical/nakhon_ratchasima/evidence_records.json`
-- `src/data/canonical/nakhon_ratchasima/local_subset.json`
-- `src/data/canonical/nakhon_ratchasima/map_layers.json`
-- `src/data/canonical/nakhon_ratchasima/opsmoac_monthly_reports.json`
-- `src/data/canonical/nakhon_ratchasima/rainfall_source_audit.json`
-- `src/data/canonical/nakhon_ratchasima/rainfall_stations.json`
-- `src/data/canonical/nakhon_ratchasima/rainfall_observations_24h.json`
-- `src/data/canonical/nakhon_ratchasima/rainfall_monthly_history.json`
-- `src/data/canonical/nakhon_ratchasima/source_matrix.json`
-- `src/data/canonical/nakhon_ratchasima/subdistrict_rainfall_coverage.json`
-- `src/data/canonical/nakhon_ratchasima/temporal_matrix.json`
-- `src/data/canonical/nakhon_ratchasima/validation.json`
+- `src/data/canonical/nakhon_ratchasima/admin_hierarchy.json`: real province,
+  district and subdistrict identities, labels and navigation slugs.
+- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`:
+  source-backed archive used for verification and isolated static builds.
 
-Typed imports and derived lists are in `src/data/catalog.ts`, except forecasts.
-Database mode uses `src/data/supabaseForecastArchive.ts`; static regression mode
-alone uses `src/data/forecastArchive.ts`. Not every retained catalog is exposed
-in the product. See `APP_MAP.md` for active surfaces.
+`src/data/catalog.ts` derives geographic locations from the hierarchy only.
+Generated summary/T+1 projections come from rev03, not a second forecast source.
+The retired source registry, research/rainfall stubs, synthetic nationwide data
+and rev02 archive/builders are no longer runtime inputs or bundled references.
+Their historical documentation is not evidence that those feeds are connected.
 
-## Database Collections / Tables / Documents
+## Published Reference Registry
 
-Existing audited tables: `ktp_districts`, `ktp_subdistricts`,
-`ktp_forecast_datasets`, `ktp_forecast_runs`, `ktp_forecast_values`,
-`ktp_research_crosswalk`. The additive local migration introduces
-`ktp_followed_areas` and `ktp_saved_filters`; these are applied remotely with RLS.
+`shared/cmsResources.mjs` is the allowlist used by CMS bootstrap, the Vite
+reference plugin and seed preparation. `VITE_REFERENCE_BACKEND=cms` requires
+the Supabase forecast backend and disables bundled reference fallbacks.
 
-PROPOSAL for a future backend:
+| Resource key | Purpose | Startup payload |
+| --- | --- | --- |
+| `canonical/nakhon_ratchasima/admin_hierarchy` | Real area identity/navigation | Preloaded |
+| `generated/forecast-archive-summary` | Generated archive metadata | Preloaded |
+| `geodata/nakhon-ratchasima-subdistricts` | Local subdistrict polygons | On demand |
+| `geodata/nakhon-ratchasima-boundary` | Local province outline | On demand |
+| `geodata/thailand-adm1` | Neighboring province context | On demand |
 
-- `riskEvents`
-- `riskEventEvidence`
-- `geographies`
-- `fieldVerificationTasks`
-- `fieldSubmissions`
-- `advisories`
-- `publicationBatches`
-- `notificationReceipts`
-- `farmerAlerts`
-- `operatorAuditLog`
-- `dataSourceIngestRuns`
+All five are read-only system resources (`editable: false`). The HTTP resource
+handler denies clone/edit/publish for inactive or unknown keys as well as these
+read-only resources. This does not disable the separate forecast draft/import/
+publish workflow. Historical stored reference versions remain readable through
+existing get/history operations; the source cleanup neither deletes database
+rows nor changes their published pointers.
 
-Do not document any future collection as current until it exists in code and
-deployment configuration.
+Bootstrap requires all five active heads, pins their IDs, and requests only the
+two preload payloads. Extra retired catalog/bundle rows cannot become runtime
+dependencies. Geometry reads use pinned IDs; failed reads expose retry.
 
-## Canonical Models
+## Database and Canonical Models
 
-See `src/types.ts`.
+Forecast persistence includes `ktp_districts`, `ktp_subdistricts`,
+`ktp_forecast_datasets`, `ktp_forecast_runs`, `ktp_forecast_values` and
+`ktp_research_crosswalk`. The crosswalk name is retained for source lineage;
+it does not activate retired research panels. `ktp_followed_areas` and
+`ktp_saved_filters` remain owner-scoped with RLS.
 
-Key models:
+CMS stores original uploads, forecast drafts, validation/publication history and
+reference versions separately. Its account session/membership checks are
+independent of visitor login. Browser roles cannot directly write published
+forecast tables. Model-input ingestion/storage is a separate validated backend;
+an accepted input does not automatically publish a rev03 forecast.
 
-- `ProvinceMonthRisk`
-- `LocationNode`
-- `RiskEvent`
-- `EventEnrichment`
-- `FieldTask`
-- `Advisory`
-- `UserPersona`
-- `FarmerProfile`
-- `CropProfile`
-- `NationalMonthlyBackbone`
-- `OutcomeMetric`
-- `ModelRegistryRecord`
-- `DataClass`
-- `SourceRegistryRecord`
-- `MapLayerRecord`
-- `LayerAvailability`
-- `RiskFusionBreakdown`
-- `NakhonRatchasimaHierarchy`
-- `NakhonRatchasimaDistrict`
-- `NakhonRatchasimaSubdistrict`
-- `NakhonRatchasimaDroughtForecastArchive`
-- `NakhonRatchasimaEvidenceRecord`
-- `NakhonRatchasimaMapLayer`
-- `NakhonRatchasimaMatrixRow`
-- `NakhonRatchasimaRainfallSourceAudit`
-- `NakhonRatchasimaRainfallStation`
-- `NakhonRatchasimaRainfallCoverageRecord`
-- `NakhonRatchasimaRainfallObservations24h`
-- `NakhonRatchasimaRainfallMonthlyHistory`
-- `RuntimeState`
-- `AppState`
-- `DeliveryRecord`
-- `FarmerAlert`
+Frontend models in `src/types.ts` cover real hierarchy, archive selections,
+forecast values and supported preferences. A parked generic agricultural panel
+may retain an input type; this is not an active feed or seeded agricultural value.
+Removed personas, runtime alerts and synthetic evidence are not user state.
 
 ## Coverage Contract
 
-Current facts:
+- Active geography: one province (`TH-P29`, administrative code `30`), 32
+  districts and 289 subdistricts, or 322 location nodes in total.
+- Original rev03: 289 mapped source IDs, 127 source months, six horizons and
+  220,218 forecast-vintage slots. Counts describe baseline integrity; published
+  metadata supplies current visible counts and selectable periods.
+- Map source artifacts: subdistrict geometry, the generated local province
+  outline and Thailand ADM1 for neighboring province context. All 289 local
+  codes must join to the hierarchy. ADM1 context is not a nationwide risk feed.
+- No-data, out-of-scope and risk zero remain distinct. Removing a stale source
+  entry must not turn an unknown value into available data or zero risk.
 
-- Provinces: 77.
-- Months: 22.
-- Month range: `2025-01` through `2026-10`.
-- Legacy province-month records: 1,672 across the other 76 provinces. The 22
-  synthetic Nakhon Ratchasima rows were removed on 2026-09-05; do not restore
-  them to fill empty agriculture metrics.
-- Seeded deeper locations: 14.
-- Nakhon Ratchasima canonical province: `TH-P29`.
-- Nakhon Ratchasima admin province code: `30`.
-- Nakhon Ratchasima local hierarchy: 32 districts and 289 subdistricts.
-- Nakhon Ratchasima drought forecast archive rev03: 289 mapped source IDs,
-  127 source/base months T from `2015-06` through `2025-12`, 6 forward horizons
-  per source month, and 220,218 canonical forecast vintages. Actual forecast
-  target months span `2015-07` through `2026-06`.
-- Naming contract: "Nakhon Ratchasima" is the province. Local nicknames and
-  district/local names must not be used as province-level synonyms.
-- Nakhon Ratchasima seeded local subset: 8 districts and 11 subdistricts with
-  richer evidence or source capability.
-- Nakhon Ratchasima DWR EWS station/source coverage: 30 subdistricts in 13
-  districts, derived from 49 station options and 130 station/covered-village
-  rows captured from the public DWR EWS station-point page on `2026-08-27`.
-- Nakhon Ratchasima OPSMOAC monthly report matrix: 22 canonical months aligned
-  to `2025-01` through `2026-10`; 18 months have monthly report posts visible
-  on the first index page, 12 of those months expose linked attachment paths,
-  `2025-04` is related-warning-only in that first index, and `2026-08` through
-  `2026-10` remain current/forecast targets rather than observed report rows.
-- Nakhon Ratchasima subdistrict GeoJSON: 289 features.
-- Nakhon Ratchasima rainfall station coverage: 49 REAL DWR EWS station points,
-  29 direct-station subdistricts, 260 nearest-station coverage records, and 0
-  `no_source_available` subdistricts in the current matrix.
-- Nakhon Ratchasima current 24-hour rainfall observations fixture:
-  `rainfall_observations_24h.json` remains the station-observation schema and is
-  intentionally empty until a station-specific live ingest is implemented.
-- Nakhon Ratchasima monthly rainfall history: current fixture has only
-  national/regional context records, not subdistrict monthly totals.
-- Risk events: 9.
-- Field tasks: 2.
-- Model registry records: 7.
-- Source registry records: 9 audited source families.
-- Map layer catalogue: 12 layer records with provenance/no-data metadata.
+## Retired Research Data
 
-Tests in `tests/domain.test.ts` enforce province/month coverage, GeoJSON join
-coverage, source/layer provenance, canonical workflow chain, and farmer-alert
-gating.
-
-## Nakhon Ratchasima Research Period
-
-The nationwide canonical period remains `2025-01` through `2026-10` inclusive,
-and `temporal_matrix.json` must still have one row per canonical month in the
-same order. The Nakhon Ratchasima local research map bundle was intentionally
-cleared on `2026-09-02` for a dataset refresh: live local map data currently
-has no active research period and no subdistrict hazard rows.
-
-Historical local map periods, including the formerly retained `2025-12` period,
-are parked outside the live app in the rollback checkpoints noted in
-`docs/rollback-parking-lot.md`. Do not restore or reintroduce those map periods
-unless a new source-backed dataset refresh explicitly requires it.
-
-Source coverage and observed impact are intentionally separate:
-
-- DWR EWS station/source coverage can be shown as capability metadata across the
-  canonical period, but a monthly hazard state requires a warning/readings record
-  for that specific month.
-- DOAE farmer-registration report capability can support crop exposure research
-  by production year, province, district, subdistrict, and crop filters, but no
-  crop-area values are current until a period-specific query is captured and
-  normalized.
-- OPSMOAC Nakhon Ratchasima monthly situation posts can support monthly disaster
-  report research, but the index alone cannot assign affected districts,
-  subdistricts, crops, or rai.
-- `opsmoac_monthly_reports.json` is a prediction-readiness/source-validation
-  input. It must not be rendered as a district/subdistrict risk score until
-  individual reports are parsed, geocoded, and normalized against canonical
-  admin codes and crop/exposure fields.
-
-For local maps, missing local evidence remains `no-data`, never low risk or
-normal. A source pathway may reduce “unknown source coverage” without reducing
-“unknown local hazard/impact.”
+The old monthly research panel, source matrix, readiness metrics, rainfall
+coverage stubs and demo source list have been removed from the active graph.
+References to earlier research periods or station audits in historical reports
+are provenance only. They must not be used to claim current observations,
+forecast accuracy, live provider access or a publication state.
 
 ## Nakhon Ratchasima Drought Forecast Archive
 
@@ -236,7 +128,8 @@ fixed target and calculated issue months backwards. Normalize only the original
 `Drought_T1-6_rev03.xlsx` using this definition, never the superseded normalized
 workbook or other prediction providers.
 
-- Selectable source months T remain `2015-06` through `2025-12` (127 months).
+- The original rev03 source months T span `2015-06` through `2025-12` (127 months).
+  Published CMS revisions supply the selectable months; do not hard-code the latest month in UI.
 - Runtime projection uses `issueMonth = sourcePeriod` and
   `targetMonth = sourcePeriod + horizon` with calendar-month arithmetic.
 - Source `2015-06` forecasts `2015-07` through `2015-12`; source `2025-12`
@@ -262,52 +155,48 @@ workbook or other prediction providers.
 - Each chart slot retains in-scope, explicit out-of-scope and missing counts.
   An all-unavailable slot must not become a green zero. Do not connect/fill
   across unavailable slots; a fully unavailable series has no risk graph.
-- The aggregate chart reference uses half of the administrative tambon count,
-  rounded up for integer counts. Exactly half is included. It is not land area,
-  an Excel risk class, an official warning threshold or a severity assessment.
 - Single-tambon UI reports the record status directly, without population
   counts or a link back to the same tambon. Null and missing remain distinct.
-- Readiness is derived from supporting evidence/source capability metadata,
-  not Excel completeness or accuracy. Its percentage describes the ready
-  category only; single-tambon readiness uses a categorical status.
-- Empty historical research/area-fact designs remain gated in source. This
-  change does not add observations, restore removed data or change the archive.
 
 The Supabase provider reconstructs the same full/T+1 archive shapes from
 normalized rows, without a static fallback. Original Year/Month, row lineage
 and location names are preserved. The new dataset time-role marker is
-`CONFIRMED_SOURCE_IS_ORIGIN`. Only the approved original workbook hash,
-normalized manifest/file hashes and canonical projection are importable.
+`CONFIRMED_SOURCE_IS_ORIGIN`. Baseline normalization verifies the approved
+original workbook hash, normalized manifest/file hashes and canonical projection.
+Later no-code imports or edits require validation, an explicit CMS publication
+and retained source/audit history; they do not silently replace that provenance.
 
 FACT: `drought_forecast_archive_rev03.json` is the source-backed T+1 through
 T+6 drought forecast archive built from `Drought_T1-6_rev03.xlsx` through
 `data/normalized/drought-rev03/`. It is the current public
 drought prediction source used by the province, district, and subdistrict
-workspace surfaces. The runtime pins dataset version
-`drought-rev03-a3be44486c8e`; older retained datasets are not a fallback.
+workspace surfaces. The baseline dataset version is
+`drought-rev03-a3be44486c8e`. Runtime reads the current validated publication
+revision, including approved CMS edits; older retained datasets are not a fallback.
 
 Loading contract:
 
-- Keep the canonical archive unchanged. In static mode, `?url` emits a content-hashed JSON asset
-  whose bytes are checked against the canonical file by `npm run check:bundle`.
-- Login and province overview do not fetch the full archive. The overview map
-  fetches `src/data/generated/forecast-overview-t1.json`, the T+1-only projection
-  of all 127 source months T, as a separate content-hashed asset. Counts and map
-  statuses use the same forecast helpers as the full archive. The tiny
-  `forecast-archive-summary.json` remains available for entry summaries. Both
-  are regenerated by `npm run generate:forecast-summary` before dev/build;
-  do not edit them manually.
-- Drought, district, and subdistrict pages fetch the archive on demand and share
-  an in-memory result for the current document. A reload starts a new loader;
-  the content-hashed asset can use the existing immutable HTTP cache policy.
-- Pending, failed, and timed-out loads must not render forecast counts or map
-  risk states. Retry preserves the requested source month T and T+ horizon.
-- Failed requests are not cached; leaving a loading view cannot update the
-  departed view. The shared request can finish for subsequent navigation.
-- Database mode obtains the same full/T+1 shapes from the security-invoker
-  `ktp_load_forecast_archive` RPC. Both raw archive assets are excluded from new
-  builds. Errors show retry without a static fallback; account changes/logout
-  dispose caches. Geometry and unrelated context remain static.
+- Database mode checks `ktp_latest_forecast_revision` before cache reuse and
+  reads `ktp_load_forecast_slice` for the requested area and source month.
+  The overview requests T+1; the drought workspace requests six horizons.
+  Cache identity includes user, published dataset revision and requested scope.
+- Focus/visibility and periodic revalidation check for a newer publication.
+  Logout/account changes dispose protected forecast caches. Departed or stale
+  requests cannot replace the active selection. See `FORECAST_SCOPED_LOADING.md`.
+- Database builds exclude both raw archive assets. Errors show retry, without
+  substituting bundled JSON, another provider or a synthetic forecast.
+- In isolated static mode, `?url` emits the canonical archive as a content-hashed
+  asset whose bytes are checked by `npm run check:bundle`. Overview uses the
+  generated T+1-only projection; six-horizon routes load the full archive on demand.
+- `forecast-overview-t1.json` and `forecast-archive-summary.json` are generated
+  by `npm run generate:forecast-summary` before dev/build. Do not edit them manually.
+- CMS reference mode pins only the five active resources for the document.
+  It preloads hierarchy and summary, then loads the three map geometries on demand.
+  Missing active reference data is an error; there is no static geometry fallback.
+- Pending, failed and timed-out initial loads must not render forecast counts
+  or green map states. Retry preserves source month T and horizon. Previously
+  loaded same-scope data may stay visible with explicit revalidation feedback;
+  failed Excel revalidation blocks download.
 
 Source and mapping contract:
 
@@ -349,7 +238,7 @@ UI contract:
 
 - Drought archive modules use the selected source/base month T plus a single
   T+ selector. Actual target month is derived from that pair.
-- Province, district, and subdistrict drought maps use the same archive fixture
+- Province, district, and subdistrict drought maps use the same published source
   and the same map status semantics.
 - Archive map legends show no-risk, moderate risk, high risk, and out-of-scope
   states. Out-of-scope areas use a muted hatched treatment.
@@ -358,17 +247,15 @@ UI contract:
 - Archive forecasts are not official damage figures and are not observed
   historical drought impacts.
 - The overview starts at the latest available source month T and fixes T+1
-  (`2025-12` T, forecasting `2026-01`).
+  (the original rev03 baseline ends at `2025-12` T, forecasting `2026-01`).
   Changing district scope updates map focus, counts and high-risk links.
   Counts use canonical subdistrict codes, with null/out-of-scope and missing
   records kept separate. Synthetic agricultural rai and confidence have been
   removed from the Korat source records and hidden from Home/drought UI. Their
   shared component and styling remain available for source-backed data only;
-  missing data must not render as zero or an empty replacement card. Readiness
-  remains separate from forecast severity and model accuracy, and must not use
-  the removed agriculture rows as its reference date.
+  missing data must not render as zero or an empty replacement card.
 
-Latest source month in the archive and its forward projection:
+Original rev03 baseline validation examples (not hard-coded current UI totals):
 
 - Source month T `2025-12` (`ธ.ค. 2568`) is archive forecast data, not the old
   cleared historical map panel. Its target months are January-June 2026.
@@ -379,287 +266,107 @@ Latest source month in the archive and its forward projection:
   `2025-12` has forecast risks `[1, 1, 1, 2, 2, 2]` across T+1 through T+6,
   targeting `2026-01` through `2026-06`, all with origin month `2025-12`.
 
-## Nakhon Ratchasima Rainfall Contract
+## Future Rainfall Integration Guards
 
-FACT: Rainfall is currently represented as station/source coverage for all 289
-subdistricts plus empty current-observation schemas. It is not yet a live
-rainfall feed and has no bundled province water-provider snapshot.
+No live rainfall reading is supplied by the active dashboard. The former
+station/proxy JSON stubs are retired. `RAINFALL_SOURCE_AUDIT.md` remains
+historical source research and a checklist for a future verified integration,
+not a live inventory or authorization to restore fabricated observations.
 
-Source files:
+Any future adapter must preserve these distinctions:
 
-- `rainfall_source_audit.json`: source URLs, access method, fields, timestamp
-  semantics, usage notes, and known limitations for DWR EWS and TMD context.
-- `rainfall_stations.json`: 49 DWR EWS station points with REAL provenance.
-- `subdistrict_rainfall_coverage.json`: one coverage record for every
-  subdistrict code.
-- `rainfall_observations_24h.json`: current-observation schema with zero
-  imported observations.
-- `rainfall_monthly_history.json`: national/regional TMD context records only.
+- A direct station reading and nearest-station representative context are
+  different. A proxy needs station identity, distance, source timestamp,
+  confidence and an explicit indication that it is not a direct local reading.
+- Rainfall units and accumulation window must be explicit, for example `mm`
+  over `24h`; source timezone and coverage-through must come from evidence.
+- Missing, stale, withheld and request errors are not `0 mm`, low risk or normal.
+- National/regional context cannot become a subdistrict observation by joining
+  the same value to every administrative code.
 
-Rules:
+## Provenance and Map Semantics
 
-- Direct station: `coverageStatus === "direct_station"` means at least one DWR
-  station point is inside or directly assigned to that subdistrict.
-- Nearest station: `coverageStatus === "nearest_station_proxy"` means the
-  selected station is representative context, not a direct local measurement.
-- Nearest-station records must include station ID, distance, confidence, source
-  timestamp, and `notLocalReading: true`.
-- No source: `coverageStatus === "no_source_available"` is allowed by schema and
-  must render as no-data, never as low risk.
-- Unit for rainfall values is `mm`; accumulation window must be explicit, such
-  as `24h`.
-- Timezone for source timestamps is `Asia/Bangkok` unless a source response says
-  otherwise.
-- Station-specific live rainfall values for `rainfall_observations_24h.json`
-  remain absent until a live ingest is implemented. Do not hard-code `0 mm` or
-  use synthetic values as a fallback.
+`REAL` requires verified source lineage; `DERIVED` requires reproducible inputs
+and transformations. Any retained historical synthetic type or fixture used by
+isolated tests does not authorize synthetic production forecasts. Source acronyms
+may remain in English when they identify an actual source or format.
 
-See [RAINFALL_SOURCE_AUDIT.md](RAINFALL_SOURCE_AUDIT.md) before adding any live
-rainfall ingest, rainfall chart, or rainfall-driven risk score.
-
-## Data Class Contract
-
-Current values:
-
-- `REAL`: real source context or source-family metadata.
-- `DERIVED`: computed/risk-fusion output from multiple inputs.
-- `CANONICAL_SYNTHETIC`: seeded prototype fixture values.
-- `RUNTIME_STATE`: local browser state created by interactions.
-
-Rules:
-
-- Derived agricultural risk must not be labelled as an official source score.
-- Synthetic local/province values must remain visibly marked as prototype/demo
-  data.
-- Source acronyms such as TMD, GISTDA, RID, DWR, OAE, LDD, DOAE, and DDPM may
-  remain in English when they are official or operational acronyms.
-
-## Map Layer Contract
-
-The canonical map layer catalogue lives in
-`src/data/canonical/map_layer_catalog.json`.
-
-Layer groups:
-
-- `risk`
-- `agriculture`
-- `hydrology`
-- `weather`
-- `planning`
-- `operations`
-
-Every layer must define:
-
-- source IDs linked to `source_registry.json`
-- data class
-- Thai label and Thai description
-- geography and time granularity
-- access mode
-- limitation
-- no-data meaning
-- source-unavailable meaning
-- unsupported-layer meaning
-
-Availability semantics:
-
-- `available`: selected state has data that can be shown.
-- `low-risk`: selected state has an explicit available low-risk/normal record.
-- `no-data`: no seeded data exists for the selected area/filter.
-- `source-unavailable`: the layer represents a source that is not currently
-  available in the prototype.
-- `unsupported`: selected filter combination does not match the layer's valid
-  hazard/crop/time scope.
-
-Never treat missing/null layer data as low risk.
-
-## Legacy Severity Taxonomy
-
-Retained multi-hazard prototype severity values (not the rev03 0/1/2 classes):
-
-- `Normal`
-- `Watch`
-- `Warning`
-- `Severe`
-
-Ordering is defined in `src/domain.ts` as:
-
-```text
-Normal < Watch < Warning < Severe
-```
-
-Public copy must pair severity with recommended action and uncertainty. Do not
-present severity as a guaranteed prediction.
-
-## Hazard Taxonomy
-
-Hazards retained in prototype canonical data; the active dashboard fixes hazard
-to drought and crop to rice:
-
-- Agricultural Water Stress
-- Crop Stress
-- Disease Risk
-- Dry Spell / Rainfall Deficit
-- Dry-season Irrigation Pressure
-- Flash Flood
-- Flood / Excess Rainfall
-- Heat Stress
-- Heavy Rainfall
-- Multi-Hazard Seasonal Transition
-- River Flood / Waterlogging
-- Seasonal Transition
-- Storm / Strong Wind
-
-Thai labels live in `src/i18n.ts`.
+The active map supports forecast-risk coloring and workbook irrigation coloring.
+Risk comes from the selected published T/horizon; irrigation comes from the same
+source location metadata and is independent of risk. Missing values remain
+unavailable. There is no runtime multi-hazard layer catalogue or automatic
+weather/water/soil feed behind these controls. The retired `Normal`/`Watch`/
+`Warning`/`Severe` demo taxonomy is not the rev03 `0`/`1`/`2` contract.
 
 ## Geographic Area Model
 
-`LocationNode` supports:
+`TH-P29` remains the only Nakhon Ratchasima province object. Its 32 districts and
+289 subdistricts derive from `admin_hierarchy.json`. Preserve existing IDs,
+district slugs and subdistrict paths for deep links, search and saved workspaces.
 
-- `country`
-- `province`
-- `district`
-- `subdistrict`
-- `village`
-- `farm`
+Join by `provinceCode`, `districtCode` and `subdistrictCode`, never by display
+name or route slug. Real model-input validation derives its allowed code set
+from this same hierarchy. Do not fabricate values for unmatched areas.
 
-Province IDs use values such as `TH-P17`. The main farmer demo farm is
-`FARM-001`.
+The source geometry files are:
 
-Map join rules:
+- `public/geodata/nakhon-ratchasima-subdistricts.geojson` (GISTDA local extract).
+- `public/geodata/nakhon-ratchasima-boundary.geojson` (dissolved local outline).
+- `public/geodata/thailand-adm1.geojson` (neighboring province context).
 
-- ADM1 GeoJSON is `public/geodata/thailand-adm1.geojson`.
-- Regional-country context is
-  `public/geodata/thailand-neighbor-context.geojson` and is rendered as a
-  non-interactive orientation underlay, not as a risk layer.
-- Nakhon Ratchasima subdistrict geometry is
-  `public/geodata/nakhon-ratchasima-subdistricts.geojson`.
-- The visible Nakhon Ratchasima local province outline is
-  `public/geodata/nakhon-ratchasima-boundary.geojson`, generated from the same
-  289 subdistrict geometries with `npm run generate:nr-boundary`.
-- `normalizeName` in `src/domain.ts` removes `Province`, whitespace, casing, and
-  non-alpha characters for joins.
-- Tests require all 77 canonical provinces to join to GeoJSON.
-- For Nakhon Ratchasima local data, join business/evidence records by
-  `provinceCode`, `districtCode`, and `subdistrictCode` only. Do not join by
-  Thai name, English name, or route slug.
-- `TH-P29` must remain the only Nakhon Ratchasima province object. Local
-  districts and subdistricts are child locations.
-- Do not collapse the province into a local nickname in UI, docs, fixtures, or
-  prompts. Province-level labels must remain explicit.
+Regenerate the local outline with `npm run generate:nr-boundary`; do not edit
+its coordinates by hand. CMS builds load published versions through authenticated
+reference RPCs and omit public-file fallback. Static regression builds use these
+same source files. The unused country underlay and nationwide demo map are removed.
 
-Do not fabricate local drill-down data for unseeded provinces.
-Do not fabricate local values for unseeded Nakhon Ratchasima subdistricts.
-No-data means insufficient evidence, not normal/green/low-risk.
+## Local Storage, Session and Caches
 
-## Local Storage / Session / Cache Keys
+- `korat-tan-phai-preferences-v1` persists only `language` and `selectedMonth`.
+  The initial month is empty until an actual archive supplies available periods;
+  language normalizes to Thai. Toasts are transient.
+- If the new key is absent, `korat-tan-phai-demo-state-v1` is read for supported
+  preferences only. Retired workflow fields are ignored, not replayed. The old
+  snapshot is not deleted or overwritten by this migration.
+- Initial mount and transient notices do not rewrite stored preferences.
+  Malformed values recover to defaults with a visible storage notice. Storage
+  errors use document-lifetime memory, not a false durable-save result.
+- `korat-tan-phai-login-user` is a retired demo-auth key and is not a session.
+  Supabase SDK manages auth token persistence independently.
+- Followed areas/saved filters are owner-scoped database rows, not imported
+  from legacy browser workflow state. Logout/account changes dispose protected
+  archive/saved-row caches. Failed database saves never claim local success.
 
-Followed areas/saved filters in the opt-in database provider are owner-scoped
-Supabase rows, never imported from the legacy demo key below. Their memory
-and archive caches are disposed on account changes/logout. Failed saves do not
-fall back to browser persistence or claim success.
+## API Boundaries
 
-Current keys:
+- Supabase Auth owns visitor sessions; CMS uses its independent admin scope.
+- Forecast reads use `ktp_latest_forecast_revision` and
+  `ktp_load_forecast_slice`. Owner-scoped saved workspaces use PostgREST/RLS.
+- Reference reads use `ktp_cms_reference_catalog`, `ktp_cms_reference_bundle`
+  and `ktp_cms_reference_read` with the active resource allowlist.
+- `/api/admin-data` owns no-code import, validation, drafts, publication and
+  historical resource reads under admin membership checks.
+- `/api/model-inputs` accepts validated machine inputs into its separate store.
+  `/api/operational-context` returns policy/source-gap metadata for parked work.
+- `/api/health` and `/api/telemetry` implement operational checks/technical events.
+  Implemented handlers are not evidence of configured feeds, schedules or alerts.
+- The old `/api/risk-fusion` synthetic explanation endpoint is removed.
 
-- `korat-tan-phai-demo-state-v1`
-- `korat-tan-phai-login-user`: retired and removed during auth initialization;
-  never used as a session. Supabase SDK owns its separate auth-token storage.
+## Source Precedence and Compatibility
 
-Stored shape:
+Current user decisions, code/tests and verified source/publication metadata take
+precedence over historical design notes. The original rev03 workbook, normalized
+lineage/hashes and approved CMS publication history remain auditable; source
+registry prose does not substitute for an actual connection.
 
-- `AppState`, including language, persona, section, filters, selected IDs,
-  explicit map selection (`mapSelectedProvinceId`), map layer, and
-  `RuntimeState`. The map selection starts as `null`; the initial province
-  context must not appear as a user-selected map province.
-- Transient toast messages are not persisted. Older snapshots containing a toast
-  are accepted, but that toast is not restored.
+Preserve geographic IDs, existing district/subdistrict deep links, legacy
+`/nakhon-ratchasima/...` aliases and origin-T meanings of saved `target` keys.
+Do not rewrite followed areas or saved filters during source cleanup. Preserve
+stored CMS versions, originals and audit history even when their former resource
+key is no longer active or editable.
 
-Migration rule:
-
-- Bump the storage key when persisted runtime state becomes incompatible.
-- Keep `createInitialState()` deterministic.
-- Reset Demo Data should remain safe and should not clear unrelated localStorage
-  keys.
-
-## API Payloads
-
-Runtime APIs include Supabase Auth, the authenticated archive RPC and
-owner-scoped `ktp_followed_areas` / `ktp_saved_filters` PostgREST operations.
-Archive tables are not writable by browser roles. Supabase never supplies
-external predictions: published data comes only from the pinned Excel lineage.
-
-Static fetch:
-
-- `GET /api/risk-fusion?eventId=:id`
-- `GET /geodata/thailand-adm1.geojson`
-- `GET /geodata/thailand-neighbor-context.geojson`
-- `GET /geodata/nakhon-ratchasima-subdistricts.geojson`
-- `GET /geodata/nakhon-ratchasima-boundary.geojson`
-
-`GET /api/risk-fusion` returns `RiskFusionBreakdown` for the selected event in
-production. It is read-only, has no credentials, and must not be treated as real
-authorization.
-
-PROPOSAL: Future APIs must include explicit source timestamps, timezone,
-provenance, confidence, and audit IDs.
-
-## Source-Of-Truth Precedence
-
-1. Current user instruction.
-2. Current code and tests.
-3. Canonical JSON in `src/data/canonical/`.
-4. Current docs.
-5. Older attached specs or chat history.
-
-Data provenance precedence:
-
-- Real official context must remain distinct from synthetic prototype layers.
-- Derived data must be reproducible from canonical input.
-- Runtime state is local demo state only.
-
-## Fallback / Cache Rules
-
-Current code:
-
-- If a province-month record is missing, UI falls back to empty/not-seeded states.
-- If event enrichment is missing, `getEventEnrichment` falls back to the main
-  event enrichment.
-- Persisted state is validated before use. Malformed JSON falls back to initial
-  state; invalid nested fields fall back individually while valid edits survive.
-  A visible notice reports recovery. Initial mount does not rewrite the stored
-  snapshot; subsequent user edits save recovered state without transient toasts.
-- Unavailable or full browser storage uses document-lifetime memory and displays
-  a warning. It is not durable storage: reload may lose changes and require login.
-  Neither error-boundary retry nor ordinary navigation clears persisted data.
-
-Current forecast/map behavior:
-
-- Critical loads have deadlines and retry/error states. The database archive
-  checks publication revision before cache reuse; scope/origin requests reject
-  stale responses. See `FORECAST_SCOPED_LOADING.md` and `loadDeadline.ts`.
-- Previously loaded same-scope forecasts may remain visible during revalidation
-  with request feedback. Failed Excel revalidation blocks download. Neither
-  path substitutes ThaiWater or static predictions for a failed database read.
-- Live-feed freshness policies remain future work, distinct from these archive
-  revision checks.
-
-## Migration / Compatibility Rules
-
-- Do not change record IDs unless all references and tests are updated.
-- Keep the main demo chain stable unless the product owner approves a new
-  canonical chain.
-- Keep old localStorage keys isolated when bumping demo state versions.
-- Add tests before changing geography normalization or severity taxonomy.
-
-## What Must Never Be Hard-Coded If A Database/CMS Exists
-
-If live backend/CMS is added, do not hard-code:
-
-- Active alert content.
-- Data freshness timestamp.
-- Severity/confidence values.
-- Delivery counts or acknowledgement counts.
-- Operator identity or approval state.
-- Notification channel configuration.
-- Official source URLs.
-- Jurisdiction permissions.
-- Public-safety disclaimers.
+Critical requests retain deadlines, retry and stale-response protection. A
+failed active database/CMS read must not silently fall back to old bundled data.
+Do not hard-code visible forecast counts, latest source dates, freshness,
+publication state, operator identity or approval status. Stable administrative
+codes, format/risk enums, calendar arithmetic and verified baseline assertions
+are contracts, not fabricated live values.

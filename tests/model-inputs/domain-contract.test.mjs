@@ -21,9 +21,10 @@ const validate = (kind, rows) => validateDomainBatch(envelope(kind, rows), depen
 const invalid = error => error instanceof InputError && error.status === 400 && error.code === 'invalid_batch';
 
 test('Korat joins accept exactly the real 289 subdistrict codes, not names or plausible unassigned codes', () => {
-  const matrix = JSON.parse(readFileSync(new URL('../../src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json', import.meta.url), 'utf8'));
-  assert.equal(matrix.length, 289);
-  assert.ok(matrix.every(row => isKoratSubdistrict(row.subdistrict_code)));
+  const hierarchy = JSON.parse(readFileSync(new URL('../../src/data/canonical/nakhon_ratchasima/admin_hierarchy.json', import.meta.url), 'utf8'));
+  const areas = hierarchy.province.districts.flatMap(district => district.subdistricts);
+  assert.equal(areas.length, 289);
+  assert.ok(areas.every(area => isKoratSubdistrict(area.subdistrictCode)));
   for (const code of ['30', '3008', '309999', '100101', 't-300806', 'บ้านเก่า', 300806, null]) assert.equal(isKoratSubdistrict(code), false);
 });
 

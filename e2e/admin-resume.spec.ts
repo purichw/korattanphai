@@ -87,15 +87,15 @@ test('returning to a browser tab and same-user session events retain the loaded 
   try {
     await seedAdminSession(page); await page.goto('/admin');
     const search = page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true });
-    await search.fill('แหล่งข้อมูลอ้างอิง');
+    await search.fill('ข้อมูลพื้นที่');
     const original = await search.elementHandle();
     const before = reads.length;
     await watchStartup(page); await watchSessionEvents(page);
     const away = await openAwayTab(page);
-    await expect(search).toHaveValue('แหล่งข้อมูลอ้างอิง');
+    await expect(search).toHaveValue('ข้อมูลพื้นที่');
     for (const event of ['SIGNED_IN', 'TOKEN_REFRESHED', 'SIGNED_IN'] as const) {
       await sessionEvent(away, page, event);
-      await expect(search).toHaveValue('แหล่งข้อมูลอ้างอิง');
+      await expect(search).toHaveValue('ข้อมูลพื้นที่');
       expect(await original!.evaluate(element => element.isConnected)).toBe(true);
       await noNewStartup(page);
     }
@@ -109,38 +109,43 @@ test('returning to a browser tab and same-user session events retain the loaded 
   } finally { await database.close(); }
 });
 
-test('an unsaved source edit survives browser tab return and token refresh before saving', async ({ page, context }, testInfo) => {
+test('an unsaved forecast correction survives browser tab return and token refresh before saving', async ({ page, context }, testInfo) => {
   test.setTimeout(120000);
-  const database = await cmsTestDatabase(context, { references: true });
+  const database = await cmsTestDatabase(context, { references: true, forecasts: true });
   const reads: string[] = [];
   page.on('request', request => { if (request.url().includes('/api/admin-data')) reads.push(request.url()); });
   try {
-    const draft = await database.operation('resource:clone', { key: 'canonical/source_registry' });
+    await seedAdminSession(page); await page.goto('/admin');
+    await page.getByRole('button', { name: 'ตรวจแก้รอบนี้', exact: true }).click();
+    await expect(page).toHaveURL(/draft=/);
+    const id = new URL(page.url()).searchParams.get('draft')!;
+    const draft = await database.operation('get', { id });
     const originalPayload = structuredClone(draft.payload);
-    await seedAdminSession(page); await page.goto(`/admin?resource=${draft.id}`);
-    await page.getByRole('button', { name: 'แก้ไข', exact: true }).first().click();
-    const name = page.getByLabel('ชื่อแหล่งข้อมูล', { exact: true });
-    const updated = `${originalPayload[0].nameTh} [tab return test]`;
-    await name.fill(updated);
-    await page.getByLabel('เหตุผลการแก้ไขข้อมูลอ้างอิง', { exact: true }).fill('แก้ไขต่อหลังกลับเข้าแท็บทดสอบ');
-    const original = await name.elementHandle();
+    await page.getByRole('button', { name: 'แก้ไขแถว 1', exact: true }).click();
+    const risk = page.getByRole('combobox', { name: /^ผลพยากรณ์/ });
+    await risk.click();
+    await page.getByRole('option', { name: 'เสี่ยงสูง', exact: true }).click();
+    await page.getByLabel('เหตุผลการแก้ไข', { exact: true }).fill('แก้ไขต่อหลังกลับเข้าแท็บทดสอบ');
+    const original = await risk.elementHandle();
     const before = reads.length;
     await watchStartup(page); await watchSessionEvents(page);
     const away = await openAwayTab(page);
     for (const event of ['SIGNED_IN', 'TOKEN_REFRESHED'] as const) {
       await sessionEvent(away, page, event);
-      await expect(name).toHaveValue(updated);
-      await expect(page.getByLabel('เหตุผลการแก้ไขข้อมูลอ้างอิง', { exact: true })).toHaveValue('แก้ไขต่อหลังกลับเข้าแท็บทดสอบ');
+      await expect(risk).toContainText('เสี่ยงสูง');
+      await expect(page.getByLabel('เหตุผลการแก้ไข', { exact: true })).toHaveValue('แก้ไขต่อหลังกลับเข้าแท็บทดสอบ');
       expect(await original!.evaluate(element => element.isConnected)).toBe(true);
       await noNewStartup(page);
     }
     expect(reads).toHaveLength(before);
-    expect((await database.operation('resource:get', { id: draft.id })).payload).toEqual(originalPayload);
+    expect((await database.operation('get', { id })).payload).toEqual(originalPayload);
     await page.screenshot({ path: testInfo.outputPath('admin-unsaved-edit-return.png') });
     await page.getByRole('button', { name: 'บันทึกฉบับร่าง', exact: true }).click();
-    await expect(page.getByText('บันทึกข้อมูลอ้างอิงฉบับร่างแล้ว', { exact: true })).toBeVisible();
-    expect((await database.operation('resource:get', { id: draft.id })).payload[0].nameTh).toBe(updated);
-    expect((await database.operation('resource:get', { id: draft.base_id })).payload).toEqual(originalPayload);
+    await expect(page.getByText('บันทึกฉบับร่างแล้ว', { exact: true })).toBeVisible();
+    const expectedPayload = structuredClone(originalPayload);
+    expectedPayload.predictions[0] = { ...expectedPayload.predictions[0], status: 'predicted', riskCode: 2 };
+    expect((await database.operation('get', { id })).payload).toEqual(expectedPayload);
+    expect((await database.operation('original', { id })).payload).toEqual(originalPayload);
     await away.close();
   } finally { await database.close(); }
 });
@@ -163,14 +168,14 @@ test('returning from imports keeps loaded Admin panels visible while their lates
   };
   try {
     await seedAdminSession(page); await page.goto('/admin');
-    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group')).toHaveCount(2);
     await navigate('รายการนำเข้าและฉบับร่าง');
     await expect(page.getByRole('heading', { name: 'รายการนำเข้าและฉบับร่าง', exact: true })).toBeVisible();
     await watchStartup(page);
     holdCatalog = true;
     await navigate('จัดการข้อมูล');
     await expect(page.getByRole('heading', { name: 'ข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
-    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group')).toHaveCount(2);
     await expect(page.getByRole('heading', { name: 'พยากรณ์ที่แสดงบนเว็บไซต์', exact: true })).toBeVisible();
     await noNewStartup(page);
     await page.screenshot({ path: testInfo.outputPath('admin-warm-navigation.png'), fullPage: true });
@@ -180,15 +185,15 @@ test('returning from imports keeps loaded Admin panels visible while their lates
   } finally { release(); await database.close(); }
 });
 
-test('manual refresh and returning from source detail keep cached panels visible during revalidation', async ({ page, context }, testInfo) => {
+test('manual refresh and returning from area detail keep cached panels visible during revalidation', async ({ page, context }, testInfo) => {
   test.setTimeout(120000);
   const database = await cmsTestDatabase(context, { references: true });
   const delay = await delayAdminReads(context);
   try {
     await seedAdminSession(page); await page.goto('/admin');
     const search = page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true });
-    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
-    await search.fill('แหล่งข้อมูลอ้างอิง');
+    await expect(page.locator('.cms-resource-group')).toHaveCount(2);
+    await search.fill('ข้อมูลพื้นที่');
     const original = await search.elementHandle();
     await watchStartup(page);
     delay.hold('list', 'forecast-catalog', 'resource-catalog');
@@ -197,7 +202,7 @@ test('manual refresh and returning from source detail keep cached panels visible
     await expect(page.getByRole('heading', { name: 'พยากรณ์ที่แสดงบนเว็บไซต์', exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'ข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
     await expect(page.locator('.cms-resource-group')).toHaveCount(1);
-    await expect(search).toHaveValue('แหล่งข้อมูลอ้างอิง');
+    await expect(search).toHaveValue('ข้อมูลพื้นที่');
     expect(await original!.evaluate(element => element.isConnected)).toBe(true);
     await noNewStartup(page);
     await page.screenshot({ path: testInfo.outputPath('admin-manual-refresh.png'), fullPage: true });
@@ -207,17 +212,17 @@ test('manual refresh and returning from source detail keep cached panels visible
     await noNewStartup(page);
 
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'แหล่งข้อมูลอ้างอิง', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
     await expect(page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await watchStartup(page);
     delay.hold('forecast-catalog', 'resource-catalog');
     await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await delay.waitFor('forecast-catalog', 'resource-catalog');
     await expect(page.getByRole('heading', { name: 'ข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
-    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
+    await expect(page.locator('.cms-resource-group')).toHaveCount(2);
     await expect(page.getByRole('heading', { name: 'พยากรณ์ที่แสดงบนเว็บไซต์', exact: true })).toBeVisible();
     await noNewStartup(page);
-    await page.screenshot({ path: testInfo.outputPath('admin-source-return.png'), fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath('admin-area-return.png'), fullPage: true });
     delay.release();
     await expect(page.locator('.cms-reference')).toHaveAttribute('aria-busy', 'false');
     await noNewStartup(page);

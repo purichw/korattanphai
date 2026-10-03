@@ -9,12 +9,12 @@ test("login restores a deep link including month, horizon and hash", async ({ pa
   await expect(page).toHaveURL(/target=2025-12&horizon=4#forecast/);
 });
 
-test("malformed persisted runtime shows a notice and a usable map", async ({ page }) => {
+test("malformed persisted preferences show a notice and a usable map", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await seedAuthSession(page);
   await page.addInitScript(() => {
-    localStorage.setItem("korat-tan-phai-demo-state-v1", JSON.stringify({ runtime: { taskStatus: null, farmerAlerts: "invalid" } }));
+    localStorage.setItem("korat-tan-phai-preferences-v1", JSON.stringify({ selectedMonth: "2025-99", language: null }));
   });
   await page.goto("/");
   await expect(page.locator(".storage-notice")).toBeVisible();

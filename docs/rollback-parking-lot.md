@@ -1,5 +1,24 @@
 # Rollback Parking Lot
 
+## 2026-10-03 — Approved legacy runtime/data cleanup (local)
+
+- User reviewed the 52-path proposal and explicitly approved “ลบ”. The isolated
+  worktree is `/Users/point/korattanphai/artifacts/legacy-cleanup-20261003`.
+- Baseline: `ce9d98ba021f087675ce61c8645d30c233472bae`; source checkpoint:
+  `/Users/point/korattanphai/artifacts/legacy-audit-20261003/before-cleanup.tar`.
+  Its 613 tracked entries were captured before edits. The adjacent
+  `deletion-manifest.json` records baseline blob identities.
+- Removed 51 listed paths. Preserved/refactored `OperationalFilters.tsx` after
+  proving the active Overview still consumes it; no fake month defaults remain.
+- No commit/push/deploy, database write, migration or other checkout changes.
+  Stored originals/history and the genuine rev03/geometry resources are intact.
+- Restore only on an explicit request: extract selected checkpoint files into
+  a separate review directory and reconcile their consumers against current
+  code. Never extract the archive over the working checkout or restore old
+  synthetic records into production. Preserve current auth, rev03, admin and
+  map-label contracts. See `LEGACY_CLEANUP_20261003.md` for checks/exceptions.
+
+
 ## 2026-09-06 — Abandon Subdistrict UI Redesign
 
 - Request: explicitly roll back all subdistrict UI redesign work.

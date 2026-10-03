@@ -30,15 +30,21 @@ export async function handleResourceAction(actor, action, body, operation) {
   const allowed = action === 'clone' ? ['key'] : action === 'get' || action === 'history' ? ['id']
     : action === 'edit' ? ['id', 'revision', 'reason', 'payload'] : ['id', 'revision', 'reason'];
   requireCms(Object.keys(body).length === allowed.length && allowed.every(key => Object.hasOwn(body, key)));
-  if (action === 'clone') requireCms(CMS_RESOURCE_BY_KEY.has(body.key), 'unknown_resource');
+  if (action === 'clone') {
+    const resource = CMS_RESOURCE_BY_KEY.get(body.key);
+    requireCms(resource, 'unknown_resource');
+    requireCms(resource.editable === true, 'resource_review_required');
+  }
   else requireCms(typeof body.id === 'string' && /^[a-f0-9-]{36}$/i.test(body.id));
   if (['edit', 'publish'].includes(action)) {
     requireCms(Number.isInteger(body.revision) && body.revision > 0);
     requireCms(typeof body.reason === 'string' && body.reason.trim() && body.reason.length <= 1000, 'reason_required');
     const current = await operation(actor, 'resource:get', { id: body.id });
+    const resource = CMS_RESOURCE_BY_KEY.get(current.resource_key);
+    requireCms(resource, 'unknown_resource');
+    requireCms(resource.editable === true, 'resource_review_required');
     if (current.revision !== body.revision) throw new CmsError(409, 'revision_conflict');
     if (action === 'edit') {
-      requireCms(!['geometry', 'derived', 'retained'].includes(CMS_RESOURCE_BY_KEY.get(current.resource_key)?.group), 'resource_review_required');
       assertResourceEdit(current.payload, body.payload);
     }
   }

@@ -1,15 +1,15 @@
-import { useEffect, useMemo } from 'react';
 import { Archive, ArrowLeft, CalendarDays, CircleHelp, Database, MapPin, RefreshCw, Shield, TriangleAlert } from 'lucide-react';
-import { getNakhonRatchasimaMapLayers, type NakhonRatchasimaRouteTarget } from '../../domain';
-import { useOperationalContext } from '../../useOperationalContext';
-import { archivePath, operationalPath, readOperationalLocation } from '../../operationalLocation';
+import { useEffect, useMemo } from 'react';
+import { type NakhonRatchasimaRouteTarget } from '../../domain';
 import { shiftMonthPeriod } from '../../forecastPeriod';
 import { formatMonth } from '../../i18n';
+import { archivePath, operationalPath, readOperationalLocation } from '../../operationalLocation';
+import { useOperationalContext } from '../../useOperationalContext';
 import { AppSelect } from '../AppSelect';
 import { MonthSelect } from '../MonthSelect';
 import { MetricGrid } from '../PageSummary';
-import { NakhonRatchasimaLocalMap } from './NakhonRatchasimaLocalMap';
 import { DroughtOperationalDisclosure } from './DroughtOperationalWorkspace';
+import { NakhonRatchasimaLocalMap } from './NakhonRatchasimaLocalMap';
 import { districtOptionsForProvince, pathForDistrictCode, pathForSubdistrictCode, routeBackTargetForRoute } from './workspaceModel';
 
 type Target = Extract<NakhonRatchasimaRouteTarget, { valid: true }>;
@@ -85,9 +85,9 @@ export function OperationalDroughtWorkspace({ target, onNavigate }: { target: Ta
       <section className="nr-primary-map" aria-label="แผนที่สถานการณ์">
         <div className="panel-header"><MapPin size={18} /><h2>แผนที่{future ? 'พยากรณ์' : 'สถานการณ์'}ภัยแล้ง</h2></div>
         <p className="nr-primary-map-period">{periodLabel} · {statusLabel}</p>
-        <NakhonRatchasimaLocalMap target={target} layer={getNakhonRatchasimaMapLayers()[0]} mapMode="prediction-readiness"
+        <NakhonRatchasimaLocalMap target={target}
           onNavigate={navigateArea} selectedMonth={period ?? ''} monthOptions={[]} onMonthChange={() => {}}
-          researchCriteriaEnabled={false} showMonthFilter={false} compactForecast operationalUnavailable={mapContext} />
+          showMonthFilter={false} compactForecast operationalUnavailable={mapContext} />
       </section>
       <aside className="nr-primary-aside">
         <section className="nr-primary-state" aria-live="polite" aria-busy={loading}>

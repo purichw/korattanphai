@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AppErrorBoundary } from "../src/components/AppErrorBoundary";
-import { createInitialState, loadInitialState } from "../src/store";
+import { AppStateProvider, appReducer, createInitialState, loadInitialState, useAppDispatch, useAppState } from "../src/store";
 import { decodePersistedState } from "../src/persistedState";
 
 const values = new Map<string, string>();
@@ -19,28 +19,44 @@ describe("persisted state recovery", () => {
     expect(decodePersistedState(raw, createInitialState())).toEqual({ state: createInitialState(), invalid: true });
   });
 
-  it("rejects invalid nested values while retaining valid user edits", () => {
+  it("rejects invalid preferences without inventing a forecast month", () => {
     const { state, invalid } = decodePersistedState(JSON.stringify({
-      section: "unknown", selectedMonth: "2025-99", language: "en",
-      runtime: { taskStatus: null, advisoryActions: ["คำแนะนำที่แก้ไว้"], farmerAlerts: [{ read: "yes" }],
-        eventAuditTrail: { event: [null] }, deliveryRecords: [{ targeted: -1 }], selectedChannels: "SMS" },
+      selectedMonth: "2025-99", language: null,
     }), createInitialState());
     expect(invalid).toBe(true);
-    expect(state.section).toBe("overview");
-    expect(state.selectedMonth).toBe("2026-08");
-    expect(state.language).toBe("th");
-    expect(state.runtime.advisoryActions).toEqual(["คำแนะนำที่แก้ไว้"]);
-    expect(state.runtime.taskStatus).toEqual(createInitialState().runtime.taskStatus);
-    expect(state.runtime.farmerAlerts).toEqual([]);
-    expect(state.runtime.eventAuditTrail).toEqual({});
+    expect(state).toEqual({ language: "th", selectedMonth: "" });
   });
 
-  it("accepts old partial snapshots and preserves valid runtime records on roundtrip", () => {
-    const original = createInitialState();
-    original.runtime.eventAuditTrail.event = [{ at: "2026-09-05", action: "Edited", actor: "Pointy" }];
-    original.runtime.selectedChannels = ["SMS"];
-    expect(decodePersistedState(JSON.stringify(original), createInitialState())).toEqual({ state: original, invalid: false });
-    expect(decodePersistedState('{"runtime":{"advisoryStatus":"Approved"}}', createInitialState()).state.runtime.advisoryStatus).toBe("Approved");
+  it("migrates only supported preferences from retired workflow snapshots", () => {
+    const raw = JSON.stringify({
+      selectedMonth: "2025-12", language: "en", section: "alerts", personaId: "u-farmer",
+      runtime: { advisoryStatus: "Published", farmerAlerts: [{ title: "Retired alert" }], taskStatus: null },
+      toast: "Stale notification",
+    });
+    localStorage.setItem("korat-tan-phai-demo-state-v1", raw);
+    expect(decodePersistedState(raw, createInitialState())).toEqual({
+      state: { language: "th", selectedMonth: "2025-12" }, invalid: false,
+    });
+    expect(loadInitialState()).toEqual({ language: "th", selectedMonth: "2025-12" });
+    expect(localStorage.getItem("korat-tan-phai-demo-state-v1")).toBe(raw);
+    expect(localStorage.getItem("korat-tan-phai-preferences-v1")).toBeNull();
+  });
+
+  it("roundtrips current preferences and accepts an unselected month", () => {
+    for (const selectedMonth of ["", "2025-12"]) {
+      const state = { language: "th" as const, selectedMonth };
+      expect(decodePersistedState(JSON.stringify(state), createInitialState())).toEqual({ state, invalid: false });
+    }
+    expect(decodePersistedState('{}', createInitialState())).toEqual({ state: createInitialState(), invalid: false });
+  });
+
+  it("prefers current settings and never revives older state on malformed current data", () => {
+    localStorage.setItem("korat-tan-phai-demo-state-v1", JSON.stringify({ selectedMonth: "2025-12" }));
+    localStorage.setItem("korat-tan-phai-preferences-v1", JSON.stringify({ selectedMonth: "2025-11" }));
+    expect(loadInitialState().selectedMonth).toBe("2025-11");
+    localStorage.setItem("korat-tan-phai-preferences-v1", "{broken");
+    expect(loadInitialState()).toEqual(createInitialState());
+    expect(localStorage.getItem("korat-tan-phai-preferences-v1")).toBe("{broken");
   });
 
   it("does not overwrite malformed stored data merely by reading it", () => {
@@ -48,6 +64,38 @@ describe("persisted state recovery", () => {
     expect(loadInitialState()).toEqual(createInitialState());
     expect(localStorage.getItem("korat-tan-phai-demo-state-v1")).toBe("{broken");
   });
+
+  it("persists current preferences after an edit, leaving notices transient and old content intact", () => {
+    const old = JSON.stringify({ selectedMonth: "2025-12", runtime: { advisoryStatus: "Published" } });
+    localStorage.setItem("korat-tan-phai-demo-state-v1", old);
+    function Preferences() {
+      const state = useAppState();
+      const dispatch = useAppDispatch();
+      return <>
+        <output>{state.selectedMonth}</output>
+        <button onClick={() => dispatch({ type: "toast", message: "Temporary notice" })}>Notice</button>
+        <button onClick={() => dispatch({ type: "setMonth", month: "2025-11" })}>Change month</button>
+      </>;
+    }
+    const mounted = render(<AppStateProvider><Preferences /></AppStateProvider>);
+    expect(screen.getByText("2025-12")).toBeInTheDocument();
+    expect(localStorage.getItem("korat-tan-phai-preferences-v1")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Notice" }));
+    expect(localStorage.getItem("korat-tan-phai-preferences-v1")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Change month" }));
+    expect(screen.getByText("2025-11")).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem("korat-tan-phai-preferences-v1")!)).toEqual({ language: "th", selectedMonth: "2025-11" });
+    expect(localStorage.getItem("korat-tan-phai-demo-state-v1")).toBe(old);
+    mounted.unmount();
+  });
+
+  it("keeps notices dismissible without changing the chosen month", () => {
+    const selected = appReducer(createInitialState(), { type: "setMonth", month: "2025-12" });
+    const notice = appReducer(selected, { type: "toast", message: "Saved" });
+    expect(notice.toast).toBe("Saved");
+    expect(appReducer(notice, { type: "toast" })).toEqual({ ...selected, toast: undefined });
+  });
+
 });
 
 describe("unavailable browser storage", () => {

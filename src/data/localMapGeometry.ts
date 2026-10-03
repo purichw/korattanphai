@@ -6,7 +6,6 @@ const localMapUrls = [
   "/geodata/nakhon-ratchasima-subdistricts.geojson",
   "/geodata/thailand-adm1.geojson",
   "/geodata/nakhon-ratchasima-boundary.geojson",
-  "/geodata/thailand-neighbor-context.geojson",
 ] as const;
 
 const requests = new Map<string, Promise<unknown>>();

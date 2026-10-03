@@ -12,10 +12,11 @@ test('operators see explained real resources and can inspect them without creati
   try {
     await seedAdminSession(page); await page.goto('/admin');
     await expect(page.getByRole('heading', { name: 'ข้อมูลประกอบเว็บไซต์', exact: true })).toBeVisible();
-    await expect(page.locator('.cms-resource-group')).toHaveCount(3);
-    for (const name of ['ข้อมูลพื้นที่', 'ชั้นข้อมูลแผนที่', 'แหล่งข้อมูลอ้างอิง']) {
+    await expect(page.locator('.cms-resource-group')).toHaveCount(2);
+    for (const name of ['ข้อมูลพื้นที่', 'ชั้นข้อมูลแผนที่']) {
       await expect(page.locator('.cms-reference').getByRole('heading', { name, exact: true })).toBeVisible();
     }
+    await expect(page.locator('.cms-reference')).not.toContainText('แหล่งข้อมูลอ้างอิง');
     await expect(page.locator('.cms-workspace')).not.toContainText('canonical/');
     await expect(page.locator('.cms-workspace')).not.toContainText('farmer profile');
     await expect(page.locator('.cms-workspace')).not.toContainText('advisory');
@@ -29,21 +30,33 @@ test('operators see explained real resources and can inspect them without creati
     await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'ในเมือง', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'สร้างฉบับแก้ไข', exact: true })).toHaveCount(0);
-    // Retained resources remain inspectable and exportable through existing deep links.
-    const catalog = await database.operation('resource:catalog', {});
-    const station = catalog.find((resource: { resource_key: string }) => resource.resource_key === 'canonical/nakhon_ratchasima/rainfall_stations');
-    const original = await database.operation('resource:get', { id: station.id });
-    await page.goto(`/admin?resource=${station.id}`);
-    await expect(page.getByRole('heading', { name: 'รายชื่อและพิกัดสถานีฝน', exact: true })).toBeVisible();
-    await expect(page.getByRole('cell', { name: 'บ้านเทพนิมิตร', exact: true })).toBeVisible();
-    await expect(page.getByText('หน้า 1 / 3', { exact: true })).toBeVisible();
+    // Historical records may still exist in storage after their UI feature retires.
+    const retained = { id: 'fefefefe-1111-4222-8333-444444444444', resource_key: 'canonical/source_registry',
+      title: 'Retained reference test fixture', resource_group: 'retained', revision: 1, state: 'published',
+      published_at: '2026-09-01T00:00:00Z', payload: [{ id: 'retained-test', nameTh: 'รายการเดิมสำหรับทดสอบ' }] };
+    await context.route('**/api/admin-data**', async route => {
+      const action = new URL(route.request().url()).searchParams.get('action');
+      if (action === 'resource-get' && route.request().postDataJSON().id === retained.id) return route.fulfill({ json: retained });
+      if (action === 'resource-history' && route.request().postDataJSON().id === retained.id) return route.fulfill({ json: [
+        { id: 1, revision: 1, action: 'publish', reason: 'ประวัติทดสอบที่เก็บไว้', occurred_at: retained.published_at },
+      ] });
+      await route.fallback();
+    });
+    await page.goto(`/admin?resource=${retained.id}`);
+    await expect(page.getByRole('heading', { name: 'ข้อมูลเดิมที่เก็บประวัติ', exact: true })).toBeVisible();
+    await expect(page.locator('.cms-reference')).toContainText('ข้อมูลชุดนี้ไม่ได้อยู่ในรายการใช้งานปัจจุบัน');
+    await expect(page.locator('.cms-reference-table')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'สร้างฉบับแก้ไข', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'เผยแพร่ข้อมูลอ้างอิง', exact: true })).toHaveCount(0);
     await page.locator('summary').filter({ hasText: 'ประวัติและไฟล์ต้นฉบับ' }).click();
     const downloadReady = page.waitForEvent('download');
     await page.getByRole('button', { name: 'ดาวน์โหลดไฟล์ข้อมูล (JSON)', exact: true }).click();
     const download = await downloadReady;
-    expect(download.suggestedFilename()).toMatch(/^rainfall_stations_r\d+\.json$/);
-    expect(JSON.parse(await readFile((await download.path())!, 'utf8'))).toEqual(original.payload);
+    expect(download.suggestedFilename()).toBe('source_registry_r1.json');
+    expect(JSON.parse(await readFile((await download.path())!, 'utf8'))).toEqual(retained.payload);
+    await page.getByRole('button', { name: 'ประวัติการแก้ไข', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'ประวัติข้อมูลอ้างอิง', exact: true })).toContainText('ประวัติทดสอบที่เก็บไว้');
+    await page.getByRole('button', { name: 'ปิดประวัติ', exact: true }).click();
     expect(clones).toEqual([]);
     await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await page.getByRole('button', { name: 'นำเข้าข้อมูล', exact: true }).click();

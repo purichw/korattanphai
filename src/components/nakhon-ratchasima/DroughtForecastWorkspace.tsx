@@ -1,49 +1,47 @@
-import { useId, useLayoutEffect, useRef, useState } from "react";
 import {
-  type NakhonRatchasimaDroughtForecastArchive,
-  type NakhonRatchasimaDroughtForecastArchiveTargetMonth,
-  type NakhonRatchasimaDroughtForecastArchiveRecord,
-  type NakhonRatchasimaMapLayer,
-} from "../../types";
-import { formatMonth } from "../../i18n";
-import { forecastHorizonLabel } from "../../forecastPeriod";
-import {
-  TrendingUp,
+  AlertTriangle,
+  CalendarDays,
+  ChartColumn,
   Database,
-  LocateFixed,
+  Info,
+  MapPin,
   ShieldAlert,
   ShieldCheck,
-  AlertTriangle,
-  MapPin,
-  CalendarDays,
-  Info,
   Sprout,
-  ChartColumn,
+  TrendingUp
 } from "lucide-react";
-import { formatThaiNumber, type LocalMapMode, formatPercent, pathForSubdistrictCode } from "./workspaceModel";
-import { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
-import { DroughtWorkspaceHeader, DroughtWorkspaceFilters, DroughtOperationalDisclosure, DroughtOperationalDisclosureGroup, DroughtOperationalSummary } from "./DroughtOperationalWorkspace";
+import { useId, useLayoutEffect, useRef, useState } from "react";
+import { forecastHorizonLabel } from "../../forecastPeriod";
+import { formatMonth } from "../../i18n";
+import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
 import {
-  type DroughtForecastTrendMonth,
-  type ForecastArchiveHorizon,
+  type NakhonRatchasimaDroughtForecastArchive,
+  type NakhonRatchasimaDroughtForecastArchiveRecord,
+  type NakhonRatchasimaDroughtForecastArchiveTargetMonth
+} from "../../types";
+import { type AppSelectOption } from "../AppSelect";
+import { DataProvenanceChip, type DataProvenanceChipKind } from "../DataProvenanceChip";
+import { IrrigationEmptyState } from "../IrrigationEmptyState";
+import type { ForecastMapIrrigation } from "../IrrigationStatusSelect";
+import { MetricCard, MetricGrid, type SummaryMetric } from "../PageSummary";
+import { DroughtOperationalDisclosure, DroughtOperationalDisclosureGroup, DroughtOperationalSummary, DroughtWorkspaceFilters, DroughtWorkspaceHeader } from "./DroughtOperationalWorkspace";
+import { DroughtForecastArchiveHorizonSelector, DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
+import {
   type DroughtForecastArchiveLevel,
-  forecastArchiveSummaryForSelection,
   type DroughtForecastArchiveSummary,
-  forecastArchiveRecordLabel,
+  type DroughtForecastTrendMonth,
   type DroughtForecastWorkspaceTarget,
-  forecastArchiveTrendMonthsForSelection,
+  type ForecastArchiveHorizon,
+  forecastArchiveRecordLabel,
+  forecastArchiveSummaryForSelection,
   forecastArchiveTargetMonthForSelection,
+  forecastArchiveTrendMonthsForSelection,
   pathWithForecastSelection,
 } from "./forecastModel";
-import { DashboardSection, EmptyLocalEvidence } from "./SharedPanels";
-import { DroughtForecastArchiveHorizonSelector, DroughtForecastArchiveSummaryMetrics } from "./ForecastControls";
-import { forecastSubdistrictCodesForIrrigation } from "../../irrigation";
-import type { ForecastMapIrrigation } from "../IrrigationStatusSelect";
-import { IrrigationEmptyState } from "../IrrigationEmptyState";
-import { type DataProvenanceChipKind, DataProvenanceChip } from "../DataProvenanceChip";
-import { type AppSelectOption } from "../AppSelect";
+import { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
 import { NakhonRatchasimaLocalMap } from "./NakhonRatchasimaLocalMap";
-import { MetricCard, MetricGrid, type SummaryMetric } from "../PageSummary";
+import { DashboardSection, EmptyLocalEvidence } from "./SharedPanels";
+import { formatPercent, formatThaiNumber, pathForSubdistrictCode } from "./workspaceModel";
 
 export { DroughtForecastTrendGraph } from "./ForecastRiskBarGraph";
 
@@ -358,9 +356,6 @@ export function DroughtForecastWorkspaceMapCard({
   filteredSubdistrictCodes,
   level,
   target,
-  layer,
-  mapMode,
-  onMapModeChange,
   onNavigate,
   selectedMonth,
   monthOptions,
@@ -377,9 +372,6 @@ export function DroughtForecastWorkspaceMapCard({
   filteredSubdistrictCodes?: string[];
   level: DroughtForecastArchiveLevel;
   target: DroughtForecastWorkspaceTarget;
-  layer: NakhonRatchasimaMapLayer;
-  mapMode: LocalMapMode;
-  onMapModeChange: (mode: LocalMapMode) => void;
   onNavigate: (path: string) => void;
   selectedMonth: string;
   monthOptions: AppSelectOption[];
@@ -440,9 +432,6 @@ export function DroughtForecastWorkspaceMapCard({
         filteredSubdistrictCodes={filteredSubdistrictCodes}
         compactForecast
         target={target}
-        layer={layer}
-        mapMode={mapMode}
-        onMapModeChange={onMapModeChange}
         onNavigate={onNavigate}
         selectedMonth={selectedMonth}
         monthOptions={monthOptions}
@@ -471,9 +460,6 @@ export function DroughtCompactForecastWorkspace({
   selectedHorizon,
   onHorizonChange,
   target,
-  layer,
-  mapMode,
-  onMapModeChange,
   onNavigate,
   selectedMonth,
   monthOptions,
@@ -493,9 +479,6 @@ export function DroughtCompactForecastWorkspace({
   selectedHorizon: ForecastArchiveHorizon;
   onHorizonChange: (horizon: ForecastArchiveHorizon) => void;
   target: DroughtForecastWorkspaceTarget;
-  layer: NakhonRatchasimaMapLayer;
-  mapMode: LocalMapMode;
-  onMapModeChange: (mode: LocalMapMode) => void;
   onNavigate: (path: string) => void;
   selectedMonth: string;
   monthOptions: AppSelectOption[];
@@ -583,9 +566,6 @@ export function DroughtCompactForecastWorkspace({
             filteredSubdistrictCodes={irrigation.value === "all" ? undefined : matchingCodes}
             level={level}
             target={target}
-            layer={layer}
-            mapMode={mapMode}
-            onMapModeChange={onMapModeChange}
             onNavigate={navigateWithForecast}
             selectedMonth={selectedMonth}
             monthOptions={monthOptions}

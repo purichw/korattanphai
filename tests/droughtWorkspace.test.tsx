@@ -2,11 +2,9 @@ import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import archiveJson from "../src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json";
 import type { NakhonRatchasimaDroughtForecastArchive } from "../src/types";
-import { getNakhonRatchasimaDistrictByCode, getNakhonRatchasimaResearchPanelSummary } from "../src/domain";
+import { getNakhonRatchasimaDistrictByCode } from "../src/domain";
 import { forecastRiskShare, forecastArchiveSummaryForSelection, forecastArchiveTrendMonthsForSelection } from "../src/components/nakhon-ratchasima/forecastModel";
 import { DroughtForecastTrendGraph, DroughtForecastWorkspaceKpiStrip, DroughtForecastWorkspaceChart } from "../src/components/nakhon-ratchasima/DroughtForecastWorkspace";
-import { PredictionReadinessPanel, ResearchDroughtSituationPanel, ResearchAreaHeading, ResearchAreaSituationPanel, ResearchSubdistrictDataGapPanel, ResearchAreaAgricultureImpactPanel, ResearchAreaAttentionPanel } from "../src/components/nakhon-ratchasima/ResearchPanels";
-import { localResearchPeriodForSelectedMonth, predictionReadinessSummaryForSubdistrictCodes, summarizeResearchAreaRecords } from "../src/components/nakhon-ratchasima/workspaceModel";
 import { DroughtForecastArchiveSummaryMetrics } from "../src/components/nakhon-ratchasima/ForecastControls";
 import { DroughtOperationalDisclosure, DroughtOperationalDisclosureGroup, DroughtOperationalSummary } from "../src/components/nakhon-ratchasima/DroughtOperationalWorkspace";
 
@@ -240,40 +238,6 @@ it.each([0, 1, 2, null, undefined])("shows one status, not population counts, fo
   expect(container.querySelectorAll(".metric-card")).toHaveLength(1);
   expect(container.textContent).not.toMatch(/1\/1|0 ตำบล|100%/);
   if (risk === null || risk === undefined) expect(container.querySelector(".metric-card")).toHaveClass("is-muted");
-});
-
-it("attaches the readiness percentage to the ready category and uses a single-area status", () => {
-  const codes = archive.locations.filter((item) => item.districtCode === "3008").map((item) => item.subdistrictCode);
-  const readiness = predictionReadinessSummaryForSubdistrictCodes(codes);
-  const { rerender, container } = render(<PredictionReadinessPanel readiness={readiness} onOpenMap={() => {}} compact />);
-  expect(container.textContent).toContain("พร้อมระดับพื้นที่ 0% ของจำนวนตำบลทั้งหมด");
-  expect(container.textContent).not.toContain("มีข้อมูลตั้งต้น · ประมาณ 0%");
-  expect(container.textContent).toContain("ไม่ใช่ความครบถ้วนหรือความแม่นยำของคลังพยากรณ์ Excel");
-  rerender(<PredictionReadinessPanel readiness={predictionReadinessSummaryForSubdistrictCodes(["300806"])} onOpenMap={() => {}} scope="single" />);
-  expect(container.querySelector(".nr-readiness-gauge, .nr-readiness-breakdown-list")).toBeNull();
-  expect(screen.getByRole("group", { name: "สถานะหลักฐานของตำบล" })).toBeInTheDocument();
-});
-
-it("does not show an empty historical dataset as normal conditions", () => {
-  render(<ResearchDroughtSituationPanel research={getNakhonRatchasimaResearchPanelSummary()} />);
-  expect(screen.queryByText("ปกติเดือนล่าสุด")).not.toBeInTheDocument();
-  expect(screen.getByText(/ข้อมูลว่างไม่เท่ากับความเสี่ยงต่ำ/)).toBeInTheDocument();
-});
-
-it("keeps unavailable quality checks neutral and hides empty area designs", () => {
-  const district = getNakhonRatchasimaDistrictByCode("3008")!;
-  const stats = summarizeResearchAreaRecords([], district.subdistricts.length);
-  const activePeriod = localResearchPeriodForSelectedMonth("2025-12", getNakhonRatchasimaResearchPanelSummary());
-  const { container } = render(<>
-    <ResearchAreaHeading district={district} stats={stats} activePeriod={activePeriod} />
-    <ResearchAreaSituationPanel district={district} stats={stats} activePeriod={activePeriod} />
-    <ResearchSubdistrictDataGapPanel stats={stats} activePeriod={activePeriod} />
-    <ResearchAreaAgricultureImpactPanel district={district} stats={stats} activePeriod={activePeriod} />
-    <ResearchAreaAttentionPanel district={district} period={activePeriod.period} onNavigate={() => {}} />
-  </>);
-  for (const value of screen.getAllByText("ยังตรวจสอบไม่ได้")) expect(value.closest(".metric-card")).toHaveClass("is-muted");
-  expect(container.textContent).not.toContain("ครอบคลุมทุกพื้นที่");
-  expect(container.querySelector(".nr-agri-impact-module, .nr-area-watchlist-section")).toBeNull();
 });
 
 it("does not color an unmatched overview forecast as no risk", () => {

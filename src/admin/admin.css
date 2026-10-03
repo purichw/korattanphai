@@ -139,7 +139,6 @@
 .cms-reference-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0; }
 .cms-reference-toolbar .cms-search { flex: 1; min-width: min(280px, 100%); }
 .cms-table-scroll .cms-reference-table td { white-space: normal; min-width: 160px; }
-.cms-reference-publish { margin-block: 20px; justify-content: space-between; }
 .cms-technical { margin-block: 12px; font-size: 14px; color: var(--muted); }
 .cms-technical summary { cursor: pointer; padding-block: 8px; }
 .cms-technical .cms-actions { margin-top: 8px; }
@@ -227,9 +226,6 @@
 .cms-resource-state { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; background: #eaf7ee; color: #237147; padding: 2px 8px; font-size: 11px; font-weight: 600; }
 .cms-resource-state > span { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgb(46 156 99 / 10%); }
 .cms-resource-state.is-draft { background: #fff3df; color: #986814; }
-.cms-reference-guidance { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 12px 0; }
-.cms-reference-guidance .cms-help { margin: 0; font-size: 13px; max-width: 85ch; }
-.cms-reference-guidance > button { flex-shrink: 0; }
 .cms-records-panel { min-width: 0; }
 .cms-record-filters { display: flex; align-items: end; gap: 12px; margin-bottom: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 .cms-record-filters .cms-search { flex: 1; min-width: 220px; }
@@ -342,8 +338,6 @@
   .cms-resource-metrics .metric-card.has-icon .metric-card-label { font-size: 12px; }
   .cms-resource-metrics .metric-card-detail { font-size: 11px; }
   .cms-resource-metrics .cms-resource-secondary-metric { display: none; }
-  .cms-reference-guidance { align-items: flex-start; flex-wrap: wrap; margin-block: 10px; gap: 8px; }
-  .cms-reference-guidance .cms-help { font-size: 12px; }
   .cms-record-filters { gap: 8px; align-items: end; padding: 0; border: 0; background: transparent; margin-bottom: 0; }
   .cms-record-filters .cms-search { min-width: 0; flex-basis: 0; }
   .cms-record-filters input { font-size: 14px; }

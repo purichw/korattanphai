@@ -1,8 +1,8 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { DroughtForecastArchiveHorizonSelector } from "../src/components/nakhon-ratchasima/ForecastControls";
-import { clampLocalTransform, localMaxZoom, transformForLocalFocus } from "../src/components/nakhon-ratchasima/workspaceModel";
-import type { NakhonRatchasimaDroughtForecastArchiveTargetMonth, NakhonRatchasimaGeoFeature } from "../src/types";
+import { clampLocalTransform, localMaxZoom, transformForLocalFocus, type NakhonRatchasimaGeoFeature } from "../src/components/nakhon-ratchasima/workspaceModel";
+import type { NakhonRatchasimaDroughtForecastArchiveTargetMonth } from "../src/types";
 
 afterEach(cleanup);
 

@@ -146,18 +146,13 @@ user task explicitly authorizes it.
 ## Data Contract Snapshot
 
 - Current forecast scope: 32 districts and 289 subdistricts in province code `30`.
-- The inherited 77-province/22-month fixtures and demo advisory chain are legacy
-  prototype context, not the forecast dataset shown in the current dashboard.
-- Source registry and map-layer provenance live in
-  `src/data/canonical/source_registry.json` and
-  `src/data/canonical/map_layer_catalog.json`.
-- Runtime workflow state is stored in browser `localStorage` under
-  `korat-tan-phai-demo-state-v1`.
-- The static Thailand ADM1 map file is
-  `public/geodata/thailand-adm1.geojson`.
-- The map also uses `public/geodata/thailand-neighbor-context.geojson` as a
-  non-interactive regional-country orientation underlay from Natural Earth
-  1:110m Admin 0 countries.
+- Prototype national risk, advisory/persona workflows, source registries and
+  research-readiness layers have been removed from the runtime.
+- Active CMS references are the genuine administrative hierarchy, forecast
+  archive summary, subdistrict polygons, province boundary and Thailand ADM1.
+  The first two are preloaded; geometry loads when a map is opened.
+- Local preferences store only language/month under
+  `korat-tan-phai-preferences-v1`; account data remains in Supabase.
 - Nakhon Ratchasima local drill-down data lives under
   `src/data/canonical/nakhon_ratchasima/` and preserves `TH-P29` as the existing
   province with admin province code `30`, 32 districts, and 289 subdistricts.

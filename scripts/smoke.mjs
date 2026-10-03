@@ -26,7 +26,7 @@ const report = { url: base.origin, at: new Date().toISOString(), api: local ? "s
 let browser;
 try {
   if (!local) {
-    const response = await fetch(new URL("/api/risk-fusion?eventId=ARE-2026-0825-NE", base), {
+    const response = await fetch(new URL("/api/health", base), {
       signal: AbortSignal.timeout(30_000), redirect: "error",
       headers: protectionCookie ? { Cookie: `_vercel_jwt=${protectionCookie}` } : undefined,
     });
@@ -34,9 +34,7 @@ try {
     assert.match(response.headers.get("content-type") ?? "", /application\/json/);
     assert.match(response.headers.get("cache-control") ?? "", /no-store/);
     const body = await response.json();
-    assert.equal(body.id, "fusion-ARE-2026-0825-NE");
-    assert.equal(body.components.length, 6);
-    assert.ok(!JSON.stringify(body).match(/thaiwater|thai-water|thai_water/i), "retired provider remains absent");
+    assert.deepEqual(body, { status: "ok", scope: "process" }, "Real API process liveness");
     report.api = "passed";
     const clock = await fetch(new URL('/api/operational-context', base), {
       signal: AbortSignal.timeout(30_000), redirect: 'error',

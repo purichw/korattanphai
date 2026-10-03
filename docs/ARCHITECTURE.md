@@ -1,325 +1,190 @@
 # Korat Tan Phai / โคราชทันภัย Architecture
 
+Source cleanup checkpoint: 2026-10-03. This describes the current working source;
+release and production evidence are tracked separately in [HANDOFF.md](HANDOFF.md).
+
 ## Current Architecture
 
-FACT: The app is a Vite SPA with Supabase Auth, scoped published forecast reads
-and personal saved workspaces. Vercel also hosts risk-fusion, model-input,
+The product is a Vite + React + TypeScript SPA with Supabase Auth, scoped
+published drought forecasts, owner-only saved workspaces and an independently
+authenticated no-code CMS. Vercel hosts the frontend and admin-data, model-input,
 health, telemetry and operational-context handlers. Implemented handlers do not
-imply configured live ingestion; see `API.md` and `NFR_OPERATIONS_RUNBOOK.md`.
+imply configured live feeds or automated ingestion.
 
-Forecast-only restoration (2026-09-20): all public workspace routes mount the
-forecast loader; no Actual intent branch is active. See
-[FORECAST_ONLY_RESTORATION.md](FORECAST_ONLY_RESTORATION.md) and
-[HANDOFF.md](HANDOFF.md). The Actual source/model/metadata implementation remains
-parked and unconfigured; it is not a dependency of forecast navigation.
+Public workspace routes remain forecast-only under
+[FORECAST_ONLY_RESTORATION.md](FORECAST_ONLY_RESTORATION.md). Actual source/model/
+metadata contracts are parked and unconfigured; they are not a dependency of
+forecast navigation or a fallback for missing forecast data.
 
-- Framework: Vite + React + TypeScript.
-- Rendering: client-side React mounted from `src/main.tsx`.
-- State: reducer/context in `src/store.tsx`.
-- Persistence: Supabase for archive/followed areas/saved filters when enabled;
-  browser `localStorage` for remaining preferences/demo workflows only.
-- Data: static JSON imported through `src/data/catalog.ts`, including the
-  canonical source registry and map layer catalogue.
-- API: `api/risk-fusion.ts` returns a sanitized risk-fusion explanation in
-  production without importing browser-side JSON catalog modules into the
-  serverless runtime.
-- Legacy nationwide map: static Thailand ADM1 GeoJSON fetched from `/geodata/thailand-adm1.geojson`,
-  with non-interactive regional-country context from
-  `/geodata/thailand-neighbor-context.geojson`.
-- Local geography: Nakhon Ratchasima routes use static GISTDA subdistrict
-  geometry from `/geodata/nakhon-ratchasima-subdistricts.geojson` and canonical
-  research fixtures under `src/data/canonical/nakhon_ratchasima/`. The visible
-  local province outline is the generated
-  `/geodata/nakhon-ratchasima-boundary.geojson` artifact derived from the same
-  subdistrict geometry, while ADM1 remains only national/context geometry.
-- Rainfall: Nakhon Ratchasima has static rainfall source-audit, DWR EWS station,
-  current-observation schema, monthly-context, and 289-subdistrict coverage
-  fixtures. No live rainfall readings or province water-provider snapshots are
-  ingested into the app yet.
-- Drought forecast archive: published rev03 rows from `Drought_T1-6_rev03.xlsx`
-  are read through `src/data/supabaseForecastArchive.ts` in database mode.
-  `drought_forecast_archive_rev03.json` is the canonical verification/static-mode
-  artifact. Rev02 is retired and is not a runtime fallback.
-- Deployment: Vercel static build.
-- Backend/database: Supabase Auth, immutable published forecast tables and
-  owner-only saved workspaces. See `SUPABASE_DATA_MIGRATION.md`; unrelated
-  operational domains have not been migrated.
+The active data graph has three parts:
+
+1. Published rev03-compatible forecast rows, read by area, origin month and
+   horizon through Supabase revision and slice RPCs.
+2. Five published CMS system references: real administrative hierarchy,
+   generated archive summary and three map geometries. Only the first two are
+   startup payloads; map geometries load on demand.
+3. Owner-only followed areas/saved filters, independent of local preferences.
+
+The canonical rev03 JSON and normalized source package remain verification
+artifacts and inputs for isolated static regression builds. Synthetic nationwide
+risk/workflow data, old source lists, research/rainfall stubs, rev02 artifacts,
+the national demo map and risk-fusion endpoint have been removed from runtime.
 
 ## Runtime Boundaries
 
-Future officer roles are scaffolded in `src/access`; see
-[Workspace access](WORKSPACE_ACCESS.md) for configurable roles, capabilities and
-administrative area grants. The visitor shell currently mounts explicit
-compatibility mode. No officer restrictions or new backend authorization have
-been activated; CMS sessions/membership stay separate.
-
 ```mermaid
 flowchart TD
-  Browser["Browser"] --> Login["App: lightweight login"]
-  Login -->|lazy import| App["AuthenticatedApp"]
-  App --> Store["AppStateProvider + reducer"]
-  Store --> Local["localStorage demo state"]
-  App --> Domain["domain selectors"]
-  App --> FusionApi["/api/risk-fusion in production"]
-  Domain --> Catalog["typed canonical data imports"]
-  FusionApi --> FusionPayload["self-contained public response payload"]
-  App --> Map["RiskMap"]
-  Map --> Geo["/geodata/thailand-adm1.geojson"]
-  Map --> NeighborGeo["/geodata/thailand-neighbor-context.geojson"]
-  App --> NR["NakhonRatchasimaWorkspace"]
-  NR --> NRGeo["/geodata/nakhon-ratchasima-subdistricts.geojson"]
-  NR --> NRBoundary["/geodata/nakhon-ratchasima-boundary.geojson"]
-  NR --> NRData["src/data/canonical/nakhon_ratchasima/*"]
-  NR --> Loader["useForecastArchive + DatabaseWorkspaceProvider"]
+  Browser["Browser"] --> App["App: session check and lightweight login"]
+  App -->|lazy after session| Shell["AuthenticatedApp"]
+  Shell --> Refs["CMS active reference catalog"]
+  Refs --> Startup["Hierarchy and generated summary"]
+  Shell --> Workspace["NakhonRatchasimaWorkspace"]
+  Workspace --> Maps["Three pinned map geometries"]
+  Workspace --> Loader["useForecastArchive / DatabaseWorkspaceProvider"]
   Loader --> Revision["Latest publication revision"]
-  Loader --> Archive["Scoped Supabase rev03 archive RPC"]
-  App --> Saved["Owner-only areas and filters"]
-  App --> Excel["Excel dialog + worker"]
-  Excel --> Archive
+  Loader --> Slice["Scoped forecast slice RPC"]
+  Shell --> Saved["Owner-only areas and filters"]
+  Shell --> Excel["Excel export dialog and worker"]
+  Excel --> Loader
+  Shell --> Preferences["Language and month preferences"]
+  App -->|separate admin session| Admin["No-code CMS"]
+  Admin --> Draft["Import / validate / edit draft"]
+  Draft --> Publish["Explicit publication with source history"]
+  Publish --> Revision
 ```
 
-The diagram includes retained legacy RiskMap/risk-fusion branches; they are not
-primary product navigation. See `APP_MAP.md` for the active surfaces.
+- `src/App.tsx` owns browser history, lightweight login and lazy authenticated
+  loading. `AppStartup` shows branding/neutral placeholders while protected
+  routes resolve a session or load a chunk. No protected forecast request or
+  account content appears before session resolution. Return paths preserve
+  query parameters and hashes.
+- `src/AuthenticatedApp.tsx` owns the visitor shell, workspace composition,
+  saved-workspace/export actions and account controls. Internal links use client
+  navigation; downloads, external links and modified clicks retain browser behavior.
+- `src/data/catalog.ts` derives real locations from `admin_hierarchy.json` only.
+  `src/domain.ts` owns geographic lookup, routing and formatting helpers. It no
+  longer computes synthetic events, delivery records or research readiness.
+- `src/store.tsx` owns supported language/month preferences and transient toasts.
+  `src/persistedState.ts` validates these fields; `src/browserStorage.ts` handles
+  unavailable storage with an explicit document-lifetime fallback. No demo
+  workflow is restored or persisted.
+- `src/components/NakhonRatchasimaWorkspace.tsx` coordinates route scope, filters
+  and loading. Views, the local map and forecast calculations live under
+  `src/components/nakhon-ratchasima/`. `workspaceModel.ts` retains geometry,
+  camera, real geography and forecast criteria helpers only.
+- `src/components/nakhon-ratchasima/forecastModel.ts` and `src/forecastPeriod.ts`
+  preserve origin T and derive the actual target as T plus horizon. Maps,
+  summaries, detail views and export use the same risk/coverage semantics.
 
-Boundary rules:
+Future officer roles remain scaffolded in `src/access`. The visitor shell uses
+explicit compatibility mode; this cleanup does not activate new restrictions or
+modify backend ACLs. CMS sessions/membership remain separate. See
+[WORKSPACE_ACCESS.md](WORKSPACE_ACCESS.md) and `src/authScope.ts`.
 
-- Parked, not mounted: `operationalPolicy.mjs` owns Bangkok calendar/family resolution;
-  `useOperationalContext.ts` aborts departed requests, ignores late results and
-  revalidates server time without a persistent operational cache. Unknown feed
-  contracts fail closed; metadata is never promoted into observations.
-- `operationalData.ts` defines/test-drives actual and eligible forecast resolution
-  for future adapters. These integration contracts are not a connected data service.
-  Actual-source absence does not mount `useForecastArchive` as a fallback.
-- The active product reuses the forecast local map, selects, metrics, disclosures
-  and bookmarks at every level. The parked `operationalUnavailable` variant has
-  no live route; it is not an actual-value renderer.
-- `src/data/canonical/*.json` is read-only source fixture data.
-- `src/data/catalog.ts` casts JSON into typed application records and derives
-  catalog lists.
-- `src/data/forecastArchive.ts` loads content-hashed rev03 JSON in static mode
-  only. Database builds alias it to `disabledStaticForecastArchive.ts` and do
-  not emit raw archive assets or use them after a database failure.
-- `src/useForecastArchive.ts` owns the loading lifecycle. The workspace passes
-  the loaded archive into shared components. Database requests are scoped by
-  origin and area; overview requests one horizon and drought requests six.
-  Each load rechecks the server revision before cache reuse. Visible pages also
-  revalidate on focus/visibility and every 60 seconds. Static mode alone uses a
-  generated T+1 projection. See `FORECAST_SCOPED_LOADING.md`.
-- `src/data/localMapGeometry.ts` shares pending/parsed local geometry requests.
-  Forecast routes prefetch geometry alongside the archive to avoid serial
-  loading. Optional context failures do not block the subdistrict geometry.
-- `DatabaseWorkspaceProvider` owns per-Auth-user archive caches and saved-row
-  clients in database mode. Its security-invoker RPC reconstructs the canonical
-  full/T+1 projections. Static archive loaders/assets are replaced at build time;
-  network errors do not fall back to JSON. Logout/account changes clear caches.
-- `WorkspaceBookmarks` is shared by desktop/mobile account toolbars. Geographic
-  following does not depend on a forecast selection. Structured archive selections
-  preserve area, source month T, T+, dataset and map risk. Legacy
-  `target`/`target_period` fields continue to key that source month. Only restoring a
-  saved item remounts the route workspace; normal filter dialogs remain open.
-- `src/domain.ts` owns deterministic joins and derived summaries.
-- `src/store.tsx` owns UI state, workflow transitions, and local persistence.
-- `src/App.tsx` owns lightweight login and browser history. It lazily imports
-  `src/AuthenticatedApp.tsx` after login so canonical data is not in login startup.
-  Its eager `AppStartup` renders public branding and neutral placeholders while
-  a protected route checks its session or downloads the authenticated chunk.
-  `ForecastLoadingPrimitives` stays independent of workspace/catalog loaders;
-  the explicit login route keeps its login frame. No account data, protected
-  component, or forecast fetch is introduced before session resolution.
-  Deep-link query parameters and hashes survive login redirects.
-- `src/AuthenticatedApp.tsx` owns the authenticated shell and remaining app
-  surfaces. Ordinary internal content links use client navigation; modified
-  clicks, downloads and external links retain browser behavior.
-- `src/browserStorage.ts` wraps storage errors with a document-lifetime fallback;
-  `src/persistedState.ts` validates persisted fields and nested runtime records.
-  `src/store.tsx` does not rewrite the snapshot merely on mount. A visible notice
-  reports invalid or unavailable preference storage. Auth token persistence is
-  separately managed by the Supabase SDK, not this wrapper.
-- `AppErrorBoundary` guards root/loading and routed content. Render retry
-  remounts content without clearing storage; failed module loading retries by
-  reloading the current URL because browsers cache failed dynamic imports.
-- `src/components/RiskMap.tsx` owns map rendering, province selection, bounded
-  zoom/pan, regional-country underlay rendering, and GeoJSON joins.
-- `src/components/ProvinceWorkspacePlaceholder.tsx` owns route-backed
-  placeholder dashboards for canonical provinces that do not yet have local
-  drill-down data. It provides containers only and must not fabricate local
-  evidence.
-- `src/components/NakhonRatchasimaWorkspace.tsx` owns the Nakhon Ratchasima
-  route composition, filters and loading state. View implementations now live
-  under `src/components/nakhon-ratchasima/`, separately from the local map and
-  forecast model. The extraction preserves existing calculations and markup.
-  Never join evidence by route slug or display no-data as normal risk.
-- Rainfall helper ownership lives in `src/domain.ts`. Components consume
-  `getNakhonRatchasimaRainfall*` selectors and must keep direct-station coverage
-  separate from nearest-station representative context.
-- Drought forecast archive calculations live in
-  `src/components/nakhon-ratchasima/forecastModel.ts`, using shared calendar-month
-  arithmetic in `src/forecastPeriod.ts` for forecast views and saved selections.
-  They preserve the source month T and T+ horizon, deriving origin = T and actual
-  target = T+horizon for product display instead of using the legacy manifest's
-  backwards issue date.
+## Forecast and Reference Loading
 
-## Frontend / Backend / API Ownership
+`DatabaseWorkspaceProvider` owns per-user loaders and saved-row clients.
+`src/data/supabaseForecastArchive.ts` checks `ktp_latest_forecast_revision`
+before cache reuse, then reads `ktp_load_forecast_slice` for area/origin scope.
+Overview requests one horizon; drought requests six. Published metadata controls
+available source months and latest selection; the UI does not freeze them to a
+baseline month. Logout/account changes dispose caches. Stale, wrong-scope and
+wrong-revision responses cannot overwrite active data.
 
-FACT:
+`useForecastArchive` coordinates deadlines/retry and revalidation on focus,
+visibility and a periodic timer. Previously loaded same-scope data may remain
+visible with revalidation feedback; failed Excel revalidation blocks download.
+Initial failed/pending loads do not become green values. See
+[FORECAST_SCOPED_LOADING.md](FORECAST_SCOPED_LOADING.md).
 
-- Frontend ownership is all user-facing behavior in this repo.
-- Vercel handlers are `api/risk-fusion.ts`, `api/model-inputs.js`,
-  `api/health.js` and `api/telemetry.js`. Model-input persistence is isolated
-  from published forecast data and cannot automatically replace it. Configuration
-  and deployment evidence are tracked separately from code in `API.md`/`HANDOFF.md`.
-- Supabase Email + Password authentication is managed by `src/useAuth.ts` and
-  the shared lazy client in `src/supabase.ts`. See `docs/AUTH_SETUP.md` for
-  implementation status and real-account verification prerequisites.
-- Personas from `src/data/canonical/users.json` are display context only,
-  never authorization or evidence of an admin role.
-- Delivery and alerting are retained local demos, not active notification services.
+Database builds replace static archive loaders at build time and exclude raw
+archive/T+1 assets. Isolated static builds use a content-hashed rev03 archive and
+a generated T+1 projection. `generate:forecast-summary` regenerates the summary
+and projection before dev/build; neither is a separate prediction source.
 
-PROPOSAL:
+`shared/cmsResources.mjs` is the five-resource allowlist used by bootstrap,
+`cms-reference-plugin.mjs`, seed preparation and admin resource validation.
+CMS mode pins only active heads, requires hierarchy/summary payloads and ignores
+retired extra rows. `src/data/localMapGeometry.ts` loads these three resources:
 
-- If this becomes operational, split domains into `alerts`, `geography`,
-  `sources`, `field-verification`, `advisories`, `notifications`, and
-  `audit-log`.
-- Add verified backend authorization before using live data, real notifications
-  or admin approvals.
+- Nakhon Ratchasima subdistrict geometry (all 289 canonical codes).
+- Local province boundary generated from the same subdistrict geometry.
+- Thailand ADM1 for neighboring province context.
 
-## External Services
+Geometry requests share pending/parsed results and retain deadline/retry behavior.
+Core geometry failure is actionable; optional context failure need not block the
+core map. CMS builds fetch pinned published references, with no `/geodata/`
+fallback. Static regression builds use the retained source files in that folder.
+Regenerate the local outline with `npm run generate:nr-boundary`; do not hand-edit
+coordinates. The unused country underlay is no longer loaded or bundled.
 
-Current external services:
+## Admin, Persistence and API Ownership
 
-- Vercel hosts the static production app.
-- Vercel hosts the read-only risk-fusion serverless endpoint. The function is
-  intentionally self-contained because Vercel type-checks API code under a
-  Node runtime that should not pull in Vite/browser JSON imports.
-- Google Fonts loads `Google Sans` from `index.html`.
-- Supabase provides email/password sessions and the opt-in archive/saved
-  workspace provider. Browser access obeys RLS; no privileged key ships.
-- Browser fetches local static map assets from the deployed app.
+`src/admin` provides no-code CSV/XLS/XLSX import, validation, draft review/editing,
+explicit publication and history. `server/admin-data` implements membership and
+resource rules; migrations retain source uploads, publication/audit history and
+immutable versions. User-facing fields and examples describe the source contract
+in Thai rather than requiring code or raw database knowledge.
 
-Current external-data facts:
+All five active reference resources are read-only system data. Unknown/inactive
+keys cannot be cloned, edited or published through the HTTP resource handler.
+Stored retired versions remain accessible through existing get/history operations;
+source cleanup does not delete originals, CMS rows, revisions or database pointers.
+The separate forecast import/edit/publish workflow remains supported.
 
-- The Thai ADM1 map file is static in `public/geodata/thailand-adm1.geojson`.
-- The regional-country context file is static in
-  `public/geodata/thailand-neighbor-context.geojson`; it is Natural Earth 1:110m
-  Admin 0 context used only as a low-emphasis orientation underlay.
-- The Nakhon Ratchasima subdistrict context file is static in
-  `public/geodata/nakhon-ratchasima-subdistricts.geojson`; it is a province-code
-  `30` extract of GISTDA subdistrict boundaries transformed for web display.
-- The Nakhon Ratchasima local province boundary file is static in
-  `public/geodata/nakhon-ratchasima-boundary.geojson`; it is generated by
-  dissolving all 289 local subdistrict geometries and must be regenerated with
-  `npm run generate:nr-boundary` instead of edited by hand.
-- The Nakhon Ratchasima DWR EWS rainfall station fixture is static in
-  `src/data/canonical/nakhon_ratchasima/rainfall_stations.json`; it is used for
-  station metadata and nearest-station coverage, not current rainfall values.
-- `src/data/canonical/nakhon_ratchasima/rainfall_observations_24h.json`
-  currently has zero current observations by design because live station-specific
-  access still needs audit.
-- `src/data/canonical/nakhon_ratchasima/drought_forecast_archive_rev03.json`
-  is the approved source-backed T+1 through T+6 verification/static artifact.
-  See `DROUGHT_REV03_NORMALIZATION.md` and `DROUGHT_REV03_CUTOVER.md` for lineage;
-  older rev02 files/builders are not the current data contract.
-- Canonical risk data is local JSON in `src/data/canonical/`.
-- Documentation names the original local spec/data package path:
-  `/Users/point/Downloads/agri_risk_codex_single_source`.
+Current Vercel entry points are:
 
-needs audit:
+- `api/admin-data.js`: admin CMS operations.
+- `api/model-inputs.js`: validated, machine-authenticated input storage.
+- `api/operational-context.js`: server clock/policy and source-gap metadata.
+- `api/health.js`: liveness/private readiness contracts.
+- `api/telemetry.js`: bounded technical event handling.
 
-- Verify production licensing and attribution for any official data source
-  before replacing prototype scores.
-- Verify whether Google Fonts is acceptable for emergency/low-bandwidth use or
-  whether self-hosted font files are required.
+Model-input ingestion uses the real hierarchy for administrative-code validation.
+Its collector, validation, isolated storage and backup/restore tools remain useful
+backend capabilities; they do not automatically publish forecasts or prove a live
+ThaiWater/local-system feed is configured. Review `API.md` and
+`NFR_OPERATIONS_RUNBOOK.md` for deployment/configuration evidence.
 
-## Data Flow
+Supabase Auth manages email/password sessions. Published forecast tables are not
+browser-writable; saved-workspace rows are owner-scoped by RLS. No privileged
+server key ships in the browser. Admin and visitor sign-out must not clear each
+other's sessions. `WorkspaceBookmarks` preserves geography plus structured
+origin/horizon/risk/irrigation selections; only explicit restoration remounts a
+workspace, while ordinary filters remain usable in place.
 
-1. Vite bundles imported canonical JSON from `src/data/catalog.ts`.
-   The drought forecast archive is excluded from this catalog: Vite emits its
-   canonical JSON as a separate asset via `?url` in static mode only. Database
-   mode reads authenticated RPCs and excludes both raw archive assets. The overview summary is
-   regenerated from that same source before dev/build by
-   `scripts/generate-forecast-summary.mjs`.
-2. Domain helpers in `src/domain.ts` compute records, summaries, workflow state,
-   joins, delivery records, and map-related values.
-3. The retained `RisksSection` can fetch `/api/risk-fusion`; it is not part of
-   primary workspace navigation. Current workspace data comes from scoped
-   Supabase reads, not this legacy explanation endpoint.
-4. `src/store.tsx` initializes Thai default UI state and runtime workflow state.
-5. User interactions dispatch reducer actions.
-6. Reducer writes app state to `localStorage` under
-   `korat-tan-phai-demo-state-v1`.
-7. Components re-render from context state.
+Preferences use `korat-tan-phai-preferences-v1`. The previous demo key is read only
+for supported preference fields when the new key is absent, and is not overwritten
+or deleted. Initial mount/toasts do not write a new snapshot. Saved database rows
+never fall back to browser persistence after a failed save.
 
-## Source-Of-Truth Rules
+## Parked Actual Contracts
 
-- Current code beats old notes when docs conflict.
-- Latest explicit product decision beats older design references.
-- Canonical JSON beats copied prose for fixture contents.
-- Runtime state is demo-only and can be reset.
-- Official context and synthetic scores must remain separated.
-- `source_registry.json` is the source of truth for data-family provenance.
-- `map_layer_catalog.json` is the source of truth for layer availability,
-  no-data semantics, data class, and source linkage.
-- Nakhon Ratchasima local hierarchy/evidence fixtures are source of truth for
-  that workspace. They are additive children of existing province `TH-P29`.
-- Generic province workspace slugs are derived from canonical province records
-  in `src/data/catalog.ts`; they are navigation only and must not become data
-  readiness flags.
-- For Nakhon Ratchasima, `districtCode` and `subdistrictCode` are data keys;
-  route slugs are navigation keys only.
-- For Nakhon Ratchasima rainfall, `subdistrict_rainfall_coverage.json` is the
-  source of truth for whether a subdistrict has a direct station, nearest
-  station, or no available source. Nearest-station context must never be rendered
-  as a direct subdistrict reading.
-- For the drought forecast archive, the user confirmed on 2026-09-06 that
-  `Source_YearMonth` is the origin/base month T for all 127 source months.
-  Runtime projection uses `issueMonth = sourcePeriod` and actual
-  `targetMonth = sourcePeriod + horizon`. The record identity remains
-  `subdistrictCode + sourcePeriod + horizon`; equal numeric values across T+
-  horizons are still different forecast vintages. Canonical bytes, published
-  rows/RPC manifests and legacy source-month keys (`targetMonths`,
-  `packedRiskByTargetMonth`, URL `target`, saved `target_period`) remain unchanged.
-  The old fixed-target convention and workbook's original `UNCONFIRMED` marker
-  remain historical provenance only; see `DATA_CONTRACT.md`.
-- Archive risk values are `0` no forecast risk, `1` moderate forecast risk,
-  `2` high forecast risk, and blank workbook cells are out of scope. Missing
-  joined records are a different data-quality issue.
-- Missing layer data must never be interpreted as low risk without an explicit
-  available low-risk record.
-- Public-safety copy must expose uncertainty and provenance.
+`operationalPolicy.mjs` owns Bangkok calendar/family resolution;
+`operationalData.ts` defines future actual and eligible-forecast resolution.
+`useOperationalContext.ts` bounds/aborts metadata requests and ignores late results.
+None supplies an active observation transport. Metadata cannot become an observed
+value, forecast data cannot fill an actual gap, and source absence remains explicit.
 
-## Current Facts vs Future Refactor Notes
+Generic agricultural presentation components may remain for future source-backed
+inputs. Their existence is not evidence of current crop-area values, readiness
+percentages or a live feed. Historical rainfall/source audit documents retain
+provenance and integration cautions without reactivating deleted research data.
 
-FACT:
+## Contracts to Preserve
 
-- Browser auth uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
-- Current API routes and configuration boundaries are maintained in `API.md`.
-- There is no service worker, offline cache, or push notification registration.
-- SQL migrations, a pinned-source importer, isolated PostgreSQL tests and
-  recorded API verification cover the archive and personal workspaces.
-  Production release evidence lives separately in `HANDOFF.md`.
-
-PROPOSAL:
-
-- Extend the existing typed/scoped data-access layer for any new approved
-  data families, without treating prototype catalogs as live sources.
-- Add append-only server audit logs before real admin/operator approvals.
-- Add provider-specific notification receipts before claiming delivery
-  guarantees.
-
-## Do Not Break
-
-- 77 province map join coverage.
-- Nakhon Ratchasima local coverage: `TH-P29`, 32 districts, 289 subdistricts,
-  and GeoJSON coverage for all 289 subdistrict codes.
-- Nakhon Ratchasima rainfall coverage: 49 stations, 29 direct-station
-  subdistricts, and 260 nearest-station records with explicit distance and
-  confidence.
-- Nakhon Ratchasima drought archive coverage: 289 mapped Source_IDs, 127 source
-  months T from `2015-06` through `2025-12`, 6 forward horizons, and 220,218
-  canonical forecast vintages. Actual target dates span `2015-07` through
-  `2026-06`.
-- 22-month province coverage and 1,694 province-month records.
-- Thai-only visible production UI; no TH/EN switch.
-- Farmer alert gating after advisory publication.
-- No fabricated drill-down data for unseeded locations.
-- Visible provenance and prototype data labels.
+- One canonical province `TH-P29`, 32 districts and 289 subdistricts; join by
+  administrative codes, never labels or route slugs. Preserve existing deep links.
+- Original rev03 integrity: 289 mapped source IDs, 127 origin months and six
+  horizons, totaling 220,218 vintages. Original source T spans June 2015 through
+  December 2025; actual forecast targets are T+1 through T+6.
+- Legacy fields `targetMonths`, `packedRiskByTargetMonth`, URL `target` and saved
+  `target_period` continue to identify source T. Do not rewrite saved selections.
+- Risk `0` is no detected forecast risk, `1` moderate and `2` high. Workbook blank
+  is out-of-scope; missing joined records are a separate data-quality problem.
+- Irrigation metadata does not imply a risk score. Missing data never becomes a
+  green zero, fabricated source timestamp or official warning.
+- Original workbook lineage and approved CMS publication history remain auditable.
+  Current published revision supplies visible data, not deleted source-list prose.
+- Thai visible UI, independent admin/visitor sessions, honest loading/retry and
+  mobile map labels/selection behavior remain required.

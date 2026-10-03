@@ -87,13 +87,41 @@ test('monitor bounds hung probes, rejects redirects/HTML APIs and preserves no s
   assert.throws(() => validateMonitorUrl('https://user:password@korattanphai.vercel.app'));
   const report = await checkOperationalHealth({ url: 'https://korattanphai.vercel.app', readiness: true, healthToken: token, timeoutMs: 10, fetchImpl: async url => {
     if (url.pathname === '/login') return new Response('<html><script type="module" src="/assets/app.js"></script></html>', { headers: { 'content-type': 'text/html' } });
-    if (url.pathname === '/api/risk-fusion') return Response.json({ id: 'fusion-ARE-2026-0825-NE' });
+    if (url.pathname === '/api/health' && !url.search) return Response.json({ status: 'ok', scope: 'process' });
     throw new Error(token);
   } });
   assert.equal(report.status, 'failed'); assert.equal(report.checks[0].status, 'passed'); assert.equal(report.checks[1].status, 'passed');
   assert(!JSON.stringify(report).includes(token));
   const hung = await checkOperationalHealth({ url: 'http://localhost', timeoutMs: 10, fetchImpl: () => new Promise(() => {}) });
   assert(hung.checks.every(check => check.status === 'failed'));
+});
+
+test('monitor probes real process health separately from published forecast readiness', async () => {
+  const requests = [];
+  const report = await checkOperationalHealth({ url: 'https://korattanphai.vercel.app', readiness: true, healthToken: token, fetchImpl: async (url, options) => {
+    requests.push({ path: url.pathname + url.search, authorization: options.headers?.Authorization });
+    if (url.pathname === '/login') return new Response('<html><script type="module" src="/assets/app.js"></script></html>', { headers: { 'content-type': 'text/html' } });
+    if (url.pathname === '/api/health' && !url.search) return Response.json({ status: 'ok', scope: 'process' });
+    if (url.pathname === '/api/health' && url.search === '?mode=readiness') return Response.json({ status: 'ready', scope: 'published_archive', checks: { publishedArchive: 'available' } });
+    throw new Error('Unexpected endpoint');
+  } });
+  assert.equal(report.status, 'passed');
+  assert.deepEqual(report.checks.map(check => check.name), ['login_document', 'health_liveness', 'published_archive_readiness']);
+  assert.deepEqual(requests, [
+    { path: '/login', authorization: undefined },
+    { path: '/api/health', authorization: undefined },
+    { path: '/api/health?mode=readiness', authorization: `Bearer ${token}` },
+  ]);
+  assert(!JSON.stringify(report).includes(token));
+});
+
+test('monitor rejects HTML and misleading payloads from the health endpoint', async () => {
+  for (const bad of [new Response('<html>Login</html>', { headers: { 'content-type': 'text/html' } }), Response.json({ status: 'ready', scope: 'published_archive' }), Response.json({ status: 'ok', scope: 'other' })]) {
+    const report = await checkOperationalHealth({ url: 'https://korattanphai.vercel.app', fetchImpl: async url => url.pathname === '/login'
+      ? new Response('<html><script type="module" src="/assets/app.js"></script></html>', { headers: { 'content-type': 'text/html' } }) : bad });
+    assert.equal(report.status, 'failed');
+    assert.equal(report.checks.find(check => check.name === 'health_liveness').status, 'failed');
+  }
 });
 
 test('partial chunked uploads expire and stop reading without leaking data', async () => {

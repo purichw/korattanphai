@@ -1,11 +1,20 @@
 import { readFileSync } from 'node:fs';
 import { requiredFields, optionalFields } from '../../shared/dataFields.mjs';
 
-const matrix = JSON.parse(readFileSync(new URL('../../src/data/canonical/nakhon_ratchasima/district_subdistrict_matrix.json', import.meta.url), 'utf8'));
-const subdistricts = new Set(matrix.map(row => row.subdistrict_code));
-if (subdistricts.size !== 289 || matrix.length !== 289 || matrix.some(row => row.province_code !== '30'
-  || row.province_id !== 'TH-P29' || !/^30\d{4}$/.test(row.subdistrict_code))) {
-  throw new Error('Canonical Korat administrative code matrix is invalid.');
+const hierarchy = JSON.parse(readFileSync(new URL('../../src/data/canonical/nakhon_ratchasima/admin_hierarchy.json', import.meta.url), 'utf8'));
+const province = hierarchy.province;
+const districts = province.districts;
+const areas = districts.flatMap(district => district.subdistricts);
+const subdistricts = new Set(areas.map(area => area.subdistrictCode));
+if (province.id !== 'TH-P29' || province.provinceCode !== '30' || districts.length !== 32
+  || new Set(districts.map(district => district.districtCode)).size !== 32
+  || subdistricts.size !== 289 || areas.length !== 289
+  || districts.some(district => district.provinceCode !== '30' || district.parent !== province.id
+    || !/^30\d{2}$/.test(district.districtCode)
+    || district.subdistricts.some(area => area.provinceCode !== '30' || area.districtCode !== district.districtCode
+      || area.parent !== district.id || !/^30\d{4}$/.test(area.subdistrictCode)
+      || !area.subdistrictCode.startsWith(district.districtCode)))) {
+  throw new Error('Canonical Korat administrative hierarchy is invalid.');
 }
 
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$/;
