@@ -26,7 +26,7 @@ test('operators see explained real resources and can inspect them without creati
     await page.screenshot({ path: `artifacts/admin-no-code/${testInfo.project.name}-home.png`, fullPage: true });
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'ข้อมูลพื้นที่', exact: true })).toBeVisible();
     await expect(page.getByRole('cell', { name: 'ในเมือง', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'สร้างฉบับแก้ไข', exact: true })).toHaveCount(0);
     // Retained resources remain inspectable and exportable through existing deep links.

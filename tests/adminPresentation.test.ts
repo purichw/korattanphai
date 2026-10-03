@@ -36,7 +36,9 @@ describe('operator-facing data inventory', () => {
     ]);
     const maps = referenceCatalogGroups(items, 'ชั้นข้อมูลแผนที่');
     expect(maps).toHaveLength(1);
-    expect(maps[0].resources).toHaveLength(3);
+    expect(maps[0].resources).toHaveLength(2);
+    expect(groups[0].resources).toHaveLength(2);
+    expect(referenceCatalogGroups(items, 'ขอบเขตตำบล')[0].id).toBe('areas');
     expect(referenceCatalogGroups(items, 'เส้นรอบจังหวัดนครราชสีมา')[0].resources.map(resource => resource.resource_key))
       .toEqual(['geodata/nakhon-ratchasima-boundary']);
     expect(referenceCatalogGroups(items, 'เส้นรอบจังหวัดนครราชสีมา', 'sources')).toEqual([]);

@@ -30,7 +30,8 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
 ## Reference catalogue grouping (local follow-up)
 
 - The reference panel now has three groups: ข้อมูลพื้นที่, ชั้นข้อมูลแผนที่ and
-  แหล่งข้อมูลอ้างอิง. Map layers expand to the three active local geometries.
+  แหล่งข้อมูลอ้างอิง. Area names and tambon boundaries now share the area group;
+  map layers expand to the province outline and neighboring provinces.
   Search includes nested layer names; category filters use these same groups.
 - Station locations, nearest-station coverage and neighboring-country geometry
   are hidden from the main catalogue and its search. Their original payloads,
@@ -60,6 +61,52 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   unverified `ข้อมูลปัจจุบัน` label. The existing Korat Tan Phai branding stays.
   Mobile uses a bottom sheet; its body scrolls while the close footer stays
   reachable, including short viewports. All three close paths restore focus.
+
+## Unified Area Workspace (2026-10-03, Local)
+
+- Both hierarchy and tambon-boundary resource links open `AreaWorkspace` under
+  ข้อมูลพื้นที่. Hierarchy links start in รายชื่อ; existing boundary links start
+  in แผนที่. Other geometry, source and retained-resource views are unchanged.
+- The list groups whole districts with collapse/expand, found/total counts and
+  pagination by district groups (4 by default). Search opens matching groups.
+  Search (including Thai digits), searchable district/tambon selectors, boundary
+  status and sorting feed the same row set in both views. Changing district
+  resets its dependent tambon selection. Zero results use the shared empty state.
+- Identity/name authority is the CMS hierarchy. Geometry joins only by exact
+  `subdistrictCode` / `Admin_code`. Duplicate codes are not resolved by choosing
+  the first feature. Unmatched geometry stays visible in its own review group.
+  Missing, duplicate, invalid rendering geometry, different names, orphan and
+  unavailable reads are distinct. Rendering validation is not topology or
+  survey certification. Counts are derived from the loaded revisions, never
+  hardcoded or claims about hazard/forecast coverage.
+- Read paths reuse authenticated `resource-catalog` and `resource-get` with
+  `useAdminRead`. An explicitly opened revision/draft is preserved and paired
+  with the published counterpart, not an unpublished draft chosen implicitly.
+  Both versions/states are shown. Missing/failed/malformed resources are unknown,
+  not absence of boundaries; retry is available. No static/bundled fallback.
+- `AreaBoundaryMap` is a neutral, read-only CMS geometry inspector. It reuses the
+  local projection/path, collision-aware map labels and shared anchored-zoom math without mounting the
+  forecast map's own data loaders or changing visitor map behavior. It supports
+  selected-area inspection, zoom/reset, pointer drag when zoomed, keyboard
+  selection, and mobile page scrolling at fit. Filters fit the visible geometry.
+  The same `WorkspaceDialog` and map show general/boundary details, source and
+  revision; mobile retains the bounded bottom sheet and reachable close action.
+- Selection is explicit. District checkboxes select matching members of that
+  group; the all-results checkbox includes all matching pages. Sort, pagination
+  and list/map switching retain selection; filters, revision changes and cancel
+  clear it. CSV uses existing quoting/formula guards. GeoJSON contains selected
+  original features, deduplicated by source index, without simplifying geometry
+  or replacing its properties with canonical display names. Button counts show
+  how many features are actually exportable, including invalid features for review.
+- History and full original JSON remain available separately for both datasets.
+  No migration, mutation, permission, publication, or new geometry-import/edit
+  capability is introduced. Existing import/publication gates remain in force.
+- Targeted coverage: `tests/areaModel.test.ts`, presentation/export unit tests,
+  `e2e/admin-resource-detail.spec.ts` (desktop/mobile, isolated CMS database),
+  plus existing catalog/navigation consumers. Authenticated read-only release
+  coverage uses `scripts/smoke-admin-navigation.mjs` with the area journeys in
+  `scripts/smoke-admin-areas.mjs`. This implementation checkpoint is local;
+  see `HANDOFF.md` for subsequent verified deployment status.
 
 ## Operator-facing cleanup (2026-09-30 checkpoint)
 

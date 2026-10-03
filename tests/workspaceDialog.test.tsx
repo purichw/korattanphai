@@ -7,6 +7,17 @@ beforeEach(() => {
   HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
 });
 afterEach(cleanup);
+it('returns focus to a keyboard-accessible map shape as well as HTML controls', () => {
+  const source = render(<svg><path tabIndex={0} role="button" aria-label="Boundary" d="M0 0 L10 0 L10 10 Z" /></svg>);
+  const opener = screen.getByRole('button', { name: 'Boundary' });
+  opener.focus();
+  const focus = vi.spyOn(opener, 'focus');
+  const view = render(<WorkspaceDialog title="Boundary details" onClose={() => {}}>Details</WorkspaceDialog>);
+  screen.getByRole('button', { name: 'ปิดเครื่องมือแผนที่' }).focus();
+  view.unmount();
+  expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  expect(opener).toHaveFocus(); source.unmount();
+});
 it('keeps the modal open when its owner defers closure and closes after approved unmount', () => {
   const close = vi.fn();
   const view = render(<WorkspaceDialog title="Editing" onClose={close}><input aria-label="value" /></WorkspaceDialog>);

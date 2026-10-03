@@ -15,10 +15,10 @@ export const resourceViews: Record<string, { title: string; description: string;
 
 // The everyday catalogue is separate from retained deep-link views and storage.
 export const resourceGroups = [
-  { id: 'areas', title: 'ข้อมูลพื้นที่', description: 'รายชื่อและรหัสอำเภอและตำบล สำหรับค้นหา เลือกพื้นที่ และเชื่อมกับข้อมูลพยากรณ์',
-    keys: ['canonical/nakhon_ratchasima/admin_hierarchy'] },
-  { id: 'maps', title: 'ชั้นข้อมูลแผนที่', description: 'ขอบเขตตำบล เส้นรอบจังหวัด และจังหวัดรอบข้างที่ใช้แสดงบนแผนที่',
-    keys: ['geodata/nakhon-ratchasima-subdistricts', 'geodata/nakhon-ratchasima-boundary', 'geodata/thailand-adm1'] },
+  { id: 'areas', title: 'ข้อมูลพื้นที่', description: 'รายชื่อ รหัส และขอบเขตตำบล จัดกลุ่มตามอำเภอ พร้อมแผนที่และสถานะการเชื่อมข้อมูล',
+    keys: ['canonical/nakhon_ratchasima/admin_hierarchy', 'geodata/nakhon-ratchasima-subdistricts'] },
+  { id: 'maps', title: 'ชั้นข้อมูลแผนที่', description: 'เส้นรอบจังหวัดและจังหวัดรอบข้างที่ใช้ประกอบแผนที่',
+    keys: ['geodata/nakhon-ratchasima-boundary', 'geodata/thailand-adm1'] },
   { id: 'sources', title: 'แหล่งข้อมูลอ้างอิง', description: resourceViews['canonical/source_registry'].description,
     keys: ['canonical/source_registry'] },
 ] as const;

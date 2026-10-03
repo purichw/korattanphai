@@ -56,7 +56,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
     await captureReferences('admin-reference-groups.png');
     await maps.getByRole('button', { name: 'ดูชั้นข้อมูล', exact: true }).click();
     await expect(maps.getByRole('button', { name: 'ย่อชั้นข้อมูล', exact: true })).toHaveAttribute('aria-expanded', 'true');
-    await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(3);
+    await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(2);
     await captureReferences('admin-reference-maps-expanded.png');
     await maps.getByRole('button', { name: 'ย่อชั้นข้อมูล', exact: true }).click();
     await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(0);
