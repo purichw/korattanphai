@@ -62,7 +62,10 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   Mobile uses a bottom sheet; its body scrolls while the close footer stays
   reachable, including short viewports. All three close paths restore focus.
 
-## Unified Area Workspace (2026-10-03, Local)
+## Unified Area Workspace (2026-10-03)
+
+Deployed runtime: `3df31e8`. See `HANDOFF.md` for exact deployment, CI and
+authenticated candidate/production verification evidence.
 
 - Both hierarchy and tambon-boundary resource links open `AreaWorkspace` under
   ข้อมูลพื้นที่. Hierarchy links start in รายชื่อ; existing boundary links start
@@ -105,8 +108,8 @@ See `docs/CMS_CUTOVER_20260928.md` for the checkpoint and final outcome.
   `e2e/admin-resource-detail.spec.ts` (desktop/mobile, isolated CMS database),
   plus existing catalog/navigation consumers. Authenticated read-only release
   coverage uses `scripts/smoke-admin-navigation.mjs` with the area journeys in
-  `scripts/smoke-admin-areas.mjs`. This implementation checkpoint is local;
-  see `HANDOFF.md` for subsequent verified deployment status.
+  `scripts/smoke-admin-areas.mjs`. See `HANDOFF.md` for verified deployment
+  status and the read-only production reports.
 
 ## Operator-facing cleanup (2026-09-30 checkpoint)
 

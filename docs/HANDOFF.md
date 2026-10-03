@@ -20,6 +20,47 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
+Unified Admin area workspace production release (2026-10-03):
+
+- Runtime `3df31e873d2eb7476fa0be5df78630230580acf5` is pushed on
+  `fix/admin-area-workspace-20261003` and deployed. It starts from verified
+  production `ce9d98ba021f087675ce61c8645d30c233472bae`, preserving its map,
+  controls, alignment and Admin updates. Work stayed in the isolated checkout
+  `artifacts/admin-area-workspace-20261003`; unrelated root changes were not
+  staged or overwritten.
+- Hierarchy and tambon-boundary links now open ข้อมูลพื้นที่ with grouped
+  district lists, list/map modes, shared search/district/tambon/status/sort,
+  bounded detail sheets, selection across pages and CSV/original GeoJSON
+  export. Original resource IDs, revisions, history and full JSON remain
+  independent. Joins use administrative codes; failed reads are unknown,
+  never falsely counted as missing boundaries. See `ADMIN_CMS.md`.
+- Local verification passed 475 unit tests, focused desktop/mobile journeys,
+  authenticated read-only CMS checks and the production-config protected build
+  with unchanged exposure/bundle gates. The first local unit run overlapped
+  generated JSON creation; a later concurrent run hit an existing 5-second
+  heavy-test limit. A sequential setup with two workers passed all tests
+  without changing assertions or timeouts. Exact-runtime
+  [Quality Gate 37113423177](https://github.com/purichw/korattanphai/actions/runs/37113423177)
+  passed all six required jobs (26m16s overall).
+- Built the candidate from a tracked Git archive only. Candidate and production
+  each passed 39 visitor smoke checks plus desktop/mobile Admin navigation,
+  filter/group/map/detail, selected CSV/GeoJSON, original JSON/history, import
+  template and independent-session checks. Admin smoke recorded zero application
+  writes; no migration, ACL, forecast-data or native-app change is included.
+- Promoted Ready deployment `dpl_HNEvn8iyDfATDWD76VFtox7cDujo`
+  (`https://korattanphai-2ly0sax7e-purich-w.vercel.app`) only after required CI
+  and candidate checks passed. Immediately before promotion, the primary alias
+  still pointed to the recorded baseline. Verified `korattanphai.vercel.app`
+  now resolves to the exact candidate, with Supabase/CMS mode and no fallback.
+- Evidence: `artifacts/admin-area-workspace-20261003/artifacts/release-evidence/`
+  contains CI results, deployment identities, the pre-promotion guard and
+  candidate/production reports and screenshots. Production desktop/mobile area
+  screenshots were visually inspected. Physical-device testing was not repeated.
+- Recovery baseline: `dpl_A3q2L4xEH4TMy53ExsUxP6EPKH8C` /
+  `https://korattanphai-1sfzsshl9-purich-w.vercel.app` (runtime `ce9d98b`).
+  A docs-only closeout commit follows the deployed runtime; it does not require
+  another runtime deployment.
+
 Admin resource-detail production release (2026-10-01):
 
 - Released this chat's Admin detail work from `fix/admin-navigation-20261001`.
