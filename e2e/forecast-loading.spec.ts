@@ -105,6 +105,11 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await seedAuthSession(page);
   let requests = 0;
   const geometryRequests: string[] = [];
+  const expectedGeometryPaths = [
+    '/geodata/nakhon-ratchasima-boundary.geojson',
+    '/geodata/nakhon-ratchasima-subdistricts.geojson',
+    '/geodata/thailand-adm1.geojson',
+  ];
   page.on("request", (request) => {
     if (request.url().endsWith(".geojson")) geometryRequests.push(new URL(request.url()).pathname);
   });
@@ -113,7 +118,7 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await page.route(archiveRequest, async (route) => { requests += 1; await held; await route.continue(); });
   await page.goto("/drought?mapLayer=forecast-archive&target=2025-12&horizon=6");
   await expect(page.locator('.app-startup').getByRole("status")).toHaveText("กำลังเตรียมข้อมูลให้คุณ");
-  await expect.poll(() => geometryRequests.length).toBe(4);
+  await expect.poll(() => [...geometryRequests].sort()).toEqual(expectedGeometryPaths);
   await expect(page.locator(".nr-drought-compact-workspace")).toHaveCount(0);
   // Full-page loading makes underlying navigation inert; browser navigation
   // must still abandon the old reader without keeping the new route blocked.
@@ -127,11 +132,7 @@ test("leaving a pending archive load keeps overview usable and reuses its result
   await expect(page.locator(".nr-drought-compact-workspace")).toBeVisible();
   await expect(page.locator(".nr-drought-workspace-horizon").getByRole("tab", { selected: true })).toContainText("6 เดือน");
   expect(requests).toBe(1);
-  expect(geometryRequests.sort()).toEqual([
-    '/geodata/nakhon-ratchasima-boundary.geojson',
-    '/geodata/nakhon-ratchasima-subdistricts.geojson',
-    '/geodata/thailand-adm1.geojson',
-  ]);
+  expect([...geometryRequests].sort()).toEqual(expectedGeometryPaths);
 });
 
 test("optional map context failure does not hide the forecast or its local polygons", async ({ page }) => {

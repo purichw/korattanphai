@@ -22,9 +22,16 @@ try {
   };
   const heads = await rpc('ktp_cms_reference_catalog');
   const { resources } = await prepareReferenceSeed();
-  assert.equal(heads.length, resources.length);
+  const activeKeys = new Set(resources.map(resource => resource.key));
+  assert.equal(resources.length, 5, 'Expected five active CMS resources');
+  assert.equal(activeKeys.size, 5, 'Active resource keys must be unique');
+  const activeHeads = heads.filter(head => activeKeys.has(head.resource_key));
+  assert.equal(activeHeads.length, 5, 'Expected exactly five active published resource heads');
+  assert.deepEqual(activeHeads.map(head => head.resource_key).sort(), [...activeKeys].sort(),
+    'Active published resource keys must be complete and unique');
+  report.retainedHistoricalResources = heads.length - activeHeads.length;
   for (const resource of resources) {
-    const head = heads.find(item => item.resource_key === resource.key);
+    const head = activeHeads.find(item => item.resource_key === resource.key);
     assert.ok(head, `Missing reference: ${resource.key}`);
     assert.equal(head.original_sha256, resource.hash, `Original hash mismatch: ${resource.key}`);
     const actual = await rpc('ktp_cms_reference_read', { p_id: head.id });
@@ -32,12 +39,12 @@ try {
     report.references.push({ key: resource.key, originalHashMatches: true, allFieldsMatch: true });
   }
   const required = resources.filter(item => item.preload);
-  const bundle = await rpc('ktp_cms_reference_bundle', { p_ids: required.map(item => heads.find(head => head.resource_key === item.key).id) });
+  const bundle = await rpc('ktp_cms_reference_bundle', { p_ids: required.map(item => activeHeads.find(head => head.resource_key === item.key).id) });
   assert.equal(Object.keys(bundle).length, required.length);
   for (const resource of required) assert.ok(isDeepStrictEqual(bundle[resource.key], resource.payload), `Bundle mismatch: ${resource.key}`);
   report.bootstrapBundleResources = required.length;
-  for (const [name, args] of [['ktp_cms_reference_catalog', {}], ['ktp_cms_reference_read', { p_id: heads[0].id }],
-    ['ktp_cms_reference_bundle', { p_ids: [heads[0].id] }]]) {
+  for (const [name, args] of [['ktp_cms_reference_catalog', {}], ['ktp_cms_reference_read', { p_id: activeHeads[0].id }],
+    ['ktp_cms_reference_bundle', { p_ids: [activeHeads[0].id] }]]) {
     assert.ok((await anonymous.rpc(name, args)).error, `Anonymous access allowed: ${name}`);
     report.denied.push(`anonymous:${name}`);
   }
@@ -52,5 +59,6 @@ try {
   const output = process.env.CMS_VERIFY_OUTPUT_DIR ?? 'artifacts/cms-verification';
   await mkdir(output, { recursive: true });
   await writeFile(`${output}/report.json`, JSON.stringify(report, null, 2));
-  console.log(JSON.stringify({ references: report.references.length, bootstrap: report.bootstrapBundleResources, denied: report.denied.length, passed: true }));
+  console.log(JSON.stringify({ references: report.references.length, bootstrap: report.bootstrapBundleResources,
+    retainedHistoricalResources: report.retainedHistoricalResources, denied: report.denied.length, passed: true }));
 } finally { await client.auth.signOut({ scope: 'local' }); }
