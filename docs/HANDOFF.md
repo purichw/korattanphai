@@ -9,7 +9,8 @@ per-account followed areas/saved filters. The site brand is Korat Tan Phai /
 
 - Repo: `/Users/point/korattanphai`
 - Production: `https://korattanphai.vercel.app`
-- Primary release branch: `main`
+- Current release branch: `fix/legacy-cleanup-20261003`
+- Deployed runtime: `f1359369c44f49357ad25513d1a6343897bfd9f7`
 - Source snapshot: copied from Kaset Tan Phai commit
   `0f16794bb57d5dec93b7c6312de7d9362bb97013`.
 
@@ -20,7 +21,37 @@ the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
 
-Legacy cleanup (2026-10-03, local only; not committed or deployed):
+Legacy cleanup production release (2026-10-03):
+
+- Pushed this chat's cleanup on `fix/legacy-cleanup-20261003` and released
+  runtime `f1359369c44f49357ad25513d1a6343897bfd9f7`. Preserved the already
+  deployed Admin area workspace from `3df31e873d2eb7476fa0be5df78630230580acf5`;
+  the root checkout and unrelated worktrees were not edited.
+- All six required jobs passed in [Quality Gate 37121917888](https://github.com/purichw/korattanphai/actions/runs/37121917888).
+  Protected build, exposure and unchanged bundle-budget checks passed. Stale
+  area-page selectors and a four-layer geometry expectation were corrected,
+  with focused browser verification before the final CI run.
+- Promoted the verified candidate `dpl_CsXdJbb13WkbfGeS5tPV7MsGQnwa`
+  (`https://korattanphai-id0lktxum-purich-w.vercel.app`). The primary alias was
+  checked immediately before promotion against the preserved production
+  revision, then confirmed to resolve to the intended runtime.
+- Both production build flags are explicit: database forecasts and CMS
+  references. The Vercel environment snapshot had an empty reference flag;
+  that candidate was rejected and never promoted. The accepted build and
+  hosted marker confirm CMS mode without a static geometry fallback.
+- Candidate and production authenticated read-only checks passed on desktop
+  and mobile: Admin navigation, area list/map/filter/selection/download,
+  templates, independent sessions, and four map-label states including mobile
+  pinch. Reports confirm zero application writes and CMS geometry reads.
+  Production verification completed at 19:32 ICT; health checks passed too.
+- Live verification found all five active reference payloads and hashes
+  unchanged, two preload resources, 40 retained historical resources and
+  13 passing denied-access checks. No migration, ACL change or production
+  data mutation was performed; existing drafts and history remain intact.
+- Evidence and recovery details: `LEGACY_CLEANUP_20261003.md` and
+  `artifacts/legacy-audit-20261003/`. Native builds were outside this web release.
+
+Legacy cleanup (initial local checkpoint, before the production release above):
 
 - Approved cleanup is isolated in `artifacts/legacy-cleanup-20261003`, branch
   `fix/legacy-cleanup-20261003`, from production baseline

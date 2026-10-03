@@ -112,4 +112,52 @@ the checkpoint over current work or restore synthetic data to the public UI.
 - Both server functions now package `admin_hierarchy.json`, matching their
   hierarchy-based validation contract. The obsolete matrix is not packaged.
 - Production candidate, exact-SHA CI, read-only hosted checks and promotion
-  remain required before this release is reported complete.
+  subsequently passed, as recorded below.
+
+## Verified production release
+
+Released on 3 October 2026. Production verification completed at 19:32 ICT.
+
+- Runtime: `f1359369c44f49357ad25513d1a6343897bfd9f7` on
+  `fix/legacy-cleanup-20261003`; the pushed branch contains the approved cleanup
+  and preserves production Admin runtime `3df31e873d2eb7476fa0be5df78630230580acf5`.
+- Deployment: `dpl_CsXdJbb13WkbfGeS5tPV7MsGQnwa`,
+  `https://korattanphai-id0lktxum-purich-w.vercel.app`; promoted without rebuilding
+  after candidate checks and CI passed. The alias
+  `https://korattanphai.vercel.app` resolves to this deployment and runtime.
+- [Quality Gate 37121917888](https://github.com/purichw/korattanphai/actions/runs/37121917888)
+  passed all six required jobs: contracts, built-browser, database-browser,
+  cms-browser, browser-compatibility and regression. None of these jobs skipped.
+- Earlier CI exposed stale Admin selectors and a geometry wait for four files
+  after removal left three. Corrected the affected consumers while preserving
+  payload, cache, loading and permission assertions. Focused repairs passed
+  four Admin cases and the full 18-case static loading suite before final CI.
+- The initially pulled Vercel reference flag was empty. Rejected that candidate
+  and built with explicit `VITE_DATA_BACKEND=supabase` and
+  `VITE_REFERENCE_BACKEND=cms`, preserving the actual production read path.
+  The hosted marker is `{"backend":"cms","fallback":false}`; map smoke confirms
+  CMS geometry reads on both devices. No persistent project environment was changed.
+- Authenticated candidate and production checks cover both desktop and mobile:
+  the two Admin catalog groups, 289 areas in 32 districts, filtering, list/map
+  views, selection across pages, exact CSV/GeoJSON exports, templates, session
+  separation, refresh/history and four map-label states including mobile pinch.
+  Both device reports confirm zero application writes, and health checks pass.
+- Active CMS verification confirms all five payloads and original hashes match,
+  both preloaded resources match, and 13 denied-access checks pass. The other
+  40 stored historical resources remain retained; no production data, drafts,
+  originals, audit history, migrations or access rules were changed.
+
+Evidence under `artifacts/legacy-audit-20261003/`:
+
+- `final-ci.json`, `pre-promotion.json`, `production-health.json`.
+- `f135936-vercel-build.log`, `f135936-deploy.log`.
+- `live-active-cms-verification/report.json`.
+- `f135936-candidate-smoke/release-smoke-report.json`.
+- `f135936-production-smoke/release-smoke-report.json`, with Admin/map reports
+  and screenshots in its sibling `admin/` and `map-labels/` directories.
+
+For web rollback, the preserved production deployment is
+`dpl_HNEvn8iyDfATDWD76VFtox7cDujo` (`3df31e8`). A rollback is a separate
+authorized operation; do not restore synthetic data or alter immutable history.
+Native builds were outside this web-only release. The final documentation
+commit changes no deployed runtime files and does not require another deployment.
