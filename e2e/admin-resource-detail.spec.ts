@@ -1,8 +1,30 @@
 import { test, expect, seedAdminSession } from './fixtures';
 import { cmsTestDatabase } from '../tests/fixtures/admin-data.mjs';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { AREA_NAMES_KEY, AREA_BOUNDARIES_KEY } from '../src/admin/areaModel';
+import type { Page } from '@playwright/test';
 
-test('resource details filter, paginate, inspect and export selected original rows without writing data', async ({ page, context }, info) => {
+test.use({ actionTimeout: 10000 });
+
+async function choose(page: Page, label: string, value: string) {
+  const select = page.getByRole('combobox', { name: new RegExp(`^${label}`) });
+  if (!await select.isVisible()) await page.getByRole('button', { name: /^ตัวกรอง/ }).click();
+  await select.click(); await page.getByRole('option', { name: value, exact: true }).click();
+  await expect(select).toHaveAttribute('aria-expanded', 'false');
+  await expect(select).toBeFocused();
+}
+async function prepareCapture(page: Page) {
+  await page.evaluate(() => { (document.activeElement as HTMLElement)?.blur?.(); window.scrollTo(0, 0); });
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+}
+async function downloaded(page: Page, button: string) {
+  const ready = page.waitForEvent('download');
+  await page.getByRole('button', { name: button, exact: true }).click();
+  const file = await ready;
+  return { name: file.suggestedFilename(), text: await readFile((await file.path())!, 'utf8') };
+}
+
+test('unified areas group, filter, inspect, map and export the same CMS records without writes', async ({ page, context }, info) => {
   test.setTimeout(120000);
   const database = await cmsTestDatabase(context, { references: true });
   const errors: string[] = []; const writes: string[] = [];
@@ -11,165 +33,161 @@ test('resource details filter, paginate, inspect and export selected original ro
     const action = new URL(request.url()).searchParams.get('action');
     if (action && /clone|edit|publish|create|accept/.test(action)) writes.push(action);
   });
-  async function choose(label: string, value: string) {
-    const select = page.getByRole('combobox', { name: new RegExp(`^${label}`) });
-    if (!await select.isVisible()) await page.getByRole('button', { name: /^ตัวกรอง/ }).click();
-    await select.click(); await page.getByRole('option', { name: value, exact: true }).click();
-  }
   try {
+    const catalog = await database.operation('resource:catalog', {});
+    const names = catalog.find((item: { resource_key: string }) => item.resource_key === AREA_NAMES_KEY);
+    const boundaries = catalog.find((item: { resource_key: string }) => item.resource_key === AREA_BOUNDARIES_KEY);
+    const original = await database.operation('resource:get', { id: boundaries.id });
     await seedAdminSession(page); await page.goto('/admin');
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('รายชื่ออำเภอและตำบล');
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', level: 1, exact: true })).toBeVisible();
-    const resource = await database.operation('resource:get', { id: new URL(page.url()).searchParams.get('resource') });
-    await expect(page.locator('.cms-resource-metrics')).toContainText('289');
-    await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(20);
-    await expect(page.getByText('หน้า 1 / 15', { exact: true })).toBeVisible();
-    const rowCheckboxes = page.locator('.cms-reference-table tbody input[type="checkbox"]');
-    const pageCheckbox = page.getByRole('checkbox', { name: 'เลือกทุกรายการในหน้านี้', exact: true });
-    await expect(rowCheckboxes).toHaveCount(0);
-    await expect(pageCheckbox).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true })).toBeVisible();
-    if (info.project.name === 'mobile') {
-      const detail = page.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).first();
-      const dimensions = await detail.evaluate(element => ({
-        button: element.getBoundingClientRect().toJSON(), row: element.closest('tr')!.getBoundingClientRect().toJSON(),
-      }));
-      expect(dimensions.button.width).toBeLessThan(dimensions.row.width * 0.7);
-      expect(dimensions.button.height).toBeGreaterThanOrEqual(44);
-    }
-    if (info.project.name === 'mobile') {
-      await page.getByRole('button', { name: 'เปิดเมนูหลัก', exact: true }).click();
-      await expect(page.locator('#sidebar-navigation')).toBeVisible();
-      await page.getByRole('button', { name: 'ปิดเมนูหลัก', exact: true }).click();
-    }
+    await expect(page).toHaveURL(new RegExp(`resource=${names.id}`));
+    await expect(page.getByRole('heading', { name: 'ข้อมูลพื้นที่', level: 1 })).toBeVisible();
+    await expect(page.locator('.cms-area-results')).toContainText('พบ 289 จาก 289 รายการ · 32 อำเภอ');
+    await expect(page.locator('.cms-area-group')).toHaveCount(4);
+    await expect(page.getByText('หน้า 1 / 8', { exact: true })).toBeVisible();
+    await expect(page.locator('.cms-area-group').first().locator('tbody tr')).toHaveCount(25);
+    await expect(page.locator('.cms-area-table input')).toHaveCount(0);
     await page.evaluate(() => document.fonts.ready);
     await page.locator('.brand-mark img').evaluate((image: HTMLImageElement) => image.decode());
-    await page.mouse.move(0, 0);
-    await page.screenshot({ path: info.outputPath('resource-detail-full.png'), fullPage: true });
-    await page.screenshot({ path: info.outputPath('resource-detail-viewport.png') });
-    await writeFile(info.outputPath('geometry.json'), JSON.stringify(await page.evaluate(() => {
-      const list = document.querySelector('.cms-records-scroll')!;
-      return { url: location.href, width: innerWidth, height: innerHeight, pageHeight: document.documentElement.scrollHeight,
-        pageOverflow: document.documentElement.scrollWidth > innerWidth, listHeight: list.clientHeight, listScrollHeight: list.scrollHeight,
-        rowCount: list.querySelectorAll('tbody tr').length, viewport: list.getBoundingClientRect().toJSON() };
-    }), null, 2));
-    const startSelection = page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true });
-    await startSelection.focus(); await page.keyboard.press('Enter');
-    await expect(rowCheckboxes).toHaveCount(20);
-    if (info.project.name === 'mobile') await expect(page.getByText('เลือกทั้งหน้านี้', { exact: true })).toBeVisible();
-    await rowCheckboxes.first().check();
-    await page.mouse.move(0, 0);
-    await page.screenshot({ path: info.outputPath('resource-detail-selected-full.png'), fullPage: true });
-    const firstName = await rowCheckboxes.first().getAttribute('aria-label');
-    expect(await pageCheckbox.evaluate((input: HTMLInputElement) => input.indeterminate)).toBe(true);
-    await page.getByRole('button', { name: 'ข้อมูลหน้าถัดไป', exact: true }).click();
-    await rowCheckboxes.last().check();
-    const secondName = await rowCheckboxes.last().getAttribute('aria-label');
-    expect(await page.locator('.cms-records-scroll').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
-    await expect(page.getByText('เลือก 2 รายการ (รวมทุกหน้า)', { exact: true })).toBeVisible();
-    await choose('เรียงลำดับ', 'รหัสตำบล (มาก→น้อย)');
-    const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'ดาวน์โหลดที่เลือก (CSV)', exact: true }).click();
-    const download = await downloadPromise; const stream = await download.createReadStream(); const chunks: Buffer[] = [];
-    for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
-    const csv = Buffer.concat(chunks).toString('utf8');
-    expect(csv.startsWith('\uFEFF')).toBe(true); expect(csv.split('\r\n')).toHaveLength(3);
-    for (const name of [firstName, secondName]) expect(csv).toContain(name!.split(' · ').at(-1));
-    await page.getByRole('button', { name: 'ล้างรายการที่เลือก', exact: true }).click();
-    const exportButton = page.locator('.cms-record-selection button').filter({ hasText: 'ดาวน์โหลดที่เลือก (CSV)' });
-    await expect(exportButton).toBeDisabled();
-    if (info.project.name === 'mobile') await expect(exportButton).toBeHidden();
-    await rowCheckboxes.first().check();
-    await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
-    await expect(rowCheckboxes).toHaveCount(0);
-    await expect(pageCheckbox).toHaveCount(0);
-    await startSelection.click();
-    await expect(page.locator('.cms-reference-table tbody input[type="checkbox"]:checked')).toHaveCount(0);
-    await expect(exportButton).toBeDisabled();
-    await choose('อำเภอ', 'ปากช่อง');
-    await expect(page.getByText('พบ 12 จาก 289 รายการ', { exact: true })).toBeVisible();
-    await expect(page.locator('.cms-reference-table tbody tr')).toHaveCount(12);
-    await pageCheckbox.check();
-    await expect(page.getByText('เลือก 12 รายการ (รวมทุกหน้า)', { exact: true })).toBeVisible();
-    await page.getByLabel('ค้นหาในข้อมูลชุดนี้', { exact: true }).fill('ไม่มีตำบลชื่อนี้');
-    await expect(page.getByRole('heading', { name: 'ไม่พบรายการตามคำค้น', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).last().click();
-    await expect(exportButton).toBeDisabled();
-    await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
-    await expect(rowCheckboxes).toHaveCount(0);
-    await choose('จำนวนรายการต่อหน้า', '10 ต่อหน้า');
-    await expect(page.getByText('หน้า 1 / 29', { exact: true })).toBeVisible();
-    const open = page.getByRole('button', { name: 'ดูรายละเอียด', exact: true }).first();
-    const fieldValues = await page.locator('.cms-reference-table tbody tr').first().locator('.cms-record-cell').evaluateAll(cells =>
-      cells.map(cell => (cell.textContent ?? '').replace(cell.querySelector('.cms-record-mobile-label')?.textContent ?? '', '').trim()));
-    await open.focus(); await page.keyboard.press('Enter');
-    const recordDialog = page.getByRole('dialog', { name: 'รายละเอียดรายการ', exact: true });
-    await expect(recordDialog).toBeVisible();
-    await expect(recordDialog).toHaveAccessibleDescription('ข้อมูลอำเภอและตำบลในจังหวัดนครราชสีมา');
-    expect(await recordDialog.evaluate(element => element.tagName === 'DIALOG' && element.matches(':modal'))).toBe(true);
-    expect(resource.state).toBe('published');
-    await expect(recordDialog.locator('.cms-record-dialog-meta')).toContainText(`รุ่นแก้ไข ${resource.revision}`);
-    await expect(recordDialog.locator('.cms-record-dialog-status')).toHaveText('เผยแพร่แล้ว');
-    await expect(recordDialog.locator('dt')).toHaveText(['อำเภอ', 'ตำบล', 'รหัสตำบล']);
-    await expect(recordDialog.locator('dt svg[aria-hidden="true"]')).toHaveCount(3);
-    await expect(recordDialog.locator('dd')).toHaveText(fieldValues);
-    await expect(recordDialog.locator('.cms-record-dialog-description')).toContainText('ชื่อและรหัสพื้นที่ที่ใช้ค้นหา เลือกพื้นที่ และเชื่อมกับค่าพยากรณ์');
-    await expect(recordDialog.locator('footer')).toContainText(`ข้อมูลอ้างอิงสำหรับตรวจสอบ · รุ่นแก้ไข ${resource.revision}`);
-    const dialogGeometry = () => recordDialog.evaluate(element => {
-      const content = element.querySelector('.nr-tool-dialog-content')!;
-      const footer = element.querySelector('footer')!;
-      return { viewport: { width: innerWidth, height: innerHeight }, dialog: element.getBoundingClientRect().toJSON(),
-        content: { clientHeight: content.clientHeight, scrollHeight: content.scrollHeight, scrollTop: content.scrollTop },
-        footer: footer.getBoundingClientRect().toJSON(), pageOverflow: document.documentElement.scrollWidth > innerWidth };
+    const layout = await page.evaluate(() => {
+      const scroll = document.querySelector('.cms-area-groups')!;
+      return { height: document.documentElement.scrollHeight, historyBottom: document.querySelector('.cms-resource-history')!.getBoundingClientRect().bottom + scrollY,
+        listHeight: scroll.clientHeight, listScrollHeight: scroll.scrollHeight, overflow: document.documentElement.scrollWidth > innerWidth };
     });
-    const normalGeometry = await dialogGeometry();
-    expect(normalGeometry.pageOverflow).toBe(false);
-    if (info.project.name === 'mobile') {
-      expect(Math.abs(normalGeometry.dialog.x)).toBeLessThanOrEqual(1);
-      expect(Math.abs(normalGeometry.dialog.width - normalGeometry.viewport.width)).toBeLessThanOrEqual(1);
-      expect(Math.abs(normalGeometry.dialog.bottom - normalGeometry.viewport.height)).toBeLessThanOrEqual(1);
-    }
-    await page.mouse.move(0, 0);
-    await page.screenshot({ path: info.outputPath('resource-record-dialog-viewport.png') });
-    // Native modal/backdrop evidence must stay within one viewport; full-page stitching misplaces it.
-    await page.screenshot({ path: info.outputPath('resource-record-dialog-context.png') });
+    expect(layout.overflow).toBe(false); expect(layout.listScrollHeight).toBeGreaterThan(layout.listHeight);
+    expect(layout.height).toBeLessThan(layout.historyBottom + 120);
+    await writeFile(info.outputPath('layout.json'), JSON.stringify(layout, null, 2));
+    await prepareCapture(page);
+    await page.screenshot({ path: info.outputPath('areas-list-full.png'), fullPage: true });
+    await page.screenshot({ path: info.outputPath('areas-list-viewport.png') });
+    await page.getByRole('button', { name: 'ย่อทุกกลุ่ม', exact: true }).click();
+    await expect(page.locator('.cms-area-group-heading button[aria-expanded="false"]')).toHaveCount(4);
+    await page.getByRole('button', { name: 'ขยายทุกกลุ่ม', exact: true }).click();
+    const selection = page.getByRole('button', { name: 'เลือกเพื่อดาวน์โหลด', exact: true });
+    await selection.focus(); await page.keyboard.press('Enter');
+    await page.getByRole('checkbox', { name: 'เลือก ในเมือง 300101', exact: true }).check();
+    await expect(page.getByRole('checkbox', { name: 'เลือกกลุ่ม เมืองนครราชสีมา', exact: true })).toHaveJSProperty('indeterminate', true);
+    await page.getByRole('button', { name: 'ข้อมูลหน้าถัดไป', exact: true }).click();
+    const next = page.locator('.cms-area-table tbody input').first();
+    const nextCode = (await next.getAttribute('aria-label'))!.split(' ').at(-1)!;
+    await next.check();
+    await expect(page.getByText('เลือก 2 รายการ (รวมทุกหน้า)', { exact: true })).toBeVisible();
+    await choose(page, 'เรียงลำดับ', 'รหัสพื้นที่ มากไปน้อย');
+    const csv = await downloaded(page, 'รายชื่อ (CSV)');
+    expect(csv.text.startsWith('\uFEFF')).toBe(true); expect(csv.text.split('\r\n')).toHaveLength(3);
+    expect(csv.text).toContain('300101'); expect(csv.text).toContain(nextCode);
+    await page.getByRole('button', { name: 'แผนที่', exact: true }).click();
+    await expect(page.getByText('เลือก 2 รายการ (รวมทุกหน้า)', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'รายชื่อ', exact: true }).click();
+    await choose(page, 'อำเภอ', 'ปากช่อง');
+    await expect(page.locator('.cms-area-results')).toContainText('พบ 12 จาก 289 รายการ · 1 อำเภอ');
+    await expect(page.getByRole('button', { name: 'รายชื่อ (CSV)', exact: true })).toBeDisabled();
+    await page.getByRole('checkbox', { name: 'เลือกกลุ่ม ปากช่อง', exact: true }).check();
+    const geometry = await downloaded(page, 'ขอบเขต (GeoJSON) · 12');
+    expect(geometry.name.endsWith('.geojson')).toBe(true);
+    const parsed = JSON.parse(geometry.text);
+    expect(parsed.features).toHaveLength(12);
+    for (const feature of parsed.features) expect(original.payload.features).toContainEqual(feature);
+    await page.getByRole('button', { name: 'ยกเลิกการเลือก', exact: true }).click();
+    await choose(page, 'ตำบล', 'หนองสาหร่าย 302106 · ปากช่อง');
+    await expect(page.locator('.cms-area-table tbody tr')).toHaveCount(1);
+    const open = page.getByRole('button', { name: /^ดูรายละเอียด หนองสาหร่าย/ });
+    await open.focus(); await page.keyboard.press('Enter');
+    const dialog = page.getByRole('dialog', { name: 'ตำบลหนองสาหร่าย', exact: true });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('dd')).toContainText(['นครราชสีมา', 'ปากช่อง', 'หนองสาหร่าย', '302106']);
+    await dialog.getByRole('button', { name: 'ขอบเขตแผนที่', exact: true }).click();
+    await expect(dialog.locator('.cms-area-map-canvas > svg > g > path')).toHaveCount(1);
+    await expect(dialog).toContainText('DOPA');
+    await page.screenshot({ path: info.outputPath('areas-detail-map.png') });
     await page.keyboard.press('Escape');
-    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
-    await page.keyboard.press('Enter');
-    await recordDialog.getByRole('button', { name: 'ปิดรายละเอียดรายการ', exact: true }).click();
-    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
-    await page.keyboard.press('Enter');
-    let shortGeometry: Awaited<ReturnType<typeof dialogGeometry>> | null = null;
-    const originalViewport = page.viewportSize()!;
-    if (info.project.name === 'mobile') {
-      await page.setViewportSize({ width: originalViewport.width, height: 480 });
-      await expect.poll(async () => Math.abs((await dialogGeometry()).dialog.bottom - 480) <= 1).toBe(true);
-      const content = recordDialog.locator('.nr-tool-dialog-content');
-      expect(await content.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
-      await content.evaluate(element => { element.scrollTop = element.scrollHeight; });
-      await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
-      shortGeometry = await dialogGeometry();
-      expect(shortGeometry.footer.top).toBeGreaterThanOrEqual(0);
-      expect(shortGeometry.footer.bottom).toBeLessThanOrEqual(480);
-      await expect(recordDialog.getByRole('button', { name: 'ปิด', exact: true })).toBeInViewport();
-      await page.screenshot({ path: info.outputPath('resource-record-dialog-short-mobile.png') });
-    }
-    await recordDialog.getByRole('button', { name: 'ปิด', exact: true }).click();
-    await expect(recordDialog).toHaveCount(0); await expect(open).toBeFocused();
-    if (info.project.name === 'mobile') await page.setViewportSize(originalViewport);
-    await writeFile(info.outputPath('resource-record-dialog-geometry.json'), JSON.stringify({ normal: normalGeometry, short: shortGeometry }, null, 2));
-    await page.reload();
-    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
+    await expect(dialog).toHaveCount(0); await expect(open).toBeFocused();
+    await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).click();
+    await choose(page, 'อำเภอ', 'ปากช่อง');
+    await page.getByRole('button', { name: 'แผนที่', exact: true }).click();
+    await expect(page.locator('.cms-area-map-canvas > svg > g > path')).toHaveCount(12);
+    await expect(page.locator('.cms-area-map-list')).toContainText('หนองสาหร่าย');
+    await expect(page.locator('.cms-area-map-label').first()).toBeVisible();
+    const transform = page.locator('.cms-area-map-canvas > svg > g');
+    const before = await transform.getAttribute('transform');
+    await page.getByRole('button', { name: 'ขยายแผนที่ขอบเขต', exact: true }).click();
+    await expect(transform).not.toHaveAttribute('transform', before!);
+    await page.getByRole('button', { name: 'แสดงขอบเขตทั้งหมด', exact: true }).click();
+    await expect(transform).toHaveAttribute('transform', before!);
+    await prepareCapture(page);
+    await page.screenshot({ path: info.outputPath('areas-map-full.png'), fullPage: true });
+    const polygon = page.locator('.cms-area-map-canvas > svg > g > path[role="button"]').first();
+    await polygon.focus(); await page.keyboard.press('Enter');
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.getByRole('button', { name: 'ปิดรายละเอียดพื้นที่', exact: true }).click();
+    await expect(polygon).toBeFocused();
+    await page.getByLabel('ค้นหาพื้นที่', { exact: true }).fill('ไม่มีพื้นที่นี้');
+    await expect(page.getByRole('heading', { name: 'ไม่พบพื้นที่ตามตัวกรองนี้', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).last().click();
+    await choose(page, 'สถานะขอบเขต', 'รายการที่ต้องตรวจสอบ');
+    await expect(page.getByRole('heading', { name: 'ไม่พบพื้นที่ตามตัวกรองนี้', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).last().click();
+    await page.getByRole('button', { name: 'รายชื่อ', exact: true }).click();
+    await page.getByLabel('ค้นหาพื้นที่', { exact: true }).fill('๓๐๐๑๐๑');
+    await expect(page.locator('.cms-area-table tbody tr')).toHaveCount(1);
+    await expect(page.locator('.cms-area-group-heading')).toContainText('1 / 25 ตำบล');
     await page.locator('summary').filter({ hasText: 'ประวัติและไฟล์ต้นฉบับ' }).click();
-    await expect(page.getByRole('button', { name: 'ดาวน์โหลดไฟล์ข้อมูล (JSON)', exact: true })).toBeVisible();
+    const source = page.locator('.cms-area-source').filter({ has: page.getByRole('heading', { name: 'ขอบเขตตำบล', exact: true }) });
+    const downloadReady = page.waitForEvent('download');
+    await source.getByRole('button', { name: 'ไฟล์ต้นฉบับ (JSON)', exact: true }).click();
+    expect(JSON.parse(await readFile((await (await downloadReady).path())!, 'utf8'))).toEqual(original.payload);
+    await source.getByRole('button', { name: 'ประวัติการแก้ไข', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'ประวัติ ขอบเขตตำบล' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    // Existing boundary deep links resolve to the same workspace, initially in map mode.
+    await page.goto(`/admin?resource=${boundaries.id}`);
+    await expect(page.getByRole('heading', { name: 'ข้อมูลพื้นที่', level: 1 })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'แผนที่', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.cms-area-map-canvas > svg > g > path')).toHaveCount(289);
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'แผนที่', exact: true })).toHaveAttribute('aria-pressed', 'true');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (info.project.name === 'desktop') {
-      await page.setViewportSize({ width: 900, height: 1000 });
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    }
-    await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
+    await writeFile(info.outputPath('areas-evidence.json'), JSON.stringify({ route: page.url(), viewport: page.viewportSize(), errors, writes, geometryCount: await page.locator('.cms-area-map-canvas > svg > g > path').count() }, null, 2));
     expect(errors).toEqual([]); expect(writes).toEqual([]);
+  } finally { await database.close(); }
+});
+
+test('failed boundary read stays unknown and retries without reporting every tambon missing', async ({ page, context }) => {
+  test.setTimeout(90000);
+  const database = await cmsTestDatabase(context, { references: true });
+  try {
+    const catalog = await database.operation('resource:catalog', {});
+    const names = catalog.find((item: { resource_key: string }) => item.resource_key === AREA_NAMES_KEY);
+    const boundary = catalog.find((item: { resource_key: string }) => item.resource_key === AREA_BOUNDARIES_KEY);
+    let blocked = true;
+    await context.route('**/api/admin-data?action=resource-get', async route => {
+      if (route.request().postDataJSON().id === boundary.id && blocked) await route.fulfill({ status: 503, json: { error: { code: 'cms_unavailable' } } });
+      else await route.fallback();
+    });
+    await seedAdminSession(page); await page.goto(`/admin?resource=${names.id}`);
+    await expect(page.getByRole('alert')).toContainText('ข้อมูลที่โหลดไม่ได้จะไม่ถูกนับ');
+    await expect(page.locator('.cms-area-table .cms-area-status').first()).toHaveText('ยังตรวจสอบไม่ได้');
+    await choose(page, 'สถานะขอบเขต', 'ไม่มีขอบเขต');
+    await expect(page.getByRole('heading', { name: 'ไม่พบพื้นที่ตามตัวกรองนี้', exact: true })).toBeVisible();
+    blocked = false;
+    await page.getByRole('button', { name: 'ลองโหลดใหม่', exact: true }).click();
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await page.getByRole('button', { name: 'ล้างตัวกรอง', exact: true }).last().click();
+    await expect(page.locator('.cms-area-table .cms-area-status').first()).toHaveText('มีขอบเขต');
+    let catalogBlocked = true;
+    await context.route('**/api/admin-data?action=resource-catalog', async route => {
+      if (catalogBlocked) await route.fulfill({ status: 503, json: { error: { code: 'cms_unavailable' } } });
+      else await route.fallback();
+    });
+    await page.reload();
+    await expect(page.getByRole('alert')).toContainText('ข้อมูลที่โหลดไม่ได้จะไม่ถูกนับ');
+    await page.getByLabel('ค้นหาพื้นที่', { exact: true }).fill('300101');
+    catalogBlocked = false;
+    await page.getByRole('button', { name: 'ลองโหลดใหม่', exact: true }).click();
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByLabel('ค้นหาพื้นที่', { exact: true })).toHaveValue('300101');
+    await expect(page.locator('.cms-area-table tbody tr')).toHaveCount(1);
+    await expect(page.locator('.cms-area-table .cms-area-status')).toHaveText('มีขอบเขต');
   } finally { await database.close(); }
 });

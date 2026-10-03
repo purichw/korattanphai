@@ -56,7 +56,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
     await captureReferences('admin-reference-groups.png');
     await maps.getByRole('button', { name: 'ดูชั้นข้อมูล', exact: true }).click();
     await expect(maps.getByRole('button', { name: 'ย่อชั้นข้อมูล', exact: true })).toHaveAttribute('aria-expanded', 'true');
-    await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(3);
+    await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(2);
     await captureReferences('admin-reference-maps-expanded.png');
     await maps.getByRole('button', { name: 'ย่อชั้นข้อมูล', exact: true }).click();
     await expect(maps.locator('.cms-map-resource:visible')).toHaveCount(0);
@@ -90,7 +90,7 @@ test('Admin cards preserve draft review and searchable resource access at each v
     await expect(page.locator('.cms-resource-group:visible')).toHaveCount(1);
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
     await expect(page).toHaveURL(/resource=/);
-    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'ข้อมูลพื้นที่', exact: true })).toBeVisible();
     await page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true }).click();
     await page.getByLabel('ค้นหาข้อมูลประกอบ', { exact: true }).fill('ไม่ตรงกับข้อมูลใด');
     await expect(page.getByText('ไม่พบข้อมูลตามคำค้น', { exact: true })).toBeVisible();

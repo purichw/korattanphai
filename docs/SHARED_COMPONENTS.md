@@ -93,7 +93,8 @@ Area controls are explicitly searchable even with fewer than 8 options. Other
 long lists, including analysis patterns and search-topic filters, use the shared
 threshold; short status, horizon, sort and view menus retain their compact form.
 `WorkspaceDialog` supports Escape, its close button and backdrop dismissal,
-locks background scroll and restores the opener without moving the page.
+locks background scroll and restores connected HTML or focusable SVG openers
+without moving the page, including keyboard-selected CMS map boundaries.
 Optional `description`, `footer` and `className` support a scoped detail variant:
 the description is connected with `aria-describedby`, and the footer remains
 outside bounded scrolling content. Default dialogs retain their existing shell.
@@ -141,8 +142,9 @@ counts come from the API; the six-month lead is the existing rev3 contract and
 published status describes the current dataset, not draft readiness. Resource
 cards use the existing supported catalogue without invented row counts.
 The reference catalogue shows three task groups on desktop and mobile: area
-identities, map layers and source references. The map group expands to its three
-active geometries; search matches nested resources and opens their group.
+identities with tambon boundaries, map layers and source references. The map group
+expands to the province outline and neighboring provinces; search matches nested
+resources and opens their group.
 Retained station/proximity and neighboring-country resources stay accessible by
 existing deep links but are absent from everyday catalogue/search. Source rows
 are curated drought/agriculture references with original payload indices, not
@@ -150,7 +152,17 @@ asserted model inputs. Search/filter results always reveal every match. Drafts
 retain the same DOM/actions and use a mobile card layout. Presentation does not
 change import, publication, permission, auth or reference-read ownership.
 
-`ReferenceRecords` is the Admin resource-detail browsing adapter. It receives the
+`AreaWorkspace` handles the hierarchy and tambon-boundary resources together,
+reusing `AppSelect`, `MetricGrid`, `WorkspaceEmptyState`, `WorkspaceDialog` and
+the formula-safe CSV helper. Its read-only `areaModel` joins CMS records by code,
+preserves source indices, and owns derived status/filter/group/export projections.
+List and map share filters/selection; pagination keeps districts together.
+`AreaBoundaryMap` consumes supplied CMS geometry only and reuses projection/path
+helpers and `mapInteraction` anchored zoom, not the visitor forecast component or
+its data fetches. No existing shared API/default changes. See `ADMIN_CMS.md` for
+revision pairing, unknown/error semantics, export scope and detail-sheet behavior.
+
+`ReferenceRecords` remains the other Admin resource-detail browsing adapter. It receives the
 existing `referenceTable` projection and retains each row's original payload
 index through search, district filter, sort, pagination and CSV selection. It
 reuses `AppSelect`, `WorkspaceEmptyState` and existing controls; it does not own

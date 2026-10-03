@@ -1,7 +1,8 @@
 # Legacy cleanup — 3 October 2026
 
-Local implementation only. No commit, push, deployment, database migration or
-production data mutation was performed.
+The initial cleanup was verified locally. The owner subsequently authorized
+push/deploy; release preparation and final evidence are recorded below. No
+database migration or production data mutation is part of this release.
 
 ## Scope and recovery
 
@@ -98,3 +99,17 @@ confirmed all 289 geometry-to-hierarchy joins without missing identities.
 
 See `rollback-parking-lot.md` for selective restore instructions. Do not extract
 the checkpoint over current work or restore synthetic data to the public UI.
+
+## Release preparation
+
+- Full unit rerun passed: 48 files, 460 tests, with unchanged limits.
+- Preserved production runtime `3df31e873d2eb7476fa0be5df78630230580acf5`
+  (unified Admin area registry and map) by merging it before release.
+  Both active catalog groups remain; removed agency-reference sources stay absent.
+- Post-merge protected build, exposure and unchanged bundle budgets passed.
+  Area/dialog/CMS units passed (17 tests), presentation units passed (8 tests),
+  and 12 built Admin scenarios passed across desktop/mobile.
+- Both server functions now package `admin_hierarchy.json`, matching their
+  hierarchy-based validation contract. The obsolete matrix is not packaged.
+- Production candidate, exact-SHA CI, read-only hosted checks and promotion
+  remain required before this release is reported complete.

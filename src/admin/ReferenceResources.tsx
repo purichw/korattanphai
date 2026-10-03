@@ -11,6 +11,8 @@ import { MetricGrid } from '../components/PageSummary';
 import { ReferenceRecords } from './ReferenceRecords';
 import { ReferenceRecordDialog } from './ReferenceRecordDialog';
 import type { ReferenceRow } from './resourcePresentation';
+import { AreaWorkspace } from './AreaWorkspace';
+import { isAreaResource } from './areaModel';
 
 type Resource = { id: string; resource_key: string; title: string; resource_group: string; published_at: string | null; updated_at?: string; draft_id?: string | null };
 type ResourceDraft = Resource & { payload: Json; revision: number; state: 'draft' | 'published' };
@@ -60,6 +62,7 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
   const updatedDate = updated && Number.isFinite(Date.parse(updated)) ? new Date(updated) : null;
   const dateTitle = item?.updated_at ? 'บันทึกล่าสุด' : 'เผยแพร่เมื่อ';
   const districtCount = view?.view === 'areas' ? new Set(table.rows.map(row => row.cells[0])).size : null;
+  if (item && isAreaResource(item.resource_key)) return <AreaWorkspace key={item.id} api={api} primary={item} onNavigate={onNavigate} onReload={read.reload} refreshing={read.refreshing} error={read.error} />;
   return <section className={`cms-reference${!resourceId ? ' is-catalog' : ' is-detail'}`} aria-labelledby="cms-reference-title" aria-busy={busy}>
     {resourceId && <div className="cms-context-bar cms-reference-context"><nav aria-label="เส้นทางหน้าผู้ดูแล"><a href="/admin" onClick={event => { event.preventDefault(); onNavigate('/admin'); }}><ArrowLeft size={15} aria-hidden="true" />จัดการข้อมูล</a><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">{title}</span></nav>
       <button className="icon-button" disabled={busy} aria-busy={read.refreshing} aria-label="โหลดข้อมูลประกอบใหม่" title="โหลดข้อมูลประกอบใหม่" onClick={() => { setError(''); read.reload(); }}><RefreshCw size={16} /></button></div>}
@@ -80,7 +83,7 @@ export function ReferenceResources({ api, resourceId, onNavigate, refreshVersion
           const hasDraft = category.resources.some(value => value.draft_id);
           return <article className="cms-resource-group" data-group={category.id} key={category.id}>
             <div className="cms-resource-row"><span className="cms-resource-icon"><Icon size={25} strokeWidth={2} aria-hidden="true" /></span><div className="cms-resource-copy"><h3>{category.title}</h3><p>{category.description}</p>
-              <small><BookOpen size={12} aria-hidden="true" />{category.id === 'maps' ? `${category.resources.length} ชั้นข้อมูล` : 'รายชื่ออำเภอและตำบล'}{hasDraft ? ' · มีฉบับร่างที่บันทึกไว้' : ''}</small></div>
+              <small><BookOpen size={12} aria-hidden="true" />{category.id === 'maps' ? `${category.resources.length} ชั้นข้อมูล` : 'รายชื่อและแผนที่ตำบล'}{hasDraft ? ' · มีฉบับร่างที่บันทึกไว้' : ''}</small></div>
               {category.id === 'maps' ? <button className="secondary-button" disabled={busy} aria-expanded={mapExpanded} aria-controls="cms-map-resource-list" onClick={() => setMapExpanded(value => !value)}>
                 {mapExpanded ? 'ย่อชั้นข้อมูล' : 'ดูชั้นข้อมูล'}{mapExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button>
                 : <button className="secondary-button" disabled={busy} onClick={() => onNavigate(`/admin?resource=${resource.draft_id ?? resource.id}`)}>เปิดข้อมูล<ArrowRight size={16} /></button>}

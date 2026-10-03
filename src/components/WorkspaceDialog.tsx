@@ -13,7 +13,7 @@ export function WorkspaceDialog({ title, children, onClose, wide = false, bounde
   useEffect(() => {
     const dialog = ref.current;
     dialog?.showModal();
-    return () => { dialog?.close(); if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true }); };
+    return () => { dialog?.close(); if ((opener instanceof HTMLElement || opener instanceof SVGElement) && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true }); };
   }, []);
   // The owner may defer closing while saving or ask to discard unsaved changes.
   // Native close belongs to unmount cleanup, after that decision is accepted.
