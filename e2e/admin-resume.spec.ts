@@ -212,7 +212,7 @@ test('manual refresh and returning from area detail keep cached panels visible d
     await noNewStartup(page);
 
     await page.getByRole('button', { name: 'เปิดข้อมูล', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'รายชื่ออำเภอและตำบล', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'ข้อมูลพื้นที่', exact: true })).toBeVisible();
     await expect(page.locator('.cms-reference-context').getByRole('link', { name: 'จัดการข้อมูล', exact: true })).toBeVisible();
     await watchStartup(page);
     delay.hold('forecast-catalog', 'resource-catalog');

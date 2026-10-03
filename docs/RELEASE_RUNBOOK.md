@@ -23,6 +23,11 @@ requirement to reactivate that experience.
 - Use an isolated tracked-source candidate with production configuration.
   All required CI jobs and authenticated read-only candidate smoke must pass
   before promotion; then verify the production alias.
+- Verify both build flags explicitly: `VITE_DATA_BACKEND=supabase` and
+  `VITE_REFERENCE_BACKEND=cms`. A pulled empty flag must not silently revert
+  the deployed CMS read path. Require the hosted `reference-backend.json`
+  marker to report `{"backend":"cms","fallback":false}` and verify CMS
+  geometry reads before promotion.
 - Keep Actual code/contracts parked. Future activation needs corrected owner
   requirements, approved sources and adapter/UAT evidence.
 - No migration, ACL changes, iOS setup or unrelated UAT/research files are included.

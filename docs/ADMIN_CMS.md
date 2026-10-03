@@ -178,10 +178,8 @@ publication boundary. The files and UI have not been deployed.
 | Satellite and crop | `server/model-inputs/domain-contract.mjs` | Same V1 fields, units, quality, provenance and null semantics |
 | Model result | `server/model-inputs/model-contract.mjs` | Same scope, cutoff, input-batch provenance and six prediction cells |
 | Current forecast archive | Supabase forecast tables / rev03 verification artifact | Reviewed adapter; origin T, target T+h; original workbook blanks are out of scope |
-| Geography and routing | Admin hierarchy, canonical code matrix and GeoJSON | Versioned together; codes are keys, names are labels; geometry needs structural/coverage checks |
-| Source/layer/model registries | `src/data/catalog.ts` imports | CMS reference resources; preserve existing shapes and provenance |
-| Rainfall/research/context | `src/data/catalog.ts` imports | Preserve pending/empty/illustrative status; absence never becomes an observation |
-| Legacy demo content | Retained catalog imports and legacy view constants | Inventory and retain separately; migration does not authorize exposing them |
+| Geography and routing | Admin hierarchy and GeoJSON | Codes are keys, names are labels; read-only area workspace; structural/coverage checks are required for replacement |
+| Retired registries, research and demo content | Historical CMS revisions only | Removed from runtime and active seed in the approved 2026-10-03 cleanup; retain original/history reads, reject clone/edit/publish |
 | Personal workspaces | Existing user-owned Supabase tables | Remain user-owned, not public CMS data; preserve RLS |
 | User identity | Supabase Auth | No password/role editing in generic data forms |
 
@@ -286,11 +284,12 @@ payload export, including invalid values before repair.
 
 ## Reference Read Path
 
-`shared/cmsResources.mjs` inventories 45 resources: the catalog's 33 JSON
-resources, one generated summary, four geometries, and seven retained historical
-or normalization artifacts. These group labels are operational classifications,
-not claims that all rows are real observations. Existing provenance/status values
-are preserved; retained material remains parked.
+`shared/cmsResources.mjs` inventories five active resources: the genuine
+administrative hierarchy, generated forecast summary and three geometry layers.
+Only hierarchy and summary preload; geometry loads when needed. The initial
+45-resource cutover inventory below is historical evidence, not the active
+catalog. Retired database revisions retain original/history access but are
+excluded from startup, seeding and mutation.
 
 `scripts/prepare-cms-reference-seed.mjs` only writes local preparation artifacts:
 
@@ -303,8 +302,8 @@ values with their originals, not only row counts.
 
 The CMS build uses `VITE_REFERENCE_BACKEND=cms` alongside
 `VITE_DATA_BACKEND=supabase`. Before importing the authenticated UI, the app reads
-an authenticated reference catalog and one bundle containing the 34 required
-resources. Immutable IDs pin the page session to coherent revisions. Geometry
+an authenticated reference catalog and one bundle containing the two required
+preloaded resources. Immutable IDs pin the page session to coherent revisions. Geometry
 loads on demand against the same catalog. A missing resource or failed request
 fails closed; no catch handler loads bundled business data.
 
