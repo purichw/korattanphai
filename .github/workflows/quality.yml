@@ -9,7 +9,35 @@ concurrency:
   group: quality-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      mode: ${{ steps.scope.outputs.mode }}
+      base_sha: ${{ steps.scope.outputs.base_sha }}
+      baseline_run: ${{ steps.scope.outputs.baseline_run }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          # Covers ordinary pushes and PR merge parents. Missing history runs full.
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Test scope and required-gate decisions
+        run: node --test tests/ci/*.test.mjs
+      - name: Select coverage with verified baseline
+        id: scope
+        run: node scripts/ci-scope.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
   contracts:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -32,6 +60,8 @@ jobs:
       - run: npm audit --omit=dev --audit-level=moderate
       - run: npm run test:database
   built-browser:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
     runs-on: ubuntu-latest
     # Keep the full built suite; build plus browser coverage can exceed 20 minutes.
     timeout-minutes: 30
@@ -59,6 +89,8 @@ jobs:
           path: test-results/
           retention-days: 7
   database-browser:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
     runs-on: ubuntu-latest
     # Browser coverage takes about 19 minutes before the protected build.
     timeout-minutes: 30
@@ -87,6 +119,8 @@ jobs:
           path: test-results/
           retention-days: 7
   cms-browser:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -117,6 +151,8 @@ jobs:
           path: test-results/
           retention-days: 7
   browser-compatibility:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
     runs-on: ubuntu-latest
     # Slow Ubuntu mirrors can consume the old budget before browsers are installed.
     timeout-minutes: 30
@@ -139,11 +175,14 @@ jobs:
           retention-days: 7
   regression:
     if: always()
-    needs: [contracts, built-browser, database-browser, cms-browser, browser-compatibility]
+    needs: [scope, contracts, built-browser, database-browser, cms-browser, browser-compatibility]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
-      - name: Require every regression job to pass
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Require the complete selected coverage
         env:
-          RESULTS: ${{ join(needs.*.result, ',') }}
-        run: test "$RESULTS" = 'success,success,success,success,success'
+          CI_NEEDS: ${{ toJSON(needs) }}
+        run: node scripts/ci-regression-gate.mjs

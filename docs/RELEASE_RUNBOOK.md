@@ -34,6 +34,12 @@ requirement to reactivate that experience.
 
 ## Local Checks
 
+For CI scope, runner-time evidence, required check semantics, and delay
+checkpoints, see [ACTIONS_USAGE.md](ACTIONS_USAGE.md). Keep push acceptance,
+Quality Gate, deployment build, candidate smoke, and production promotion as
+separate recorded results for the intended SHA. A skipped or pending required
+job is not a pass outside the verified documentation-only mode.
+
 Inspect scope:
 
 ```bash
@@ -203,6 +209,13 @@ Production deploy:
 - Production smoke will be run after deploy.
 
 ## Docs-Only Changes
+
+Push documentation normally when publishing is authorized; do not add
+`[skip ci]`. Quality Gate has an explicit docs mode for allowlisted internal
+Markdown after a verified passing exact base. Unknown/runtime paths, manual
+dispatch, missing history, and missing baseline evidence run the full gate.
+The final `regression` check remains present in both modes. See
+[ACTIONS_USAGE.md](ACTIONS_USAGE.md) for its conditions and estimated savings.
 
 For docs-only work:
 
