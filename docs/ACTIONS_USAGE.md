@@ -1,6 +1,6 @@
 # GitHub Actions usage and coverage
 
-## Current source and measured baseline
+## Audit source and measured baseline
 
 The 2026-10-03 review used the latest observed Preview source,
 `fix/legacy-cleanup-20261003` at `e9605e7d26e5650fa05be794959f36a41b6546c3`.
@@ -8,14 +8,36 @@ That commit changes release documentation and used `[skip ci]`; its parent,
 `f1359369c44f49357ad25513d1a6343897bfd9f7`, passed the full
 [Quality Gate run 37121917888](https://github.com/purichw/korattanphai/actions/runs/37121917888).
 The default `main` branch did not contain these workflow files. The newest
-Production deployment reported by GitHub was `ce9d98b` on 2026-10-01. Preview
-source, GitHub Production metadata, and the currently served production alias
-are separate facts; none alone authorizes a promotion.
+Production deployment reported by that GitHub query was `ce9d98b` on 2026-10-01.
+That observation was incomplete: the [handoff](HANDOFF.md) records the later
+production verification of `f1359369` at 19:32 Asia/Bangkok on October 3.
+Preview source, GitHub Production metadata, and the served production alias
+are separate facts; the Actions audit did not revalidate or promote production.
 
-The usage patch starts from the current Preview source in an isolated branch.
-It does not merge the newer application changes into `main` or promote a build.
-Integrate the CI-only commit into the authorized active development branch;
-recheck the current branch and deployment revisions first if they have advanced.
+The usage patch was published as `e60716cc816cc28b99dc2f039d7a07404255b8fc` to
+the authorized `fix/legacy-cleanup-20261003` branch. It did not merge newer
+application changes into `main` or promote a production build. Recheck current
+branch and deployment revisions before a future release.
+
+## Verified rollout — 2026-10-03
+
+[Quality Gate 37128487838](https://github.com/purichw/korattanphai/actions/runs/37128487838),
+attempt 1, passed on exact `e60716c` in full mode at 14:18:44 UTC. Scope,
+contracts, database-browser, built-browser, browser-compatibility, cms-browser
+and final `regression` all succeeded. Workflow elapsed time was 12m07s;
+summed job time was 32m22s. These are duration measurements, not billing charges.
+The automatic [Preview](https://korattanphai-arh6mk5cy-purich-w.vercel.app)
+reported success; no production promotion was performed by this Actions work.
+
+Local validation passed 16 selector/gate tests, actionlint and whitespace checks,
+and confirmed preservation of the five heavy-job bodies. Hosted docs-mode
+selection still awaits a genuine eligible docs push; a passing full run does
+not prove that shortcut has executed. The shorter full run cannot be attributed
+to a docs-only selector, especially across the private-to-public transition.
+Raw receipts are kept in the primary checkout's ignored
+`.tools/usage-audit-20261003/` directory.
+
+## Historical usage window
 
 From 2026-09-03 through 2026-10-03 13:34:18 UTC, GitHub returned 288 runs and
 690 job records across all attempts. Of these, 520 executed jobs used
@@ -57,7 +79,8 @@ with an average per-job rounded estimate of 58.4 minutes. Their average job time
 were database-browser 23m 33s, built-browser 18m 09s, CMS 8m 05s, contracts 3m 09s,
 compatibility 2m 25s, and regression 3s.
 
-The newest full successful run, measured from job start/end timestamps:
+The newest full successful run in the pre-change baseline cohort, measured
+from job start/end timestamps:
 
 | Job | Runner time | Browser installation | Purpose retained |
 | --- | ---: | ---: | --- |
@@ -135,7 +158,8 @@ git diff --check
 
 Validate `.github/workflows/quality.yml` with the available YAML/Actions tooling,
 inspect the final diff, then verify all full-mode jobs on the exact pushed SHA.
-This patch changes workflow logic, so its own first run must select `full`.
+The workflow-changing patch's first hosted run selected `full` and passed,
+as recorded above. Future workflow changes must also select `full`.
 Verify the next genuine docs-only change uses `docs` with a matching baseline;
 do not make an extra push merely to benchmark it. A green workflow with omitted
 required work is not evidence unless the scope/gate explicitly verifies docs.

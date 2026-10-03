@@ -10,6 +10,8 @@ per-account followed areas/saved filters. The site brand is Korat Tan Phai /
 - Repo: `/Users/point/korattanphai`
 - Production: `https://korattanphai.vercel.app`
 - Current release branch: `fix/legacy-cleanup-20261003`
+- Verified Actions update on that branch: `e60716cc816cc28b99dc2f039d7a07404255b8fc`
+  (CI and Preview passed; this update did not promote production)
 - Deployed runtime: `f1359369c44f49357ad25513d1a6343897bfd9f7`
 - Source snapshot: copied from Kaset Tan Phai commit
   `0f16794bb57d5dec93b7c6312de7d9362bb97013`.
@@ -20,6 +22,18 @@ Recent changes below are chronological checkpoints;
 the newest release supersedes earlier statements about production state.
 
 ## Recent Changes
+
+Actions usage rollout (2026-10-03, verified 21:18 Asia/Bangkok):
+
+- `e60716c` passed full [Quality Gate 37128487838](https://github.com/purichw/korattanphai/actions/runs/37128487838),
+  including all five heavy jobs and final `regression`. The automatic Preview
+  succeeded. The production receipt below remains a separate release event.
+- Conservative docs-only selection preserves required gates and verifies the
+  latest exact-base run/attempt before skipping heavy jobs. The first full-mode
+  result is verified; hosted docs-mode proof awaits a genuine eligible docs push.
+- See [ACTIONS_USAGE.md](ACTIONS_USAGE.md) for the measured baseline, public
+  visibility caveat, diagnostic checkpoints and unchanged coverage. No savings
+  percentage is inferred from a single faster full run.
 
 Legacy cleanup production release (2026-10-03):
 
